@@ -58,4 +58,7 @@ public class Diary {
         this.content = content;
         this.emotionId = emotionId;
     }
+    //윤재 윤재 남윤재
+    //진짜 화이팅이야
+
 }
