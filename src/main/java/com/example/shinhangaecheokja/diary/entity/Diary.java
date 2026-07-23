@@ -57,5 +57,6 @@ public class Diary {
         this.date = date;
         this.content = content;
         this.emotionId = emotionId;
+        //남윤재 바보
     }
 }
