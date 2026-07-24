@@ -31,6 +31,9 @@ dependencies {
     implementation 'org.flywaydb:flyway-core'
     implementation 'org.flywaydb:flyway-mysql'
     
+    // Dotenv support for Spring Boot
+    implementation 'me.paulschwarz:spring-dotenv:5.1.0'
+    
     // Flyway Gradle Plugin CLI dependencies
     flyway 'org.flywaydb:flyway-core:10.22.0'
     flyway 'org.flywaydb:flyway-mysql:10.22.0'
@@ -45,11 +48,24 @@ dependencies {
     testAnnotationProcessor 'org.projectlombok:lombok'
 }
 
+// Read environment variables from .env file for Gradle tasks
+def env = [:]
+def envFile = file(".env")
+if (envFile.exists()) {
+    envFile.eachLine { line ->
+        def trimmed = line.trim()
+        if (trimmed && !trimmed.startsWith("#") && trimmed.contains("=")) {
+            def parts = trimmed.split("=", 2)
+            env[parts[0].trim()] = parts[1].trim()
+        }
+    }
+}
+
 // Configuration for Flyway Plugin CLI tasks
 flyway {
-    url = 'jdbc:mariadb://localhost:3306/gaecheokja'
-    user = 'root'
-    password = 'password' // Change this to your local database password
+    url = env['DB_URL'] ?: 'jdbc:mariadb://localhost:3306/shinhan_gaecheokja'
+    user = env['DB_USER'] ?: 'root'
+    password = env['DB_PASSWORD'] ?: 'password'
 }
 
 tasks.named('test') {
