@@ -58,4 +58,17 @@ public class Diary {
         this.content = content;
         this.emotionId = emotionId;
     }
+
+    public void update2(Long date, String content, Integer emotionId) {
+        this.date = date;
+        this.content = content;
+        this.emotionId = emotionId;
+    }
+
+
+    public void update3(Long date, String content, Integer emotionId) {
+        this.date = date;
+        this.content = content;
+        this.emotionId = emotionId;
+    }
 }
