@@ -6,6 +6,8 @@ import com.example.shinhangaecheokja.delivery.exception.MatchingNotFoundExceptio
 import com.example.shinhangaecheokja.delivery.exception.NoAvailableCourierException;
 import com.example.shinhangaecheokja.member.exception.DuplicateMemberException;
 import com.example.shinhangaecheokja.member.exception.MemberNotFoundException;
+import com.example.shinhangaecheokja.payment.exception.InsufficientPointException;
+import com.example.shinhangaecheokja.payment.exception.PointWalletNotFoundException;
 import com.example.shinhangaecheokja.vehicle.exception.InvalidWeightException;
 import com.example.shinhangaecheokja.vehicle.exception.OverMaxDistanceException;
 import com.example.shinhangaecheokja.vehicle.exception.VehicleNotFoundException;
@@ -36,7 +38,8 @@ public class GlobalExceptionHandler {
     MemberNotFoundException.class,
     VehicleNotFoundException.class,
     DeliveryRequestNotFoundException.class,
-    MatchingNotFoundException.class
+    MatchingNotFoundException.class,
+    PointWalletNotFoundException.class
   })
   public ResponseEntity<ErrorResponse> handleNotFound(RuntimeException e) {
     return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(e.getMessage()));
@@ -49,7 +52,11 @@ public class GlobalExceptionHandler {
   }
 
   /** 비즈니스 규칙상 처리가 불가능한 경우 422로 변환한다. */
-  @ExceptionHandler({NoAvailableCourierException.class, AlreadyMatchedException.class})
+  @ExceptionHandler({
+    NoAvailableCourierException.class,
+    AlreadyMatchedException.class,
+    InsufficientPointException.class
+  })
   public ResponseEntity<ErrorResponse> handleUnprocessable(RuntimeException e) {
     return ResponseEntity.status(HttpStatus.UNPROCESSABLE_CONTENT).body(new ErrorResponse(e.getMessage()));
   }
