@@ -1,8 +1,6 @@
 spring:
   application:
     name: shinhan-gaecheokja
-  profiles:
-    active: local
 
   datasource:
     url: ${DB_URL}
