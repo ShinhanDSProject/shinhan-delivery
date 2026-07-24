@@ -31,17 +31,3 @@
 
 ### ⚠️ JPA ddl-auto 속성은 validate 혹은 none으로 설정해야 합니다.
 * Hibernate가 스키마를 직접 생성하지 않도록 `spring.jpa.hibernate.ddl-auto` 설정은 `validate`로 유지해야 합니다. 그렇지 않으면 Hibernate와 Flyway의 라이프사이클이 꼬이거나, 마이그레이션 히스토리 없이 임의로 컬럼이 추가/삭제될 수 있습니다.
-
----
-
-## 4. Node.js (TypeORM) 개발자를 위한 개념 매핑
-
-TypeORM의 마이그레이션 흐름과 비교하여 가이드를 한눈에 확인할 수 있는 비교표입니다.
-
-| 작업 내용 | Node.js (TypeORM) | Spring Boot & Flyway |
-| :--- | :--- | :--- |
-| **마이그레이션 실행** | `npm run typeorm migration:run` | **서버 구동 시 자동 실행** |
-| **파일 포맷** | TypeScript/JavaScript 클래스 (`up()`, `down()`) | **순수 DDL/DML SQL 파일** |
-| **마이그레이션 기록** | `migrations` 테이블 | `flyway_schema_history` 테이블 |
-| **롤백 / 다운그레이드** | `npm run typeorm migration:revert` | **지원 안 함** (Forward-Only: 버전을 높인 SQL 파일 추가 작성) |
-| **엔티티 비교 자동 생성** | `npm run typeorm migration:generate` | IntelliJ의 **JPA Buddy** 플러그인 활용 권장 |
