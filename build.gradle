@@ -45,35 +45,3 @@ dependencies {
 tasks.named('test') {
     useJUnitPlatform()
 }
-
-// TypeORM의 migration:create처럼 새로운 빈 마이그레이션 SQL 파일을 생성해주는 태스크
-tasks.register('migrationCreate') {
-    group = 'database'
-    description = 'Creates a new empty Flyway migration file sequentially'
-    doLast {
-        def desc = project.hasProperty('desc') ? project.property('desc') : 'new_migration'
-        def migrationDir = file("src/main/resources/db/migration")
-        if (!migrationDir.exists()) {
-            migrationDir.mkdirs()
-        }
-        
-        // 디렉토리를 스캔하여 다음 버전 번호 계산
-        def files = migrationDir.listFiles()
-        def nextVersion = 1
-        if (files) {
-            def versions = files.findAll { it.name.startsWith('V') && it.name.contains('__') }
-                                .collect { 
-                                    def match = (it.name =~ /^V(\d+)__/)
-                                    match ? match[0][1].toInteger() : 0 
-                                }
-            if (versions) {
-                nextVersion = versions.max() + 1
-            }
-        }
-        
-        def fileName = "V${nextVersion}__${desc}.sql"
-        def newFile = file("src/main/resources/db/migration/${fileName}")
-        newFile.text = "-- Migration: V${nextVersion}__${desc}\n"
-        println "Created empty migration file: ${newFile.absolutePath}"
-    }
-}

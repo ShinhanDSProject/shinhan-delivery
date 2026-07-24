@@ -45,18 +45,20 @@
   private String phone;
   ```
 
-### 2단계: 신규 마이그레이션 SQL 파일 생성 (자동 생성 명령어)
-* 새로운 마이그레이션 SQL 파일 틀을 만들려면 터미널에서 다음 명령어를 실행합니다:
-  ```bash
-  ./gradlew migrationCreate -Pdesc=설명문
-  ```
-  * 예: `./gradlew migrationCreate -Pdesc=add_phone_to_user`를 실행하면 현재 존재하는 마지막 버전의 다음 번호를 자동으로 계산하여 `V2__add_phone_to_user.sql` 빈 파일을 `db/migration/` 아래에 만들어 줍니다.
-* 생성된 파일 내에 스키마 변경 DDL 쿼리를 작성합니다:
-  ```sql
-  ALTER TABLE user ADD COLUMN phone VARCHAR(20);
-  ```
+### 2단계: 신규 마이그레이션 SQL 파일 생성 (JPA Buddy 활용)
+JPA Buddy 플러그인을 활용하여 Java Entity 코드와 실제 데이터베이스 스키마 간의 차이점(Diff)을 분석하고, 마이그레이션 SQL 파일을 자동으로 생성하는 방법입니다.
 
-> 💡 **Tip (JPA Buddy 활용 - 자동 SQL 생성):** 만약 `ALTER TABLE` DDL 구문을 직접 타이핑하기 번거로운 경우, IntelliJ 플러그인인 **JPA Buddy**를 활용해 보세요. 플러그인 설치 후 `Flyway` -> `Diff Versioned Migration` 메뉴를 실행하면 Java Entity 클래스의 변경 코드와 데이터베이스 상태를 대조하여 위와 같은 SQL 변경 쿼리를 자동으로 뽑아서 마이그레이션 파일로 저장해 줍니다.
+1. **IntelliJ 플러그인 설치**
+   * IntelliJ의 설정 창 (`Preferences` ➔ `Plugins`)에서 **JPA Buddy**를 검색하여 설치합니다.
+2. **Flyway Versioned Migration 메뉴 실행**
+   * `src/main/resources/db/migration` 폴더를 우클릭한 후 **New** ➔ **Flyway Versioned Migration**을 클릭합니다.
+   * (또는 IntelliJ 하단의 **JPA Structure** 도구 창에서 **Flyway** ➔ **Diff Versioned Migration**을 클릭합니다.)
+3. **대조 대상(Source & Target) 설정**
+   * **Source (기준이 되는 소스 코드):** `JPA Entities`를 선택합니다.
+   * **Target (변경 전의 데이터베이스):** 로컬 데이터베이스 커넥션을 선택합니다.
+4. **마이그레이션 스크립트 저장**
+   * 파일의 설명 설명문(예: `add_phone_to_user`)을 작성한 뒤 **OK**를 누르면, 플러그인이 자동으로 버전 번호를 계산하여 `V2__add_phone_to_user.sql` 형태로 빈 스크립트 파일을 만들고, 내부에 테이블 변경용 `ALTER TABLE ... ADD COLUMN` DDL 쿼리문까지 완성하여 저장해 줍니다.
+   * 생성된 SQL 쿼리에 이상이 없는지 최종 검토합니다.
 
 ### 3단계: 애플리케이션 실행 및 검증
 * 서버를 실행(`bootRun`)하면 Flyway가 자동으로 `V2` 마이그레이션 파일을 감지하여 DB에 적용합니다.
