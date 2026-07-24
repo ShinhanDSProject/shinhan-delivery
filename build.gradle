@@ -2,6 +2,7 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '4.1.0'
     id 'io.spring.dependency-management' version '1.1.7'
+    id 'net.ltgt.flyway' version '1.0.0'
 }
 
 group = 'com.example'
@@ -25,6 +26,16 @@ dependencies {
     compileOnly 'org.projectlombok:lombok'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
+    
+    // Database Migration (Flyway)
+    implementation 'org.flywaydb:flyway-core'
+    implementation 'org.flywaydb:flyway-mysql'
+    
+    // Flyway Gradle Plugin CLI dependencies
+    flyway 'org.flywaydb:flyway-core:10.22.0'
+    flyway 'org.flywaydb:flyway-mysql:10.22.0'
+    flyway 'org.mariadb.jdbc:mariadb-java-client:3.3.3'
+    
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-data-jpa-test'
     testImplementation 'org.springframework.boot:spring-boot-starter-validation-test'
@@ -32,6 +43,13 @@ dependencies {
     testCompileOnly 'org.projectlombok:lombok'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     testAnnotationProcessor 'org.projectlombok:lombok'
+}
+
+// Configuration for Flyway Plugin CLI tasks
+flyway {
+    url = 'jdbc:mariadb://localhost:3306/gaecheokja'
+    user = 'root'
+    password = 'password' // Change this to your local database password
 }
 
 tasks.named('test') {
