@@ -27,206 +27,56 @@ Thymeleaf UI 개발 시 일관된 사용자 인터페이스를 제공하기 위�
 서비스에서 사용하는 색상을 정의합니다.
 버튼, 텍스트, 배경 등 UI 요소에 일관된 색상 규칙을 적용합니다.
 
-| 이름 | 용도 | HEX | 사용처 |
-|------|------|------|---------|
-| Button | 주요 버튼 | `#2C88FF` | 메인 버튼 |
-| Kakao | 카카오 브랜드 색상 | `#F5F7FA` | 로그인 버튼 |
-| Apple | Apple 브랜드 색상 | `#212121` | 로그인 버튼 |
-| Google | Google 브랜드 색상 | `#EFEFEF` | 로그인 버튼 |
-| Naver | Naver 브랜드 색상 | `#65F465` | 로그인 버튼 |
-| Background | 페이지 배경 | `#FFFFFF` | 페이지 배경 |
-| Text Primary | 기본 글자 | `#000000` | 제목 |
-| Text Secondary | 보조 글자 | `#2C88FF` | 설명 |
+orange-100 : #FA9200
+blue-100 : #2C88FF
+white-100 : #FFFFFF
+yellow-100 : #F7E600
+green-100 : #03C75A
+black-100 : #000000
+black-200 : #212121
+grey-30: #EFEFEF
+grey-500 : #555555
+brown-30 : DEA66C
+brown-50 : #B38251
+brown-100 : #966239
+beige-30 : #FFE0B2
+beige-50 : #BF9F85
+
+# 3. Design Components
 
 ## 설명
+Design Components는 서비스에서 반복적으로 사용되는 UI 요소를 정의
+버튼, 입력창, 카드, 아이콘 등 공통 컴포넌트를 동일한 디자인 규칙으로 관리하여 화면의 일관성을 유지
+Thymeleaf Fragment를 활용한 재사용성 향상
 
-서비스에서 사용하는 색상을 정의합니다.
-버튼, 텍스트, 배경 등 UI 요소에 동일한 색상 규칙을 적용합니다.
+버튼 : blue-100
+카카오 버튼 : yellow-100
+네이버 버튼 : green-100
+애플 버튼 : black-100
+구글 버튼 : grey-30
 
-### Login Button
 
-#### Kakao
+# 4. icons
 
-- 배경 : Yellow
-- 글자 : Black
-- 크기 : 350 × 60px
+# 설명
+다양한 상황에 맞는 아이콘 세트를 제공하여 일관된 디자인 언어를 유지
 
-#### Apple
+icon-1-car-fill
+icon-1-customer-fill
 
-- 배경 : Black
-- 글자 : White
-- 크기 : 350 × 60px
 
-#### Naver
+# 5. Typography
 
-- 배경 : Green
-- 글자 : White
-- 크기 : 350 × 60px
+# 설명
+일관된 타이포그래피 시스템을 제공하여 다양한 UI 구성 요소에 적용
 
----
-
-# 3. Typography
-
-## 설명
-
-서비스에서 사용하는 글꼴의 크기와 굵기를 정의합니다.
-
-| 구분 | Font Size | Font Weight | Line Height |
-|------|-----------|-------------|-------------|
-| Main | 40px | Extra Bold | |
-| Title | 20px | Semi Bold | |
-| Body | 15px | Medium | |
-| Button | 20px | Bold | |
-
----
-
-# 4. Spacing
-
-## 설명
-
-컴포넌트 간 간격과 내부 여백을 정의합니다.
-
-| 항목 | 값 |
-|------|----|
-| 배송지 입력 위 | 137px |
-| 배송지 입력 아래 | 495px |
-| 배송지 입력 옆 | 26px |
-
----
-
-# 5. Border Radius
-
-## 설명
-
-버튼과 입력창 등의 모서리 둥근 정도를 정의합니다.
-
-| Component | Radius |
-|-----------|--------|
-| Button | 12px |
-| Input | 12px |
-
----
-
-# 6. Button
-
-## 설명
-
-버튼의 크기와 디자인 규칙을 정의합니다.
-
-### Login Button
-
-#### Kakao
-
-- Background : Yellow
-- Text : Black
-- Size : 350 × 60px
-
-#### Apple
-
-- Background : Black
-- Text : White
-- Size : 350 × 60px
-
-#### Naver
-
-- Background : Green
-- Text : White
-- Size : 350 × 60px
-
----
-
-# 7. Input
-
-## 설명
-
-입력창의 디자인과 상태를 정의합니다.
-
-- Default
-- Focus
-- Error
-- Disabled
-
-### Input 규칙
-
-- Width
-- Height
-- Border
-- Radius
-- Placeholder
-
----
-
-# 8. Icon
-
-## 설명
-
-서비스에서 사용하는 아이콘의 크기를 정의합니다.
-
-| 항목 | 값 |
-|------|----|
-| Width | 60px |
-| Height | 53px |
-
----
-
-# 9. Card
-
-## 설명
-
-카드 컴포넌트의 디자인을 정의합니다.
-
-- Background
-- Shadow
-- Radius
-- Padding
-
----
-
-# 10. Thymeleaf Component
-
-## 설명
-
-공통 UI를 Fragment로 분리하여 재사용합니다.
-
-### Fragment 구조
-
-```text
-templates/
-└── fragments/
-    ├── header.html
-    ├── footer.html
-    ├── home.html
-    ├── login.html
-    ├── delivery-destination.html
-    └── my-page.html
-```
-
----
-
-# 11. 페이지별 적용
-
-## Home
-
-- Header
-- Login Button
-- Icon
-
-## Login
-
-- Login Button
-- Icon
-
-## Delivery Destination
-
-- Input
-- Button
-
-## My Page
-
-- Card
-- Button
-
----
+| Style    | Font Weight | Font Size | Line-Height |
+|-----------|-----------------|--------------|-------------|
+| Header   | Extra Bold (800) | 40px | -5px        |
+| Display1 | Semi Bold (600) | 20px | -5px        |
+| Display2 | Medium (600) | 15px | -5px        |
+| Display3 | Regular (600) | 15px | -5px        |
+| Display4 | Bold (600)  | 20px | -5px        |
 
 ## 참고 사항
 
