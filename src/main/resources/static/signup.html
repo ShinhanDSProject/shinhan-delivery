@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>회원가입 - 신한 개척자</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f0f4f9 0%, #e2e8f0 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .signup-card {
+            background: #ffffff;
+            width: 100%;
+            max-width: 480px;
+            padding: 40px 36px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 70, 255, 0.08);
+            transition: transform 0.3s ease;
+        }
+
+        .signup-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .signup-header h1 {
+            font-size: 26px;
+            color: #0046ff;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .signup-header p {
+            font-size: 14px;
+            color: #64748b;
+            margin-top: 6px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 8px;
+        }
+
+        .input-inline {
+            display: flex;
+            gap: 8px;
+        }
+
+        .input-inline input {
+            flex: 1;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        input[type="tel"] {
+            width: 100%;
+            padding: 13px 16px;
+            border: 1.5px solid #cbd5e1;
+            border-radius: 10px;
+            font-size: 15px;
+            color: #0f172a;
+            background-color: #f8fafc;
+            outline: none;
+            transition: all 0.2s ease-in-out;
+        }
+
+        input:focus {
+            border-color: #0046ff;
+            background-color: #ffffff;
+            box-shadow: 0 0 0 3.5px rgba(0, 70, 255, 0.12);
+        }
+
+        .btn-secondary {
+            padding: 0 18px;
+            background-color: #0046ff;
+            color: #ffffff;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s ease;
+        }
+
+        .btn-secondary:hover {
+            background-color: #0036cc;
+        }
+
+        .btn-secondary:disabled {
+            background-color: #94a3b8;
+            cursor: not-allowed;
+        }
+
+        .verification-box {
+            margin-top: 10px;
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .status-badge {
+            font-size: 13px;
+            margin-top: 6px;
+            font-weight: 500;
+        }
+
+        .status-badge.success {
+            color: #16a34a;
+        }
+
+        .status-badge.error {
+            color: #dc2626;
+        }
+
+        /* 이용동의 영역 */
+        .terms-section {
+            margin: 28px 0;
+            padding: 18px;
+            background-color: #f8fafc;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .terms-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+            cursor: pointer;
+        }
+
+        .terms-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .terms-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: #0046ff;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+
+        .terms-item label {
+            font-size: 14px;
+            color: #334155;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .terms-item.all-agree {
+            padding-bottom: 12px;
+            border-bottom: 1px solid #e2e8f0;
+            margin-bottom: 14px;
+            font-weight: 700;
+        }
+
+        .terms-item.all-agree label {
+            font-size: 15px;
+            color: #0f172a;
+            font-weight: 700;
+        }
+
+        .text-required {
+            color: #0046ff;
+            font-weight: 600;
+        }
+
+        .text-optional {
+            color: #64748b;
+        }
+
+        /* 가입 완료 버튼 */
+        .btn-submit {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #0046ff 0%, #0036cc 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 17px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 14px rgba(0, 70, 255, 0.3);
+            transition: all 0.25s ease;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(0, 70, 255, 0.4);
+        }
+
+        .btn-submit:active {
+            transform: translateY(0);
+        }
+
+        .result-toast {
+            margin-top: 20px;
+            padding: 14px;
+            border-radius: 10px;
+            font-size: 14px;
+            text-align: center;
+            display: none;
+            font-weight: 600;
+        }
+
+        .result-toast.success {
+            background-color: #dcfce7;
+            color: #15803d;
+            border: 1px solid #bbf7d0;
+            display: block;
+        }
+
+        .result-toast.error {
+            background-color: #fee2e2;
+            color: #b91c1c;
+            border: 1px solid #fecaca;
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="signup-card">
+    <div class="signup-header">
+        <h1>신한 개척자</h1>
+        <p>서비스 이용을 위한 회원가입 정보를 입력해주세요</p>
+    </div>
+
+    <form id="signupForm">
+        <!-- 1. 이름 -->
+        <div class="form-group">
+            <label for="name">이름 <span class="text-required">*</span></label>
+            <input type="text" id="name" placeholder="홍길동" required>
+        </div>
+
+        <!-- 2. 이메일 주소 (계정 ID) -->
+        <div class="form-group">
+            <label for="email">이메일 주소 (계정 ID) <span class="text-required">*</span></label>
+            <input type="email" id="email" placeholder="example@shinhan.com" required>
+        </div>
+
+        <!-- 3. 비밀번호 -->
+        <div class="form-group">
+            <label for="password">비밀번호 <span class="text-required">*</span></label>
+            <input type="password" id="password" placeholder="8자 이상의 영문/숫자/특수문자" required>
+        </div>
+
+        <!-- 4. 비밀번호 확인 -->
+        <div class="form-group">
+            <label for="confirmPassword">비밀번호 확인 <span class="text-required">*</span></label>
+            <input type="password" id="confirmPassword" placeholder="비밀번호를 한번 더 입력하세요" required>
+            <div id="pwMatchStatus" class="status-badge"></div>
+        </div>
+
+        <!-- 5. 휴대폰 번호 (인증번호 발송 & 확인) -->
+        <div class="form-group">
+            <label for="phoneNumber">휴대폰 번호 <span class="text-required">*</span></label>
+            <div class="input-inline">
+                <input type="tel" id="phoneNumber" placeholder="01012345678" required>
+                <button type="button" id="btnSendCode" class="btn-secondary">인증번호 발송</button>
+            </div>
+            
+            <div id="verificationBox" class="verification-box">
+                <div class="input-inline" style="margin-top: 8px;">
+                    <input type="text" id="verificationCode" placeholder="인증번호 6자리 입력">
+                    <button type="button" id="btnVerifyCode" class="btn-secondary">인증 확인</button>
+                </div>
+            </div>
+            <div id="phoneStatus" class="status-badge"></div>
+        </div>
+
+        <!-- 6. 이용동의 -->
+        <div class="terms-section">
+            <div class="terms-item all-agree">
+                <input type="checkbox" id="checkAll">
+                <label for="checkAll">전체 동의하기</label>
+            </div>
+            <div class="terms-item">
+                <input type="checkbox" id="termsAgreed" class="term-check" required>
+                <label for="termsAgreed"><span class="text-required">[필수]</span> 서비스 이용약관 동의</label>
+            </div>
+            <div class="terms-item">
+                <input type="checkbox" id="privacyAgreed" class="term-check" required>
+                <label for="privacyAgreed"><span class="text-required">[필수]</span> 개인정보 수집 및 이용 동의</label>
+            </div>
+            <div class="terms-item">
+                <input type="checkbox" id="marketingAgreed" class="term-check">
+                <label for="marketingAgreed"><span class="text-optional">[선택]</span> 마케팅 정보 수신 동의</label>
+            </div>
+        </div>
+
+        <!-- 7. 가입 완료 버튼 -->
+        <button type="submit" class="btn-submit">가입 완료</button>
+    </form>
+
+    <div id="resultToast" class="result-toast"></div>
+</div>
+
+<script>
+    let isPhoneVerified = false;
+
+    // 비밀번호 확인 일치 실시간 검사
+    const pwInput = document.getElementById('password');
+    const confirmPwInput = document.getElementById('confirmPassword');
+    const pwMatchStatus = document.getElementById('pwMatchStatus');
+
+    function checkPasswordMatch() {
+        if (!confirmPwInput.value) {
+            pwMatchStatus.textContent = '';
+            return;
+        }
+        if (pwInput.value === confirmPwInput.value) {
+            pwMatchStatus.className = 'status-badge success';
+            pwMatchStatus.textContent = '✓ 비밀번호가 일치합니다.';
+        } else {
+            pwMatchStatus.className = 'status-badge error';
+            pwMatchStatus.textContent = '✕ 비밀번호가 일치하지 않습니다.';
+        }
+    }
+
+    pwInput.addEventListener('input', checkPasswordMatch);
+    confirmPwInput.addEventListener('input', checkPasswordMatch);
+
+    // 1) 휴대폰 인증번호 발송
+    document.getElementById('btnSendCode').addEventListener('click', async function() {
+        const phoneNumber = document.getElementById('phoneNumber').value.trim();
+        const phoneStatus = document.getElementById('phoneStatus');
+        
+        if (!phoneNumber) {
+            phoneStatus.className = 'status-badge error';
+            phoneStatus.textContent = '휴대폰 번호를 입력해주세요.';
+            return;
+        }
+
+        try {
+            const res = await fetch('/api/users/send-verification-code', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phoneNumber })
+            });
+
+            const data = await res.json();
+            if (res.ok) {
+                document.getElementById('verificationBox').style.display = 'block';
+                phoneStatus.className = 'status-badge success';
+                phoneStatus.textContent = `✓ 인증번호가 발송되었습니다. (테스트 인증번호: ${data.code})`;
+            } else {
+                phoneStatus.className = 'status-badge error';
+                phoneStatus.textContent = data.message || '인증번호 발송 실패';
+            }
+        } catch (err) {
+            phoneStatus.className = 'status-badge error';
+            phoneStatus.textContent = '서버 통신 오류가 발생했습니다.';
+        }
+    });
+
+    // 2) 휴대폰 인증번호 확인
+    document.getElementById('btnVerifyCode').addEventListener('click', async function() {
+        const phoneNumber = document.getElementById('phoneNumber').value.trim();
+        const code = document.getElementById('verificationCode').value.trim();
+        const phoneStatus = document.getElementById('phoneStatus');
+
+        if (!code) {
+            phoneStatus.className = 'status-badge error';
+            phoneStatus.textContent = '인증번호 6자리를 입력해 주세요.';
+            return;
+        }
+
+        try {
+            const res = await fetch('/api/users/verify-code', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phoneNumber, code })
+            });
+
+            const data = await res.json();
+            if (res.ok && data.success) {
+                isPhoneVerified = true;
+                phoneStatus.className = 'status-badge success';
+                phoneStatus.textContent = '✓ 휴대폰 번호 인증이 완료되었습니다!';
+                document.getElementById('phoneNumber').readOnly = true;
+                document.getElementById('btnSendCode').disabled = true;
+                document.getElementById('btnVerifyCode').disabled = true;
+            } else {
+                phoneStatus.className = 'status-badge error';
+                phoneStatus.textContent = data.message || '인증번호가 유효하지 않습니다.';
+            }
+        } catch (err) {
+            phoneStatus.className = 'status-badge error';
+            phoneStatus.textContent = '서버 통신 오류가 발생했습니다.';
+        }
+    });
+
+    // 이용동의 전체 선택 / 해제
+    const checkAll = document.getElementById('checkAll');
+    const termChecks = document.querySelectorAll('.term-check');
+
+    checkAll.addEventListener('change', function() {
+        termChecks.forEach(cb => cb.checked = checkAll.checked);
+    });
+
+    termChecks.forEach(cb => {
+        cb.addEventListener('change', function() {
+            const allChecked = Array.from(termChecks).every(c => c.checked);
+            checkAll.checked = allChecked;
+        });
+    });
+
+    // 3) 가입 완료 제출
+    document.getElementById('signupForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const resultToast = document.getElementById('resultToast');
+
+        const name = document.getElementById('name').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+        const phoneNumber = document.getElementById('phoneNumber').value.trim();
+        const termsAgreed = document.getElementById('termsAgreed').checked;
+        const privacyAgreed = document.getElementById('privacyAgreed').checked;
+        const marketingAgreed = document.getElementById('marketingAgreed').checked;
+
+        if (password !== confirmPassword) {
+            resultToast.className = 'result-toast error';
+            resultToast.textContent = '비밀번호와 비밀번호 확인이 일치하지 않습니다.';
+            return;
+        }
+
+        if (!isPhoneVerified) {
+            resultToast.className = 'result-toast error';
+            resultToast.textContent = '휴대폰 인증을 완료해주세요.';
+            return;
+        }
+
+        try {
+            const res = await fetch('/api/users/signup', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name,
+                    email,
+                    password,
+                    confirmPassword,
+                    phoneNumber,
+                    termsAgreed,
+                    privacyAgreed,
+                    marketingAgreed
+                })
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+                resultToast.className = 'result-toast success';
+                resultToast.textContent = `🎉 가입 완료! 축하합니다, ${data.name}님 (${data.email})`;
+            } else {
+                resultToast.className = 'result-toast error';
+                resultToast.textContent = data.message || '가입 처리 중 오류가 발생했습니다.';
+            }
+        } catch (err) {
+            resultToast.className = 'result-toast error';
+            resultToast.textContent = '서버 통신 오류가 발생했습니다.';
+        }
+    });
+</script>
+
+</body>
+</html>
