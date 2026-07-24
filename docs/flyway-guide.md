@@ -31,3 +31,30 @@
 
 ### ⚠️ JPA ddl-auto 속성은 validate 혹은 none으로 설정해야 합니다.
 * Hibernate가 스키마를 직접 생성하지 않도록 `spring.jpa.hibernate.ddl-auto` 설정은 `validate`로 유지해야 합니다. 그렇지 않으면 Hibernate와 Flyway의 라이프사이클이 꼬이거나, 마이그레이션 히스토리 없이 임의로 컬럼이 추가/삭제될 수 있습니다.
+
+---
+
+## 4. 실무 개발 및 사용 흐름 (JPA Entity 추가/변경 시)
+
+프로젝트에서 새로운 Java Entity 클래스를 추가하거나 기존 Entity의 필드를 수정할 때 데이터베이스에 반영하는 단계별 사용 흐름입니다. **(단순히 Entity 클래스만 생성/수정해서는 DB에 반영되지 않습니다.)**
+
+### 1단계: Java Entity 코드 작성
+* 예: `User` 엔티티에 `phone` 필드 추가
+  ```java
+  @Column(length = 20)
+  private String phone;
+  ```
+
+### 2단계: 신규 마이그레이션 SQL 파일 생성
+* `src/main/resources/db/migration/` 디렉토리에 버전 번호를 올려서 새 SQL 파일을 만듭니다. (예: `V2__add_phone_to_user.sql`)
+* 해당 파일 내에 스키마 변경 DDL 쿼리를 직접 작성합니다.
+  ```sql
+  ALTER TABLE user ADD COLUMN phone VARCHAR(20);
+  ```
+
+> 💡 **Tip (JPA Buddy 활용):** SQL 문을 직접 타이핑하기 번거로운 경우, IntelliJ 플러그인인 **JPA Buddy**를 설치한 뒤 `Flyway` -> `Diff Versioned Migration` 메뉴를 실행하면 Java Entity의 변경 사항과 데이터베이스 상태를 대조하여 위와 같은 `ALTER TABLE` SQL 문을 자동으로 만들어 줍니다.
+
+### 3단계: 애플리케이션 실행 및 검증
+* 서버를 실행(`bootRun`)하면 Flyway가 자동으로 `V2` 마이그레이션 파일을 감지하여 DB에 적용합니다.
+* 마이그레이션 완료 후 Hibernate가 Entity와 실제 DB의 일치 여부를 검증(`validate`)하며 정상 구동됩니다.
+
