@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/** Vehicle CRUD API를 제공하는 컨트롤러. */
 @RestController
 @RequestMapping("/api/vehicles")
 @RequiredArgsConstructor
@@ -23,28 +24,33 @@ public class VehicleController {
 
   private final VehicleService vehicleService;
 
+  /** 운송수단을 등록한다. */
   @PostMapping
   public ResponseEntity<VehicleResponse> registerVehicle(
       @RequestBody VehicleCreateRequest request) {
     return ResponseEntity.ok(vehicleService.registerVehicle(request));
   }
 
+  /** 운송수단 단건을 조회한다. */
   @GetMapping("/{vehicleId}")
   public ResponseEntity<VehicleResponse> getVehicle(@PathVariable Long vehicleId) {
     return ResponseEntity.ok(vehicleService.getVehicle(vehicleId));
   }
 
+  /** 운송수단 전체 목록을 조회한다. */
   @GetMapping
   public ResponseEntity<List<VehicleResponse>> getVehicles() {
     return ResponseEntity.ok(vehicleService.getVehicles());
   }
 
+  /** 운송수단 정보를 수정한다. */
   @PutMapping("/{vehicleId}")
   public ResponseEntity<VehicleResponse> updateVehicle(
       @PathVariable Long vehicleId, @RequestBody VehicleUpdateRequest request) {
     return ResponseEntity.ok(vehicleService.updateVehicle(vehicleId, request));
   }
 
+  /** 운송수단을 삭제한다. */
   @DeleteMapping("/{vehicleId}")
   public ResponseEntity<Void> deleteVehicle(@PathVariable Long vehicleId) {
     vehicleService.deleteVehicle(vehicleId);

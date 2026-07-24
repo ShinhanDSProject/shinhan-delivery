@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/** Vehicle 관련 유스케이스(등록/조회/수정/삭제)를 담당하는 서비스. */
 @Service
 @RequiredArgsConstructor
 public class VehicleService {
@@ -22,6 +23,7 @@ public class VehicleService {
   private final VehicleRepository vehicleRepository;
   private final MemberRepository memberRepository;
 
+  /** 소유자(Member) 존재 여부와 무게/거리 유효성을 검증한 뒤 Vehicle을 등록한다. */
   @Transactional
   public VehicleResponse registerVehicle(VehicleCreateRequest request) {
     if (!memberRepository.existsById(request.getOwnerId())) {
@@ -38,16 +40,19 @@ public class VehicleService {
     return VehicleResponse.from(vehicleRepository.save(vehicle));
   }
 
+  /** id로 Vehicle 단건을 조회한다. 없으면 VehicleNotFoundException. */
   @Transactional(readOnly = true)
   public VehicleResponse getVehicle(Long vehicleId) {
     return VehicleResponse.from(findVehicleOrThrow(vehicleId));
   }
 
+  /** 전체 Vehicle 목록을 조회한다. */
   @Transactional(readOnly = true)
   public List<VehicleResponse> getVehicles() {
     return vehicleRepository.findAll().stream().map(VehicleResponse::from).toList();
   }
 
+  /** 무게/거리 유효성을 검증한 뒤 Vehicle의 종류·무게·거리를 수정한다. ownerId는 변경하지 않는다. */
   @Transactional
   public VehicleResponse updateVehicle(Long vehicleId, VehicleUpdateRequest request) {
     validateWeightAndDistance(request.getMaxWeight(), request.getMaxDistance());
@@ -59,6 +64,7 @@ public class VehicleService {
     return VehicleResponse.from(vehicle);
   }
 
+  /** id로 Vehicle을 조회해 삭제한다. 없으면 VehicleNotFoundException. */
   @Transactional
   public void deleteVehicle(Long vehicleId) {
     Vehicle vehicle = findVehicleOrThrow(vehicleId);

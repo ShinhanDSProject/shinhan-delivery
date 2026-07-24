@@ -12,6 +12,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/** 배송 운송수단(드론/오토바이/차량) 엔티티. owner_id는 Member를 가리키는 FK 값이다. */
 @Entity
 @Getter
 @Setter
