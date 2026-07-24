@@ -14,8 +14,13 @@ public class GlobalExceptionHandler {
     return ResponseEntity.badRequest().body(new ErrorResponse("요청 본문을 읽을 수 없습니다."));
   }
 
-  @ExceptionHandler(MemberNotFoundException.class)
-  public ResponseEntity<ErrorResponse> handleNotFound(MemberNotFoundException e) {
+  @ExceptionHandler({InvalidWeightException.class, OverMaxDistanceException.class})
+  public ResponseEntity<ErrorResponse> handleInvalidInput(RuntimeException e) {
+    return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
+  }
+
+  @ExceptionHandler({MemberNotFoundException.class, VehicleNotFoundException.class})
+  public ResponseEntity<ErrorResponse> handleNotFound(RuntimeException e) {
     return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(e.getMessage()));
   }
 
