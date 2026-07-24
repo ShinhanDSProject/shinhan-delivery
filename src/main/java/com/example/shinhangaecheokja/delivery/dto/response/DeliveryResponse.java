@@ -1,7 +1,7 @@
-package com.example.shinhangaecheokja.dto.response;
+package com.example.shinhangaecheokja.delivery.dto.response;
 
-import com.example.shinhangaecheokja.entity.DeliveryRequest;
-import com.example.shinhangaecheokja.entity.DeliveryStatus;
+import com.example.shinhangaecheokja.delivery.entity.DeliveryRequest;
+import com.example.shinhangaecheokja.delivery.entity.DeliveryStatus;
 
 /** 배송 요청 응답 DTO. */
 public record DeliveryResponse(

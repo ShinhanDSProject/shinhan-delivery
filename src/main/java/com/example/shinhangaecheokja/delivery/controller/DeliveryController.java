@@ -1,9 +1,9 @@
-package com.example.shinhangaecheokja.controller;
+package com.example.shinhangaecheokja.delivery.controller;
 
-import com.example.shinhangaecheokja.dto.request.DeliveryCreateRequest;
-import com.example.shinhangaecheokja.dto.request.DeliveryUpdateRequest;
-import com.example.shinhangaecheokja.dto.response.DeliveryResponse;
-import com.example.shinhangaecheokja.service.DeliveryService;
+import com.example.shinhangaecheokja.delivery.dto.request.DeliveryCreateRequest;
+import com.example.shinhangaecheokja.delivery.dto.request.DeliveryUpdateRequest;
+import com.example.shinhangaecheokja.delivery.dto.response.DeliveryResponse;
+import com.example.shinhangaecheokja.delivery.service.DeliveryService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

@@ -1,16 +1,15 @@
-package com.example.shinhangaecheokja.service;
+package com.example.shinhangaecheokja.delivery.service;
 
-import com.example.shinhangaecheokja.dto.request.DeliveryCreateRequest;
-import com.example.shinhangaecheokja.dto.request.DeliveryUpdateRequest;
-import com.example.shinhangaecheokja.dto.response.DeliveryResponse;
-import com.example.shinhangaecheokja.entity.DeliveryRequest;
-import com.example.shinhangaecheokja.entity.DeliveryStatus;
-import com.example.shinhangaecheokja.exception.DeliveryRequestNotFoundException;
-import com.example.shinhangaecheokja.exception.MemberNotFoundException;
-import com.example.shinhangaecheokja.exception.NoAvailableCourierException;
-import com.example.shinhangaecheokja.repository.DeliveryRequestRepository;
-import com.example.shinhangaecheokja.repository.MemberRepository;
-import com.example.shinhangaecheokja.repository.VehicleRepository;
+import com.example.shinhangaecheokja.delivery.dto.request.DeliveryCreateRequest;
+import com.example.shinhangaecheokja.delivery.dto.request.DeliveryUpdateRequest;
+import com.example.shinhangaecheokja.delivery.dto.response.DeliveryResponse;
+import com.example.shinhangaecheokja.delivery.entity.DeliveryRequest;
+import com.example.shinhangaecheokja.delivery.entity.DeliveryStatus;
+import com.example.shinhangaecheokja.delivery.exception.DeliveryRequestNotFoundException;
+import com.example.shinhangaecheokja.delivery.exception.NoAvailableCourierException;
+import com.example.shinhangaecheokja.delivery.repository.DeliveryRequestRepository;
+import com.example.shinhangaecheokja.member.service.MemberService;
+import com.example.shinhangaecheokja.vehicle.service.VehicleService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -25,17 +24,14 @@ public class DeliveryService {
   private static final long FEE_PER_WEIGHT = 10L;
 
   private final DeliveryRequestRepository deliveryRequestRepository;
-  private final MemberRepository memberRepository;
-  private final VehicleRepository vehicleRepository;
+  private final MemberService memberService;
+  private final VehicleService vehicleService;
 
   /** 고객 존재 여부와 감당 가능한 차량 존재 여부를 검증한 뒤 배송을 요청한다. */
   @Transactional
   public DeliveryResponse requestDelivery(DeliveryCreateRequest request) {
-    if (!memberRepository.existsById(request.getCustomerId())) {
-      throw new MemberNotFoundException(request.getCustomerId());
-    }
-    if (!vehicleRepository.existsByMaxWeightGreaterThanEqualAndMaxDistanceGreaterThanEqual(
-        request.getWeight(), request.getDistance())) {
+    memberService.getMember(request.getCustomerId());
+    if (!vehicleService.existsAvailableVehicle(request.getWeight(), request.getDistance())) {
       throw new NoAvailableCourierException(request.getWeight(), request.getDistance());
     }
 
