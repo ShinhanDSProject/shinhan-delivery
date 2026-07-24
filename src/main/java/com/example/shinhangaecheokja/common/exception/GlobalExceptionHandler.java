@@ -2,6 +2,9 @@ package com.example.shinhangaecheokja.common.exception;
 
 import com.example.shinhangaecheokja.member.exception.DuplicateMemberException;
 import com.example.shinhangaecheokja.member.exception.MemberNotFoundException;
+import com.example.shinhangaecheokja.vehicle.exception.InvalidWeightException;
+import com.example.shinhangaecheokja.vehicle.exception.OverMaxDistanceException;
+import com.example.shinhangaecheokja.vehicle.exception.VehicleNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -18,9 +21,15 @@ public class GlobalExceptionHandler {
     return ResponseEntity.badRequest().body(new ErrorResponse("요청 본문을 읽을 수 없습니다."));
   }
 
+  /** 입력값 자체가 유효하지 않은 경우 400으로 변환한다. */
+  @ExceptionHandler({InvalidWeightException.class, OverMaxDistanceException.class})
+  public ResponseEntity<ErrorResponse> handleInvalidInput(RuntimeException e) {
+    return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
+  }
+
   /** 리소스를 찾을 수 없는 경우 404로 변환한다. */
-  @ExceptionHandler(MemberNotFoundException.class)
-  public ResponseEntity<ErrorResponse> handleNotFound(MemberNotFoundException e) {
+  @ExceptionHandler({MemberNotFoundException.class, VehicleNotFoundException.class})
+  public ResponseEntity<ErrorResponse> handleNotFound(RuntimeException e) {
     return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(e.getMessage()));
   }
 
