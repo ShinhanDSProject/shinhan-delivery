@@ -27,9 +27,6 @@ class UserServiceTest {
     @Mock
     private PasswordEncoder passwordEncoder;
 
-    @Mock
-    private VerificationService verificationService;
-
     @InjectMocks
     private UserService userService;
 
@@ -48,7 +45,6 @@ class UserServiceTest {
                 false
         );
 
-        given(verificationService.isPhoneVerified(request.getPhoneNumber())).willReturn(true);
         given(userRepository.existsByEmail(request.getEmail())).willReturn(false);
         given(passwordEncoder.encode(request.getPassword())).willReturn("encodedPassword123");
 
@@ -91,27 +87,5 @@ class UserServiceTest {
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("비밀번호와 비밀번호 확인이 일치하지 않습니다.");
     }
-
-    @Test
-    @DisplayName("휴대폰 미인증 시 예외 발생 테스트")
-    void signUpUnverifiedPhoneThrowsException() {
-        // given
-        SignUpRequest request = new SignUpRequest(
-                "홍길동",
-                "test@example.com",
-                "password123",
-                "password123",
-                "01012345678",
-                true,
-                true,
-                false
-        );
-
-        given(verificationService.isPhoneVerified(request.getPhoneNumber())).willReturn(false);
-
-        // when & then
-        assertThatThrownBy(() -> userService.signUp(request))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("휴대폰 번호 인증이 필요합니다.");
-    }
 }
+

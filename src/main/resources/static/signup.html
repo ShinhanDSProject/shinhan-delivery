@@ -281,21 +281,10 @@
             <div id="pwMatchStatus" class="status-badge"></div>
         </div>
 
-        <!-- 5. 휴대폰 번호 (인증번호 발송 & 확인) -->
+        <!-- 5. 휴대폰 번호 -->
         <div class="form-group">
             <label for="phoneNumber">휴대폰 번호 <span class="text-required">*</span></label>
-            <div class="input-inline">
-                <input type="tel" id="phoneNumber" placeholder="01012345678" required>
-                <button type="button" id="btnSendCode" class="btn-secondary">인증번호 발송</button>
-            </div>
-            
-            <div id="verificationBox" class="verification-box">
-                <div class="input-inline" style="margin-top: 8px;">
-                    <input type="text" id="verificationCode" placeholder="인증번호 6자리 입력">
-                    <button type="button" id="btnVerifyCode" class="btn-secondary">인증 확인</button>
-                </div>
-            </div>
-            <div id="phoneStatus" class="status-badge"></div>
+            <input type="tel" id="phoneNumber" placeholder="01012345678" required>
         </div>
 
         <!-- 6. 이용동의 -->
@@ -326,8 +315,6 @@
 </div>
 
 <script>
-    let isPhoneVerified = false;
-
     // 비밀번호 확인 일치 실시간 검사
     const pwInput = document.getElementById('password');
     const confirmPwInput = document.getElementById('confirmPassword');
@@ -350,76 +337,6 @@
     pwInput.addEventListener('input', checkPasswordMatch);
     confirmPwInput.addEventListener('input', checkPasswordMatch);
 
-    // 1) 휴대폰 인증번호 발송
-    document.getElementById('btnSendCode').addEventListener('click', async function() {
-        const phoneNumber = document.getElementById('phoneNumber').value.trim();
-        const phoneStatus = document.getElementById('phoneStatus');
-        
-        if (!phoneNumber) {
-            phoneStatus.className = 'status-badge error';
-            phoneStatus.textContent = '휴대폰 번호를 입력해주세요.';
-            return;
-        }
-
-        try {
-            const res = await fetch('/api/users/send-verification-code', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ phoneNumber })
-            });
-
-            const data = await res.json();
-            if (res.ok) {
-                document.getElementById('verificationBox').style.display = 'block';
-                phoneStatus.className = 'status-badge success';
-                phoneStatus.textContent = `✓ 인증번호가 발송되었습니다. (테스트 인증번호: ${data.code})`;
-            } else {
-                phoneStatus.className = 'status-badge error';
-                phoneStatus.textContent = data.message || '인증번호 발송 실패';
-            }
-        } catch (err) {
-            phoneStatus.className = 'status-badge error';
-            phoneStatus.textContent = '서버 통신 오류가 발생했습니다.';
-        }
-    });
-
-    // 2) 휴대폰 인증번호 확인
-    document.getElementById('btnVerifyCode').addEventListener('click', async function() {
-        const phoneNumber = document.getElementById('phoneNumber').value.trim();
-        const code = document.getElementById('verificationCode').value.trim();
-        const phoneStatus = document.getElementById('phoneStatus');
-
-        if (!code) {
-            phoneStatus.className = 'status-badge error';
-            phoneStatus.textContent = '인증번호 6자리를 입력해 주세요.';
-            return;
-        }
-
-        try {
-            const res = await fetch('/api/users/verify-code', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ phoneNumber, code })
-            });
-
-            const data = await res.json();
-            if (res.ok && data.success) {
-                isPhoneVerified = true;
-                phoneStatus.className = 'status-badge success';
-                phoneStatus.textContent = '✓ 휴대폰 번호 인증이 완료되었습니다!';
-                document.getElementById('phoneNumber').readOnly = true;
-                document.getElementById('btnSendCode').disabled = true;
-                document.getElementById('btnVerifyCode').disabled = true;
-            } else {
-                phoneStatus.className = 'status-badge error';
-                phoneStatus.textContent = data.message || '인증번호가 유효하지 않습니다.';
-            }
-        } catch (err) {
-            phoneStatus.className = 'status-badge error';
-            phoneStatus.textContent = '서버 통신 오류가 발생했습니다.';
-        }
-    });
-
     // 이용동의 전체 선택 / 해제
     const checkAll = document.getElementById('checkAll');
     const termChecks = document.querySelectorAll('.term-check');
@@ -435,7 +352,7 @@
         });
     });
 
-    // 3) 가입 완료 제출
+    // 가입 완료 제출
     document.getElementById('signupForm').addEventListener('submit', async function(e) {
         e.preventDefault();
         const resultToast = document.getElementById('resultToast');
@@ -452,12 +369,6 @@
         if (password !== confirmPassword) {
             resultToast.className = 'result-toast error';
             resultToast.textContent = '비밀번호와 비밀번호 확인이 일치하지 않습니다.';
-            return;
-        }
-
-        if (!isPhoneVerified) {
-            resultToast.className = 'result-toast error';
-            resultToast.textContent = '휴대폰 인증을 완료해주세요.';
             return;
         }
 
@@ -495,3 +406,4 @@
 
 </body>
 </html>
+

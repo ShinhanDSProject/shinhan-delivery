@@ -16,7 +16,6 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final VerificationService verificationService;
 
     @Transactional
     public UserResponse signUp(SignUpRequest request) {
@@ -25,17 +24,12 @@ public class UserService {
             throw new IllegalArgumentException("비밀번호와 비밀번호 확인이 일치하지 않습니다.");
         }
 
-        // 2. 휴대폰 인증 완료 확인
-        if (!verificationService.isPhoneVerified(request.getPhoneNumber())) {
-            throw new IllegalArgumentException("휴대폰 번호 인증이 필요합니다.");
-        }
-
-        // 3. 이메일 중복 확인
+        // 2. 이메일 중복 확인
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new IllegalArgumentException("이미 가입된 이메일 주소입니다.");
         }
 
-        // 4. 비밀번호 암호화 및 유저 엔티티 생성
+        // 3. 비밀번호 암호화 및 유저 엔티티 생성
         String encodedPassword = passwordEncoder.encode(request.getPassword());
         User user = User.create(
                 request.getName(),
@@ -49,3 +43,4 @@ public class UserService {
         return UserResponse.from(savedUser);
     }
 }
+
