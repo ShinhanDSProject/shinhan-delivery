@@ -12,6 +12,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/** 회원 엔티티. role로 Customer/Courier/Admin을 구분한다. */
 @Entity
 @Getter
 @Setter

@@ -6,19 +6,23 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+/** 모든 예외를 HTTP 응답으로 변환하는 전역 예외 처리기. */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+  /** 요청 본문 파싱 실패를 400으로 변환한다. */
   @ExceptionHandler(HttpMessageNotReadableException.class)
   public ResponseEntity<ErrorResponse> handleBadRequest(HttpMessageNotReadableException e) {
     return ResponseEntity.badRequest().body(new ErrorResponse("요청 본문을 읽을 수 없습니다."));
   }
 
+  /** 리소스를 찾을 수 없는 경우 404로 변환한다. */
   @ExceptionHandler(MemberNotFoundException.class)
   public ResponseEntity<ErrorResponse> handleNotFound(MemberNotFoundException e) {
     return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(e.getMessage()));
   }
 
+  /** 리소스 중복(예: 이메일 중복 가입)을 409로 변환한다. */
   @ExceptionHandler(DuplicateMemberException.class)
   public ResponseEntity<ErrorResponse> handleConflict(DuplicateMemberException e) {
     return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(e.getMessage()));
