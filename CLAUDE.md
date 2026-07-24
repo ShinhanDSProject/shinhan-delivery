@@ -1,0 +1,42 @@
+# CLAUDE.md
+
+이 파일은 이 저장소에서 작업할 때 Claude Code(claude.ai/code)에게 필요한 안내를 제공합니다.
+
+## 프로젝트 개요
+
+`shinhan-gaecheokja`는 Spring Boot 4.1.0 / Java 17 기반 백엔드(Gradle 빌드)입니다. Flyway로 데이터베이스 스키마를 버전 관리합니다(`docs/flyway-guide.md` 참고).
+
+## 코딩 컨벤션 (필독)
+
+**코드를 작성하거나 수정하기 전, 그리고 이 저장소에서 git 작업(커밋, 브랜치 생성)을 하기 전에 반드시 `code-convention.md`를 읽으세요.** 이 문서는 이 저장소의 기준이 되는 명세로, 전통적인 계층형 아키텍처(`Controller → Service → Repository → Entity`)와 예외 기반 에러 처리, git 작업 방식(§15: 커밋 메시지 형식, 브랜치 네이밍), PR 체크리스트(§16)를 다룹니다. 모든 신규 코드와 모든 커밋은 이 문서를 따라야 합니다. 여기서는 요약하거나 다르게 서술하지 않으니, 이 문서는 독립적으로 최신 상태를 유지하므로 반드시 원문을 직접 참고하세요.
+
+코딩 전에 숙지해야 할 핵심 사항(자세한 내용, 코드 예시, PR 체크리스트는 `code-convention.md`에 있습니다):
+
+- 레이어(기술적 역할) 기준으로 패키지를 나눕니다: `controller`, `service`, `repository`, `entity`, `dto/{request,response}`, `exception`, `config`. 의존 방향은 항상 위에서 아래로만(`Controller → Service → Repository`) — 역방향 의존은 금지입니다.
+- `Entity`는 JPA 표준 방식(`@Entity`, Lombok `@Getter`/`@Setter`/`@NoArgsConstructor`)을 그대로 사용합니다. Value Object나 `Result` 타입 같은 함수형 패턴은 쓰지 않습니다.
+- 비즈니스 로직은 전부 `Service` 계층에 모읍니다. 생성자 주입(`@RequiredArgsConstructor`)만 쓰고 필드 주입(`@Autowired` on field)은 금지입니다. 하나의 public 메서드가 하나의 유스케이스입니다.
+- 예상 가능한 실패는 커스텀 `RuntimeException`을 던지고, `@RestControllerAdvice`인 `GlobalExceptionHandler` 한 곳에서만 HTTP 응답으로 변환합니다(컨벤션 §6). Controller에서 개별적으로 `try-catch`하지 않습니다.
+- `@Transactional`은 `Service` 계층에만 붙입니다. Controller는 DTO만 다루고 Entity를 직접 반환하지 않습니다.
+- 포맷팅은 Spotless + google-java-format으로 강제됩니다(2칸 들여쓰기, wildcard import 금지) — 스타일 취향이 아니라 규칙이므로, 커밋 전에 `spotlessApply`를 실행하세요.
+- 커밋 메시지: `type: 설명`(Conventional Commits 기반, 한글 설명), `type`은 `feat|fix|refactor|test|docs|chore` 중 하나(컨벤션 §15). 브랜치명: `type/도메인-내용`.
+
+## 명령어
+
+Gradle wrapper를 사용하세요(Windows에서는 `gradlew.bat`, bash에서는 `./gradlew`) — 전역에 설치된 Gradle에 의존하지 마세요.
+
+```
+gradlew.bat build              # 전체 빌드 (컴파일 + 테스트)
+gradlew.bat bootRun            # 애플리케이션 실행
+gradlew.bat test               # 전체 테스트 실행
+gradlew.bat spotlessCheck      # 포맷팅 검사 (CI에서 실행 / 작업 완료 선언 전에 실행)
+gradlew.bat spotlessApply      # 컨벤션에 맞게 자동 포맷팅
+```
+
+로컬 DB 연결(`.env`)과 Flyway 마이그레이션 작성법은 `README.md`, `docs/flyway-guide.md`를 참고하세요.
+
+## 아키텍처
+
+- 베이스 패키지: `com.example.shinhangaecheokja`.
+- `code-convention.md` §2 기준 목표 구조: `controller`(DTO만 다룸), `service`(비즈니스 로직·트랜잭션·예외 발생), `repository`(`~Repository extends JpaRepository<Entity, Long>`, Entity 1개당 1개), `entity`(`@Entity` + Lombok), `dto/{request,response}`, `exception`(커스텀 예외 + `GlobalExceptionHandler`), `config`.
+- 새 도메인 로직을 추가할 때는 "Controller → Service → Repository" 단방향 의존과 "Repository는 Service/Controller에 의존하지 않는다"는 규칙(컨벤션 §14)을 지키세요. 아직 이 규칙을 빌드 시점에 강제하는 ArchUnit 테스트는 없으니, 필요하면 컨벤션 §14의 예시를 참고해 추가하세요.
+- 영속성: MariaDB(`org.mariadb.jdbc`) 대상 Spring Data JPA + Flyway. 스키마 변경은 항상 새 마이그레이션 파일(`src/main/resources/db/migration/V<n>__설명.sql`)로 추가하고, `spring.jpa.hibernate.ddl-auto`는 `validate`(또는 `none`)로 유지합니다 — Hibernate가 스키마를 직접 생성하게 하면 안 됩니다.
