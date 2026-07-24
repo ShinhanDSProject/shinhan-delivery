@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Coding convention (required reading)
 
-**Read `code-convention.md` before writing or modifying any code.** It is the authoritative spec for this repo — DDD (domain-driven design) + FP (functional programming) + Railway-oriented programming (`Result<S, F>` instead of exceptions for expected failures). All new code must follow it; do not summarize/deviate from it here, refer to the file directly since it is kept up to date independently of this file.
+**Read `code-convention.md` before writing or modifying any code — and before any git action (commit, branch) in this repo.** It is the authoritative spec, covering not just source code (DDD + FP + Railway-oriented programming, `Result<S, F>` instead of exceptions for expected failures) but also git workflow (§15: commit message format, branch naming) and the PR checklist (§16). All new code and every commit must follow it; do not summarize/deviate from it here, refer to the file directly since it is kept up to date independently of this file.
 
 Key points to internalize before coding (full detail, code samples, and the PR checklist are in `code-convention.md`):
 
@@ -17,6 +17,9 @@ Key points to internalize before coding (full detail, code samples, and the PR c
 - No setters/mutation in domain code; state changes return new objects. Expected failures return `Result` (`common/result/Result.java`, already scaffolded); `throw` is reserved for genuine infrastructure exceptions.
 - `@Transactional` only in the `application` (UseCase) layer. Logging never happens in `domain`. Controllers only touch DTOs, never domain objects, and convert `Result` → HTTP status via a single shared mapper (`DomainErrorHttpMapper`, per convention §11).
 - Formatting is enforced by Spotless + google-java-format (2-space indent, no wildcard imports) — not a style preference, run `spotlessApply` before committing.
+- Commit messages: `type: 설명` (Conventional Commits based, Korean description), `type` ∈ `feat|fix|refactor|test|docs|chore` (convention §15). Branch names: `type/도메인-내용`.
+
+Git hooks in `.githooks/` enforce the above automatically once `core.hooksPath` is set (run once per clone: `git config core.hooksPath .githooks`): `pre-commit` runs `spotlessApply` and restages formatted `.java` files, `commit-msg` rejects commits whose message doesn't match `type: 설명`.
 
 ## Commands
 

@@ -1,0 +1,16 @@
+#!/bin/sh
+# code-convention.md §15: 커밋 메시지는 `type: 설명` 형식 (Conventional Commits 기반)
+# type: feat, fix, refactor, test, docs, chore
+
+commit_msg_file="$1"
+first_line=$(head -n1 "$commit_msg_file")
+
+pattern='^(feat|fix|refactor|test|docs|chore)(\([a-z0-9/_-]+\))?: .+'
+
+if ! echo "$first_line" | grep -Eq "$pattern"; then
+  echo "commit-msg hook: 커밋 메시지가 code-convention.md §15 규칙을 따르지 않습니다."
+  echo "  형식: type: 설명   (type = feat|fix|refactor|test|docs|chore)"
+  echo "  예:   feat: 배송 요금 산정 로직 추가"
+  echo "  받은 첫 줄: $first_line"
+  exit 1
+fi

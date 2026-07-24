@@ -1,0 +1,10 @@
+#!/bin/sh
+# code-convention.md §14: 로컬에는 pre-commit hook으로 spotlessApply 실행
+
+./gradlew spotlessApply -q
+if [ $? -ne 0 ]; then
+  echo "pre-commit hook: spotlessApply 실패, 커밋을 중단합니다."
+  exit 1
+fi
+
+git diff --name-only --diff-filter=ACMR -- '*.java' | xargs -r git add
