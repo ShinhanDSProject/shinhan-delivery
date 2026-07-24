@@ -1,12 +1,12 @@
-package com.example.shinhangaecheokja.service;
+package com.example.shinhangaecheokja.member.service;
 
-import com.example.shinhangaecheokja.dto.request.MemberCreateRequest;
-import com.example.shinhangaecheokja.dto.request.MemberUpdateRequest;
-import com.example.shinhangaecheokja.dto.response.MemberResponse;
-import com.example.shinhangaecheokja.entity.Member;
-import com.example.shinhangaecheokja.exception.DuplicateMemberException;
-import com.example.shinhangaecheokja.exception.MemberNotFoundException;
-import com.example.shinhangaecheokja.repository.MemberRepository;
+import com.example.shinhangaecheokja.member.dto.request.MemberCreateRequest;
+import com.example.shinhangaecheokja.member.dto.request.MemberUpdateRequest;
+import com.example.shinhangaecheokja.member.dto.response.MemberResponse;
+import com.example.shinhangaecheokja.member.entity.Member;
+import com.example.shinhangaecheokja.member.exception.DuplicateMemberException;
+import com.example.shinhangaecheokja.member.exception.MemberNotFoundException;
+import com.example.shinhangaecheokja.member.repository.MemberRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;

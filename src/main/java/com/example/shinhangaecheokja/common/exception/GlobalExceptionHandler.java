@@ -1,5 +1,7 @@
-package com.example.shinhangaecheokja.exception;
+package com.example.shinhangaecheokja.common.exception;
 
+import com.example.shinhangaecheokja.member.exception.DuplicateMemberException;
+import com.example.shinhangaecheokja.member.exception.MemberNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;

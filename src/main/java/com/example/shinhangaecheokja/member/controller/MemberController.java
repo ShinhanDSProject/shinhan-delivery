@@ -1,9 +1,9 @@
-package com.example.shinhangaecheokja.controller;
+package com.example.shinhangaecheokja.member.controller;
 
-import com.example.shinhangaecheokja.dto.request.MemberCreateRequest;
-import com.example.shinhangaecheokja.dto.request.MemberUpdateRequest;
-import com.example.shinhangaecheokja.dto.response.MemberResponse;
-import com.example.shinhangaecheokja.service.MemberService;
+import com.example.shinhangaecheokja.member.dto.request.MemberCreateRequest;
+import com.example.shinhangaecheokja.member.dto.request.MemberUpdateRequest;
+import com.example.shinhangaecheokja.member.dto.response.MemberResponse;
+import com.example.shinhangaecheokja.member.service.MemberService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

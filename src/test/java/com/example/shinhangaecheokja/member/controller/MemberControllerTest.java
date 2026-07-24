@@ -1,4 +1,4 @@
-package com.example.shinhangaecheokja.controller;
+package com.example.shinhangaecheokja.member.controller;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -8,11 +8,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.example.shinhangaecheokja.dto.request.MemberCreateRequest;
-import com.example.shinhangaecheokja.dto.response.MemberResponse;
-import com.example.shinhangaecheokja.entity.MemberRole;
-import com.example.shinhangaecheokja.exception.MemberNotFoundException;
-import com.example.shinhangaecheokja.service.MemberService;
+import com.example.shinhangaecheokja.member.dto.request.MemberCreateRequest;
+import com.example.shinhangaecheokja.member.dto.response.MemberResponse;
+import com.example.shinhangaecheokja.member.entity.MemberRole;
+import com.example.shinhangaecheokja.member.exception.MemberNotFoundException;
+import com.example.shinhangaecheokja.member.service.MemberService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;

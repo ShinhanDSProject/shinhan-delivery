@@ -1,4 +1,4 @@
-package com.example.shinhangaecheokja.exception;
+package com.example.shinhangaecheokja.member.exception;
 
 /** 이미 가입된 이메일로 회원 가입을 시도할 때 던진다. */
 public class DuplicateMemberException extends RuntimeException {

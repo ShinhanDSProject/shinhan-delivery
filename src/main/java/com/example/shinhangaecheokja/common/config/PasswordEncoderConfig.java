@@ -1,4 +1,4 @@
-package com.example.shinhangaecheokja.config;
+package com.example.shinhangaecheokja.common.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

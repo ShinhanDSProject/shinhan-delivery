@@ -1,4 +1,4 @@
-package com.example.shinhangaecheokja.dto.request;
+package com.example.shinhangaecheokja.member.dto.request;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;

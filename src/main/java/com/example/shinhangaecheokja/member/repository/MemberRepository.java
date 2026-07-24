@@ -1,6 +1,6 @@
-package com.example.shinhangaecheokja.repository;
+package com.example.shinhangaecheokja.member.repository;
 
-import com.example.shinhangaecheokja.entity.Member;
+import com.example.shinhangaecheokja.member.entity.Member;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 

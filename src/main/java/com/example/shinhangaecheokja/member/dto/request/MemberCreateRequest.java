@@ -1,6 +1,6 @@
-package com.example.shinhangaecheokja.dto.request;
+package com.example.shinhangaecheokja.member.dto.request;
 
-import com.example.shinhangaecheokja.entity.MemberRole;
+import com.example.shinhangaecheokja.member.entity.MemberRole;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

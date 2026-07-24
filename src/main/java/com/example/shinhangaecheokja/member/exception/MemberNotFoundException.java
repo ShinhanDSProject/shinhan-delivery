@@ -1,4 +1,4 @@
-package com.example.shinhangaecheokja.exception;
+package com.example.shinhangaecheokja.member.exception;
 
 /** 주어진 id에 해당하는 Member가 존재하지 않을 때 던진다. */
 public class MemberNotFoundException extends RuntimeException {

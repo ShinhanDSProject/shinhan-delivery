@@ -1,17 +1,17 @@
-package com.example.shinhangaecheokja.service;
+package com.example.shinhangaecheokja.member.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-import com.example.shinhangaecheokja.dto.request.MemberCreateRequest;
-import com.example.shinhangaecheokja.entity.Member;
-import com.example.shinhangaecheokja.entity.MemberRole;
-import com.example.shinhangaecheokja.exception.DuplicateMemberException;
-import com.example.shinhangaecheokja.exception.MemberNotFoundException;
-import com.example.shinhangaecheokja.dto.response.MemberResponse;
-import com.example.shinhangaecheokja.repository.MemberRepository;
+import com.example.shinhangaecheokja.member.dto.request.MemberCreateRequest;
+import com.example.shinhangaecheokja.member.entity.Member;
+import com.example.shinhangaecheokja.member.entity.MemberRole;
+import com.example.shinhangaecheokja.member.exception.DuplicateMemberException;
+import com.example.shinhangaecheokja.member.exception.MemberNotFoundException;
+import com.example.shinhangaecheokja.member.dto.response.MemberResponse;
+import com.example.shinhangaecheokja.member.repository.MemberRepository;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
