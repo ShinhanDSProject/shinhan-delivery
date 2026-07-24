@@ -1,5 +1,7 @@
 package com.example.shinhangaecheokja.common.exception;
 
+import com.example.shinhangaecheokja.delivery.exception.DeliveryRequestNotFoundException;
+import com.example.shinhangaecheokja.delivery.exception.NoAvailableCourierException;
 import com.example.shinhangaecheokja.member.exception.DuplicateMemberException;
 import com.example.shinhangaecheokja.member.exception.MemberNotFoundException;
 import com.example.shinhangaecheokja.vehicle.exception.InvalidWeightException;
@@ -28,7 +30,11 @@ public class GlobalExceptionHandler {
   }
 
   /** 리소스를 찾을 수 없는 경우 404로 변환한다. */
-  @ExceptionHandler({MemberNotFoundException.class, VehicleNotFoundException.class})
+  @ExceptionHandler({
+    MemberNotFoundException.class,
+    VehicleNotFoundException.class,
+    DeliveryRequestNotFoundException.class
+  })
   public ResponseEntity<ErrorResponse> handleNotFound(RuntimeException e) {
     return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(e.getMessage()));
   }
@@ -37,6 +43,12 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(DuplicateMemberException.class)
   public ResponseEntity<ErrorResponse> handleConflict(DuplicateMemberException e) {
     return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(e.getMessage()));
+  }
+
+  /** 비즈니스 규칙상 처리가 불가능한 경우 422로 변환한다. */
+  @ExceptionHandler(NoAvailableCourierException.class)
+  public ResponseEntity<ErrorResponse> handleUnprocessable(NoAvailableCourierException e) {
+    return ResponseEntity.status(HttpStatus.UNPROCESSABLE_CONTENT).body(new ErrorResponse(e.getMessage()));
   }
 
   @ExceptionHandler(Exception.class)

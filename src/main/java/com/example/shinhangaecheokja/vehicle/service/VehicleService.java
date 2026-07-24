@@ -49,6 +49,13 @@ public class VehicleService {
     return vehicleRepository.findAll().stream().map(VehicleResponse::from).toList();
   }
 
+  /** 주어진 무게·거리를 감당할 수 있는 차량이 하나라도 있는지 확인한다. */
+  @Transactional(readOnly = true)
+  public boolean existsAvailableVehicle(double weight, double distance) {
+    return vehicleRepository.existsByMaxWeightGreaterThanEqualAndMaxDistanceGreaterThanEqual(
+        weight, distance);
+  }
+
   /** 무게/거리 유효성을 검증한 뒤 Vehicle의 종류·무게·거리를 수정한다. ownerId는 변경하지 않는다. */
   @Transactional
   public VehicleResponse updateVehicle(Long vehicleId, VehicleUpdateRequest request) {
