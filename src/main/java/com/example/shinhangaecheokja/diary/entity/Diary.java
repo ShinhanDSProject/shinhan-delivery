@@ -70,5 +70,6 @@ public class Diary {
         this.date = date;
         this.content = content;
         this.emotionId = emotionId;
+        System.out.println("점메추 플리즈");
     }
 }
