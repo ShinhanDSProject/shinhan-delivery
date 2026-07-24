@@ -1,7 +1,7 @@
-package com.example.shinhangaecheokja.dto.response;
+package com.example.shinhangaecheokja.vehicle.dto.response;
 
-import com.example.shinhangaecheokja.entity.Vehicle;
-import com.example.shinhangaecheokja.entity.VehicleType;
+import com.example.shinhangaecheokja.vehicle.entity.Vehicle;
+import com.example.shinhangaecheokja.vehicle.entity.VehicleType;
 
 /** 운송수단 응답 DTO. */
 public record VehicleResponse(

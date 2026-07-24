@@ -1,6 +1,6 @@
-package com.example.shinhangaecheokja.repository;
+package com.example.shinhangaecheokja.vehicle.repository;
 
-import com.example.shinhangaecheokja.entity.Vehicle;
+import com.example.shinhangaecheokja.vehicle.entity.Vehicle;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 /** Vehicle 엔티티에 대한 JPA 저장소. */

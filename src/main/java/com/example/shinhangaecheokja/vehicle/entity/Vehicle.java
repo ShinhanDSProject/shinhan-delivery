@@ -1,4 +1,4 @@
-package com.example.shinhangaecheokja.entity;
+package com.example.shinhangaecheokja.vehicle.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

@@ -1,20 +1,20 @@
-package com.example.shinhangaecheokja.service;
+package com.example.shinhangaecheokja.vehicle.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-import com.example.shinhangaecheokja.dto.request.VehicleCreateRequest;
-import com.example.shinhangaecheokja.dto.response.VehicleResponse;
-import com.example.shinhangaecheokja.entity.Vehicle;
-import com.example.shinhangaecheokja.entity.VehicleType;
-import com.example.shinhangaecheokja.exception.InvalidWeightException;
-import com.example.shinhangaecheokja.exception.MemberNotFoundException;
-import com.example.shinhangaecheokja.exception.OverMaxDistanceException;
-import com.example.shinhangaecheokja.exception.VehicleNotFoundException;
-import com.example.shinhangaecheokja.repository.MemberRepository;
-import com.example.shinhangaecheokja.repository.VehicleRepository;
+import com.example.shinhangaecheokja.member.exception.MemberNotFoundException;
+import com.example.shinhangaecheokja.member.service.MemberService;
+import com.example.shinhangaecheokja.vehicle.dto.request.VehicleCreateRequest;
+import com.example.shinhangaecheokja.vehicle.dto.response.VehicleResponse;
+import com.example.shinhangaecheokja.vehicle.entity.Vehicle;
+import com.example.shinhangaecheokja.vehicle.entity.VehicleType;
+import com.example.shinhangaecheokja.vehicle.exception.InvalidWeightException;
+import com.example.shinhangaecheokja.vehicle.exception.OverMaxDistanceException;
+import com.example.shinhangaecheokja.vehicle.exception.VehicleNotFoundException;
+import com.example.shinhangaecheokja.vehicle.repository.VehicleRepository;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,7 +26,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class VehicleServiceTest {
 
   @Mock private VehicleRepository vehicleRepository;
-  @Mock private MemberRepository memberRepository;
+  @Mock private MemberService memberService;
   @InjectMocks private VehicleService vehicleService;
 
   @Test
@@ -37,7 +37,6 @@ class VehicleServiceTest {
     request.setMaxWeight(500);
     request.setMaxDistance(100);
 
-    when(memberRepository.existsById(1L)).thenReturn(true);
     when(vehicleRepository.save(any(Vehicle.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
     VehicleResponse response = vehicleService.registerVehicle(request);
@@ -54,7 +53,7 @@ class VehicleServiceTest {
     request.setMaxWeight(500);
     request.setMaxDistance(100);
 
-    when(memberRepository.existsById(999L)).thenReturn(false);
+    when(memberService.getMember(999L)).thenThrow(new MemberNotFoundException(999L));
 
     assertThatThrownBy(() -> vehicleService.registerVehicle(request))
         .isInstanceOf(MemberNotFoundException.class);
@@ -68,8 +67,6 @@ class VehicleServiceTest {
     request.setMaxWeight(-5);
     request.setMaxDistance(100);
 
-    when(memberRepository.existsById(1L)).thenReturn(true);
-
     assertThatThrownBy(() -> vehicleService.registerVehicle(request))
         .isInstanceOf(InvalidWeightException.class);
   }
@@ -81,8 +78,6 @@ class VehicleServiceTest {
     request.setType(VehicleType.CAR);
     request.setMaxWeight(500);
     request.setMaxDistance(0);
-
-    when(memberRepository.existsById(1L)).thenReturn(true);
 
     assertThatThrownBy(() -> vehicleService.registerVehicle(request))
         .isInstanceOf(OverMaxDistanceException.class);

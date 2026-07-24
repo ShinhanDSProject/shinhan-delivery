@@ -1,4 +1,4 @@
-package com.example.shinhangaecheokja.exception;
+package com.example.shinhangaecheokja.vehicle.exception;
 
 /** 최대 무게(maxWeight)가 0 이하로 유효하지 않을 때 던진다. */
 public class InvalidWeightException extends RuntimeException {

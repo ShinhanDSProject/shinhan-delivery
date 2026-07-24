@@ -1,15 +1,14 @@
-package com.example.shinhangaecheokja.service;
+package com.example.shinhangaecheokja.vehicle.service;
 
-import com.example.shinhangaecheokja.dto.request.VehicleCreateRequest;
-import com.example.shinhangaecheokja.dto.request.VehicleUpdateRequest;
-import com.example.shinhangaecheokja.dto.response.VehicleResponse;
-import com.example.shinhangaecheokja.entity.Vehicle;
-import com.example.shinhangaecheokja.exception.InvalidWeightException;
-import com.example.shinhangaecheokja.exception.MemberNotFoundException;
-import com.example.shinhangaecheokja.exception.OverMaxDistanceException;
-import com.example.shinhangaecheokja.exception.VehicleNotFoundException;
-import com.example.shinhangaecheokja.repository.MemberRepository;
-import com.example.shinhangaecheokja.repository.VehicleRepository;
+import com.example.shinhangaecheokja.member.service.MemberService;
+import com.example.shinhangaecheokja.vehicle.dto.request.VehicleCreateRequest;
+import com.example.shinhangaecheokja.vehicle.dto.request.VehicleUpdateRequest;
+import com.example.shinhangaecheokja.vehicle.dto.response.VehicleResponse;
+import com.example.shinhangaecheokja.vehicle.entity.Vehicle;
+import com.example.shinhangaecheokja.vehicle.exception.InvalidWeightException;
+import com.example.shinhangaecheokja.vehicle.exception.OverMaxDistanceException;
+import com.example.shinhangaecheokja.vehicle.exception.VehicleNotFoundException;
+import com.example.shinhangaecheokja.vehicle.repository.VehicleRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,14 +20,12 @@ import org.springframework.transaction.annotation.Transactional;
 public class VehicleService {
 
   private final VehicleRepository vehicleRepository;
-  private final MemberRepository memberRepository;
+  private final MemberService memberService;
 
   /** 소유자(Member) 존재 여부와 무게/거리 유효성을 검증한 뒤 Vehicle을 등록한다. */
   @Transactional
   public VehicleResponse registerVehicle(VehicleCreateRequest request) {
-    if (!memberRepository.existsById(request.getOwnerId())) {
-      throw new MemberNotFoundException(request.getOwnerId());
-    }
+    memberService.getMember(request.getOwnerId());
     validateWeightAndDistance(request.getMaxWeight(), request.getMaxDistance());
 
     Vehicle vehicle = new Vehicle();

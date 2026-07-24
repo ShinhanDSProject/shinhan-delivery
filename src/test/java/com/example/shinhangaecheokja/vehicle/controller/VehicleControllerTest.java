@@ -1,4 +1,4 @@
-package com.example.shinhangaecheokja.controller;
+package com.example.shinhangaecheokja.vehicle.controller;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -8,11 +8,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.example.shinhangaecheokja.dto.request.VehicleCreateRequest;
-import com.example.shinhangaecheokja.dto.response.VehicleResponse;
-import com.example.shinhangaecheokja.entity.VehicleType;
-import com.example.shinhangaecheokja.exception.VehicleNotFoundException;
-import com.example.shinhangaecheokja.service.VehicleService;
+import com.example.shinhangaecheokja.vehicle.dto.request.VehicleCreateRequest;
+import com.example.shinhangaecheokja.vehicle.dto.response.VehicleResponse;
+import com.example.shinhangaecheokja.vehicle.entity.VehicleType;
+import com.example.shinhangaecheokja.vehicle.exception.VehicleNotFoundException;
+import com.example.shinhangaecheokja.vehicle.service.VehicleService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;

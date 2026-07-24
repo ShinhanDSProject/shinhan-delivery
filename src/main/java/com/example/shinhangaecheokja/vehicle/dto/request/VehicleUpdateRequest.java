@@ -1,6 +1,6 @@
-package com.example.shinhangaecheokja.dto.request;
+package com.example.shinhangaecheokja.vehicle.dto.request;
 
-import com.example.shinhangaecheokja.entity.VehicleType;
+import com.example.shinhangaecheokja.vehicle.entity.VehicleType;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

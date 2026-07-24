@@ -1,9 +1,9 @@
-package com.example.shinhangaecheokja.controller;
+package com.example.shinhangaecheokja.vehicle.controller;
 
-import com.example.shinhangaecheokja.dto.request.VehicleCreateRequest;
-import com.example.shinhangaecheokja.dto.request.VehicleUpdateRequest;
-import com.example.shinhangaecheokja.dto.response.VehicleResponse;
-import com.example.shinhangaecheokja.service.VehicleService;
+import com.example.shinhangaecheokja.vehicle.dto.request.VehicleCreateRequest;
+import com.example.shinhangaecheokja.vehicle.dto.request.VehicleUpdateRequest;
+import com.example.shinhangaecheokja.vehicle.dto.response.VehicleResponse;
+import com.example.shinhangaecheokja.vehicle.service.VehicleService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
