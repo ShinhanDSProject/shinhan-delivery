@@ -19,3 +19,9 @@ spring:
   flyway:
     enabled: true
     baseline-on-migrate: true
+
+jwt:
+  member:
+    secret: ${JWT_MEMBER_SECRET}
+    access-exp-min: 30
+    refresh-exp-min: 1440
