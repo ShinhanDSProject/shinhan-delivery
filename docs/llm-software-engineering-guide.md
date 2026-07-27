@@ -28,7 +28,7 @@
 │  2. 프롬프트 엔지니어링 ──▶ AI에게 "정확한 지시"를 내려 원하는 코드 획득        │
 │  3. 컨텍스트 엔지니어링 ──▶ AI에게 "꼭 필요한 프로젝트 맥락"만 스마트하게 주입   │
 │  4. 하네스 엔지니어링   ──▶ AI가 만든 코드를 "안전하게 자동 검증"하는 울타리    │
-│  5. 피드백 루프       ──▶ 하네스가 잡은 에러를 AI가 "자가 치유(Auto-Fix)"      │
+│  5. 루프 엔지니어링    ──▶ AI-하네스-지식자산화 간 "자율 피드백 순환 구조" 설계 │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -38,7 +38,7 @@
 | **✍️ 프롬프트 엔지니어링** | AI에게 모호하게 시키면 쓸모없는 코드가 나오므로, **내 의도와 원하는 출력에 100% 부합하는 답을 얻기 위해** | AI가 프로젝트 규칙과 안 맞는 코드를 엉뚱하게 짜서 고치느라 시간이 더 걸림 |
 | **🧠 컨텍스트 엔지니어링** | AI의 메모리(Context Window)는 한계가 있으므로, **엉뚱한 정보나 낭비 없이 핵심 코드/규칙만 핀포인트로 전달하기 위해** | 프로젝트 전체 코드를 다 집어넣어 AI가 환각에 빠지거나 중요한 지시사항을 무시함 |
 | **🏗️ 하네스 엔지니어링** | AI는 자신 있게 틀린 코드(환각)를 짜기도 함. 이를 **자동으로 감지하고 막아주는 안전한 검사 울타리를 구축하기 위해** | AI가 짠 버그 있는 코드가 그대로 배포되어 실제 서비스 장애로 이어짐 |
-| **🔄 피드백 루프** | 사람이 직접 몇 시간씩 에러 로그를 분석할 필요 없이, **검사 오류를 AI가 수초 만에 스스로 수정(Self-Healing)하게 만들기 위해** | 에러가 났을 때 초보 개발자가 어디가 틀렸는지 몰라 개발이 중단됨 |
+| **🔄 루프 엔지니어링** | 단발성 검사를 넘어 **[자가치유 ➔ 다차원교정 ➔ 컨벤션자산화] 4대 피드백 순환 고리를 자율 오케스트레이션하기 위해** | AI가 매번 같은 실수를 반복하고 지적받은 내용을 문서나 다음 작업에 이식하지 못함 |
 
 ---
 
@@ -90,19 +90,53 @@ AI의 작업 기억 공간인 **컨텍스트 윈도우(Context Window)**에 **"�
 
 ---
 
-## 6. 4️⃣ 피드백 루프 & 자가 치유 (Feedback Loops & Self-Healing)
+## 6. 4️⃣ 루프 엔지니어링 & 피드백 순환 구조 (Loop Engineering & Feedback Loops)
 
-### 💡 개념
-하네스 검사에서 나온 **결과(성공/에러 로그)를 AI에게 다시 전달하여, AI가 스스로 코드를 수정(Self-Healing)하도록 만드는 순환 체계**입니다.
+### 💡 개념: 루프 엔지니어링(Loop Engineering)이란?
+단발성 프롬프트 작성(Prompt)이나 개별 검사 도구(Harness) 구축을 넘어, **[AI 자가 코드 생성 $\rightarrow$ 하네스 자동 검증 $\rightarrow$ 자가 치유(Self-Healing) $\rightarrow$ 다차원 교정(Multi-Pass Audit) $\rightarrow$ 컨벤션 지식 자산화]로 이어지는 4대 자율 순환 루프(Loop)를 종합 설계하고 제어하는 최상위 AI 시스템 아키텍처 방법론**입니다.
 
-### 🔄 피드백 루프의 5가지 층위
-1. **Pre-Flight Self-Review Feedback:** AI가 커밋 전 스스로 미사용 import, 명명 규칙, 콘솔 출력을 1차 셀프 검토.
-2. **Immediate Local Feedback:** 로컬에서 `./scripts/verify.sh`를 구동해 3초 만에 결과를 확인하고 자가 치유.
-3. **Multi-Pass Audit Feedback (다회차 재검토 피드백 루프):**
-   * *"한 번의 성공이나 1차 답변이 완벽함을 보장하지 않는다"*는 원칙.
-   * AI 코드가 하네스를 1차 통과했더라도, 개발자/AI가 *"다른 각도(크로스 플랫폼, 예외케이스, 가독성)에서 개선할 점은 없을까?"* 라고 2차, 3차 재검토(Audit) 질문을 던져 비로소 완성도를 100%로 끌어올리는 피드백 루프.
-4. **Human-in-the-Loop:** AI의 설계안(Plan)이나 PR 코드를 사람이 리뷰하고 방향성을 보정.
-5. **CI/CD Pipeline Feedback:** GitHub PR 생성 시 CI 서버와 AI 리뷰봇(Gemini Code Reviewer)이 코드를 검사해 리뷰 댓글을 남기고, 이를 다시 수용해 고치는 순환.
+```mermaid
+graph TD
+    subgraph Inner Loop ["1️⃣ 내적 자가 치유 루프 (Inner Self-Healing Loop)"]
+        A["AI 코드 생성/수정"] --> B["로컬 하네스 실행 (verify.sh)"]
+        B -->|"에러 발생 시 로그 수집"| C["AI 수초 내 자가 치유 (Auto-Fix)"]
+        C --> B
+        B -->|"0 exit code 성공"| D["2️⃣ 다차원 교정 루프 (Multi-Pass Audit Loop)"]
+    end
+    
+    subgraph Audit Loop ["2️⃣ 다차원 교정 루프 (Multi-Pass Audit Loop)"]
+        D -->|"아키텍처, 예외, DB, 보안, DX, 테스트 6대 관점"| E["AI 사전 다각도 셀프 코드 리뷰 & 2차 보완"]
+    end
+    
+    subgraph Assetization Loop ["3️⃣ 컨벤션 자산화 루프 (Convention Assetization Loop)"]
+        E --> F["개선 노하우 code-convention.md & docs/ 동기화 자산화"]
+        F -->|"다음 작업의 컨텍스트로 자동 재주입"| A
+    end
+    
+    subgraph Governance Loop ["4️⃣ 외적 거버넌스 CI/CD 루프 (Outer Governance Loop)"]
+        F --> G["무결점(Zero-Defect) PR 생성"]
+        G --> H["GitHub CI (JaCoCo Coverage Gate + ArchUnit) & Gemini AI Reviewer"]
+        H --> I["Squash and Merge 최종 병합"]
+    end
+```
+
+### 🔄 루프 엔지니어링의 4대 핵심 순환 루프 (The 4 Pillars of Loop Engineering)
+
+1. **🔄 1️⃣ 내적 자가 치유 루프 (Inner Self-Healing Loop):**
+   * **원리:** `AI 코드 생성` $\rightarrow$ `로컬 하네스(verify.sh) 실행` $\rightarrow$ `에러 로그 분석` $\rightarrow$ `AI 자가 수정(Auto-Fix)` $\rightarrow$ `0 exit code 달성 시까지 자율 반복`
+   * **목적:** 사람의 정답 확인 없이 로컬에서 컴파일 및 테스트 100% 그린 상태를 자동 도출.
+
+2. **🔍 2️⃣ 다차원 교정 다중 루프 (Multi-Pass Audit Loop):**
+   * **원리:** 1차 그린 빌드 달성 후 멈추지 않고, **6대 프로젝트 관점(아키텍처 순수성, 비즈니스 예외 안전성, DB 마이그레이션, 보안, 개발자 경험, 테스트 유의미성)**에서 AI가 스스로 다각도 교정을 2차, 3차 탐색.
+   * **목적:** 눈에 보이지 않는 오버 엔지니어링이나 숨은 부작용(Side-effect)을 사전에 스스로 발굴하여 제거.
+
+3. **📚 3️⃣ 컨벤션 자산화 선순환 루프 (Convention Assetization Loop):**
+   * **원리:** 코드 수정 및 AI 리뷰 과정에서 얻은 새로운 해결책과 패턴 노하우를 단회성 작업으로 끝내지 않고 **`code-convention.md` 및 `docs/` 가이드 문서에 즉시 동기화 ➔ 다음 대화의 컨텍스트(Context)로 자동 재주입**
+   * **목적:** AI가 동일한 실수를 반복하거나 지적받았던 내용을 잊어버리는 현상을 근본적으로 차단.
+
+4. **🛡️ 4️⃣ 외적 거버넌스 CI/CD 루프 (Outer Governance Loop):**
+   * **원리:** `로컬 무결점 PR` $\rightarrow$ `GitHub Actions CI (JaCoCo Coverage Gate + ArchUnit)` $\rightarrow$ `Gemini AI Reviewer` $\rightarrow$ `Squash and Merge`로 연결되는 안전망 연동.
+   * **목적:** 메인 브랜치에 단 1개의 결함도 유입되지 않도록 원격 3중 안전 장치 보장.
 
 ---
 
