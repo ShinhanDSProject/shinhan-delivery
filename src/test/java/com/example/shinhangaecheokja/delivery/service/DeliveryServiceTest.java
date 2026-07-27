@@ -7,14 +7,16 @@ import static org.mockito.Mockito.when;
 
 import com.example.shinhangaecheokja.delivery.dto.request.DeliveryCreateRequest;
 import com.example.shinhangaecheokja.delivery.dto.response.DeliveryResponse;
+import com.example.shinhangaecheokja.delivery.dto.response.MatchingResponse;
 import com.example.shinhangaecheokja.delivery.entity.DeliveryRequest;
 import com.example.shinhangaecheokja.delivery.entity.DeliveryStatus;
+import com.example.shinhangaecheokja.delivery.entity.MatchingStatus;
 import com.example.shinhangaecheokja.delivery.exception.DeliveryRequestNotFoundException;
 import com.example.shinhangaecheokja.delivery.exception.NoAvailableCourierException;
 import com.example.shinhangaecheokja.delivery.repository.DeliveryRequestRepository;
 import com.example.shinhangaecheokja.member.exception.MemberNotFoundException;
 import com.example.shinhangaecheokja.member.service.MemberService;
-import com.example.shinhangaecheokja.vehicle.service.VehicleService;
+import java.time.LocalDateTime;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,26 +29,28 @@ class DeliveryServiceTest {
 
   @Mock private DeliveryRequestRepository deliveryRequestRepository;
   @Mock private MemberService memberService;
-  @Mock private VehicleService vehicleService;
+  @Mock private MatchingService matchingService;
   @InjectMocks private DeliveryService deliveryService;
 
   @Test
-  void 고객이_존재하고_가용_차량이_있으면_배송을_요청한다() {
+  void 고객이_존재하고_자동_매칭에_성공하면_배송을_요청한다() {
     DeliveryCreateRequest request = new DeliveryCreateRequest();
     request.setCustomerId(1L);
     request.setPickupAddress("서울시 강남구");
     request.setDropoffAddress("서울시 서초구");
     request.setWeight(10);
     request.setDistance(5);
+    request.setPickupLatitude(37.5);
+    request.setPickupLongitude(127.0);
 
-    when(vehicleService.existsAvailableVehicle(10, 5)).thenReturn(true);
     when(deliveryRequestRepository.save(any(DeliveryRequest.class)))
         .thenAnswer(invocation -> invocation.getArgument(0));
+    when(matchingService.autoMatch(any(DeliveryRequest.class)))
+        .thenReturn(new MatchingResponse(1L, 1L, 2L, MatchingStatus.MATCHED, LocalDateTime.now()));
 
     DeliveryResponse response = deliveryService.requestDelivery(request);
 
     assertThat(response.customerId()).isEqualTo(1L);
-    assertThat(response.status()).isEqualTo(DeliveryStatus.REQUESTED);
     assertThat(response.feePoint()).isEqualTo(600L);
   }
 
@@ -70,7 +74,10 @@ class DeliveryServiceTest {
     request.setWeight(1000);
     request.setDistance(500);
 
-    when(vehicleService.existsAvailableVehicle(1000, 500)).thenReturn(false);
+    when(deliveryRequestRepository.save(any(DeliveryRequest.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
+    when(matchingService.autoMatch(any(DeliveryRequest.class)))
+        .thenThrow(new NoAvailableCourierException(1000, 500));
 
     assertThatThrownBy(() -> deliveryService.requestDelivery(request))
         .isInstanceOf(NoAvailableCourierException.class);

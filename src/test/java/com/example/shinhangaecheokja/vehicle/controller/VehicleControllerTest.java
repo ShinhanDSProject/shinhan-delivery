@@ -10,6 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.example.shinhangaecheokja.vehicle.dto.request.VehicleCreateRequest;
 import com.example.shinhangaecheokja.vehicle.dto.response.VehicleResponse;
+import com.example.shinhangaecheokja.vehicle.entity.VehicleStatus;
 import com.example.shinhangaecheokja.vehicle.entity.VehicleType;
 import com.example.shinhangaecheokja.vehicle.exception.VehicleNotFoundException;
 import com.example.shinhangaecheokja.vehicle.service.VehicleService;
@@ -38,7 +39,8 @@ class VehicleControllerTest {
     request.setMaxDistance(100);
 
     when(vehicleService.registerVehicle(any()))
-        .thenReturn(new VehicleResponse(1L, 1L, VehicleType.CAR, 500, 100));
+        .thenReturn(
+            new VehicleResponse(1L, 1L, VehicleType.CAR, 500, 100, 37.5, 127.0, VehicleStatus.AVAILABLE));
 
     mockMvc
         .perform(

@@ -41,7 +41,7 @@ class DeliveryControllerTest {
     when(deliveryService.requestDelivery(any()))
         .thenReturn(
             new DeliveryResponse(
-                1L, 1L, "서울시 강남구", "서울시 서초구", 10, 5, DeliveryStatus.REQUESTED, 600L));
+                1L, 1L, "서울시 강남구", "서울시 서초구", 10, 5, DeliveryStatus.REQUESTED, 600L, 37.5, 127.0));
 
     mockMvc
         .perform(
