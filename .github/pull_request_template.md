@@ -18,6 +18,7 @@
 - [ ] **(필수)** 새로 개발한 기능, 도입된 기술 및 아키텍처 개념에 대해 개발 초급자의 눈높이에 맞춘 설명 문서(docs/ 또는 README.md)를 추가/업데이트하셨나요?
 - [ ] **(컨벤션/아키텍처 변경 시)** 코드 작성 규격 및 전체 패턴 변경 내용이 `code-convention.md` 문서에 동기화 반영되었나요?
 - [ ] **(API 개발 시)** RESTful URI 및 HTTP 메서드 명명 규칙(docs/rest-api-guide.md)을 준수하셨나요?
+- [ ] **(예외 처리 시)** try-catch 대신 BusinessException 및 ErrorCode(docs/exception-handling-guide.md)를 활용하셨나요?
 - [ ] **(CI/CD 변경 시)** `.github/workflows/*.yml` 등 파이프라인 스텝 추가/수정 시 `docs/cicd-pipeline-guide.md`에 도입 배경 및 동작 원리를 갱신하셨나요?
 - [ ] **(API 변경 시)** Swagger API 문서화(또는 API 명세서 최신화)를 완료하셨나요?
 - [ ] 불필요한 콘솔 로그(`System.out.println`)나 미사용 import를 정리하셨나요?

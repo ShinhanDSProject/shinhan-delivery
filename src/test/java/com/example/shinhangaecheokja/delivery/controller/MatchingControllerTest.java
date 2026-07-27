@@ -11,7 +11,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.example.shinhangaecheokja.delivery.dto.request.MatchingCreateRequest;
 import com.example.shinhangaecheokja.delivery.dto.response.MatchingResponse;
 import com.example.shinhangaecheokja.delivery.entity.MatchingStatus;
-import com.example.shinhangaecheokja.delivery.exception.MatchingNotFoundException;
 import com.example.shinhangaecheokja.delivery.service.MatchingService;
 import java.time.LocalDateTime;
 import org.junit.jupiter.api.Test;
@@ -51,7 +50,10 @@ class MatchingControllerTest {
 
   @Test
   void 존재하지_않는_매칭을_조회하면_404를_반환한다() throws Exception {
-    when(matchingService.getMatching(eq(999L))).thenThrow(new MatchingNotFoundException(999L));
+    when(matchingService.getMatching(eq(999L)))
+        .thenThrow(
+            new com.example.shinhangaecheokja.common.exception.EntityNotFoundException(
+                com.example.shinhangaecheokja.common.exception.ErrorCode.DELIVERY_NOT_FOUND));
 
     mockMvc.perform(get("/api/matchings/999")).andExpect(status().isNotFound());
   }

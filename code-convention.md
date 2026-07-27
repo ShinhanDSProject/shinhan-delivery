@@ -191,80 +191,43 @@ public class VehicleService {
 
 ## 6. 예외 처리
 
-### 6.1 커스텀 예외
+### 6.1 최상위 비즈니스 예외(BusinessException) & 공통 EntityNotFoundException
 
-도메인별로 의미 있는 예외를 만든다. 전부 `RuntimeException`을 상속한다 (checked exception 금지 — 메서드 시그니처가 지저분해지고 람다와도 안 맞음). 각 예외는 해당 도메인 패키지의 `exception` 하위(예: `vehicle.exception.InvalidWeightException`)에 둔다. `ErrorResponse`와 `GlobalExceptionHandler`만 도메인 전체가 공유하므로 `common.exception`에 둔다.
+프로젝트의 모든 커스텀 예외는 최상위 `BusinessException`(`RuntimeException` 상속)을 상속받고, `ErrorCode` Enum을 주입받아 예외 정보를 정밀하게 전달한다.
+
+- **`BusinessException`**: 프로젝트 내 모든 비즈니스 예외의 최상위 부모 클래스
+- **`EntityNotFoundException`**: 존재하지 않는 리소스 조회 시 사용하는 공통 예외. 도메인마다 `XxxNotFoundException` 클래스를 무분별하게 새로 만들지 않고, `new EntityNotFoundException(ErrorCode.MEMBER_NOT_FOUND)` 형태로 조합하여 사용(KISS 및 클래스 폭발 방지 원칙 준수)
+- **`ErrorCode`**: HTTP 상태 코드, 고유 에러 코드(`C001`, `M001` 등), 사용자 안내 메시지를 `common.exception` 패키지에서 통합 관리하는 Enum
 
 ```java
-public class InvalidWeightException extends RuntimeException {
-    public InvalidWeightException(double weight) {
-        super("유효하지 않은 무게입니다: " + weight);
-    }
-}
+// 공통 리소스 미존재 예외 발생 시
+Member member = memberRepository.findById(memberId)
+    .orElseThrow(() -> new EntityNotFoundException(ErrorCode.MEMBER_NOT_FOUND));
 
-public class MemberNotFoundException extends RuntimeException {
-    public MemberNotFoundException(Long memberId) {
-        super("존재하지 않는 회원입니다: " + memberId);
-    }
-}
-
-public class AlreadyMatchedException extends RuntimeException {
-    public AlreadyMatchedException(Long deliveryRequestId) {
-        super("이미 매칭된 배송 요청입니다: " + deliveryRequestId);
+// 특수 도메인 비즈니스 예외 정의 시 (BusinessException 상속)
+public class DuplicateMemberException extends BusinessException {
+    public DuplicateMemberException(String email) {
+        super(ErrorCode.DUPLICATE_EMAIL, "이미 가입된 이메일 주소입니다. (Email: " + email + ")");
     }
 }
 ```
 
-### 6.2 전역 예외 처리기
+### 6.2 전역 예외 처리기 & 표준 에러 응답 DTO
 
-모든 예외 → HTTP 응답 변환을 **한 곳**(`GlobalExceptionHandler`)에서 담당한다. Controller마다 `try-catch`를 흩어놓지 않는다.
+모든 예외 → HTTP 응답 변환은 **전역 예외 처리기(`GlobalExceptionHandler`)**가 한곳에서 담당한다. Controller에 `try-catch`를 작성하지 않는다.
 
-```java
-@RestControllerAdvice
-public class GlobalExceptionHandler {
+- **`ErrorResponse` DTO**: `status`, `code`, `message`, `timestamp`, `errors`(유효성 검사 세부 내역) 필드로 구성되며, `@JsonInclude(NON_EMPTY)`를 적용해 불필요한 null/빈 배열 출력을 직렬화에서 생략한다.
+- **`GlobalExceptionHandler`**: `@RestControllerAdvice` 기반으로 `BusinessException`, `MethodArgumentNotValidException`(@Valid 실패), `HttpMessageNotReadableException`(JSON 파싱 실패), `HttpRequestMethodNotSupportedException`, 및 `Exception`(500 스택트레이스 은폐)을 수집 포착한다.
 
-    @ExceptionHandler({InvalidWeightException.class, OverMaxDistanceException.class})
-    public ResponseEntity<ErrorResponse> handleBadRequest(RuntimeException e) {
-        return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
-    }
+### 6.3 예외 → HTTP 상태코드 & 에러코드 매핑 기준
 
-    @ExceptionHandler(MemberNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleNotFound(MemberNotFoundException e) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(e.getMessage()));
-    }
-
-    @ExceptionHandler(DuplicateMemberException.class)
-    public ResponseEntity<ErrorResponse> handleConflict(DuplicateMemberException e) {
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(e.getMessage()));
-    }
-
-    @ExceptionHandler({NoAvailableCourierException.class, AlreadyMatchedException.class,
-            InsufficientPointException.class})
-    public ResponseEntity<ErrorResponse> handleUnprocessable(RuntimeException e) {
-        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(new ErrorResponse(e.getMessage()));
-    }
-
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleUnexpected(Exception e) {
-        // 예상 못한 예외는 500으로, 원인은 로그로만 남기고 사용자에겐 상세 노출 안 함
-        return ResponseEntity.internalServerError().body(new ErrorResponse("서버 오류가 발생했습니다."));
-    }
-}
-```
-
-```java
-public record ErrorResponse(String message) {}
-```
-
-### 6.3 예외 → HTTP 상태코드 매핑 기준
-
-| 예외 유형 | HTTP 상태 | 예시 |
-|---|---|---|
-| 입력 값 자체가 유효하지 않음 | `400 Bad Request` | `InvalidWeightException`, `OverMaxDistanceException` |
-| 리소스 없음 | `404 Not Found` | `MemberNotFoundException` |
-| 중복/충돌 | `409 Conflict` | `DuplicateMemberException` |
-| 비즈니스 규칙상 처리 불가 | `422 Unprocessable Entity` | `NoAvailableCourierException`, `AlreadyMatchedException`, `InsufficientPointException` |
-| 예상 못한 서버 오류 | `500 Internal Server Error` | 그 외 모든 예외 |
+| 예외 유형 | HTTP 상태 | ErrorCode 예시 | 응답 메시지 예시 |
+|---|---|---|---|
+| 입력 값 검증/포맷 오류 | `400 Bad Request` | `INVALID_INPUT_VALUE` (`C001`) | 유효하지 않은 입력값입니다. / 요청 본문의 JSON 형식이 올바르지 않습니다. |
+| 리소스 미존재 | `404 Not Found` | `MEMBER_NOT_FOUND` (`M001`), `VEHICLE_NOT_FOUND` (`V001`) | 존재하지 않는 회원입니다. |
+| 중복/충돌 | `409 Conflict` | `DUPLICATE_EMAIL` (`M002`) | 이미 가입된 이메일 주소입니다. |
+| 잔액 부족 등 비즈니스 규칙 위반 | `400 Bad Request` | `INSUFFICIENT_BALANCE` (`P002`) | 포인트 잔액이 부족합니다. |
+| 미처 포착하지 못한 서버 내부 오류 | `500 Internal Server Error` | `INTERNAL_SERVER_ERROR` (`C003`) | 서버 내부 오류가 발생했습니다. (스택트레이스 서버 로깅 후 은폐) |
 
 ---
 
