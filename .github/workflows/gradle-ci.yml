@@ -49,6 +49,9 @@ jobs:
       - name: Verify Flyway Migration Filenames
         run: bash scripts/lint-flyway-filenames.sh
 
+      - name: Verify Flyway Migration DDL Rules (Online DDL)
+        run: bash scripts/lint-flyway-ddl.sh
+
       - name: Verify Code Style (Spotless)
         run: ./gradlew spotlessCheck
 
