@@ -116,6 +116,12 @@ git config --local commit.template .gitmessage
 3. **Swagger API 문서화 필수:** API 엔드포인트의 추가, 변경, 삭제가 발생하는 모든 작업은 반드시 관련 Controller 및 DTO에 Swagger 어노테이션 설정을 포함해야 합니다.
 4. **작업 증빙 첨부:** UI 작업은 스크린샷, API 작업은 테스트 수행 로그 또는 API 호출 결과를 반드시 본문에 첨부합니다.
 
+### 🔀 브랜치 병합 전략: Squash and Merge 의무화
+프로젝트의 메인 Git 히스토리를 깨끗하게 유지하고 기능 단위 추적을 쉽게 만들기 위해, 모든 Pull Request는 **오직 `Squash and Merge` 방식으로만 병합**해야 합니다.
+* **적용 사양:** 저장소 설정으로 일반 머지 커밋(Create a merge commit) 및 리베이스 머지(Rebase and merge) 기능은 비활성화되어 있습니다.
+* **동작 원리:** PR 내에 쌓여 있는 여러 개의 작업 커밋들이 병합되는 순간 **단 1개의 깨끗한 커밋으로 스쿼시(압축)**되어 대상 브랜치에 반영됩니다.
+* **주의 사항:** 따라서 작업 중 커밋 메시지가 다소 지저분하더라도 최종 PR 머지 시점에 제목과 설명을 깔끔히 정리해 주면 되므로, 세부 커밋 작성에 대한 심리적 부담을 덜고 개발을 편하게 진행하실 수 있습니다.
+
 ### PR 템플릿 사용 (AI 및 인간 공통 규칙)
 GitHub의 기본 PR 템플릿 파일이 `[pull_request_template.md](file:///Users/sungminjo/workspace/shinhan/shinhan-gaecheokja/.github/pull_request_template.md)`에 정의되어 있습니다. 
 * PR 작성 시 자동으로 해당 템플릿 폼이 적용되며, 요약 / 주요 변경사항 / 리뷰 포인트 / 테스트 결과를 빠짐없이 작성해야 합니다.
