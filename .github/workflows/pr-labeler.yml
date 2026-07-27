@@ -23,30 +23,7 @@ jobs:
             const pull_number = context.payload.pull_request.number;
             const branchName = context.payload.pull_request.head.ref;
 
-            // 1. 변경된 파일 경로 기준 라벨 규칙 정의
-            const files = await github.paginate(github.rest.pulls.listFiles, {
-              owner,
-              repo,
-              pull_number,
-              per_page: 100,
-            });
-
-            const pathRules = [
-              { prefix: "src/main/java/com/example/shinhangaecheokja/member/", label: "domain/member" },
-              { prefix: "src/main/java/com/example/shinhangaecheokja/vehicle/", label: "domain/vehicle" },
-              { prefix: "src/main/java/com/example/shinhangaecheokja/delivery/", label: "domain/delivery" },
-              { prefix: "src/main/java/com/example/shinhangaecheokja/payment/", label: "domain/payment" },
-              { prefix: "src/main/java/com/example/shinhangaecheokja/common/", label: "common-config" },
-              { prefix: "src/main/resources/db/migration/", label: "db/migration" },
-              { prefix: "docs/", label: "documentation" },
-              { prefix: ".github/workflows/", label: "ci-cd" }
-            ];
-
-            const pathLabels = pathRules
-              .filter((rule) => files.some((file) => file.filename.startsWith(rule.prefix)))
-              .map((rule) => rule.label);
-
-            // 2. 브랜치명 정규식 패턴 기준 라벨 규칙 정의
+            // 1. 브랜치명 정규식 패턴 기준 라벨 규칙 정의
             const branchRules = [
               { regex: /^feature\/|^feat\//, label: "feature" },
               { regex: /^fix\/|^bugfix\//, label: "bugfix" },
@@ -60,11 +37,11 @@ jobs:
               .filter((rule) => rule.regex.test(branchName))
               .map((rule) => rule.label);
 
-            // 3. Draft(초안) PR 여부에 따른 라벨 처리
+            // 2. Draft(초안) PR 여부에 따른 라벨 처리
             const draftLabels = context.payload.pull_request.draft ? ["DRAFT"] : [];
 
-            // 4. 추출된 대상 라벨 병합 및 중복 제거
-            const targetLabels = [...new Set([...pathLabels, ...branchLabels, ...draftLabels])];
+            // 3. 추출된 대상 라벨 병합 및 중복 제거
+            const targetLabels = [...new Set([...branchLabels, ...draftLabels])];
 
             // 5. 이미 등록되어 있는 기존 라벨 조회
             const { data: existingLabelObjects } = await github.rest.issues.listLabelsOnIssue({
