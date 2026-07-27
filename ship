@@ -1,3 +1,0 @@
-#!/usr/bin/env bash
-# Ship It! (원클릭 자동 검증 및 PR 파이프라인)
-exec "$(dirname "$0")/pr" "$@"
