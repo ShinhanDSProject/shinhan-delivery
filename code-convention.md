@@ -17,61 +17,90 @@
 
 ## 2. 패키지 구조
 
-레이어(기술적 역할) 기준으로 최상위 패키지를 나눈다. 각 레이어 안에서 파일이 많아지면 도메인별 하위 패키지로 세분화한다.
+**도메인을 최상위로 나누고, 그 안에서 레이어(controller/service/repository/entity/dto/exception)를 둔다.** 같은 기능(도메인)에 관련된 파일들이 한 폴더 안에 모여있어서, 기능 단위로 찾고 수정하기 쉽다.
 
 ```
 com.company.delivery
-├── controller
-│   ├── MemberController.java
-│   ├── VehicleController.java
-│   ├── DeliveryController.java
-│   └── PaymentController.java
-├── service
-│   ├── MemberService.java
-│   ├── VehicleService.java
-│   ├── DeliveryService.java
-│   ├── MatchingService.java
-│   └── PaymentService.java
-├── repository
-│   ├── MemberRepository.java          // JpaRepository<Member, Long>
-│   ├── VehicleRepository.java         // JpaRepository<Vehicle, Long>
-│   ├── DeliveryRequestRepository.java // JpaRepository<DeliveryRequest, Long>
-│   ├── MatchingRepository.java        // JpaRepository<Matching, Long>
-│   └── PaymentRepository.java         // JpaRepository<PointWallet, Long>
-├── entity
-│   ├── Member.java            // @Entity, role(enum)로 Customer/Courier/Admin 구분
-│   ├── Vehicle.java
-│   ├── VehicleType.java       // enum (DRONE, MOTORCYCLE, CAR)
-│   ├── DeliveryRequest.java
-│   ├── Matching.java
-│   └── PointWallet.java
-├── dto
-│   ├── request
-│   │   ├── MemberCreateRequest.java
-│   │   ├── VehicleCreateRequest.java
-│   │   └── DeliveryCreateRequest.java
-│   └── response
-│       ├── MemberCreateResponse.java
-│       ├── VehicleCreateResponse.java
-│       └── DeliveryCreateResponse.java
-├── exception
-│   ├── InvalidWeightException.java
-│   ├── OverMaxDistanceException.java
-│   ├── DuplicateMemberException.java
-│   ├── MemberNotFoundException.java
-│   ├── NoAvailableCourierException.java
-│   ├── AlreadyMatchedException.java
-│   ├── InsufficientPointException.java
-│   ├── ErrorResponse.java
-│   └── GlobalExceptionHandler.java   // @RestControllerAdvice
-└── config
-    └── (JPA/Web/Security 등 설정 클래스)
+├── member
+│   ├── entity
+│   │   ├── Member.java
+│   │   └── Role.java
+│   ├── repository
+│   │   └── MemberRepository.java
+│   ├── service
+│   │   └── MemberService.java
+│   ├── controller
+│   │   └── MemberController.java
+│   ├── dto
+│   │   ├── request
+│   │   │   └── MemberCreateRequest.java
+│   │   └── response
+│   │       └── MemberCreateResponse.java
+│   └── exception
+│       ├── DuplicateMemberException.java
+│       └── MemberNotFoundException.java
+├── vehicle
+│   ├── entity
+│   │   ├── Vehicle.java
+│   │   └── VehicleType.java
+│   ├── repository
+│   │   └── VehicleRepository.java
+│   ├── service
+│   │   └── VehicleService.java
+│   ├── controller
+│   │   └── VehicleController.java
+│   ├── dto
+│   │   ├── request/VehicleCreateRequest.java
+│   │   └── response/VehicleCreateResponse.java
+│   └── exception
+│       ├── InvalidWeightException.java
+│       └── OverMaxDistanceException.java
+├── delivery
+│   ├── entity
+│   │   ├── DeliveryRequest.java
+│   │   ├── DeliveryStatus.java
+│   │   ├── Matching.java
+│   │   └── MatchingStatus.java
+│   ├── repository
+│   │   ├── DeliveryRequestRepository.java
+│   │   └── MatchingRepository.java
+│   ├── service
+│   │   ├── DeliveryService.java
+│   │   └── MatchingService.java
+│   ├── controller
+│   │   └── DeliveryController.java
+│   ├── dto
+│   │   ├── request/DeliveryCreateRequest.java
+│   │   └── response/DeliveryCreateResponse.java
+│   └── exception
+│       ├── NoAvailableCourierException.java
+│       └── AlreadyMatchedException.java
+├── payment
+│   ├── entity
+│   │   └── PointWallet.java
+│   ├── repository
+│   │   └── PaymentRepository.java
+│   ├── service
+│   │   └── PaymentService.java
+│   ├── controller
+│   │   └── PaymentController.java
+│   └── exception
+│       └── InsufficientPointException.java
+└── common
+    ├── exception
+    │   ├── ErrorResponse.java
+    │   └── GlobalExceptionHandler.java   // @RestControllerAdvice, 도메인 전체 예외를 여기서 HTTP로 변환
+    └── config
+        └── (JPA/Web/Security 등 설정 클래스)
 ```
 
 **규칙**
-- 파일이 20개를 넘어가는 레이어(특히 `service`, `repository`, `entity`)는 `service/member/`, `service/delivery/` 처럼 도메인별 하위 패키지로 나눈다.
-- `dto`는 항상 `request`/`response`로 먼저 나누고, 그 안에서 도메인별로 정리한다.
-- Repository는 Entity 1개당 1개씩 만든다 (`MemberRepository` ↔ `Member`, ... ).
+- 패키지명 = 도메인명 (`member`, `vehicle`, `delivery`, `payment`). 각 도메인 패키지 안에서만 `entity/repository/service/controller/dto/exception`으로 다시 나눈다.
+- **다른 도메인의 Repository나 Entity를 직접 참조하지 않는다.** 다른 도메인의 데이터가 필요하면 그 도메인의 Service를 호출한다.
+  - 예: `DeliveryService`가 결제를 처리해야 하면 `PaymentRepository`를 직접 호출하지 않고 `PaymentService.charge(...)`를 호출한다.
+- 도메인 간에 공통으로 쓰는 것(전역 예외 처리기, 설정 클래스 등)만 `common` 패키지에 둔다. `common`이 특정 도메인 전용 로직을 담는 곳이 되지 않도록 주의한다.
+- 도메인 하나 안의 파일이 너무 많아지면(예: `delivery`가 계속 커지면) `delivery.request`, `delivery.matching`처럼 도메인을 더 잘게 쪼갠다.
+- Repository는 Entity 1개당 1개씩 만든다 (`MemberRepository` ↔ `Member`, ...).
 
 ---
 
@@ -164,7 +193,7 @@ public class VehicleService {
 
 ### 6.1 커스텀 예외
 
-도메인별로 의미 있는 예외를 만든다. 전부 `RuntimeException`을 상속한다 (checked exception 금지 — 메서드 시그니처가 지저분해지고 람다와도 안 맞음).
+도메인별로 의미 있는 예외를 만든다. 전부 `RuntimeException`을 상속한다 (checked exception 금지 — 메서드 시그니처가 지저분해지고 람다와도 안 맞음). 각 예외는 해당 도메인 패키지의 `exception` 하위(예: `vehicle.exception.InvalidWeightException`)에 둔다. `ErrorResponse`와 `GlobalExceptionHandler`만 도메인 전체가 공유하므로 `common.exception`에 둔다.
 
 ```java
 public class InvalidWeightException extends RuntimeException {
@@ -379,11 +408,23 @@ void repository는_service나_controller에_의존하지_않는다() {
         .should().dependOnClassesThat().resideInAnyPackage("..service..", "..controller..")
         .check(importedClasses);
 }
+
+@Test
+void 도메인은_다른_도메인의_repository를_직접_참조하지_않는다() {
+    // 예: vehicle 패키지의 어떤 클래스도 member 패키지의 repository를 직접 호출하면 안 된다.
+    // (member 데이터가 필요하면 member.service의 MemberService를 거쳐야 한다)
+    noClasses().that().resideInAPackage("..vehicle..")
+        .should().dependOnClassesThat().resideInAPackage("..member.repository..")
+        .check(importedClasses);
+    // 실제로는 도메인 개수만큼(member/vehicle/delivery/payment 상호 조합) 반복하거나,
+    // ArchUnit의 slice 기반 규칙(사이클 검사)으로 일반화하는 것을 검토한다.
+}
 ```
 
-최소 강제 규칙 2가지:
+최소 강제 규칙 3가지:
 1. `controller` → `repository` 직접 의존 금지 (반드시 `service`를 거칠 것)
 2. `repository` → `service`, `controller` 의존 금지 (역방향 금지)
+3. 도메인 패키지(`member`, `vehicle`, `delivery`, `payment`)는 서로 다른 도메인의 `repository`/`entity`를 직접 의존하지 않는다 — 반드시 그 도메인의 `service`를 거칠 것
 
 ---
 
@@ -405,6 +446,7 @@ void repository는_service나_controller에_의존하지_않는다() {
 - [ ] `@Transactional`이 Service 계층에만 붙어 있는가?
 - [ ] `@Autowired` 필드 주입이 아니라 생성자 주입을 쓰는가?
 - [ ] Repository가 Entity 1개당 1개씩 대응되는가?
+- [ ] 다른 도메인의 Repository/Entity를 직접 참조하지 않고, 필요하면 그 도메인의 Service를 거쳤는가?
 - [ ] Enum 필드에 `@Enumerated(EnumType.STRING)`을 썼는가? (`ORDINAL` 금지)
 - [ ] 새로 추가한 서비스 로직에 단위 테스트가 있는가? (given_when_then 네이밍)
 - [ ] ArchUnit 테스트(레이어 의존성 규칙)가 깨지지 않는가?
