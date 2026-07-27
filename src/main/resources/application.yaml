@@ -16,3 +16,7 @@ spring:
   flyway:
     enabled: true
     baseline-on-migrate: true
+
+app:
+  data-seed:
+    enabled: ${DATA_SEED_ENABLED:false}
