@@ -6,14 +6,16 @@ import com.example.shinhangaecheokja.delivery.entity.DeliveryStatus;
 public class AlreadyMatchedException extends RuntimeException {
 
   public AlreadyMatchedException(Long deliveryRequestId, DeliveryStatus status) {
-    super("이미 " + describe(status) + " 배송 요청입니다: " + deliveryRequestId);
+    super(describe(status) + " 배송 요청입니다: " + deliveryRequestId);
   }
 
+  /** REQUESTED는 이 예외가 던져지는 정상 경로에서는 나오지 않지만, switch 표현식 완전성을 위해 방어적으로 처리한다. */
   private static String describe(DeliveryStatus status) {
     return switch (status) {
-      case MATCHED, REQUESTED -> "매칭된";
-      case COMPLETED -> "완료된";
-      case CANCELLED -> "취소된";
+      case MATCHED -> "이미 매칭된";
+      case COMPLETED -> "이미 완료된";
+      case CANCELLED -> "이미 취소된";
+      case REQUESTED -> "매칭 대기 중인";
     };
   }
 }
