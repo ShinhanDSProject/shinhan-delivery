@@ -106,6 +106,31 @@ git config --local commit.template .gitmessage
 
 ---
 
+## 3-1. GitHub Issue 생성 수칙 (Issue Rules)
+
+작업의 투명성과 작업 분담(Assignee), 그리고 PR 자동 연결(`Resolves: #이슈번호`)을 위해 모든 작업은 이슈를 먼저 생성한 후 진행합니다.
+
+### 🏷️ 이슈 제목 명명 규칙 (Issue Title Convention)
+*   **포맷:** `[카테고리] 요약 설명`
+*   **카테고리 키워드:**
+    - `[Feature]` : 신규 기능 개발
+    - `[Security]` : 보안 / 인증 / 인가 체계 구축
+    - `[Concurrency]` : 동시성 및 락(Lock) 제어
+    - `[Testing]` : 단위 / 통합 / E2E 테스트 구축
+    - `[Observability]` : 분산 로깅 및 트레이싱
+    - `[Ops]` : CI/CD 및 모니터링
+    - `[Bug]` : 버그 및 이상 동작 수정
+    - `[Docs]` : 문서 작성 및 최신화
+*   **예시:** `[Security] Spring Security 및 JWT 기반 REST API 인증/인가 체계 구축`
+
+### 📄 이슈 템플릿 사용 및 필수 포함 항목
+GitHub 이슈 생성 시 `.github/ISSUE_TEMPLATE/`에 정의된 표준 템플릿이 적용됩니다:
+1. **📌 기능/버그 개요 (Overview):** 배경 및 왜 작업해야 하는지에 대한 가치 설명
+2. **🛠️ 세부 요구사항 (Detailed Requirements):** 도메인 및 스펙별 구현 요구사항 목록
+3. **✅ 완료 정의 (Definition of Done):** `./scripts/verify.sh` 및 문서 동기화 자가 체크리스트
+
+---
+
 ## 4. Pull Request 규칙 및 템플릿 (PR Rules)
 
 원활한 코드 리뷰와 히스토리 추적을 위해 GitHub에서 Pull Request를 작성할 때 다음 규칙을 준수해야 합니다.
