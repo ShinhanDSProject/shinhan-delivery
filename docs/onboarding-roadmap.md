@@ -33,8 +33,14 @@
    git config --local commit.template .gitmessage
    ```
    앞으로 `git commit`을 작성할 때 템플릿 창이 켜져 규칙을 자연스럽게 알게 됩니다.
-2. [**Git Flow 및 커밋 컨벤션 가이드 (docs/git-flow-guide.md)**](./git-flow-guide.md)를 정독하여, 브랜치를 왜 나누어 쓰는지와 왜 **`Squash and Merge`** 방식으로만 PR을 병합하는지 그 흐름을 이해합니다.
-3. [**Flyway 데이터베이스 마이그레이션 가이드 (docs/flyway-guide.md)**](./flyway-guide.md)를 읽고, 데이터베이스 테이블 변경을 자바 코드가 아닌 SQL 스크립트 기반으로 추적하는 규칙을 배웁니다.
+2. 로컬 코드 스타일의 자동 검증을 강제하기 위해 pre-commit hook인 **Lefthook**을 설치 및 등록합니다:
+   * 본인의 OS 개발 도구에 따라 `brew install lefthook` 또는 `npm install -g @evilmartians/lefthook` 등으로 설치합니다.
+   * 설치 후 프로젝트 루트 경로 터미널에서 아래 명령을 1회 실행하여 활성화합니다:
+     ```bash
+     lefthook install
+     ```
+3. [**Git Flow 및 커밋 컨벤션 가이드 (docs/git-flow-guide.md)**](./git-flow-guide.md)를 정독하여, 브랜치를 왜 나누어 쓰는지와 왜 **`Squash and Merge`** 방식으로만 PR을 병합하는지 그 흐름을 이해합니다.
+4. [**Flyway 데이터베이스 마이그레이션 가이드 (docs/flyway-guide.md)**](./flyway-guide.md)를 읽고, 데이터베이스 테이블 변경을 자바 코드가 아닌 SQL 스크립트 기반으로 추적하는 규칙을 배웁니다.
 
 ### 3일차: 기능 설계 과정 이해하기
 1. [**기능 개발 전 설계 단계 프로세스 가이드 (docs/design-phase-guide.md)**](./design-phase-guide.md)를 정독하여, 코딩을 바로 시작하지 않고 '설계 PR'을 먼저 올리는 프로세스를 익힙니다.
