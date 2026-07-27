@@ -5,6 +5,9 @@
 Thymeleaf UI 개발 시 일관된 사용자 인터페이스를 제공하기 위한 디자인 시스템입니다.
 공통 컴포넌트를 재사용하고 디자인 규칙을 통일하여 유지보수성과 개발 효율성을 높이는 것을 목표로 합니다.
 
+<!-- th:replace/th:insert 가이드 -->
+<button th:fragment="primaryBtn(text)" class="btn-blue-100" th:text="${text}"></button>
+
 ---
 
 # 1. 목적
@@ -33,7 +36,7 @@ yellow-100 : #F7E600
 
 blue-30 : #4A90FF
 blue-50 : #EBF3FF
-blue-100 : #2F73E0
+blue-100 : #2F73E0  -> .bg-blue-100 / var(--color-blue-100)
 blue-500 : #2C88FF
 
 green-50 : #D1FAE5
@@ -78,12 +81,12 @@ Thymeleaf Fragment를 활용한 재사용성 향상
 
 # 4. icons
 
-# 설명
+## 설명
 다양한 상황에 맞는 아이콘 세트를 제공하여 일관된 디자인 언어를 유지
 
-icon-1-arrow-fill
+icon-1-arrow-fill -> <i class="icon-arrow-fill"></i>
 icon-1-setting-fill
-icon-1-doller-fill
+icon-1-dollar-fill
 icon-1-wallet-fill
 icon-1-car-fill
 icon-1-customer-fill
@@ -116,7 +119,7 @@ icon-1-track-fill
 
 # 5. Spacing
 
-# 설명
+## 설명
 컴포넌트와 요소 사이의 여백을 일관된 규칙으로 관리하기 위한 기준
 동일한 간격 체계를 사용함으로써 화면의 가독성과 사용성 향상
 디자이너와 개발자가 동일한 기준으로 UI를 구현
@@ -148,16 +151,16 @@ Gap: 16px
 
 # 6. Typography
 
-# 설명
+## 설명
 일관된 타이포그래피 시스템을 제공하여 다양한 UI 구성 요소에 적용
 
-| Style    | Font Weight | Font Size | Line-Height |
-|-----------|-----------------|--------------|-------------|
-| Header   | Extra Bold (800) | 40px | -5px        |
-| Display1 | Semi Bold (600) | 20px | -5px        |
-| Display2 | Medium (600) | 15px | -5px        |
-| Display3 | Regular (600) | 15px | -5px        |
-| Display4 | Bold (600)  | 20px | -5px        |
+| Style    | Font Weight      | Font Size | Line-Height |
+|-----------|------------------|--------------|-------------|
+| Header   | Extra Bold (800) | 40px | 48px        |
+| Display1 | Semi Bold (600)  | 20px | 22px        |
+| Display2 | Medium (500)     | 15px | 20px        |
+| Display3 | Regular (400)    | 15px | 20px        |
+| Display4 | Bold (700)       | 20px | 24px        |
 
 ## 참고 사항
 
