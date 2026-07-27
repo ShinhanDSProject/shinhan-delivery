@@ -10,6 +10,7 @@ import com.example.shinhangaecheokja.payment.exception.InsufficientPointExceptio
 import com.example.shinhangaecheokja.payment.exception.PointWalletNotFoundException;
 import com.example.shinhangaecheokja.vehicle.exception.InvalidWeightException;
 import com.example.shinhangaecheokja.vehicle.exception.OverMaxDistanceException;
+import com.example.shinhangaecheokja.vehicle.exception.VehicleNotAvailableException;
 import com.example.shinhangaecheokja.vehicle.exception.VehicleNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -55,7 +56,8 @@ public class GlobalExceptionHandler {
   @ExceptionHandler({
     NoAvailableCourierException.class,
     AlreadyMatchedException.class,
-    InsufficientPointException.class
+    InsufficientPointException.class,
+    VehicleNotAvailableException.class
   })
   public ResponseEntity<ErrorResponse> handleUnprocessable(RuntimeException e) {
     return ResponseEntity.status(HttpStatus.UNPROCESSABLE_CONTENT).body(new ErrorResponse(e.getMessage()));
