@@ -31,3 +31,11 @@ DB_PASSWORD=your_password_here
 자세한 마이그레이션 적용 규칙, 네이밍 컨벤션 및 유의사항 등은 아래 상세 문서를 참고해 주세요.
 
 👉 [**Flyway 데이터베이스 마이그레이션 가이드 바로가기 (docs/flyway-guide.md)**](./docs/flyway-guide.md)
+
+---
+
+## 🤝 협업 규칙 (Collaboration Rules)
+
+원활한 공동 작업과 안정적인 배포 흐름을 위해 정의한 규칙들입니다. 작업 진행 전 아래 가이드를 준수해 주세요.
+
+👉 [**Git Flow 및 커밋 컨벤션 가이드 바로가기 (docs/git-flow-guide.md)**](./docs/git-flow-guide.md)
