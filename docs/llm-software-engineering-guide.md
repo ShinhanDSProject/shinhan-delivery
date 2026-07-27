@@ -10,11 +10,12 @@
 3. [1️⃣ 프롬프트 엔지니어링 (Prompt Engineering)](#3-1️⃣-프롬프트-엔지니어링-prompt-engineering)
 4. [2️⃣ 컨텍스트 엔지니어링 (Context Engineering)](#4-2️⃣-컨텍스트-엔지니어링-context-engineering)
 5. [3️⃣ 하네스 엔지니어링 (Harness Engineering)](#5-3️⃣-하네스-엔지니어링-harness-engineering)
-6. [4️⃣ 피드백 루프 & 자가 치유 (Feedback Loops & Self-Healing)](#6-4️⃣-피드백-루프--자가-치유-feedback-loops--self-healing)
+6. [4️⃣ 루프 엔지니어링 & 피드백 순환 구조 (Loop Engineering & Feedback Loops)](#6-4️⃣-루프-엔지니어링--피드백-순환-구조-loop-engineering--feedback-loops)
 7. [5️⃣ 에이전트 방법론 & 디자인 패턴 (Agentic Workflows & EDD)](#7-5️⃣-에이전트-방법론--디자인-패턴-agentic-workflows--edd)
 8. [6️⃣ 보안 및 데이터 프라이버시 (Security & Privacy)](#8-6️⃣-보안-및-데이터-프라이버시-security--privacy)
 9. [7️⃣ AI 환각(Hallucination) 대처법 및 클린코드 원칙](#9-7️⃣-ai-환각hallucination-대처법-및-클린코드-원칙)
 10. [8️⃣ 초보자를 위한 AI 트러블슈팅 치트시트](#10-8️⃣-초보자를-위한-ai-트러블슈팅-치트시트)
+11. [9️⃣ 처음 LLM으로 개발하는 초보자를 위한 10분 실전 입문 가이드라인](#11-9️⃣-처음-llm으로-개발하는-초보자를-위한-10분-실전-입문-가이드라인)
 
 ---
 
