@@ -15,6 +15,7 @@
 ## ✅ 자가 체크리스트 (Self-Checklist)
 - [ ] Conventional Commits 커밋 메시지 규칙을 준수하셨나요?
 - [ ] 테스트 코드를 작성하였으며 로컬에서 모든 테스트가 성공했나요?
+- [ ] **(API 개발 시)** RESTful URI 및 HTTP 메서드 명명 규칙(docs/rest-api-guide.md)을 준수하셨나요?
 - [ ] **(API 변경 시)** Swagger API 문서화(또는 API 명세서 최신화)를 완료하셨나요?
 - [ ] 불필요한 콘솔 로그(`System.out.println`)나 미사용 import를 정리하셨나요?
 
