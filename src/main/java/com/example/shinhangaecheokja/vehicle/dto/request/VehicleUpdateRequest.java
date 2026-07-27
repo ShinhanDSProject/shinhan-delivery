@@ -14,4 +14,6 @@ public class VehicleUpdateRequest {
   private VehicleType type;
   private double maxWeight;
   private double maxDistance;
+  private double latitude;
+  private double longitude;
 }

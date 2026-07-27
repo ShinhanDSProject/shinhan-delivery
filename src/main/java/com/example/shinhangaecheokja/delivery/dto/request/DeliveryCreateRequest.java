@@ -15,4 +15,6 @@ public class DeliveryCreateRequest {
   private String dropoffAddress;
   private double weight;
   private double distance;
+  private double pickupLatitude;
+  private double pickupLongitude;
 }
