@@ -36,6 +36,9 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
+      - name: Verify Code Style (Spotless)
+        run: ./gradlew spotlessCheck
+
       - name: Run Gradle Build and Test
         run: ./gradlew build
         env:

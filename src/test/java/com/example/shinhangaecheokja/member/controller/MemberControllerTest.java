@@ -38,8 +38,10 @@ class MemberControllerTest {
     request.setPhoneNumber("010-1234-5678");
     request.setRole(MemberRole.CUSTOMER);
 
-    when(memberService.createMember(any())).thenReturn(
-        new MemberResponse(1L, "user@example.com", "홍길동", "010-1234-5678", MemberRole.CUSTOMER));
+    when(memberService.createMember(any()))
+        .thenReturn(
+            new MemberResponse(
+                1L, "user@example.com", "홍길동", "010-1234-5678", MemberRole.CUSTOMER));
 
     mockMvc
         .perform(

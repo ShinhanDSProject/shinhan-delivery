@@ -61,7 +61,8 @@ public class DeliveryService {
 
   /** 배송 요청의 픽업지·도착지를 수정한다. 고객·무게·거리·요금은 변경하지 않는다. */
   @Transactional
-  public DeliveryResponse updateDeliveryRequest(Long deliveryRequestId, DeliveryUpdateRequest request) {
+  public DeliveryResponse updateDeliveryRequest(
+      Long deliveryRequestId, DeliveryUpdateRequest request) {
     DeliveryRequest deliveryRequest = findDeliveryRequestOrThrow(deliveryRequestId);
     deliveryRequest.setPickupAddress(request.getPickupAddress());
     deliveryRequest.setDropoffAddress(request.getDropoffAddress());

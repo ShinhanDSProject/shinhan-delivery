@@ -34,7 +34,8 @@ class PaymentServiceTest {
     PointWalletCreateRequest request = new PointWalletCreateRequest();
     request.setMemberId(1L);
 
-    when(paymentRepository.save(any(PointWallet.class))).thenAnswer(invocation -> invocation.getArgument(0));
+    when(paymentRepository.save(any(PointWallet.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
 
     PointWalletResponse response = paymentService.createWallet(request);
 
