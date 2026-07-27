@@ -5,6 +5,7 @@ import com.example.shinhangaecheokja.vehicle.dto.request.VehicleCreateRequest;
 import com.example.shinhangaecheokja.vehicle.dto.request.VehicleUpdateRequest;
 import com.example.shinhangaecheokja.vehicle.dto.response.VehicleResponse;
 import com.example.shinhangaecheokja.vehicle.entity.Vehicle;
+import com.example.shinhangaecheokja.vehicle.entity.VehicleStatus;
 import com.example.shinhangaecheokja.vehicle.exception.InvalidWeightException;
 import com.example.shinhangaecheokja.vehicle.exception.OverMaxDistanceException;
 import com.example.shinhangaecheokja.vehicle.exception.VehicleNotFoundException;
@@ -33,6 +34,9 @@ public class VehicleService {
     vehicle.setType(request.getType());
     vehicle.setMaxWeight(request.getMaxWeight());
     vehicle.setMaxDistance(request.getMaxDistance());
+    vehicle.setLatitude(request.getLatitude());
+    vehicle.setLongitude(request.getLongitude());
+    vehicle.setStatus(VehicleStatus.AVAILABLE);
 
     return VehicleResponse.from(vehicleRepository.save(vehicle));
   }
@@ -49,11 +53,27 @@ public class VehicleService {
     return vehicleRepository.findAll().stream().map(VehicleResponse::from).toList();
   }
 
-  /** 주어진 무게·거리를 감당할 수 있는 차량이 하나라도 있는지 확인한다. */
+  /** 배정 가능(AVAILABLE)하면서 주어진 무게·거리를 감당할 수 있는 차량 후보 목록을 조회한다. */
   @Transactional(readOnly = true)
-  public boolean existsAvailableVehicle(double weight, double distance) {
-    return vehicleRepository.existsByMaxWeightGreaterThanEqualAndMaxDistanceGreaterThanEqual(
-        weight, distance);
+  public List<VehicleResponse> getCandidateVehicles(double weight, double distance) {
+    return vehicleRepository
+        .findByStatusAndMaxWeightGreaterThanEqualAndMaxDistanceGreaterThanEqual(
+            VehicleStatus.AVAILABLE, weight, distance)
+        .stream()
+        .map(VehicleResponse::from)
+        .toList();
+  }
+
+  /** Vehicle을 BUSY 상태로 전환한다. */
+  @Transactional
+  public void markBusy(Long vehicleId) {
+    findVehicleOrThrow(vehicleId).setStatus(VehicleStatus.BUSY);
+  }
+
+  /** Vehicle을 AVAILABLE 상태로 전환한다. */
+  @Transactional
+  public void markAvailable(Long vehicleId) {
+    findVehicleOrThrow(vehicleId).setStatus(VehicleStatus.AVAILABLE);
   }
 
   /** 무게/거리 유효성을 검증한 뒤 Vehicle의 종류·무게·거리를 수정한다. ownerId는 변경하지 않는다. */
@@ -65,6 +85,8 @@ public class VehicleService {
     vehicle.setType(request.getType());
     vehicle.setMaxWeight(request.getMaxWeight());
     vehicle.setMaxDistance(request.getMaxDistance());
+    vehicle.setLatitude(request.getLatitude());
+    vehicle.setLongitude(request.getLongitude());
     return VehicleResponse.from(vehicle);
   }
 
