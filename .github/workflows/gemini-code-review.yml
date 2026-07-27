@@ -20,3 +20,4 @@ jobs:
         with:
           gemini-key: ${{ secrets.GEMINI_API_KEY }}
           model: 'gemini-flash-latest'
+          prompt: 'Please review the pull request code changes and provide your feedback. You must write all your review comments in Korean (모든 리뷰 의견은 반드시 한국어로 작성해 주세요).'
