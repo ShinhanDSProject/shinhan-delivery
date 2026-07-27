@@ -21,4 +21,12 @@ class HaversineDistanceCalculatorTest {
 
     assertThat(distance).isCloseTo(325.0, within(10.0));
   }
+
+  @Test
+  void 지구_반대편_좌표도_NaN_없이_거리를_계산한다() {
+    double distance = HaversineDistanceCalculator.distanceKm(37.5665, 126.9780, -37.5665, -53.0220);
+
+    assertThat(distance).isNotNaN();
+    assertThat(distance).isCloseTo(20015.0, within(10.0));
+  }
 }
