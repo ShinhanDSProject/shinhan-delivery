@@ -1,9 +1,19 @@
 package com.example.shinhangaecheokja.payment.exception;
 
-/** 주어진 id에 해당하는 PointWallet이 존재하지 않을 때 던진다. */
-public class PointWalletNotFoundException extends RuntimeException {
+import com.example.shinhangaecheokja.common.exception.BusinessException;
+import com.example.shinhangaecheokja.common.exception.ErrorCode;
 
-  public PointWalletNotFoundException(Long walletId) {
-    super("존재하지 않는 포인트 지갑입니다: " + walletId);
+public class PointWalletNotFoundException extends BusinessException {
+
+  public PointWalletNotFoundException() {
+    super(ErrorCode.POINT_WALLET_NOT_FOUND);
+  }
+
+  public PointWalletNotFoundException(Long id) {
+    super(ErrorCode.POINT_WALLET_NOT_FOUND, "포인트 지갑 정보를 찾을 수 없습니다. (ID: " + id + ")");
+  }
+
+  public PointWalletNotFoundException(String message) {
+    super(ErrorCode.POINT_WALLET_NOT_FOUND, message);
   }
 }

@@ -9,7 +9,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 
 /** 프론트엔드 및 클라이언트에 반환되는 전역 공통 에러 응답 DTO 클래스입니다. */
-@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class ErrorResponse {
 
   private final int status;

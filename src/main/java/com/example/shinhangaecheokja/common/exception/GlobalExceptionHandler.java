@@ -44,6 +44,16 @@ public class GlobalExceptionHandler {
     return new ResponseEntity<>(response, errorCode.getHttpStatus());
   }
 
+  /** 클라이언트의 요청 본문 JSON 형식이 올바르지 않은 예외(HttpMessageNotReadableException)를 처리합니다. */
+  @ExceptionHandler(org.springframework.http.converter.HttpMessageNotReadableException.class)
+  protected ResponseEntity<ErrorResponse> handleHttpMessageNotReadableException(
+      org.springframework.http.converter.HttpMessageNotReadableException e) {
+    log.warn("HttpMessageNotReadableException occurred: {}", e.getMessage());
+    ErrorCode errorCode = ErrorCode.INVALID_INPUT_VALUE;
+    ErrorResponse response = ErrorResponse.of(errorCode, "요청 본문의 JSON 형식이 올바르지 않습니다.");
+    return new ResponseEntity<>(response, errorCode.getHttpStatus());
+  }
+
   /** 기타 미처 처리하지 못한 모든 런타임/서버 예외(Exception)를 포착하여 500 응답으로 변환합니다. */
   @ExceptionHandler(Exception.class)
   protected ResponseEntity<ErrorResponse> handleException(Exception e) {

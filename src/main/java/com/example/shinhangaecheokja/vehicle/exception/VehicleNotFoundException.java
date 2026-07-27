@@ -1,9 +1,19 @@
 package com.example.shinhangaecheokja.vehicle.exception;
 
-/** 주어진 id에 해당하는 Vehicle이 존재하지 않을 때 던진다. */
-public class VehicleNotFoundException extends RuntimeException {
+import com.example.shinhangaecheokja.common.exception.BusinessException;
+import com.example.shinhangaecheokja.common.exception.ErrorCode;
 
-  public VehicleNotFoundException(Long vehicleId) {
-    super("존재하지 않는 운송수단입니다: " + vehicleId);
+public class VehicleNotFoundException extends BusinessException {
+
+  public VehicleNotFoundException() {
+    super(ErrorCode.VEHICLE_NOT_FOUND);
+  }
+
+  public VehicleNotFoundException(Long id) {
+    super(ErrorCode.VEHICLE_NOT_FOUND, "존재하지 않는 차량입니다. (ID: " + id + ")");
+  }
+
+  public VehicleNotFoundException(String message) {
+    super(ErrorCode.VEHICLE_NOT_FOUND, message);
   }
 }
