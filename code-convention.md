@@ -391,13 +391,16 @@ void 도메인은_다른_도메인의_repository를_직접_참조하지_않는�
 
 ---
 
-## 15. Git 커밋 / 브랜치 컨벤션
+## 15. Git 커밋 / 이슈 / 브랜치 컨벤션
 
-- 커밋 메시지: `type: 설명` 형식 (Conventional Commits 기반)
+- **GitHub 이슈 규격:** `[카테고리] 요약 설명` 형식 (`[Feature]`, `[Security]`, `[Concurrency]`, `[Testing]`, `[Observability]`, `[Ops]`, `[Bug]`, `[Docs]`)
+  - 예시: `[Security] Spring Security 및 JWT 기반 REST API 인증/인가 체계 구축`
+  - `.github/ISSUE_TEMPLATE/` 템플릿(개요, 세부 요구사항, 완료 정의) 사용 의무화
+- **커밋 메시지:** `type: 설명` 형식 (Conventional Commits 기반)
   - `feat`, `fix`, `refactor`, `test`, `docs`, `chore`
-  - 예: `feat: 배송 요금 산정 로직 추가`
-- 브랜치명: `type/도메인-내용` (예: `feat/delivery-fee-calculation`)
-- PR 단위: 도메인 하나 + 기능 하나 정도로 작게 유지.
+  - 예시: `feat: 배송 요금 산정 로직 추가`
+- **브랜치명:** `type/도메인-내용` (예: `feat/delivery-fee-calculation`)
+- **PR 단위:** 도메인 하나 + 기능 하나 정도로 작게 유지하며 `Squash and Merge` 병합.
 
 ---
 
