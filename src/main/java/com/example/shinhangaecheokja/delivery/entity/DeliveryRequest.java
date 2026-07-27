@@ -45,4 +45,10 @@ public class DeliveryRequest {
 
   @Column(name = "fee_point", nullable = false)
   private long feePoint;
+
+  @Column(name = "pickup_latitude", nullable = false)
+  private double pickupLatitude;
+
+  @Column(name = "pickup_longitude", nullable = false)
+  private double pickupLongitude;
 }
