@@ -64,5 +64,14 @@ class ArchUnitTest {
         .dependOnClassesThat()
         .resideInAnyPackage("..member.repository..", "..vehicle.repository..")
         .check(importedClasses);
+
+    noClasses()
+        .that()
+        .resideInAPackage("..payment..")
+        .should()
+        .dependOnClassesThat()
+        .resideInAnyPackage(
+            "..member.repository..", "..vehicle.repository..", "..delivery.repository..")
+        .check(importedClasses);
   }
 }
