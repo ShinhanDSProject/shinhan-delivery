@@ -1,6 +1,6 @@
 # 🤖 LLM 기반 현대 소프트웨어 엔지니어링 방법론 입문 가이드
 
-이 문서는 **AI(LLM, Large Language Model) 및 AI 에이전트 도구를 활용해 소프트웨어를 개발할 때 필요한 현대적 5대 개발 방법론**을 초보자의 눈높이에 맞춰 체계적으로 정리한 가이드북입니다.
+이 문서는 **AI(LLM, Large Language Model) 및 AI 에이전트 도구를 활용해 소프트웨어를 개발할 때 필요한 현대적 개발 방법론**을 초보자의 눈높이에 맞춰 체계적으로 정리한 가이드북입니다.
 
 ---
 
@@ -12,7 +12,9 @@
 5. [3️⃣ 하네스 엔지니어링 (Harness Engineering)](#5-3️⃣-하네스-엔지니어링-harness-engineering)
 6. [4️⃣ 피드백 루프 & 자가 치유 (Feedback Loops & Self-Healing)](#6-4️⃣-피드백-루프--자가-치유-feedback-loops--self-healing)
 7. [5️⃣ 에이전트 방법론 & 디자인 패턴 (Agentic Workflows & EDD)](#7-5️⃣-에이전트-방법론--디자인-패턴-agentic-workflows--edd)
-8. [초보자를 위한 실전 LLM 협업 5단계 룰](#8-초보자를-위한-실전-llm-협업-5단계-룰)
+8. [6️⃣ 보안 및 데이터 프라이버시 (Security & Privacy)](#8-6️⃣-보안-및-데이터-프라이버시-security--privacy)
+9. [7️⃣ AI 환각(Hallucination) 대처법 및 클린코드 원칙](#9-7️⃣-ai-환각hallucination-대처법-및-클린코드-원칙)
+10. [8️⃣ 초보자를 위한 AI 트러블슈팅 치트시트](#10-8️⃣-초보자를-위한-ai-트러블슈팅-치트시트)
 
 ---
 
@@ -68,31 +70,11 @@ AI의 작업 기억 공간인 **컨텍스트 윈도우(Context Window)**에 **"�
 
 > 💡 **비유:** 시험을 보는 학생(AI)에게 두꺼운 백과사전 전체를 던져주는 대신, **시험 문제와 직결된 1장짜리 족보 요약본(Context)**만 요약 정리해서 집어주는 과정입니다.
 
-```
-[전체 프로젝트 코드베이스] 
-       │
-       ▼ (Context Selection & Filtering)
-[필요한 클래스 시그니처 + 관련 DTO + 컨벤션 룰북] 
-       │
-       ▼ (AI Prompt 주입)
-[AI 에이전트의 명확한 판단 및 환각 없는 코드 생성]
-```
-
 ### 🧱 컨텍스트 엔지니어링의 4대 핵심 기법
-
-#### ① Context Selection & Filtering (핀포인트 정보 선택)
-* 전체 소스코드를 넣지 않고, **수정 대상 파일과 직접 연결된 클래스/인터페이스 선언부만 선택해서 주입**합니다.
-* (예: `RAG(검색기반 생성)`나 AST/코드 인덱싱 도구를 활용해 연관 파일만 자동 추출)
-
-#### ② Context Compression & Summarization (정보 압축 및 요약)
-* 몇 천 줄짜리 구현체 코드를 다 보여주지 않고, **인터페이스 메서드 시그니처(`public ResponseDTO getItem(Long id)`)나 스키마 요약본만 주입**하여 토큰 낭비를 막습니다.
-
-#### ③ Context File Conventions (규칙 파일 배치)
-* AI가 로컬 저장소에 들어왔을 때 자동으로 읽을 수 있는 **설정 및 명세 파일**을 배치합니다.
-* 예: `CLAUDE.md`, `.cursorrules`, `AGENTS.md`, `code-convention.md`
-
-#### ④ Context Pruning & Windowing (윈도우 정리)
-* 대화가길어지면 AI가 이전 지시를 잊어버리는 '내용 누수(Attention Drift)'가 발생합니다. 주기적으로 **오래된 대화 내용을 요약 정리하고 핵심 메모리만 유지**합니다.
+1. **Context Selection & Filtering:** 수정 대상 파일과 직접 관련된 클래스/인터페이스 시그니처만 추출 주입 (RAG/AST 기반)
+2. **Context Compression:** 몇 천 줄 코드를 보이지 않고 핵심 인터페이스 규격만 요약 주입
+3. **Context File Conventions:** `CLAUDE.md`, `code-convention.md` 등의 인프라 룰북 배치
+4. **Context Pruning:** 대화가 길어질 때 토큰 윈도우를 정리하고 핵심 기억만 유지
 
 ---
 
@@ -117,13 +99,11 @@ AI의 작업 기억 공간인 **컨텍스트 윈도우(Context Window)**에 **"�
 1. **Pre-Flight Self-Review Feedback:** AI가 커밋 전 스스로 미사용 import, 명명 규칙, 콘솔 출력을 1차 셀프 검토.
 2. **Immediate Local Feedback:** 로컬에서 `./scripts/verify.sh`를 구동해 3초 만에 결과를 확인하고 자가 치유.
 3. **Human-in-the-Loop:** AI의 설계안(Plan)이나 PR 코드를 사람이 리뷰하고 방향성을 보정.
-4. **CI/CD Pipeline Feedback:** GitHub PR 생성 시 CI 서버와 AI 리뷰봇(Gemini Code Reviewer)이 코드를 검사해 피드백을 남기고, 이를 다시 수용해 고치는 순환.
+4. **CI/CD Pipeline Feedback:** GitHub PR 생성 시 CI 서버와 AI 리뷰봇(Gemini Code Reviewer)이 코드를 검사해 리뷰 댓글을 남기고, 이를 다시 수용해 고치는 순환.
 
 ---
 
 ## 7. 5️⃣ 에이전트 방법론 & 디자인 패턴 (Agentic Workflows & EDD)
-
-AI 에이전트가 더 복잡한 소프트웨어를 개발할 때 사용하는 **고급 디자인 패턴**입니다.
 
 ### 🤖 1) 에이전틱 디자인 패턴 (Agentic Patterns)
 * **Planning (작업 분할):** 한 번에 구현하지 않고 [설계 $\rightarrow$ 코드 $\rightarrow$ 검증] 단계를 나눔.
@@ -136,10 +116,35 @@ AI 에이전트가 더 복잡한 소프트웨어를 개발할 때 사용하는 *
 
 ---
 
-## 8. 초보자를 위한 실전 LLM 협업 5단계 룰
+## 8. 6️⃣ 보안 및 데이터 프라이버시 (Security & Privacy)
 
-1. **작은 단위로 작업하기 (Small Batch):** 한 번에 하나의 기능, 하나의 클래스만 요청하세요.
-2. **컨텍스트 파일 활용하기:** 프로젝트 규칙 문서(`code-convention.md`)를 AI가 참조하게 하세요.
-3. **검증 하네스 구동하기:** AI가 준 코드는 무조건 `./pr` 또는 `./scripts/verify.sh`로 검증하세요.
-4. **에러를 AI에게 되돌려주기:** 에러 메시지를 복사해서 AI에게 주면 수초 만에 스스로 고칩니다 (피드백 루프).
-5. **최종 결정권은 사람에게:** 하네스 검사를 통과했는지 확인한 후 커밋/PR을 작성하세요.
+AI 도구를 사용할 때 가장 조심해야 할 2가지 보안 수칙입니다.
+
+1. **API Key & 비밀번호 절대 주입 금지:** 
+   - DB 비밀번호, API 토큰 등은 절대 AI 대화창이나 파일에 하드코딩하지 말고 `.env` 파일로 관리해야 합니다.
+2. **기업 기밀 & 개인정보(PII) 보호:**
+   - 회사의 기밀 코드나 실제 고객 개인정보가 외부 AI 모델의 학습 데이터로 유출되지 않도록 **Zero Data Retention(데이터 미저장) 옵션**이 적용된 에이전트/API를 사용합니다.
+
+---
+
+## 9. 7️⃣ AI 환각(Hallucination) 대처법 및 클린코드 원칙
+
+### 👻 AI 환각(Hallucination)이란?
+AI가 존재하지 않는 가짜 라이브러리 패키지를 추천하거나, 오래전에 없어진 폐기된(Deprecated) 메서드를 진짜인 것처럼 우기며 코드를 작성하는 현상입니다.
+
+### 🛡️ 대처법
+* **하네스 검증:** AI가 준 코드를 무작정 믿지 말고 항상 `./scripts/verify.sh`로 컴파일 및 테스트를 돌립니다.
+* **클린코드(SOLID) 지침 주입:** AI에게 *"단일 책임 원칙(SRP)을 지키고, 20줄 이하의 작은 메서드로 쪼개서 작성해 줘"* 라고 구체적으로 요구하면 품질이 극상승합니다.
+
+---
+
+## 10. 8️⃣ 초보자를 위한 AI 트러블슈팅 치트시트
+
+AI와 대화하다가 이상해졌을 때 대처하는 4가지 꿀팁입니다.
+
+| 현상 | 원인 | 해결책 |
+| :--- | :--- | :--- |
+| **AI가 말을 안 듣고 엉뚱한 코드를 반복해요** | 대화가 너무 길어져 컨텍스트 오염 발생 | 대화 세션을 초기화(Reset)하고 새로 시작하세요. |
+| **AI가 계속 똑같은 에러를 수정 못해요** | 에러 로그 원인이 불충분함 | `./gradlew test --stacktrace` 전체 로그를 AI에게 보여주세요. |
+| **AI가 프로젝트 규칙을 자꾸 잊어버려요** | 룰북 위치 인식 못함 | `"CLAUDE.md 및 code-convention.md 규칙을 재확인하고 고쳐줘"` 라고 지시하세요. |
+| **모든 검증을 마치고 마무리를 하고 싶어요** | - | 터미널에 **`./pr`** 단 한 줄만 입력하면 커밋부터 PR까지 자동 완료됩니다! |
