@@ -37,7 +37,8 @@ class VehicleServiceTest {
     request.setMaxWeight(500);
     request.setMaxDistance(100);
 
-    when(vehicleRepository.save(any(Vehicle.class))).thenAnswer(invocation -> invocation.getArgument(0));
+    when(vehicleRepository.save(any(Vehicle.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
 
     VehicleResponse response = vehicleService.registerVehicle(request);
 

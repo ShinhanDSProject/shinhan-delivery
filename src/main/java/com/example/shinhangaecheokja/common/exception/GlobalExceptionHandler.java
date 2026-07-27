@@ -58,7 +58,8 @@ public class GlobalExceptionHandler {
     InsufficientPointException.class
   })
   public ResponseEntity<ErrorResponse> handleUnprocessable(RuntimeException e) {
-    return ResponseEntity.status(HttpStatus.UNPROCESSABLE_CONTENT).body(new ErrorResponse(e.getMessage()));
+    return ResponseEntity.status(HttpStatus.UNPROCESSABLE_CONTENT)
+        .body(new ErrorResponse(e.getMessage()));
   }
 
   @ExceptionHandler(Exception.class)

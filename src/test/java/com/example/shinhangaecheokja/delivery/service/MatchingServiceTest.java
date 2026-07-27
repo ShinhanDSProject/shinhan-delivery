@@ -39,7 +39,8 @@ class MatchingServiceTest {
 
     when(deliveryRequestRepository.existsById(1L)).thenReturn(true);
     when(matchingRepository.existsByDeliveryRequestId(1L)).thenReturn(false);
-    when(matchingRepository.save(any(Matching.class))).thenAnswer(invocation -> invocation.getArgument(0));
+    when(matchingRepository.save(any(Matching.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
 
     MatchingResponse response = matchingService.createMatching(request);
 

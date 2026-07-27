@@ -23,6 +23,8 @@ DB_PASSWORD=your_password_here
 ./gradlew bootRun
 ```
 
+💡 *실행 중 에러가 발생하거나 연결이 되지 않는다면 [**로컬 개발 트러블슈팅 가이드 (docs/troubleshooting.md)**](./docs/troubleshooting.md)를 참고해 주세요.*
+
 ---
 
 ## 🗄️ 데이터베이스 형상 관리 (Database Migrations)
