@@ -48,6 +48,7 @@ git config --local commit.template .gitmessage
 * [**코딩 컨벤션 및 6대 개발 규칙 (code-convention.md)**](./code-convention.md) - 우리 프로젝트에서 개발자와 AI가 엄격히 준수해야 할 단일 원본 코딩 규약 🏛️
 * [**테스트 하네스 & LLM 피드백 루프 가이드 (docs/harness-and-llm-guide.md)**](./docs/harness-and-llm-guide.md) - 초보자와 AI 사용자를 위한 자동 검사 하네스 및 에러 자가 치유 활용법 🏗️
 * [**LLM 기반 현대 SW 엔지니어링 방법론 가이드 (docs/llm-software-engineering-guide.md)**](./docs/llm-software-engineering-guide.md) - 프롬프트/하네스/컨텍스트 엔지니어링, 피드백 루프, EDD 등 AI 활용 개발 방법론 입문서 🤖
+* [**프로젝트 루프 엔지니어링 실전 플레이북 (docs/loop-engineering-playbook.md)**](./docs/loop-engineering-playbook.md) - 자가 치유(Self-Healing), 8대 관점 교정, 컨벤션 자산화, CI/CD 4대 순환 체계 실전 운영 가이드 🔄
 * [**협업 문화 및 자동화 도구 도입 배경 가이드 (docs/development-culture-guide.md)**](./docs/development-culture-guide.md) - 왜 이런 협업 규칙과 DevOps 도구들을 도입했는지, 미도입 시 어떤 장애 참사가 발생하는지 설명해 주는 입문자 필독서 🎓
 * [**Git Flow 및 커밋 컨벤션 가이드 (docs/git-flow-guide.md)**](./docs/git-flow-guide.md) - 브랜치 운용 규칙, Conventional Commits 커밋 헤더 태그 가이드 및 자동 코드 리뷰 연동 규칙
 * [**CI/CD 파이프라인 및 GitHub Actions Step 해설 가이드 (docs/cicd-pipeline-guide.md)**](./docs/cicd-pipeline-guide.md) - 지속적 통합/배포 개념, Actions 동작 원리, 워크플로우 각 Step별 왜 도입했는지 정밀 해설 ⚙️
