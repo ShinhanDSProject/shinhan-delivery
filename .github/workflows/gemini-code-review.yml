@@ -15,12 +15,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: List available models
-        run: |
-          curl -s "https://generativelanguage.googleapis.com/v1beta/models?key=${{ secrets.GEMINI_API_KEY }}" | jq -r '.models[].name'
-
       - name: Gemini AI Code Review
         uses: sshnaidm/gemini-code-review-action@v2
         with:
           gemini-key: ${{ secrets.GEMINI_API_KEY }}
-          model: 'gemini-1.5-flash'
+          model: 'gemini-2.5-flash'
