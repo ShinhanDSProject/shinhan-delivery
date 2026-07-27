@@ -24,28 +24,46 @@ Thymeleaf UI 개발 시 일관된 사용자 인터페이스를 제공하기 위�
 
 ## 설명
 
-서비스에서 사용하는 색상을 정의합니다.
-버튼, 텍스트, 배경 등 UI 요소에 일관된 색상 규칙을 적용합니다.
+서비스에서 사용하는 색상을 정의
+버튼, 텍스트, 배경 등 UI 요소에 일관된 색상 규칙을 적용
 
 orange-100 : #FA9200
-blue-100 : #2C88FF
 white-100 : #FFFFFF
 yellow-100 : #F7E600
+
+blue-30 : #4A90FF
+blue-50 : #EBF3FF
+blue-100 : #2F73E0
+blue-500 : #2C88FF
+
+green-50 : #D1FAE5
 green-100 : #03C75A
+green-200 : #10B981
+
 black-100 : #000000
 black-200 : #212121
-grey-30: #EFEFEF
+
+red-30 : #FEE2E2
+red-50 : #FCA5A5
+red-100 : #EF4444
+
+grey-30 : #EFEFEF
+grey-50 : #E2E8F0
+grey-100 : #94A3B8
+grey-300 : #4A5568
 grey-500 : #555555
-brown-30 : DEA66C
+
+brown-30 : #DEA66C
 brown-50 : #B38251
 brown-100 : #966239
+
 beige-30 : #FFE0B2
 beige-50 : #BF9F85
 
 # 3. Design Components
 
 ## 설명
-Design Components는 서비스에서 반복적으로 사용되는 UI 요소를 정의
+서비스에서 반복적으로 사용되는 UI 요소를 정의
 버튼, 입력창, 카드, 아이콘 등 공통 컴포넌트를 동일한 디자인 규칙으로 관리하여 화면의 일관성을 유지
 Thymeleaf Fragment를 활용한 재사용성 향상
 
@@ -54,6 +72,8 @@ Thymeleaf Fragment를 활용한 재사용성 향상
 네이버 버튼 : green-100
 애플 버튼 : black-100
 구글 버튼 : grey-30
+취소 버튼 : red-30, red-50, red-100
+차트 : blue-30
 
 
 # 4. icons
@@ -61,11 +81,72 @@ Thymeleaf Fragment를 활용한 재사용성 향상
 # 설명
 다양한 상황에 맞는 아이콘 세트를 제공하여 일관된 디자인 언어를 유지
 
+icon-1-arrow-fill
+icon-1-setting-fill
+icon-1-doller-fill
+icon-1-wallet-fill
 icon-1-car-fill
 icon-1-customer-fill
+icon-1-check-fill
+icon-1-profile-fill
+icon-1-call-fill
+icon-1-time-fill
+icon-1-camera-fill
+icon-2-camera-fill
+icon-1-kickboard-fill
+icon-1-cup-fill
+icon-1-clothes-fill
+icon-1-file-fill
+icon-2-file-fill
+icon-1-box-fill
+icon-1-home-fill
+icon-1-light-fill
+icon-1-book-fill
+icon-1-line graph-fill
+icon-1-heart-fill
+icon-1-leaf-fill
+icon-1-ellipses-fill
+icon-1-motorcycle-fill
+icon-1-bicycle-fill
+icon-1-uav-fill
+icon-1-compact car-fill
+icon-1-midsize car-fill
+icon-1-fullsize car-fill
+icon-1-track-fill
+
+# 5. Spacing
+
+# 설명
+컴포넌트와 요소 사이의 여백을 일관된 규칙으로 관리하기 위한 기준
+동일한 간격 체계를 사용함으로써 화면의 가독성과 사용성 향상
+디자이너와 개발자가 동일한 기준으로 UI를 구현
+
+Button
+Padding: 31px 0px
+상하 31px, 좌우 0px의 내부 여백을 적용
+Gap: 20px
+버튼이 여러 개 배치될 경우 버튼 간 간격을 20px로 유지
+
+Input
+Padding: 24px
+입력창 내부의 텍스트와 테두리 사이의 여백을 24px로 적용
+Label → Input: 12px
+Label과 Input 사이의 간격을 12px로 유지
+Input → Input: 16px
+여러 입력창을 배치할 경우 16px 간격을 유지
+
+Card
+Padding: 15px
+카드 내부 콘텐츠와 테두리 사이의 여백을 15px로 적용
+Gap: 25px
+카드와 카드 사이의 간격을 25px로 유지
+
+Navigation
+Gap: 16px
+메뉴 간 간격을 16px로 유지
 
 
-# 5. Typography
+# 6. Typography
 
 # 설명
 일관된 타이포그래피 시스템을 제공하여 다양한 UI 구성 요소에 적용
