@@ -33,12 +33,14 @@ gradlew.bat spotlessCheck      # 포맷팅 검사 (CI에서 실행 / 작업 완�
 gradlew.bat spotlessApply      # 컨벤션에 맞게 자동 포맷팅
 ```
 
-### Test Harness & 자가 치유 피드백 루프 (AI 에이전트 필독)
+### AI Pre-Flight Self-Review (사전 셀프 코드 리뷰) & 자가 치유 피드백 루프 (AI 에이전트 필독)
 
-코드를 생성하거나 수정한 후, 작업을 완료하기 전에 **반드시 `./scripts/verify.sh`를 구동하여 검증**해야 합니다.
-1. `./scripts/verify.sh` 구동 중 오류(Spotless 포맷팅 위반, ArchUnit 아키텍처 규칙 위반, Flyway 규격 오류, 단위 테스트 실패) 발생 시,
-2. 출력된 피드백 메시지 및 스택 트레이스를 분석하여 코드를 수정한 뒤,
-3. `./scripts/verify.sh`가 성공(exit status 0)을 반환할 때까지 자가 치유 피드백 루프를 반복하세요.
+코드를 생성하거나 수정한 후, 작업을 완료하거나 `./pr`을 구동하기 전에 **AI 에이전트는 아래 2단계 사전 검토 루프를 거쳐야 합니다**:
+
+1. **1단계 - AI 사전 셀프 코드 리뷰 (Pre-Flight Self-Review):**
+   - 수정한 코드에 미사용 import, 불필요한 System.out 출력, 변수/메서드 명명 규칙 위반, 주석 미비 사항이 없는지 스스로 1차 셀프 코드 리뷰를 수행하고 보정합니다.
+2. **2단계 - Test Harness 자가 치유 피드백 루프:**
+   - `./scripts/verify.sh`를 구동하여 오류(Spotless 포맷팅 위반, ArchUnit 아키텍처 규칙 위반, Flyway 규격 오류, 단위 테스트 실패) 발생 시, 출력된 에러 메시지와 스택 트레이스를 분석해 스스로 코드를 수정한 뒤 성공(exit status 0)할 때까지 루프를 반복합니다.
 
 로컬 DB 연결(`.env`)과 Flyway 마이그레이션 작성법은 `README.md`, `docs/flyway-guide.md`를 참고하세요.
 
