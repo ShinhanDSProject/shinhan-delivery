@@ -1,0 +1,25 @@
+name: Gemini Code Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Gemini AI Code Review
+        uses: sshnaidm/gemini-code-review-action@v2
+        with:
+          gemini-key: ${{ secrets.GEMINI_API_KEY }}
+          model: 'gemini-flash-latest'
+          prompt: 'Please review the pull request code changes. The target audience of this repository is trainees who are new to software development. Do not just list issues; kindly explain the reasoning/principles behind your suggestions and encourage their learning. You must write all your review comments in Korean (모든 리뷰 의견은 반드시 한국어로 작성해 주시고, 개발을 처음 배우는 교육생들이 이해할 수 있도록 왜 그렇게 수정해야 하는지 작동 원리를 친절하게 설명하고 배움을 독려하는 다정한 어조로 리뷰를 남겨주세요).'
