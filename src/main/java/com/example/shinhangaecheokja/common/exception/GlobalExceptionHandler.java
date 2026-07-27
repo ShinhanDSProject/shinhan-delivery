@@ -6,7 +6,6 @@ import com.example.shinhangaecheokja.delivery.exception.InvalidDeliveryDistanceE
 import com.example.shinhangaecheokja.delivery.exception.InvalidDeliveryWeightException;
 import com.example.shinhangaecheokja.delivery.exception.InvalidMatchingTransitionException;
 import com.example.shinhangaecheokja.delivery.exception.MatchingNotFoundException;
-import com.example.shinhangaecheokja.delivery.exception.NoAvailableCourierException;
 import com.example.shinhangaecheokja.delivery.exception.VehicleCapacityMismatchException;
 import com.example.shinhangaecheokja.member.exception.DuplicateMemberException;
 import com.example.shinhangaecheokja.member.exception.MemberNotFoundException;
@@ -76,7 +75,6 @@ public class GlobalExceptionHandler {
 
   /** 비즈니스 규칙상 처리가 불가능한 경우 422로 변환한다. */
   @ExceptionHandler({
-    NoAvailableCourierException.class,
     AlreadyMatchedException.class,
     InsufficientPointException.class,
     VehicleNotAvailableException.class,

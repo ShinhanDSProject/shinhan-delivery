@@ -2,6 +2,7 @@ package com.example.shinhangaecheokja.delivery.controller;
 
 import com.example.shinhangaecheokja.delivery.dto.request.MatchingCreateRequest;
 import com.example.shinhangaecheokja.delivery.dto.request.MatchingUpdateRequest;
+import com.example.shinhangaecheokja.delivery.dto.response.DeliveryResponse;
 import com.example.shinhangaecheokja.delivery.dto.response.MatchingResponse;
 import com.example.shinhangaecheokja.delivery.service.MatchingService;
 import jakarta.validation.Valid;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /** Matching CRUD API를 제공하는 컨트롤러. */
@@ -30,6 +32,12 @@ public class MatchingController {
   public ResponseEntity<MatchingResponse> createMatching(
       @RequestBody @Valid MatchingCreateRequest request) {
     return ResponseEntity.ok(matchingService.createMatching(request));
+  }
+
+  /** 차량이 지금 수락할 수 있는 열린 콜(배송 요청) 목록을 조회한다. */
+  @GetMapping("/calls")
+  public ResponseEntity<List<DeliveryResponse>> getOpenCalls(@RequestParam Long vehicleId) {
+    return ResponseEntity.ok(matchingService.getOpenCalls(vehicleId));
   }
 
   /** 매칭 단건을 조회한다. */

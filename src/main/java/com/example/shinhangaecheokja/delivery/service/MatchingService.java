@@ -2,6 +2,7 @@ package com.example.shinhangaecheokja.delivery.service;
 
 import com.example.shinhangaecheokja.delivery.dto.request.MatchingCreateRequest;
 import com.example.shinhangaecheokja.delivery.dto.request.MatchingUpdateRequest;
+import com.example.shinhangaecheokja.delivery.dto.response.DeliveryResponse;
 import com.example.shinhangaecheokja.delivery.dto.response.MatchingResponse;
 import com.example.shinhangaecheokja.delivery.entity.DeliveryRequest;
 import com.example.shinhangaecheokja.delivery.entity.DeliveryStatus;
@@ -11,23 +12,20 @@ import com.example.shinhangaecheokja.delivery.exception.AlreadyMatchedException;
 import com.example.shinhangaecheokja.delivery.exception.DeliveryRequestNotFoundException;
 import com.example.shinhangaecheokja.delivery.exception.InvalidMatchingTransitionException;
 import com.example.shinhangaecheokja.delivery.exception.MatchingNotFoundException;
-import com.example.shinhangaecheokja.delivery.exception.NoAvailableCourierException;
 import com.example.shinhangaecheokja.delivery.exception.VehicleCapacityMismatchException;
 import com.example.shinhangaecheokja.delivery.repository.DeliveryRequestRepository;
 import com.example.shinhangaecheokja.delivery.repository.MatchingRepository;
-import com.example.shinhangaecheokja.delivery.util.HaversineDistanceCalculator;
 import com.example.shinhangaecheokja.vehicle.dto.response.VehicleResponse;
 import com.example.shinhangaecheokja.vehicle.entity.VehicleStatus;
 import com.example.shinhangaecheokja.vehicle.exception.VehicleNotAvailableException;
 import com.example.shinhangaecheokja.vehicle.service.VehicleService;
 import java.time.LocalDateTime;
-import java.util.Comparator;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/** Matching 관련 유스케이스(생성/자동매칭/조회/수정/삭제)를 담당하는 서비스. */
+/** Matching 관련 유스케이스(콜 수락/조회/수정/삭제)를 담당하는 서비스. */
 @Service
 @RequiredArgsConstructor
 public class MatchingService {
@@ -36,11 +34,19 @@ public class MatchingService {
   private final DeliveryRequestRepository deliveryRequestRepository;
   private final VehicleService vehicleService;
 
-  /** 배송 요청·차량 존재 여부와 중복 매칭 여부를 검증한 뒤 매칭을 생성한다(관리자 수동 매칭용). */
+  /**
+   * 차량이 배송 요청을 수락해 매칭을 생성한다(콜 수락 방식). 여러 차량이 동시에 같은 배송 요청을 수락하려
+   * 하면, 배송 요청 행에 비관적 락을 걸어 먼저 커밋한 차량 하나만 성공하도록 한다.
+   */
   @Transactional
   public MatchingResponse createMatching(MatchingCreateRequest request) {
-    DeliveryRequest deliveryRequest = findDeliveryRequestOrThrow(request.getDeliveryRequestId());
-    VehicleResponse vehicle = vehicleService.getVehicle(request.getVehicleId());
+    DeliveryRequest deliveryRequest =
+        findDeliveryRequestForUpdateOrThrow(request.getDeliveryRequestId());
+    if (deliveryRequest.getStatus() != DeliveryStatus.REQUESTED) {
+      throw new AlreadyMatchedException(request.getDeliveryRequestId(), deliveryRequest.getStatus());
+    }
+
+    VehicleResponse vehicle = vehicleService.getVehicleForUpdate(request.getVehicleId());
     if (vehicle.status() != VehicleStatus.AVAILABLE) {
       throw new VehicleNotAvailableException(request.getVehicleId());
     }
@@ -48,9 +54,6 @@ public class MatchingService {
         || vehicle.maxDistance() < deliveryRequest.getDistance()) {
       throw new VehicleCapacityMismatchException(
           request.getVehicleId(), deliveryRequest.getWeight(), deliveryRequest.getDistance());
-    }
-    if (matchingRepository.existsByDeliveryRequestId(request.getDeliveryRequestId())) {
-      throw new AlreadyMatchedException(request.getDeliveryRequestId());
     }
 
     Matching matching = new Matching();
@@ -65,38 +68,21 @@ public class MatchingService {
   }
 
   /**
-   * 배송 요청의 위치·무게·거리 조건을 모두 만족하는 가용 차량 중 가장 가까운 차량을 찾아 자동으로 매칭한다. 만족하는 차량이 없으면
-   * NoAvailableCourierException.
+   * 차량이 지금 수락할 수 있는 열린 콜(REQUESTED 상태이면서 그 차량의 무게·거리 조건을 만족하는 배송 요청)
+   * 목록을 조회한다. 차량이 AVAILABLE이 아니면 어차피 수락할 수 없으므로 빈 목록을 반환한다.
    */
-  @Transactional
-  public MatchingResponse autoMatch(DeliveryRequest deliveryRequest) {
-    VehicleResponse best =
-        vehicleService
-            .getCandidateVehicles(deliveryRequest.getWeight(), deliveryRequest.getDistance())
-            .stream()
-            .min(
-                Comparator.comparingDouble(
-                        (VehicleResponse v) ->
-                            HaversineDistanceCalculator.distanceKm(
-                                v.latitude(),
-                                v.longitude(),
-                                deliveryRequest.getPickupLatitude(),
-                                deliveryRequest.getPickupLongitude()))
-                    .thenComparing(VehicleResponse::id))
-            .orElseThrow(
-                () ->
-                    new NoAvailableCourierException(
-                        deliveryRequest.getWeight(), deliveryRequest.getDistance()));
-
-    Matching matching = new Matching();
-    matching.setDeliveryRequestId(deliveryRequest.getId());
-    matching.setVehicleId(best.id());
-    matching.setStatus(MatchingStatus.MATCHED);
-    matching.setMatchedAt(LocalDateTime.now());
-
-    Matching saved = matchingRepository.save(matching);
-    applyStatus(saved, deliveryRequest, MatchingStatus.MATCHED);
-    return MatchingResponse.from(saved);
+  @Transactional(readOnly = true)
+  public List<DeliveryResponse> getOpenCalls(Long vehicleId) {
+    VehicleResponse vehicle = vehicleService.getVehicle(vehicleId);
+    if (vehicle.status() != VehicleStatus.AVAILABLE) {
+      return List.of();
+    }
+    return deliveryRequestRepository
+        .findByStatusAndWeightLessThanEqualAndDistanceLessThanEqual(
+            DeliveryStatus.REQUESTED, vehicle.maxWeight(), vehicle.maxDistance())
+        .stream()
+        .map(DeliveryResponse::from)
+        .toList();
   }
 
   /** id로 매칭 단건을 조회한다. 없으면 MatchingNotFoundException. */
@@ -123,7 +109,7 @@ public class MatchingService {
     DeliveryRequest deliveryRequest = findDeliveryRequestOrThrow(matching.getDeliveryRequestId());
 
     if (newStatus == MatchingStatus.MATCHED && previousStatus != MatchingStatus.MATCHED) {
-      VehicleResponse vehicle = vehicleService.getVehicle(matching.getVehicleId());
+      VehicleResponse vehicle = vehicleService.getVehicleForUpdate(matching.getVehicleId());
       if (vehicle.status() != VehicleStatus.AVAILABLE) {
         throw new VehicleNotAvailableException(matching.getVehicleId());
       }
@@ -197,6 +183,12 @@ public class MatchingService {
   private DeliveryRequest findDeliveryRequestOrThrow(Long deliveryRequestId) {
     return deliveryRequestRepository
         .findById(deliveryRequestId)
+        .orElseThrow(() -> new DeliveryRequestNotFoundException(deliveryRequestId));
+  }
+
+  private DeliveryRequest findDeliveryRequestForUpdateOrThrow(Long deliveryRequestId) {
+    return deliveryRequestRepository
+        .findByIdForUpdate(deliveryRequestId)
         .orElseThrow(() -> new DeliveryRequestNotFoundException(deliveryRequestId));
   }
 }
