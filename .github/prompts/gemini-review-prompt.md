@@ -4,9 +4,10 @@ Please review the pull request code changes according to the following guideline
    - The target audience of this repository is trainees who are new to software development.
    - Do not just list issues; kindly explain the reasoning and core principles behind your suggestions to encourage their learning.
 
-2. Beginner-Friendly Documentation Check:
+2. Beginner-Friendly Documentation & Code Convention Check:
    - If the code introduces new features, technologies, or architectural concepts, verify if corresponding beginner-friendly documentation (such as markdown files in docs/ or updates in README.md) is included in the PR.
-   - If it is missing, kindly remind the author to complement the documentation according to the PR self-checklist.
+   - If the code modifies overall coding conventions or architectural patterns (e.g. exception handling structures, DTO rules, layer guidelines), verify if `code-convention.md` has been updated accordingly to maintain rule consistency.
+   - If it is missing, kindly remind the author to complement the documentation or update `code-convention.md` according to the PR self-checklist.
 
 3. Language and Tone Rules:
    - You MUST write all your review comments in Korean.
