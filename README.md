@@ -51,6 +51,10 @@ git config --local commit.template .gitmessage
 * [**Flyway 데이터베이스 마이그레이션 가이드 (docs/flyway-guide.md)**](./docs/flyway-guide.md) - Flyway 스크립트 작성 규칙, JPA Buddy 플러그인을 활용한 마이그레이션 방법
 * [**로컬 개발 트러블슈팅 가이드 (docs/troubleshooting.md)**](./docs/troubleshooting.md) - Flyway 해시 충돌, 포트 선점, 데이터베이스 권한 에러 해결 가이드
 
+### 📋 개발자 성장을 돕는 작성 양식 및 템플릿
+* [**아키텍처 결정 레코드 (ADR) 템플릿 (docs/templates/adr-template.md)**](./docs/templates/adr-template.md) - 기술 의사결정의 배경, 대안, 장단점을 논리적으로 기록해 시니어 개발자로 발돋움하게 돕는 양식 🏛️
+* [**트러블슈팅 및 장애 회고 템플릿 (docs/templates/troubleshooting-log-template.md)**](./docs/templates/troubleshooting-log-template.md) - 에러 발생 시 현상, 원인분석(5 Whys), 재발 방지책을 회고하여 성장을 가속화하는 일지 양식 💡
+
 ### 📝 기존 개발 기능 요구사항 명세서 및 설계서 (Reference)
 * [**회원 및 인증 설계서 (docs/design/member-auth-design.md)**](./docs/design/member-auth-design.md) - 회원가입, 중복 가입 방지 예외, 암호화 저장, 상세 조회 API 명세 및 ERD
 * [**차량 등록 및 조회 설계서 (docs/design/vehicle-design.md)**](./docs/design/vehicle-design.md) - 차량 사양 유효 검증, 소유주 정보 매핑, 가용성 조회 API 명세 및 ERD
