@@ -12,3 +12,8 @@ pre-commit:
     flyway-linter:
       glob: "src/main/resources/db/migration/*.sql"
       run: bash scripts/lint-flyway-filenames.sh
+
+    # 마이그레이션 SQL 내 Online DDL(무중단 쿼리) 규격을 린팅합니다.
+    flyway-ddl-linter:
+      glob: "src/main/resources/db/migration/*.sql"
+      run: bash scripts/lint-flyway-ddl.sh
