@@ -93,9 +93,17 @@ graph TD
 *   **어떻게 작동하나요?:** `./gradlew spotlessCheck`를 실행해 구글 자바 스타일 규격을 준수했는지 확인합니다.
 *   **왜 필요하나요?:** 들여쓰기나 띄어쓰기가 어긋난 코드가 메인 브랜치에 유입되지 않도록 막아 코드 가독성을 일정하게 유지시킵니다.
 
-#### 🐾 Step 7. `Run Gradle Build and Test`
-*   **어떻게 작동하나요?:** `./gradlew build` 명령을 통해 전체 자바 코드를 컴파일하고, JUnit5 단위/통합 테스트들을 전수 실행합니다.
-*   **왜 필요하나요?:** 코드가 정상적으로 컴파일되는지, 그리고 기존 기능들이 깨지지 않고 잘 작동하는지를 검증하는 CI의 최종 관문입니다.
+#### 🐾 Step 7. `Verify JaCoCo Coverage Gate & ArchUnit Architecture Rules`
+*   **어떻게 작동하나요?:** `./gradlew test jacocoTestReport jacocoTestCoverageVerification`을 실행하여 전체 단위/통합 테스트 통과, ArchUnit 아키텍처 규칙 검증, 및 서비스 계층 커버리지 최소 60% 이상 충족 여부(JaCoCo Quality Gate)를 검증합니다.
+*   **왜 필요하나요?:** 레이어 의존성 위반(`Controller` ➔ `Repository` 직접 호출)을 차단하고, 테스트 코드가 부실한 소스 코드가 메인 브랜치에 병합되는 것을 자동 차단합니다.
+
+#### 🐾 Step 8. `Upload JaCoCo Coverage Report Artifact` (`actions/upload-artifact@v4`)
+*   **어떻게 작동하나요?:** `build/reports/jacoco/test/html/` 경로에 생성된 시각화 HTML 커버리지 리포트를 GitHub Actions 아티팩트(`jacoco-coverage-report`)로 자동 업로드합니다.
+*   **왜 필요하나요?:** PR 리뷰어가 Actions 탭에서 커버리지 리포트 압축파일을 다운로드하여 라인별 테스트 검증 현황을 직관적으로 확인할 수 있습니다.
+
+#### 🐾 Step 9. `Run Gradle Build and Package`
+*   **어떻게 작동하나요?:** `./gradlew build -x test` 명령을 통해 최종 상용 패키지(JAR) 컴파일 및 빌드를 완성합니다.
+*   **왜 필요하나요?:** 이미 이전 스텝에서 테스트 및 커버리지 검증을 완벽히 마쳤으므로, 최종 패키징 단계에서는 컴파일 이상 유무만을 신속히 검증하여 전체 빌드 타임을 최적화합니다.
 
 ---
 
