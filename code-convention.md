@@ -428,17 +428,50 @@ void 도메인은_다른_도메인의_repository를_직접_참조하지_않는�
 
 ---
 
-## 15. Git 커밋 / 브랜치 컨벤션
+## 15. 데이터베이스 마이그레이션 규칙
 
-- 커밋 메시지: `type: 설명` 형식 (Conventional Commits 기반)
-  - `feat`, `fix`, `refactor`, `test`, `docs`, `chore`
-  - 예: `feat: 배송 요금 산정 로직 추가`
-- 브랜치명: `type/도메인-내용` (예: `feat/delivery-fee-calculation`)
-- PR 단위: 도메인 하나 + 기능 하나 정도로 작게 유지.
+스키마 변경은 Hibernate가 아니라 **Flyway**로만 관리한다 (`spring.jpa.hibernate.ddl-auto: validate`). 상세 작동 원리·IDE 활용법은 `docs/flyway-guide.md`를 참고하고, 여기서는 커밋 전 반드시 지켜야 할 핵심만 정리한다.
+
+- **파일 위치/네이밍**: `src/main/resources/db/migration/V<버전번호>__<설명>.sql` (언더스코어 2개 필수). 예: `V7__add_location_to_vehicle.sql`
+- **이미 반영된 마이그레이션 파일은 절대 수정하지 않는다.** 로컬/서버 DB에 한 번이라도 적용된 파일을 고치면 Checksum 불일치로 다음 구동이 실패한다. 수정이 필요하면 버전을 올린 새 파일을 추가한다.
+- Entity에 필드를 추가/변경했다면, **같은 PR 안에 대응하는 마이그레이션 파일을 함께 커밋**한다. Entity만 바꾸고 마이그레이션을 빠뜨리면 `ddl-auto: validate`에 의해 애플리케이션이 기동 실패한다.
+- 여러 테이블을 함께 바꿔야 하면 파일 하나에 `ALTER TABLE` 여러 개를 순서대로 넣어도 되고, 논리적으로 성격이 다르면 파일을 나눠도 된다 — 팀 판단에 맡긴다.
 
 ---
 
-## 16. 체크리스트 (PR 리뷰 시 확인)
+## 16. Git 커밋 / 브랜치 / PR 컨벤션
+
+브랜치 전략·PR 규칙의 전체 내용은 `docs/git-flow-guide.md`가 기준 문서이며, 여기서는 코딩 전에 알아야 할 핵심만 요약한다.
+
+### 16.1 브랜치 전략
+
+| 브랜치 유형 | 용도 | 이름 규칙 | 대상 상위 브랜치 |
+|---|---|---|---|
+| `main` | 배포 가능한 가장 안정적인 브랜치 | `main` | - |
+| `develop` | 다음 버전을 위한 기능이 모이는 통합 브랜치 | `develop` | `main` |
+| `feature` | 신규 기능/버그 수정 작업 브랜치 | `feat/도메인-내용` (예: `feat/delivery-fee-calculation`) | `develop` |
+| `release` | 배포 준비 및 최종 QA | `release/<버전>` | `develop` |
+| `hotfix` | 배포된 `main`의 긴급 장애 패치 | `hotfix/<이슈번호>-<요약>` | `main` |
+
+- 작업 시작 전 `develop`을 최신화한 뒤 그 위에서 브랜치를 분기한다. `hotfix`만 예외적으로 `main`에서 분기해 `main`으로 PR한다.
+- 머지 후 로컬 작업 브랜치는 삭제한다.
+
+### 16.2 커밋 메시지
+
+- 최소 형식: `type: 설명` (`feat`, `fix`, `refactor`, `test`, `docs`, `chore`, `style`)
+  - 예: `feat: 배송 요금 산정 로직 추가`
+- 변경 배경까지 남기고 싶으면 `docs/git-flow-guide.md`의 확장 형식(`type(scope): subject` + 본문 + 푸터)을 써도 된다. 최소 형식과 상충하지 않는, 필요할 때만 쓰는 선택 사항이다.
+
+### 16.3 PR 규칙
+
+- 리뷰어를 최소 1명 이상 지정한다.
+- 연관 이슈가 있으면 본문에 명시해 자동으로 닫히게 한다 (예: `Resolves: #45`).
+- `.github/pull_request_template.md`의 항목(요약 / 주요 변경 사항 / 리뷰 포인트 / 스크린샷·테스트 결과)을 빠짐없이 채운다 — UI 작업은 스크린샷, API 작업은 테스트 로그나 호출 결과를 첨부한다.
+- PR 단위는 도메인 하나 + 기능 하나 정도로 작게 유지한다.
+
+---
+
+## 17. 체크리스트 (PR 리뷰 시 확인)
 
 - [ ] Controller가 Entity를 직접 반환하지 않고 DTO로 변환하는가?
 - [ ] 비즈니스 로직이 Controller가 아니라 Service에 있는가?
@@ -451,3 +484,6 @@ void 도메인은_다른_도메인의_repository를_직접_참조하지_않는�
 - [ ] 새로 추가한 서비스 로직에 단위 테스트가 있는가? (given_when_then 네이밍)
 - [ ] ArchUnit 테스트(레이어 의존성 규칙)가 깨지지 않는가?
 - [ ] Spotless 포맷팅 검사를 통과하는가?
+- [ ] Entity 필드를 추가/변경했다면 대응하는 Flyway 마이그레이션 파일을 새로 추가했는가? (기존 마이그레이션 파일을 수정하지 않았는가?)
+- [ ] `develop`을 대상으로 브랜치를 분기·PR 했는가? (`hotfix`는 `main` 예외)
+- [ ] 리뷰어를 지정하고, PR 템플릿의 요약/변경사항/리뷰 포인트/테스트 결과를 모두 작성했는가?
