@@ -67,29 +67,31 @@ public class DataSeedInitializer implements CommandLineRunner {
 
   private Member createMember(
       String email, String password, String name, String phoneNumber, MemberRole role) {
-    Member member = new Member();
-    member.setEmail(email);
-    member.setPassword(passwordEncoder.encode(password));
-    member.setName(name);
-    member.setPhoneNumber(phoneNumber);
-    member.setRole(role);
+    Member member =
+        Member.builder()
+            .email(email)
+            .password(passwordEncoder.encode(password))
+            .name(name)
+            .phoneNumber(phoneNumber)
+            .role(role)
+            .build();
     return memberRepository.save(member);
   }
 
   private PointWallet createPointWallet(Long memberId, long balance) {
-    PointWallet wallet = new PointWallet();
-    wallet.setMemberId(memberId);
-    wallet.setBalance(balance);
+    PointWallet wallet = PointWallet.builder().memberId(memberId).balance(balance).build();
     return paymentRepository.save(wallet);
   }
 
   private Vehicle createVehicle(
       Long ownerId, VehicleType type, double maxWeight, double maxDistance) {
-    Vehicle vehicle = new Vehicle();
-    vehicle.setOwnerId(ownerId);
-    vehicle.setType(type);
-    vehicle.setMaxWeight(maxWeight);
-    vehicle.setMaxDistance(maxDistance);
+    Vehicle vehicle =
+        Vehicle.builder()
+            .ownerId(ownerId)
+            .type(type)
+            .maxWeight(maxWeight)
+            .maxDistance(maxDistance)
+            .build();
     return vehicleRepository.save(vehicle);
   }
 }
