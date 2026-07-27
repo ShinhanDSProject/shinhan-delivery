@@ -120,10 +120,11 @@ git config --local commit.template .gitmessage
 프로젝트의 메인 Git 히스토리를 깨끗하게 유지하고 기능 단위 추적을 쉽게 만들기 위해, 모든 Pull Request는 **오직 `Squash and Merge` 방식으로만 병합**해야 합니다.
 * **적용 사양:** 저장소 설정으로 일반 머지 커밋(Create a merge commit) 및 리베이스 머지(Rebase and merge) 기능은 비활성화되어 있습니다.
 * **동작 원리:** PR 내에 쌓여 있는 여러 개의 작업 커밋들이 병합되는 순간 **단 1개의 깨끗한 커밋으로 스쿼시(압축)**되어 대상 브랜치에 반영됩니다.
-* **주의 사항:** 따라서 작업 중 커밋 메시지가 다소 지저분하더라도 최종 PR 머지 시점에 제목과 설명을 깔끔히 정리해 주면 되므로, 세부 커밋 작성에 대한 심리적 부담을 덜고 개발을 편하게 진행하실 수 있습니다.
+* **🔗 PR 제목과의 연계:** Squash and Merge 특성상 병합 시 생성되는 최종 커밋 메시지는 **GitHub PR의 제목과 설명**을 기반으로 자동 작성됩니다. 즉, **"PR 제목 = 메인 히스토리에 남는 최종 커밋 메시지"**가 되므로, 로컬 커밋은 자유롭게 작성하더라도 **PR 생성 시 제목과 내용을 양식에 맞게 명확하게 작성해 주는 것이 깔끔한 히스토리를 유지하는 핵심**입니다.
+* **💡 개발 팁:** 따라서 작업 중 커밋 메시지가 다소 지저분하더라도 최종 PR 머지 시점에 제목과 설명을 깔끔히 정리해 주면 되므로, 세부 커밋 작성에 대한 심리적 부담을 덜고 개발을 편하게 진행하실 수 있습니다.
 
 ### PR 템플릿 사용 (AI 및 인간 공통 규칙)
-GitHub의 기본 PR 템플릿 파일이 `[pull_request_template.md](file:///Users/sungminjo/workspace/shinhan/shinhan-gaecheokja/.github/pull_request_template.md)`에 정의되어 있습니다. 
+GitHub의 기본 PR 템플릿 파일이 `[pull_request_template.md](../.github/pull_request_template.md)`에 정의되어 있습니다. 
 * PR 작성 시 자동으로 해당 템플릿 폼이 적용되며, 요약 / 주요 변경사항 / 리뷰 포인트 / 테스트 결과를 빠짐없이 작성해야 합니다.
 * **AI 에이전트(코드 자동 생성 봇) 수칙:** AI 에이전트가 자동으로 PR을 생성하는 작업을 수행할 경우, 반드시 `.github/pull_request_template.md` 파일의 마크다운 서식을 그대로 파싱하여 각 항목에 맞게 상세한 작업 명세서를 자동 작성하도록 합니다.
 
