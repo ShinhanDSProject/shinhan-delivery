@@ -28,7 +28,15 @@ DATA_SEED_ENABLED=true
 
 💡 *실행 중 에러가 발생하거나 연결이 되지 않는다면 [**로컬 개발 트러블슈팅 가이드 (docs/troubleshooting.md)**](./docs/troubleshooting.md)를 참고해 주세요.*
 
-### 3. Git 커밋 템플릿 설정 (.gitmessage)
+### 3. 로컬 CI 검증 및 원클릭 PR 제출 하네스 (./pr)
+개발 완료 또는 소스 수정 후 터미널에 아래 명령어를 실행하면, **Flyway 린트, Spotless 포맷팅, ArchUnit 아키텍처 검증, JaCoCo 커버리지 게이트(60%+), 46개 전체 테스트**를 1초 만에 검증하고 커밋/PR까지 일괄 처리합니다.
+```bash
+./pr
+# 또는 검증만 수행 시: ./scripts/verify.sh
+```
+💡 *JaCoCo 테스트 커버리지 시각화 HTML 리포트는 `./gradlew jacocoTestReport` 실행 후 `build/reports/jacoco/test/html/index.html`에서 브라우저로 바로 확인하실 수 있습니다.*
+
+### 4. Git 커밋 템플릿 설정 (.gitmessage)
 협업 규칙에 따른 일관된 커밋 작성을 위해 아래 명령어로 로컬 커밋 템플릿을 등록해 주세요. 등록 후 `git commit` 실행 시 버퍼 창에 템플릿 힌트가 자동으로 채워집니다.
 ```bash
 git config --local commit.template .gitmessage
@@ -43,14 +51,17 @@ git config --local commit.template .gitmessage
 프로젝트에 구축된 모든 개발 가이드라인과 기존 개발 기능들에 대한 요구사항 명세서 및 설계서의 전체 맵입니다. 
 아래 링크를 클릭하여 해당하는 가이드 및 설계 내용을 확인하실 수 있습니다.
 
+### 🏆 세계 최고 수준 개발 표준 & AI 행동 규범
+* [**AI 에이전트 행동 지침 및 8대 수칙 (AGENTS.md)**](./AGENTS.md) - Google, Apple, Meta 수준의 최고 결과물을 도출하기 위한 AI/개발자 8대 무결점 작업 원칙 🏛️
+* [**코딩 컨벤션 및 6대 개발 규칙 (code-convention.md)**](./code-convention.md) - 우리 프로젝트에서 개발자와 AI가 엄격히 준수해야 할 단일 원본 코딩 규약 📐
+
 ### 🛠️ 개발 가이드 및 협업 규칙
 * [**초보 개발자 온보딩 및 기능 개발 로드맵 (docs/onboarding-roadmap.md)**](./docs/onboarding-roadmap.md) - 입문자를 위한 필수 학습 순서 및 실전 기능 개발 7단계 흐름 가이드 🚀
-* [**코딩 컨벤션 및 6대 개발 규칙 (code-convention.md)**](./code-convention.md) - 우리 프로젝트에서 개발자와 AI가 엄격히 준수해야 할 단일 원본 코딩 규약 🏛️
 * [**테스트 하네스 & LLM 피드백 루프 가이드 (docs/harness-and-llm-guide.md)**](./docs/harness-and-llm-guide.md) - 초보자와 AI 사용자를 위한 자동 검사 하네스 및 에러 자가 치유 활용법 🏗️
-* [**LLM 기반 현대 SW 엔지니어링 방법론 가이드 (docs/llm-software-engineering-guide.md)**](./docs/llm-software-engineering-guide.md) - 프롬프트/하네스/컨텍스트 엔지니어링, 피드백 루프, EDD 등 AI 활용 개발 방법론 입문서 🤖
+* [**LLM 기반 현대 SW 엔지니어링 방법론 가이드 (docs/llm-software-engineering-guide.md)**](./docs/llm-software-engineering-guide.md) - 프롬프트/하네스/컨텍스트 엔지니어링, 루프 엔지니어링, EDD 등 AI 활용 개발 방법론 입문서 🤖
 * [**협업 문화 및 자동화 도구 도입 배경 가이드 (docs/development-culture-guide.md)**](./docs/development-culture-guide.md) - 왜 이런 협업 규칙과 DevOps 도구들을 도입했는지, 미도입 시 어떤 장애 참사가 발생하는지 설명해 주는 입문자 필독서 🎓
-* [**Git Flow 및 커밋 컨벤션 가이드 (docs/git-flow-guide.md)**](./docs/git-flow-guide.md) - 브랜치 운용 규칙, Conventional Commits 커밋 헤더 태그 가이드 및 자동 코드 리뷰 연동 규칙
-* [**CI/CD 파이프라인 및 GitHub Actions Step 해설 가이드 (docs/cicd-pipeline-guide.md)**](./docs/cicd-pipeline-guide.md) - 지속적 통합/배포 개념, Actions 동작 원리, 워크플로우 각 Step별 왜 도입했는지 정밀 해설 ⚙️
+* [**Git Flow, 이슈 수칙 및 커밋 컨벤션 가이드 (docs/git-flow-guide.md)**](./docs/git-flow-guide.md) - 브랜치 운용 규칙, GitHub Issue 템플릿 태그 수칙, Conventional Commits 헤더 가이드 및 자동 코드 리뷰 연동 규칙 🔀
+* [**CI/CD 파이프라인 및 GitHub Actions Step 해설 가이드 (docs/cicd-pipeline-guide.md)**](./docs/cicd-pipeline-guide.md) - 지속적 통합/배포 개념, JaCoCo Coverage Gate, Actions 동작 원리 및 워크플로우 각 Step별 해설 ⚙️
 * [**기능 개발 전 설계 단계 프로세스 가이드 (docs/design-phase-guide.md)**](./docs/design-phase-guide.md) - 기능 개발에 착수하기 전 작성해야 할 4대 핵심 산출물 양식과 2단계 PR 전략
 * [**RESTful API 설계 및 규격 가이드 (docs/rest-api-guide.md)**](./docs/rest-api-guide.md) - REST API 개념, 자원/행위 매핑 규칙, 초보자 안티패턴 및 HTTP 상태 코드 표준 응답 규칙 🌐
 * [**전역 예외 처리 및 표준 에러 코드 가이드 (docs/exception-handling-guide.md)**](./docs/exception-handling-guide.md) - @RestControllerAdvice 작동 원리, ErrorCode Enum, ErrorResponse DTO 및 방어적 프로그래밍 수칙 🛡️
@@ -59,6 +70,8 @@ git config --local commit.template .gitmessage
 * [**로컬 개발 트러블슈팅 가이드 (docs/troubleshooting.md)**](./docs/troubleshooting.md) - Flyway 해시 충돌, 포트 선점, 데이터베이스 권한 에러 해결 가이드
 
 ### 📋 개발자 성장을 돕는 작성 양식 및 템플릿
+* [**기능 개발 이슈 템플릿 (.github/ISSUE_TEMPLATE/feature_request.md)**](./.github/ISSUE_TEMPLATE/feature_request.md) - 신규 기능 등록 양식 🚀
+* [**버그 조치 이슈 템플릿 (.github/ISSUE_TEMPLATE/bug_report.md)**](./.github/ISSUE_TEMPLATE/bug_report.md) - 버그 보고 및 조치 양식 🐛
 * [**아키텍처 결정 레코드 (ADR) 템플릿 (docs/templates/adr-template.md)**](./docs/templates/adr-template.md) - 기술 의사결정의 배경, 대안, 장단점을 논리적으로 기록해 시니어 개발자로 발돋움하게 돕는 양식 🏛️
 * [**트러블슈팅 및 장애 회고 템플릿 (docs/templates/troubleshooting-log-template.md)**](./docs/templates/troubleshooting-log-template.md) - 에러 발생 시 현상, 원인분석(5 Whys), 재발 방지책을 회고하여 성장을 가속화하는 일지 양식 💡
 
