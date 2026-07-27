@@ -45,8 +45,8 @@ git config --local commit.template .gitmessage
 
 ### 🛠️ 개발 가이드 및 협업 규칙
 * [**초보 개발자 온보딩 및 기능 개발 로드맵 (docs/onboarding-roadmap.md)**](./docs/onboarding-roadmap.md) - 입문자를 위한 필수 학습 순서 및 실전 기능 개발 7단계 흐름 가이드 🚀
+* [**코딩 컨벤션 및 6대 개발 규칙 (code-convention.md)**](./code-convention.md) - 우리 프로젝트에서 개발자와 AI가 엄격히 준수해야 할 단일 원본 코딩 규약 🏛️
 * [**테스트 하네스 & LLM 피드백 루프 가이드 (docs/harness-and-llm-guide.md)**](./docs/harness-and-llm-guide.md) - 초보자와 AI 사용자를 위한 자동 검사 하네스 및 에러 자가 치유 활용법 🏗️
-* [**프로젝트 6대 필수 검증 하네스 명세서 (docs/project-audit-harness.md)**](./docs/project-audit-harness.md) - 우리 프로젝트에서 개발자와 AI가 엄격히 준수해야 할 6대 검증 하네스 명세 🏛️
 * [**LLM 기반 현대 SW 엔지니어링 방법론 가이드 (docs/llm-software-engineering-guide.md)**](./docs/llm-software-engineering-guide.md) - 프롬프트/하네스/컨텍스트 엔지니어링, 피드백 루프, EDD 등 AI 활용 개발 방법론 입문서 🤖
 * [**협업 문화 및 자동화 도구 도입 배경 가이드 (docs/development-culture-guide.md)**](./docs/development-culture-guide.md) - 왜 이런 협업 규칙과 DevOps 도구들을 도입했는지, 미도입 시 어떤 장애 참사가 발생하는지 설명해 주는 입문자 필독서 🎓
 * [**Git Flow 및 커밋 컨벤션 가이드 (docs/git-flow-guide.md)**](./docs/git-flow-guide.md) - 브랜치 운용 규칙, Conventional Commits 커밋 헤더 태그 가이드 및 자동 코드 리뷰 연동 규칙
