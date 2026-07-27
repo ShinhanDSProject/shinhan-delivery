@@ -17,6 +17,21 @@
   * 코드 작성 완료 후 커밋 및 푸시하기 전에 한 번씩 실행하는 것을 강력히 권장합니다.
 * **CI 검증 연동:** PR 제출 시 깃허브 액션에서 자동으로 포맷팅 준수 여부(`spotlessCheck`)를 확인하며, 스타일이 맞지 않으면 빌드가 반려(Fail)됩니다.
 
+### 🛡️ 커밋 전 포맷 검사 로컬 강제화 (Lefthook 연동)
+로컬에서 실수로 포맷 가공을 누락하고 커밋하여 CI 빌드를 실패시키는 피로를 방지하기 위해 Git pre-commit hook인 **Lefthook**을 프로젝트 루트에 탑재했습니다.
+
+* **1단계: 설치 방법 (본인의 OS 또는 개발 도구에 따라 1개만 실행):**
+  * **macOS:** `brew install lefthook`
+  * **Windows (Scoop):** `scoop install lefthook`
+  * **Node/npm:** `npm install -g @evilmartians/lefthook`
+  * **Python:** `pip install lefthook`
+* **2단계: Git Hook 등록:**
+  프로젝트 루트 폴더에서 아래 명령어를 1회 실행하여 훅을 등록합니다:
+  ```bash
+  lefthook install
+  ```
+  이후 자바 소스 코드를 수정한 뒤 `git commit`을 날리면 자동으로 백그라운드에서 `./gradlew spotlessCheck`가 기동됩니다. 스타일이 어긋난 부분이 있다면 커밋이 반려되므로, `./gradlew spotlessApply`로 코드를 자동 정형한 뒤 다시 커밋을 전송하시면 됩니다.
+
 ---
 
 ## 2. 🔌 Swagger를 활용한 API 문서 자동화 (Springdoc OpenAPI)

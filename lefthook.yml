@@ -1,0 +1,9 @@
+# Lefthook 설정 파일
+# 상세 설정법: https://github.com/evilmartians/lefthook
+
+pre-commit:
+  commands:
+    # 커밋할 변경 파일 중 Java 파일(*.java)이 포함되어 있는 경우에만 작동합니다.
+    spotless-check:
+      glob: "*.java"
+      run: ./gradlew spotlessCheck
