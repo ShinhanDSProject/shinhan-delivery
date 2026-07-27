@@ -97,6 +97,13 @@ feat(member): 이메일 중복 체크 API 구현
 Resolves: #45
 ```
 
+### 💡 Git 커밋 메시지 템플릿 설정 (.gitmessage)
+매번 이 컨벤션 규격을 수동으로 입력하기 어려우므로, 프로젝트 루트에 포함된 `.gitmessage` 파일을 템플릿으로 연동하여 사용하는 것을 권장합니다. 로컬 저장소 터미널에서 다음 명령어를 실행하여 등록할 수 있습니다:
+```bash
+git config --local commit.template .gitmessage
+```
+설정 후 터미널에서 `git commit`을 실행하면 템플릿 가이드라인이 자동으로 커밋 작성 화면에 로드되어 쉽게 규격에 맞춰 커밋을 작성할 수 있습니다.
+
 ---
 
 ## 4. Pull Request 규칙 및 템플릿 (PR Rules)
