@@ -13,9 +13,12 @@ import com.example.shinhangaecheokja.vehicle.exception.InvalidWeightException;
 import com.example.shinhangaecheokja.vehicle.exception.OverMaxDistanceException;
 import com.example.shinhangaecheokja.vehicle.exception.VehicleNotAvailableException;
 import com.example.shinhangaecheokja.vehicle.exception.VehicleNotFoundException;
+import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -33,6 +36,16 @@ public class GlobalExceptionHandler {
   @ExceptionHandler({InvalidWeightException.class, OverMaxDistanceException.class})
   public ResponseEntity<ErrorResponse> handleInvalidInput(RuntimeException e) {
     return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
+  }
+
+  /** @Valid 검증 실패(예: 좌표 범위 위반)를 400으로 변환한다. */
+  @ExceptionHandler(MethodArgumentNotValidException.class)
+  public ResponseEntity<ErrorResponse> handleValidationFailure(MethodArgumentNotValidException e) {
+    String message =
+        e.getBindingResult().getFieldErrors().stream()
+            .map(FieldError::getDefaultMessage)
+            .collect(Collectors.joining(", "));
+    return ResponseEntity.badRequest().body(new ErrorResponse(message));
   }
 
   /** 리소스를 찾을 수 없는 경우 404로 변환한다. */
