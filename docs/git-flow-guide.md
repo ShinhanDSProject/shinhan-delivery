@@ -113,3 +113,10 @@ GitHub의 기본 PR 템플릿 파일이 `[pull_request_template.md](file:///User
 * PR 작성 시 자동으로 해당 템플릿 폼이 적용되며, 요약 / 주요 변경사항 / 리뷰 포인트 / 테스트 결과를 빠짐없이 작성해야 합니다.
 * **AI 에이전트(코드 자동 생성 봇) 수칙:** AI 에이전트가 자동으로 PR을 생성하는 작업을 수행할 경우, 반드시 `.github/pull_request_template.md` 파일의 마크다운 서식을 그대로 파싱하여 각 항목에 맞게 상세한 작업 명세서를 자동 작성하도록 합니다.
 
+### 🤖 Gemini AI 자동 코드 리뷰 (CI/CD 연동)
+이 레포지토리에는 PR이 생성되거나 새로운 코드가 푸시(Synchronize)될 때, AI가 변경 내역을 실시간으로 분석해 피드백을 남겨주는 **Gemini AI 자동 코드 리뷰**가 연동되어 있습니다.
+
+1. **동작 방식:** PR이 생성되는 즉시 GitHub Actions가 가동되어 변경된 코드 조각(Git Diff)을 분석하고 개선 가능한 사항(코드 품질, 버그 가능성, 보안 취약점 등)을 PR 본문의 코드 라인 댓글로 남깁니다.
+2. **주의 사항 (저장소 설정):** 본 자동화가 정상 작동하려면, 저장소 관리자가 GitHub 레포지토리의 **Settings ➔ Secrets and variables ➔ Actions** 메뉴에 들어가 Google AI Studio 등에서 발급받은 Gemini API 키를 `GEMINI_API_KEY`라는 이름의 Action Secret으로 등록해 주어야 합니다.
+
+
