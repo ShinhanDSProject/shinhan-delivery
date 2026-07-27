@@ -71,6 +71,21 @@ class VehicleControllerTest {
   }
 
   @Test
+  void 소유자_id가_없으면_400을_반환한다() throws Exception {
+    VehicleCreateRequest request = new VehicleCreateRequest();
+    request.setType(VehicleType.CAR);
+    request.setMaxWeight(500);
+    request.setMaxDistance(100);
+
+    mockMvc
+        .perform(
+            post("/api/vehicles")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
   void 존재하지_않는_차량을_조회하면_404를_반환한다() throws Exception {
     when(vehicleService.getVehicle(eq(999L))).thenThrow(new VehicleNotFoundException(999L));
 

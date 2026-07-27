@@ -48,7 +48,7 @@ public class DeliveryController {
   /** 배송 요청의 픽업지·도착지를 수정한다. */
   @PutMapping("/{deliveryRequestId}")
   public ResponseEntity<DeliveryResponse> updateDeliveryRequest(
-      @PathVariable Long deliveryRequestId, @RequestBody DeliveryUpdateRequest request) {
+      @PathVariable Long deliveryRequestId, @RequestBody @Valid DeliveryUpdateRequest request) {
     return ResponseEntity.ok(deliveryService.updateDeliveryRequest(deliveryRequestId, request));
   }
 

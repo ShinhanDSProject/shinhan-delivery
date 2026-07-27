@@ -3,6 +3,7 @@ package com.example.shinhangaecheokja.vehicle.dto.request;
 import com.example.shinhangaecheokja.vehicle.entity.VehicleType;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -13,7 +14,9 @@ import lombok.Setter;
 @NoArgsConstructor
 public class VehicleUpdateRequest {
 
+  @NotNull(message = "운송수단 종류는 필수입니다.")
   private VehicleType type;
+
   private double maxWeight;
   private double maxDistance;
 

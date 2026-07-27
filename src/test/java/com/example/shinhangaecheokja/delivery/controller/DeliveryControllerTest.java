@@ -71,6 +71,22 @@ class DeliveryControllerTest {
   }
 
   @Test
+  void 픽업_주소가_없으면_400을_반환한다() throws Exception {
+    DeliveryCreateRequest request = new DeliveryCreateRequest();
+    request.setCustomerId(1L);
+    request.setDropoffAddress("서울시 서초구");
+    request.setWeight(10);
+    request.setDistance(5);
+
+    mockMvc
+        .perform(
+            post("/api/delivery-requests")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
   void 존재하지_않는_배송_요청을_조회하면_404를_반환한다() throws Exception {
     when(deliveryService.getDeliveryRequest(eq(999L)))
         .thenThrow(new DeliveryRequestNotFoundException(999L));

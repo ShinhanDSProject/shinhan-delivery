@@ -1,5 +1,6 @@
 package com.example.shinhangaecheokja.delivery.dto.request;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -10,6 +11,9 @@ import lombok.Setter;
 @NoArgsConstructor
 public class DeliveryUpdateRequest {
 
+  @NotBlank(message = "픽업 주소는 필수입니다.")
   private String pickupAddress;
+
+  @NotBlank(message = "도착 주소는 필수입니다.")
   private String dropoffAddress;
 }

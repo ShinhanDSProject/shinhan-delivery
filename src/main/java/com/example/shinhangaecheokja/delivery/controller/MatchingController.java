@@ -4,6 +4,7 @@ import com.example.shinhangaecheokja.delivery.dto.request.MatchingCreateRequest;
 import com.example.shinhangaecheokja.delivery.dto.request.MatchingUpdateRequest;
 import com.example.shinhangaecheokja.delivery.dto.response.MatchingResponse;
 import com.example.shinhangaecheokja.delivery.service.MatchingService;
+import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -27,7 +28,7 @@ public class MatchingController {
   /** 매칭을 생성한다. */
   @PostMapping
   public ResponseEntity<MatchingResponse> createMatching(
-      @RequestBody MatchingCreateRequest request) {
+      @RequestBody @Valid MatchingCreateRequest request) {
     return ResponseEntity.ok(matchingService.createMatching(request));
   }
 
@@ -46,7 +47,7 @@ public class MatchingController {
   /** 매칭 상태를 변경한다. */
   @PutMapping("/{matchingId}")
   public ResponseEntity<MatchingResponse> updateMatching(
-      @PathVariable Long matchingId, @RequestBody MatchingUpdateRequest request) {
+      @PathVariable Long matchingId, @RequestBody @Valid MatchingUpdateRequest request) {
     return ResponseEntity.ok(matchingService.updateMatching(matchingId, request));
   }
 
