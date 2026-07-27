@@ -1,5 +1,7 @@
 package com.example.shinhangaecheokja.payment.service;
 
+import com.example.shinhangaecheokja.common.exception.EntityNotFoundException;
+import com.example.shinhangaecheokja.common.exception.ErrorCode;
 import com.example.shinhangaecheokja.member.service.MemberService;
 import com.example.shinhangaecheokja.payment.dto.request.PointChargeRequest;
 import com.example.shinhangaecheokja.payment.dto.request.PointUseRequest;
@@ -7,7 +9,6 @@ import com.example.shinhangaecheokja.payment.dto.request.PointWalletCreateReques
 import com.example.shinhangaecheokja.payment.dto.response.PointWalletResponse;
 import com.example.shinhangaecheokja.payment.entity.PointWallet;
 import com.example.shinhangaecheokja.payment.exception.InsufficientPointException;
-import com.example.shinhangaecheokja.payment.exception.PointWalletNotFoundException;
 import com.example.shinhangaecheokja.payment.repository.PaymentRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -75,6 +76,6 @@ public class PaymentService {
   private PointWallet findWalletOrThrow(Long walletId) {
     return paymentRepository
         .findById(walletId)
-        .orElseThrow(() -> new PointWalletNotFoundException(walletId));
+        .orElseThrow(() -> new EntityNotFoundException(ErrorCode.POINT_WALLET_NOT_FOUND));
   }
 }

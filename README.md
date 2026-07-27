@@ -53,6 +53,7 @@ git config --local commit.template .gitmessage
 * [**CI/CD 파이프라인 및 GitHub Actions Step 해설 가이드 (docs/cicd-pipeline-guide.md)**](./docs/cicd-pipeline-guide.md) - 지속적 통합/배포 개념, Actions 동작 원리, 워크플로우 각 Step별 왜 도입했는지 정밀 해설 ⚙️
 * [**기능 개발 전 설계 단계 프로세스 가이드 (docs/design-phase-guide.md)**](./docs/design-phase-guide.md) - 기능 개발에 착수하기 전 작성해야 할 4대 핵심 산출물 양식과 2단계 PR 전략
 * [**RESTful API 설계 및 규격 가이드 (docs/rest-api-guide.md)**](./docs/rest-api-guide.md) - REST API 개념, 자원/행위 매핑 규칙, 초보자 안티패턴 및 HTTP 상태 코드 표준 응답 규칙 🌐
+* [**전역 예외 처리 및 표준 에러 코드 가이드 (docs/exception-handling-guide.md)**](./docs/exception-handling-guide.md) - @RestControllerAdvice 작동 원리, ErrorCode Enum, ErrorResponse DTO 및 방어적 프로그래밍 수칙 🛡️
 * [**로컬 개발 환경 및 자동화 도구 사용 가이드 (docs/developer-env-guide.md)**](./docs/developer-env-guide.md) - Spotless 포맷 자동 가공 명령어, Swagger UI, 로컬 테스트용 더미 데이터 설정
 * [**Flyway 데이터베이스 마이그레이션 가이드 (docs/flyway-guide.md)**](./docs/flyway-guide.md) - Flyway 스크립트 작성 규칙, JPA Buddy 플러그인을 활용한 마이그레이션 방법
 * [**로컬 개발 트러블슈팅 가이드 (docs/troubleshooting.md)**](./docs/troubleshooting.md) - Flyway 해시 충돌, 포트 선점, 데이터베이스 권한 에러 해결 가이드

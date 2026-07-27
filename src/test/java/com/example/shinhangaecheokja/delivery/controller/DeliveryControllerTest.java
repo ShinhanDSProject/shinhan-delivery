@@ -11,7 +11,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.example.shinhangaecheokja.delivery.dto.request.DeliveryCreateRequest;
 import com.example.shinhangaecheokja.delivery.dto.response.DeliveryResponse;
 import com.example.shinhangaecheokja.delivery.entity.DeliveryStatus;
-import com.example.shinhangaecheokja.delivery.exception.DeliveryRequestNotFoundException;
 import com.example.shinhangaecheokja.delivery.service.DeliveryService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,7 +55,9 @@ class DeliveryControllerTest {
   @Test
   void 존재하지_않는_배송_요청을_조회하면_404를_반환한다() throws Exception {
     when(deliveryService.getDeliveryRequest(eq(999L)))
-        .thenThrow(new DeliveryRequestNotFoundException(999L));
+        .thenThrow(
+            new com.example.shinhangaecheokja.common.exception.EntityNotFoundException(
+                com.example.shinhangaecheokja.common.exception.ErrorCode.DELIVERY_NOT_FOUND));
 
     mockMvc.perform(get("/api/delivery-requests/999")).andExpect(status().isNotFound());
   }

@@ -9,10 +9,8 @@ import com.example.shinhangaecheokja.delivery.dto.request.DeliveryCreateRequest;
 import com.example.shinhangaecheokja.delivery.dto.response.DeliveryResponse;
 import com.example.shinhangaecheokja.delivery.entity.DeliveryRequest;
 import com.example.shinhangaecheokja.delivery.entity.DeliveryStatus;
-import com.example.shinhangaecheokja.delivery.exception.DeliveryRequestNotFoundException;
 import com.example.shinhangaecheokja.delivery.exception.NoAvailableCourierException;
 import com.example.shinhangaecheokja.delivery.repository.DeliveryRequestRepository;
-import com.example.shinhangaecheokja.member.exception.MemberNotFoundException;
 import com.example.shinhangaecheokja.member.service.MemberService;
 import com.example.shinhangaecheokja.vehicle.service.VehicleService;
 import java.util.Optional;
@@ -51,16 +49,19 @@ class DeliveryServiceTest {
   }
 
   @Test
-  void 존재하지_않는_고객이면_MemberNotFoundException을_던진다() {
+  void 존재하지_않는_고객이면_EntityNotFoundException을_던진다() {
     DeliveryCreateRequest request = new DeliveryCreateRequest();
     request.setCustomerId(999L);
     request.setWeight(10);
     request.setDistance(5);
 
-    when(memberService.getMember(999L)).thenThrow(new MemberNotFoundException(999L));
+    when(memberService.getMember(999L))
+        .thenThrow(
+            new com.example.shinhangaecheokja.common.exception.EntityNotFoundException(
+                com.example.shinhangaecheokja.common.exception.ErrorCode.MEMBER_NOT_FOUND));
 
     assertThatThrownBy(() -> deliveryService.requestDelivery(request))
-        .isInstanceOf(MemberNotFoundException.class);
+        .isInstanceOf(com.example.shinhangaecheokja.common.exception.EntityNotFoundException.class);
   }
 
   @Test
@@ -77,11 +78,11 @@ class DeliveryServiceTest {
   }
 
   @Test
-  void 존재하지_않는_배송_요청을_조회하면_DeliveryRequestNotFoundException을_던진다() {
+  void 존재하지_않는_배송_요청을_조회하면_EntityNotFoundException을_던진다() {
     when(deliveryRequestRepository.findById(1L)).thenReturn(Optional.empty());
 
     assertThatThrownBy(() -> deliveryService.getDeliveryRequest(1L))
-        .isInstanceOf(DeliveryRequestNotFoundException.class);
+        .isInstanceOf(com.example.shinhangaecheokja.common.exception.EntityNotFoundException.class);
   }
 
   @Test

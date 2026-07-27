@@ -55,8 +55,21 @@ jobs:
       - name: Verify Code Style (Spotless)
         run: ./gradlew spotlessCheck
 
-      - name: Run Gradle Build and Test
-        run: ./gradlew build
+      - name: Verify JaCoCo Coverage Gate & ArchUnit Architecture Rules
+        run: ./gradlew test jacocoTestReport jacocoTestCoverageVerification
+        env:
+          DB_URL: jdbc:mariadb://localhost:3306/shinhan_gaecheokja
+          DB_USER: root
+          DB_PASSWORD: password
+
+      - name: Upload JaCoCo Coverage Report Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco-coverage-report
+          path: build/reports/jacoco/test/html/
+
+      - name: Run Gradle Build and Package
+        run: ./gradlew build -x test
         env:
           DB_URL: jdbc:mariadb://localhost:3306/shinhan_gaecheokja
           DB_USER: root

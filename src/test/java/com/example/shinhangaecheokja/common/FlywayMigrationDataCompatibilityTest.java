@@ -35,7 +35,7 @@ class FlywayMigrationDataCompatibilityTest {
         Flyway.configure()
             .dataSource(dataSource)
             .cleanDisabled(false) // clean 기능 명시적 활성화
-            .target("2") // V2 스키마(member 테이블 생성) 구축을 타겟팅
+            .target("2") // V2 스키마(Member 테이블 구축)를 타겟팅
             .load();
     flywayV1.clean(); // 기존 테스트 스키마 완전 초기화
     flywayV1.migrate(); // V2 Schema 적용
