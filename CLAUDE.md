@@ -8,7 +8,7 @@
 
 ## 코딩 컨벤션 (필독)
 
-**코드를 작성하거나 수정하기 전, 그리고 이 저장소에서 git 작업(커밋, 브랜치 생성)을 하기 전에 반드시 `code-convention.md`를 읽으세요.** 이 문서는 이 저장소의 기준이 되는 명세로, 전통적인 계층형 아키텍처(`Controller → Service → Repository → Entity`)와 예외 기반 에러 처리, git 작업 방식(§15: 커밋 메시지 형식, 브랜치 네이밍), PR 체크리스트(§16)를 다룹니다. 모든 신규 코드와 모든 커밋은 이 문서를 따라야 합니다. 여기서는 요약하거나 다르게 서술하지 않으니, 이 문서는 독립적으로 최신 상태를 유지하므로 반드시 원문을 직접 참고하세요.
+**코드를 작성하거나 수정하기 전, 그리고 이 저장소에서 git 작업(커밋, 브랜치 생성)을 하기 전에 반드시 `code-convention.md`를 읽으세요.** 이 문서는 이 저장소의 기준이 되는 명세로, 전통적인 계층형 아키텍처(`Controller → Service → Repository → Entity`)와 예외 기반 에러 처리, git 작업 방식(§16: 커밋 메시지 형식, 브랜치 네이밍, PR 규칙), PR 체크리스트(§17)를 다룹니다. 모든 신규 코드와 모든 커밋은 이 문서를 따라야 합니다. 여기서는 요약하거나 다르게 서술하지 않으니, 이 문서는 독립적으로 최신 상태를 유지하므로 반드시 원문을 직접 참고하세요.
 
 코딩 전에 숙지해야 할 핵심 사항(자세한 내용, 코드 예시, PR 체크리스트는 `code-convention.md`에 있습니다):
 
@@ -18,7 +18,7 @@
 - 예상 가능한 실패는 커스텀 `RuntimeException`을 던지고, `@RestControllerAdvice`인 `GlobalExceptionHandler` 한 곳에서만 HTTP 응답으로 변환합니다(컨벤션 §6). Controller에서 개별적으로 `try-catch`하지 않습니다.
 - `@Transactional`은 `Service` 계층에만 붙입니다. Controller는 DTO만 다루고 Entity를 직접 반환하지 않습니다.
 - 포맷팅은 Spotless + google-java-format으로 강제됩니다(2칸 들여쓰기, wildcard import 금지) — 스타일 취향이 아니라 규칙이므로, 커밋 전에 `spotlessApply`를 실행하세요.
-- 커밋 메시지: `type: 설명`(Conventional Commits 기반, 한글 설명), `type`은 `feat|fix|refactor|test|docs|chore` 중 하나(컨벤션 §15). 브랜치명: `type/도메인-내용`.
+- 커밋 메시지: `type: 설명`(Conventional Commits 기반, 한글 설명), `type`은 `feat|fix|refactor|test|docs|chore` 중 하나(컨벤션 §16). 브랜치명: `feat/도메인-내용`, `develop`을 대상으로 PR합니다(`hotfix`는 `main` 예외).
 
 ## 명령어
 
