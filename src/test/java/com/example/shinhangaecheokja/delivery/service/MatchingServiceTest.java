@@ -17,6 +17,7 @@ import com.example.shinhangaecheokja.delivery.entity.Matching;
 import com.example.shinhangaecheokja.delivery.entity.MatchingStatus;
 import com.example.shinhangaecheokja.delivery.exception.AlreadyMatchedException;
 import com.example.shinhangaecheokja.delivery.exception.DeliveryRequestNotFoundException;
+import com.example.shinhangaecheokja.delivery.exception.InvalidMatchingTransitionException;
 import com.example.shinhangaecheokja.delivery.exception.MatchingNotFoundException;
 import com.example.shinhangaecheokja.delivery.exception.NoAvailableCourierException;
 import com.example.shinhangaecheokja.delivery.repository.DeliveryRequestRepository;
@@ -256,6 +257,21 @@ class MatchingServiceTest {
 
     assertThat(response.status()).isEqualTo(MatchingStatus.MATCHED);
     verify(vehicleService).markBusy(2L);
+  }
+
+  @Test
+  void COMPLETED된_매칭을_다른_상태로_바꾸려하면_InvalidMatchingTransitionException을_던진다() {
+    Matching matching = new Matching();
+    matching.setDeliveryRequestId(1L);
+    matching.setVehicleId(2L);
+    matching.setStatus(MatchingStatus.COMPLETED);
+    MatchingUpdateRequest request = new MatchingUpdateRequest();
+    request.setStatus(MatchingStatus.CANCELLED);
+
+    when(matchingRepository.findById(1L)).thenReturn(Optional.of(matching));
+
+    assertThatThrownBy(() -> matchingService.updateMatching(1L, request))
+        .isInstanceOf(InvalidMatchingTransitionException.class);
   }
 
   @Test

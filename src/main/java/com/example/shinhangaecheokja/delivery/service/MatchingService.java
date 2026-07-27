@@ -9,6 +9,7 @@ import com.example.shinhangaecheokja.delivery.entity.Matching;
 import com.example.shinhangaecheokja.delivery.entity.MatchingStatus;
 import com.example.shinhangaecheokja.delivery.exception.AlreadyMatchedException;
 import com.example.shinhangaecheokja.delivery.exception.DeliveryRequestNotFoundException;
+import com.example.shinhangaecheokja.delivery.exception.InvalidMatchingTransitionException;
 import com.example.shinhangaecheokja.delivery.exception.MatchingNotFoundException;
 import com.example.shinhangaecheokja.delivery.exception.NoAvailableCourierException;
 import com.example.shinhangaecheokja.delivery.repository.DeliveryRequestRepository;
@@ -111,6 +112,8 @@ public class MatchingService {
     MatchingStatus previousStatus = matching.getStatus();
     MatchingStatus newStatus = request.getStatus();
 
+    validateTransition(previousStatus, newStatus);
+
     if (newStatus == MatchingStatus.MATCHED && previousStatus != MatchingStatus.MATCHED) {
       VehicleResponse vehicle = vehicleService.getVehicle(matching.getVehicleId());
       if (vehicle.status() != VehicleStatus.AVAILABLE) {
@@ -137,6 +140,22 @@ public class MatchingService {
       findDeliveryRequestOrThrow(matching.getDeliveryRequestId()).setStatus(DeliveryStatus.REQUESTED);
     }
     matchingRepository.delete(matching);
+  }
+
+  /**
+   * 매칭 상태 전이가 허용되는지 검증한다. COMPLETED는 종료 상태라 다른 상태로 전이할 수 없고,
+   * CANCELLED는 재매칭(MATCHED)만 허용한다. MATCHED에서는 어디로든 전이 가능하다.
+   */
+  private void validateTransition(MatchingStatus from, MatchingStatus to) {
+    boolean allowed =
+        switch (from) {
+          case MATCHED -> true;
+          case CANCELLED -> to == MatchingStatus.CANCELLED || to == MatchingStatus.MATCHED;
+          case COMPLETED -> to == MatchingStatus.COMPLETED;
+        };
+    if (!allowed) {
+      throw new InvalidMatchingTransitionException(from, to);
+    }
   }
 
   /** Matching 상태 변화에 맞춰 DeliveryRequest·Vehicle 상태를 함께 갱신한다. */

@@ -2,6 +2,7 @@ package com.example.shinhangaecheokja.common.exception;
 
 import com.example.shinhangaecheokja.delivery.exception.AlreadyMatchedException;
 import com.example.shinhangaecheokja.delivery.exception.DeliveryRequestNotFoundException;
+import com.example.shinhangaecheokja.delivery.exception.InvalidMatchingTransitionException;
 import com.example.shinhangaecheokja.delivery.exception.MatchingNotFoundException;
 import com.example.shinhangaecheokja.delivery.exception.NoAvailableCourierException;
 import com.example.shinhangaecheokja.member.exception.DuplicateMemberException;
@@ -57,7 +58,8 @@ public class GlobalExceptionHandler {
     NoAvailableCourierException.class,
     AlreadyMatchedException.class,
     InsufficientPointException.class,
-    VehicleNotAvailableException.class
+    VehicleNotAvailableException.class,
+    InvalidMatchingTransitionException.class
   })
   public ResponseEntity<ErrorResponse> handleUnprocessable(RuntimeException e) {
     return ResponseEntity.status(HttpStatus.UNPROCESSABLE_CONTENT).body(new ErrorResponse(e.getMessage()));
