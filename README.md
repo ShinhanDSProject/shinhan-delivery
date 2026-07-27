@@ -15,6 +15,9 @@
 DB_URL=jdbc:mariadb://localhost:3306/shinhan_gaecheokja
 DB_USER=root
 DB_PASSWORD=your_password_here
+
+# 로컬 테스트용 더미 데이터(회원, 지갑, 차량 등) 자동 적재 여부 (true/false)
+DATA_SEED_ENABLED=true
 ```
 
 ### 2. 애플리케이션 실행
