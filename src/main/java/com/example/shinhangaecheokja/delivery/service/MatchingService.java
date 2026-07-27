@@ -108,9 +108,19 @@ public class MatchingService {
   @Transactional
   public MatchingResponse updateMatching(Long matchingId, MatchingUpdateRequest request) {
     Matching matching = findMatchingOrThrow(matchingId);
-    matching.setStatus(request.getStatus());
+    MatchingStatus previousStatus = matching.getStatus();
+    MatchingStatus newStatus = request.getStatus();
+
+    if (newStatus == MatchingStatus.MATCHED && previousStatus != MatchingStatus.MATCHED) {
+      VehicleResponse vehicle = vehicleService.getVehicle(matching.getVehicleId());
+      if (vehicle.status() != VehicleStatus.AVAILABLE) {
+        throw new VehicleNotAvailableException(matching.getVehicleId());
+      }
+    }
+
+    matching.setStatus(newStatus);
     DeliveryRequest deliveryRequest = findDeliveryRequestOrThrow(matching.getDeliveryRequestId());
-    applyStatus(matching, deliveryRequest, request.getStatus());
+    applyStatus(matching, deliveryRequest, newStatus);
     return MatchingResponse.from(matching);
   }
 

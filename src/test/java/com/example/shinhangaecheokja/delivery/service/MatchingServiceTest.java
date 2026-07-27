@@ -220,6 +220,45 @@ class MatchingServiceTest {
   }
 
   @Test
+  void 취소된_매칭을_MATCHED로_되돌릴때_차량이_다른_건으로_BUSY면_VehicleNotAvailableException을_던진다() {
+    Matching matching = new Matching();
+    matching.setDeliveryRequestId(1L);
+    matching.setVehicleId(2L);
+    matching.setStatus(MatchingStatus.CANCELLED);
+    MatchingUpdateRequest request = new MatchingUpdateRequest();
+    request.setStatus(MatchingStatus.MATCHED);
+
+    when(matchingRepository.findById(1L)).thenReturn(Optional.of(matching));
+    when(vehicleService.getVehicle(2L))
+        .thenReturn(
+            new VehicleResponse(2L, 1L, VehicleType.CAR, 500, 100, 37.5, 127.0, VehicleStatus.BUSY));
+
+    assertThatThrownBy(() -> matchingService.updateMatching(1L, request))
+        .isInstanceOf(VehicleNotAvailableException.class);
+    verify(vehicleService, never()).markBusy(2L);
+  }
+
+  @Test
+  void 취소된_매칭을_MATCHED로_되돌릴때_차량이_가용하면_다시_매칭된다() {
+    Matching matching = new Matching();
+    matching.setDeliveryRequestId(1L);
+    matching.setVehicleId(2L);
+    matching.setStatus(MatchingStatus.CANCELLED);
+    DeliveryRequest deliveryRequest = deliveryRequest(1L);
+    MatchingUpdateRequest request = new MatchingUpdateRequest();
+    request.setStatus(MatchingStatus.MATCHED);
+
+    when(matchingRepository.findById(1L)).thenReturn(Optional.of(matching));
+    when(vehicleService.getVehicle(2L)).thenReturn(availableVehicle(2L));
+    when(deliveryRequestRepository.findById(1L)).thenReturn(Optional.of(deliveryRequest));
+
+    MatchingResponse response = matchingService.updateMatching(1L, request);
+
+    assertThat(response.status()).isEqualTo(MatchingStatus.MATCHED);
+    verify(vehicleService).markBusy(2L);
+  }
+
+  @Test
   void 매칭을_삭제하면_차량이_AVAILABLE로_복귀하고_배송요청_상태가_REQUESTED로_복귀한다() {
     Matching matching = new Matching();
     matching.setDeliveryRequestId(1L);
