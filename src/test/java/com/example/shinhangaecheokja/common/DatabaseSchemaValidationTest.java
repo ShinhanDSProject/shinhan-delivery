@@ -31,7 +31,7 @@ import org.springframework.boot.test.context.SpringBootTest;
       "spring.jpa.properties.hibernate.ddl-auto=validate",
       "spring.flyway.enabled=true"
     })
-public class DatabaseSchemaValidationTest {
+class DatabaseSchemaValidationTest {
 
   @Test
   @DisplayName("JPA 엔티티 명세와 데이터베이스(Flyway) 물리 스키마 구조가 완전히 일치하는지 검증한다.")
