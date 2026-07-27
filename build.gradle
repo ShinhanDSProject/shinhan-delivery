@@ -35,6 +35,9 @@ dependencies {
     // Dotenv support for Spring Boot
     implementation 'me.paulschwarz:springboot4-dotenv:5.1.0'
     
+    // API Document Automation (Swagger / OpenAPI)
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.3'
+    
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-data-jpa-test'
     testImplementation 'org.springframework.boot:spring-boot-starter-validation-test'
