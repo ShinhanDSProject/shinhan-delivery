@@ -1,0 +1,23 @@
+name: Gemini Code Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Gemini AI Code Review
+        uses: sshnaidm/gemini-code-review-action@v2
+        with:
+          gemini-key: ${{ secrets.GEMINI_API_KEY }}
+          # 필요에 따라 아래 옵션을 추가할 수 있습니다:
+          # model: 'gemini-1.5-pro' # 기본값은 'gemini-1.5-flash'
