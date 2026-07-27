@@ -40,3 +40,4 @@ jobs:
           gemini-key: ${{ secrets.GEMINI_API_KEY }}
           model: 'gemini-flash-latest'
           prompt: ${{ steps.load-prompt.outputs.prompt }}
+          pull-request-number: ${{ github.event.pull_request.number || github.event.issue.number }}
