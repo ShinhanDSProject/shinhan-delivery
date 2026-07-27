@@ -103,9 +103,12 @@ try {
     return ResponseEntity.status(500).body("에러 발생");
 }
 
-// GOOD ⭕ : ErrorCode를 주입하여 BusinessException 던지기
+// GOOD ⭕ : 공통 EntityNotFoundException과 ErrorCode를 주입하여 던지기
 Member member = memberRepository.findById(id)
-    .orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND));
+    .orElseThrow(() -> new EntityNotFoundException(ErrorCode.MEMBER_NOT_FOUND));
+
+// 💡 팁: MemberNotFoundException, VehicleNotFoundException 등의 개별 예외 클래스를 도메인마다 수십 개씩 새로 생성하지 않고,
+// 공통 EntityNotFoundException 하나에 ErrorCode를 주입하여 클래스 폭발(Class Explosion)을 방지하고 코드를 간결하게 유지합니다!
 ```
 
 ---

@@ -5,7 +5,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-import com.example.shinhangaecheokja.member.exception.MemberNotFoundException;
 import com.example.shinhangaecheokja.member.service.MemberService;
 import com.example.shinhangaecheokja.payment.dto.request.PointChargeRequest;
 import com.example.shinhangaecheokja.payment.dto.request.PointUseRequest;
@@ -13,7 +12,6 @@ import com.example.shinhangaecheokja.payment.dto.request.PointWalletCreateReques
 import com.example.shinhangaecheokja.payment.dto.response.PointWalletResponse;
 import com.example.shinhangaecheokja.payment.entity.PointWallet;
 import com.example.shinhangaecheokja.payment.exception.InsufficientPointException;
-import com.example.shinhangaecheokja.payment.exception.PointWalletNotFoundException;
 import com.example.shinhangaecheokja.payment.repository.PaymentRepository;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
@@ -44,22 +42,25 @@ class PaymentServiceTest {
   }
 
   @Test
-  void 존재하지_않는_회원이면_MemberNotFoundException을_던진다() {
+  void 존재하지_않는_회원이면_EntityNotFoundException을_던진다() {
     PointWalletCreateRequest request = new PointWalletCreateRequest();
     request.setMemberId(999L);
 
-    when(memberService.getMember(999L)).thenThrow(new MemberNotFoundException(999L));
+    when(memberService.getMember(999L))
+        .thenThrow(
+            new com.example.shinhangaecheokja.common.exception.EntityNotFoundException(
+                com.example.shinhangaecheokja.common.exception.ErrorCode.MEMBER_NOT_FOUND));
 
     assertThatThrownBy(() -> paymentService.createWallet(request))
-        .isInstanceOf(MemberNotFoundException.class);
+        .isInstanceOf(com.example.shinhangaecheokja.common.exception.EntityNotFoundException.class);
   }
 
   @Test
-  void 존재하지_않는_지갑을_조회하면_PointWalletNotFoundException을_던진다() {
+  void 존재하지_않는_지갑을_조회하면_EntityNotFoundException을_던진다() {
     when(paymentRepository.findById(1L)).thenReturn(Optional.empty());
 
     assertThatThrownBy(() -> paymentService.getWallet(1L))
-        .isInstanceOf(PointWalletNotFoundException.class);
+        .isInstanceOf(com.example.shinhangaecheokja.common.exception.EntityNotFoundException.class);
   }
 
   @Test
