@@ -95,11 +95,14 @@ AI의 작업 기억 공간인 **컨텍스트 윈도우(Context Window)**에 **"�
 ### 💡 개념
 하네스 검사에서 나온 **결과(성공/에러 로그)를 AI에게 다시 전달하여, AI가 스스로 코드를 수정(Self-Healing)하도록 만드는 순환 체계**입니다.
 
-### 🔄 피드백 루프의 4가지 층위
+### 🔄 피드백 루프의 5가지 층위
 1. **Pre-Flight Self-Review Feedback:** AI가 커밋 전 스스로 미사용 import, 명명 규칙, 콘솔 출력을 1차 셀프 검토.
 2. **Immediate Local Feedback:** 로컬에서 `./scripts/verify.sh`를 구동해 3초 만에 결과를 확인하고 자가 치유.
-3. **Human-in-the-Loop:** AI의 설계안(Plan)이나 PR 코드를 사람이 리뷰하고 방향성을 보정.
-4. **CI/CD Pipeline Feedback:** GitHub PR 생성 시 CI 서버와 AI 리뷰봇(Gemini Code Reviewer)이 코드를 검사해 리뷰 댓글을 남기고, 이를 다시 수용해 고치는 순환.
+3. **Multi-Pass Audit Feedback (다회차 재검토 피드백 루프):**
+   * *"한 번의 성공이나 1차 답변이 완벽함을 보장하지 않는다"*는 원칙.
+   * AI 코드가 하네스를 1차 통과했더라도, 개발자/AI가 *"다른 각도(크로스 플랫폼, 예외케이스, 가독성)에서 개선할 점은 없을까?"* 라고 2차, 3차 재검토(Audit) 질문을 던져 비로소 완성도를 100%로 끌어올리는 피드백 루프.
+4. **Human-in-the-Loop:** AI의 설계안(Plan)이나 PR 코드를 사람이 리뷰하고 방향성을 보정.
+5. **CI/CD Pipeline Feedback:** GitHub PR 생성 시 CI 서버와 AI 리뷰봇(Gemini Code Reviewer)이 코드를 검사해 리뷰 댓글을 남기고, 이를 다시 수용해 고치는 순환.
 
 ---
 
