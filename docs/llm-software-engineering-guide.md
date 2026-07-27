@@ -122,12 +122,14 @@ AI가 한 번에 코드를 토해내면 환각(오류)이 발생하기 쉽습니
      └──────────────────────────────────────────────────────────────────┘
 ```
 
-1. **Immediate Local Feedback (로컬 즉시 피드백):**
-   * 개발자/AI가 코드를 고친 후 로컬에서 `./scripts/verify.sh`를 구동해 3초 만에 결과를 확인하고 바로 고치는 루프.
-2. **Human-in-the-Loop (사람 참여 피드백):**
+1. **Pre-Flight Self-Review Feedback (AI 사전 셀프 코드 리뷰 피드백):**
+   * AI가 작성한 코드를 제출하거나 커밋하기 전, AI 스스로 미사용 import, 불필요한 콘솔 출력, 명명 규칙 위반, 주석 누락 여부를 1차 교정하는 피드백 루프.
+2. **Immediate Local Feedback (로컬 즉시 피드백):**
+   * 코드를 고친 후 로컬에서 `./scripts/verify.sh`를 구동해 3초 만에 결과를 확인하고 자가 치유(Auto-Fix)하는 루프.
+3. **Human-in-the-Loop (사람 참여 피드백):**
    * AI가 제시한 설계안(Plan)이나 PR 코드를 사람이 리뷰하고 방향성을 바로잡아주는 루프.
-3. **CI/CD Pipeline Feedback (지속적 통합 피드백):**
-   * GitHub PR을 올리면 CI 서버와 AI 리뷰봇(Gemini Code Reviewer 등)이 자동으로 코드 스타일과 빌드를 검사해 피드백을 남기는 루프.
+4. **CI/CD Pipeline Feedback (지속적 통합 피드백):**
+   * GitHub PR을 올리면 CI 서버와 AI 리뷰봇(Gemini Code Reviewer 등)이 자동으로 코드 스타일과 빌드를 검사해 리뷰 댓글을 남기고, 이를 다시 읽어 보정하는 루프.
 
 ---
 
