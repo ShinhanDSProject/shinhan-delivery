@@ -1,70 +1,55 @@
 package com.example.shinhangaecheokja.common.exception;
 
-import com.example.shinhangaecheokja.delivery.exception.AlreadyMatchedException;
-import com.example.shinhangaecheokja.delivery.exception.DeliveryRequestNotFoundException;
-import com.example.shinhangaecheokja.delivery.exception.MatchingNotFoundException;
-import com.example.shinhangaecheokja.delivery.exception.NoAvailableCourierException;
-import com.example.shinhangaecheokja.member.exception.DuplicateMemberException;
-import com.example.shinhangaecheokja.member.exception.MemberNotFoundException;
-import com.example.shinhangaecheokja.payment.exception.InsufficientPointException;
-import com.example.shinhangaecheokja.payment.exception.PointWalletNotFoundException;
-import com.example.shinhangaecheokja.vehicle.exception.InvalidWeightException;
-import com.example.shinhangaecheokja.vehicle.exception.OverMaxDistanceException;
-import com.example.shinhangaecheokja.vehicle.exception.VehicleNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-/** 모든 예외를 HTTP 응답으로 변환하는 전역 예외 처리기. */
+/** 애플리케이션 전역에서 발생하는 예외를 포착하여 표준 에러 응답 객체(ErrorResponse)로 변환하는 컨트롤러 어드바이스입니다. */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-  /** 요청 본문 파싱 실패를 400으로 변환한다. */
-  @ExceptionHandler(HttpMessageNotReadableException.class)
-  public ResponseEntity<ErrorResponse> handleBadRequest(HttpMessageNotReadableException e) {
-    return ResponseEntity.badRequest().body(new ErrorResponse("요청 본문을 읽을 수 없습니다."));
+  private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
+  /** 비즈니스 로직 수행 중 발생하는 비즈니스 예외(BusinessException)를 처리합니다. */
+  @ExceptionHandler(BusinessException.class)
+  protected ResponseEntity<ErrorResponse> handleBusinessException(BusinessException e) {
+    ErrorCode errorCode = e.getErrorCode();
+    log.warn("BusinessException occurred: [{}] {}", errorCode.getCode(), e.getMessage());
+    ErrorResponse response = ErrorResponse.of(errorCode, e.getMessage());
+    return new ResponseEntity<>(response, errorCode.getHttpStatus());
   }
 
-  /** 입력값 자체가 유효하지 않은 경우 400으로 변환한다. */
-  @ExceptionHandler({InvalidWeightException.class, OverMaxDistanceException.class})
-  public ResponseEntity<ErrorResponse> handleInvalidInput(RuntimeException e) {
-    return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
+  /** DTO @Valid 입출력 유효성 검증 실패 예외(MethodArgumentNotValidException)를 처리합니다. */
+  @ExceptionHandler(MethodArgumentNotValidException.class)
+  protected ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(
+      MethodArgumentNotValidException e) {
+    log.warn("MethodArgumentNotValidException occurred: {}", e.getMessage());
+    ErrorCode errorCode = ErrorCode.INVALID_INPUT_VALUE;
+    ErrorResponse response = ErrorResponse.of(errorCode, e.getBindingResult());
+    return new ResponseEntity<>(response, errorCode.getHttpStatus());
   }
 
-  /** 리소스를 찾을 수 없는 경우 404로 변환한다. */
-  @ExceptionHandler({
-    MemberNotFoundException.class,
-    VehicleNotFoundException.class,
-    DeliveryRequestNotFoundException.class,
-    MatchingNotFoundException.class,
-    PointWalletNotFoundException.class
-  })
-  public ResponseEntity<ErrorResponse> handleNotFound(RuntimeException e) {
-    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(e.getMessage()));
+  /** 지원하지 않는 HTTP 메서드 호출 예외(HttpRequestMethodNotSupportedException)를 처리합니다. */
+  @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+  protected ResponseEntity<ErrorResponse> handleHttpRequestMethodNotSupportedException(
+      HttpRequestMethodNotSupportedException e) {
+    log.warn("HttpRequestMethodNotSupportedException occurred: {}", e.getMessage());
+    ErrorCode errorCode = ErrorCode.METHOD_NOT_ALLOWED;
+    ErrorResponse response = ErrorResponse.of(errorCode);
+    return new ResponseEntity<>(response, errorCode.getHttpStatus());
   }
 
-  /** 리소스 중복(예: 이메일 중복 가입)을 409로 변환한다. */
-  @ExceptionHandler(DuplicateMemberException.class)
-  public ResponseEntity<ErrorResponse> handleConflict(DuplicateMemberException e) {
-    return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(e.getMessage()));
-  }
-
-  /** 비즈니스 규칙상 처리가 불가능한 경우 422로 변환한다. */
-  @ExceptionHandler({
-    NoAvailableCourierException.class,
-    AlreadyMatchedException.class,
-    InsufficientPointException.class
-  })
-  public ResponseEntity<ErrorResponse> handleUnprocessable(RuntimeException e) {
-    return ResponseEntity.status(HttpStatus.UNPROCESSABLE_CONTENT)
-        .body(new ErrorResponse(e.getMessage()));
-  }
-
+  /** 기타 미처 처리하지 못한 모든 런타임/서버 예외(Exception)를 포착하여 500 응답으로 변환합니다. */
   @ExceptionHandler(Exception.class)
-  public ResponseEntity<ErrorResponse> handleUnexpected(Exception e) {
-    // 예상 못한 예외는 500으로, 원인은 로그로만 남기고 사용자에겐 상세 노출 안 함
-    return ResponseEntity.internalServerError().body(new ErrorResponse("서버 오류가 발생했습니다."));
+  protected ResponseEntity<ErrorResponse> handleException(Exception e) {
+    log.error("Unhandled Exception occurred: ", e);
+    ErrorCode errorCode = ErrorCode.INTERNAL_SERVER_ERROR;
+    ErrorResponse response = ErrorResponse.of(errorCode);
+    return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
   }
 }
