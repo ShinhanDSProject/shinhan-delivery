@@ -2,9 +2,12 @@ package com.example.shinhangaecheokja.common.exception;
 
 import com.example.shinhangaecheokja.delivery.exception.AlreadyMatchedException;
 import com.example.shinhangaecheokja.delivery.exception.DeliveryRequestNotFoundException;
+import com.example.shinhangaecheokja.delivery.exception.InvalidDeliveryDistanceException;
+import com.example.shinhangaecheokja.delivery.exception.InvalidDeliveryWeightException;
 import com.example.shinhangaecheokja.delivery.exception.InvalidMatchingTransitionException;
 import com.example.shinhangaecheokja.delivery.exception.MatchingNotFoundException;
 import com.example.shinhangaecheokja.delivery.exception.NoAvailableCourierException;
+import com.example.shinhangaecheokja.delivery.exception.VehicleCapacityMismatchException;
 import com.example.shinhangaecheokja.member.exception.DuplicateMemberException;
 import com.example.shinhangaecheokja.member.exception.MemberNotFoundException;
 import com.example.shinhangaecheokja.payment.exception.InsufficientPointException;
@@ -33,7 +36,12 @@ public class GlobalExceptionHandler {
   }
 
   /** 입력값 자체가 유효하지 않은 경우 400으로 변환한다. */
-  @ExceptionHandler({InvalidWeightException.class, OverMaxDistanceException.class})
+  @ExceptionHandler({
+    InvalidWeightException.class,
+    OverMaxDistanceException.class,
+    InvalidDeliveryWeightException.class,
+    InvalidDeliveryDistanceException.class
+  })
   public ResponseEntity<ErrorResponse> handleInvalidInput(RuntimeException e) {
     return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
   }
@@ -72,7 +80,8 @@ public class GlobalExceptionHandler {
     AlreadyMatchedException.class,
     InsufficientPointException.class,
     VehicleNotAvailableException.class,
-    InvalidMatchingTransitionException.class
+    InvalidMatchingTransitionException.class,
+    VehicleCapacityMismatchException.class
   })
   public ResponseEntity<ErrorResponse> handleUnprocessable(RuntimeException e) {
     return ResponseEntity.status(HttpStatus.UNPROCESSABLE_CONTENT).body(new ErrorResponse(e.getMessage()));

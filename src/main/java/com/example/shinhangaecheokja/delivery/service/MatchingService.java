@@ -12,6 +12,7 @@ import com.example.shinhangaecheokja.delivery.exception.DeliveryRequestNotFoundE
 import com.example.shinhangaecheokja.delivery.exception.InvalidMatchingTransitionException;
 import com.example.shinhangaecheokja.delivery.exception.MatchingNotFoundException;
 import com.example.shinhangaecheokja.delivery.exception.NoAvailableCourierException;
+import com.example.shinhangaecheokja.delivery.exception.VehicleCapacityMismatchException;
 import com.example.shinhangaecheokja.delivery.repository.DeliveryRequestRepository;
 import com.example.shinhangaecheokja.delivery.repository.MatchingRepository;
 import com.example.shinhangaecheokja.delivery.util.HaversineDistanceCalculator;
@@ -42,6 +43,11 @@ public class MatchingService {
     VehicleResponse vehicle = vehicleService.getVehicle(request.getVehicleId());
     if (vehicle.status() != VehicleStatus.AVAILABLE) {
       throw new VehicleNotAvailableException(request.getVehicleId());
+    }
+    if (vehicle.maxWeight() < deliveryRequest.getWeight()
+        || vehicle.maxDistance() < deliveryRequest.getDistance()) {
+      throw new VehicleCapacityMismatchException(
+          request.getVehicleId(), deliveryRequest.getWeight(), deliveryRequest.getDistance());
     }
     if (matchingRepository.existsByDeliveryRequestId(request.getDeliveryRequestId())) {
       throw new AlreadyMatchedException(request.getDeliveryRequestId());
@@ -114,15 +120,21 @@ public class MatchingService {
 
     validateTransition(previousStatus, newStatus);
 
+    DeliveryRequest deliveryRequest = findDeliveryRequestOrThrow(matching.getDeliveryRequestId());
+
     if (newStatus == MatchingStatus.MATCHED && previousStatus != MatchingStatus.MATCHED) {
       VehicleResponse vehicle = vehicleService.getVehicle(matching.getVehicleId());
       if (vehicle.status() != VehicleStatus.AVAILABLE) {
         throw new VehicleNotAvailableException(matching.getVehicleId());
       }
+      if (vehicle.maxWeight() < deliveryRequest.getWeight()
+          || vehicle.maxDistance() < deliveryRequest.getDistance()) {
+        throw new VehicleCapacityMismatchException(
+            matching.getVehicleId(), deliveryRequest.getWeight(), deliveryRequest.getDistance());
+      }
     }
 
     matching.setStatus(newStatus);
-    DeliveryRequest deliveryRequest = findDeliveryRequestOrThrow(matching.getDeliveryRequestId());
     applyStatus(matching, deliveryRequest, newStatus);
     return MatchingResponse.from(matching);
   }

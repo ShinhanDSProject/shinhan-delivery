@@ -12,6 +12,8 @@ import com.example.shinhangaecheokja.delivery.entity.DeliveryRequest;
 import com.example.shinhangaecheokja.delivery.entity.DeliveryStatus;
 import com.example.shinhangaecheokja.delivery.entity.MatchingStatus;
 import com.example.shinhangaecheokja.delivery.exception.DeliveryRequestNotFoundException;
+import com.example.shinhangaecheokja.delivery.exception.InvalidDeliveryDistanceException;
+import com.example.shinhangaecheokja.delivery.exception.InvalidDeliveryWeightException;
 import com.example.shinhangaecheokja.delivery.exception.NoAvailableCourierException;
 import com.example.shinhangaecheokja.delivery.repository.DeliveryRequestRepository;
 import com.example.shinhangaecheokja.member.exception.MemberNotFoundException;
@@ -65,6 +67,28 @@ class DeliveryServiceTest {
 
     assertThatThrownBy(() -> deliveryService.requestDelivery(request))
         .isInstanceOf(MemberNotFoundException.class);
+  }
+
+  @Test
+  void 무게가_0이하면_InvalidDeliveryWeightException을_던진다() {
+    DeliveryCreateRequest request = new DeliveryCreateRequest();
+    request.setCustomerId(1L);
+    request.setWeight(-5);
+    request.setDistance(5);
+
+    assertThatThrownBy(() -> deliveryService.requestDelivery(request))
+        .isInstanceOf(InvalidDeliveryWeightException.class);
+  }
+
+  @Test
+  void 거리가_0이하면_InvalidDeliveryDistanceException을_던진다() {
+    DeliveryCreateRequest request = new DeliveryCreateRequest();
+    request.setCustomerId(1L);
+    request.setWeight(10);
+    request.setDistance(0);
+
+    assertThatThrownBy(() -> deliveryService.requestDelivery(request))
+        .isInstanceOf(InvalidDeliveryDistanceException.class);
   }
 
   @Test

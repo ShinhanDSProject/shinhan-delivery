@@ -6,6 +6,8 @@ import com.example.shinhangaecheokja.delivery.dto.response.DeliveryResponse;
 import com.example.shinhangaecheokja.delivery.entity.DeliveryRequest;
 import com.example.shinhangaecheokja.delivery.entity.DeliveryStatus;
 import com.example.shinhangaecheokja.delivery.exception.DeliveryRequestNotFoundException;
+import com.example.shinhangaecheokja.delivery.exception.InvalidDeliveryDistanceException;
+import com.example.shinhangaecheokja.delivery.exception.InvalidDeliveryWeightException;
 import com.example.shinhangaecheokja.delivery.repository.DeliveryRequestRepository;
 import com.example.shinhangaecheokja.member.service.MemberService;
 import java.util.List;
@@ -29,6 +31,7 @@ public class DeliveryService {
   @Transactional
   public DeliveryResponse requestDelivery(DeliveryCreateRequest request) {
     memberService.getMember(request.getCustomerId());
+    validateWeightAndDistance(request.getWeight(), request.getDistance());
 
     DeliveryRequest deliveryRequest = new DeliveryRequest();
     deliveryRequest.setCustomerId(request.getCustomerId());
@@ -73,6 +76,15 @@ public class DeliveryService {
   public void deleteDeliveryRequest(Long deliveryRequestId) {
     DeliveryRequest deliveryRequest = findDeliveryRequestOrThrow(deliveryRequestId);
     deliveryRequestRepository.delete(deliveryRequest);
+  }
+
+  private void validateWeightAndDistance(double weight, double distance) {
+    if (weight <= 0) {
+      throw new InvalidDeliveryWeightException(weight);
+    }
+    if (distance <= 0) {
+      throw new InvalidDeliveryDistanceException(distance);
+    }
   }
 
   private long calculateFee(double weight, double distance) {

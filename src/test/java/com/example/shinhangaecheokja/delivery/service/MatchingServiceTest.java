@@ -20,6 +20,7 @@ import com.example.shinhangaecheokja.delivery.exception.DeliveryRequestNotFoundE
 import com.example.shinhangaecheokja.delivery.exception.InvalidMatchingTransitionException;
 import com.example.shinhangaecheokja.delivery.exception.MatchingNotFoundException;
 import com.example.shinhangaecheokja.delivery.exception.NoAvailableCourierException;
+import com.example.shinhangaecheokja.delivery.exception.VehicleCapacityMismatchException;
 import com.example.shinhangaecheokja.delivery.repository.DeliveryRequestRepository;
 import com.example.shinhangaecheokja.delivery.repository.MatchingRepository;
 import com.example.shinhangaecheokja.vehicle.dto.response.VehicleResponse;
@@ -119,6 +120,21 @@ class MatchingServiceTest {
 
     assertThatThrownBy(() -> matchingService.createMatching(request))
         .isInstanceOf(VehicleNotAvailableException.class);
+  }
+
+  @Test
+  void 차량이_무게_거리를_감당하지_못하면_VehicleCapacityMismatchException을_던진다() {
+    MatchingCreateRequest request = new MatchingCreateRequest();
+    request.setDeliveryRequestId(1L);
+    request.setVehicleId(2L);
+
+    when(deliveryRequestRepository.findById(1L)).thenReturn(Optional.of(deliveryRequest(1L)));
+    when(vehicleService.getVehicle(2L))
+        .thenReturn(
+            new VehicleResponse(2L, 1L, VehicleType.CAR, 5, 100, 37.5, 127.0, VehicleStatus.AVAILABLE));
+
+    assertThatThrownBy(() -> matchingService.createMatching(request))
+        .isInstanceOf(VehicleCapacityMismatchException.class);
   }
 
   @Test
@@ -230,12 +246,33 @@ class MatchingServiceTest {
     request.setStatus(MatchingStatus.MATCHED);
 
     when(matchingRepository.findById(1L)).thenReturn(Optional.of(matching));
+    when(deliveryRequestRepository.findById(1L)).thenReturn(Optional.of(deliveryRequest(1L)));
     when(vehicleService.getVehicle(2L))
         .thenReturn(
             new VehicleResponse(2L, 1L, VehicleType.CAR, 500, 100, 37.5, 127.0, VehicleStatus.BUSY));
 
     assertThatThrownBy(() -> matchingService.updateMatching(1L, request))
         .isInstanceOf(VehicleNotAvailableException.class);
+    verify(vehicleService, never()).markBusy(2L);
+  }
+
+  @Test
+  void 취소된_매칭을_MATCHED로_되돌릴때_차량이_용량을_감당못하면_VehicleCapacityMismatchException을_던진다() {
+    Matching matching = new Matching();
+    matching.setDeliveryRequestId(1L);
+    matching.setVehicleId(2L);
+    matching.setStatus(MatchingStatus.CANCELLED);
+    MatchingUpdateRequest request = new MatchingUpdateRequest();
+    request.setStatus(MatchingStatus.MATCHED);
+
+    when(matchingRepository.findById(1L)).thenReturn(Optional.of(matching));
+    when(deliveryRequestRepository.findById(1L)).thenReturn(Optional.of(deliveryRequest(1L)));
+    when(vehicleService.getVehicle(2L))
+        .thenReturn(
+            new VehicleResponse(2L, 1L, VehicleType.CAR, 5, 100, 37.5, 127.0, VehicleStatus.AVAILABLE));
+
+    assertThatThrownBy(() -> matchingService.updateMatching(1L, request))
+        .isInstanceOf(VehicleCapacityMismatchException.class);
     verify(vehicleService, never()).markBusy(2L);
   }
 
