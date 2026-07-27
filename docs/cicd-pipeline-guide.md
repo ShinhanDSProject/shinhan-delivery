@@ -57,7 +57,7 @@ graph TD
 
 ---
 
-### 3-1. 🛠️ 메인 빌드 & 검증 파이프라인 ([.github/workflows/gradle-ci.yml](file:///.github/workflows/gradle-ci.yml))
+### 3-1. 🛠️ 메인 빌드 & 검증 파이프라인 ([.github/workflows/gradle-ci.yml](../.github/workflows/gradle-ci.yml))
 
 우리가 제출한 PR 코드가 기존 시스템을 깨뜨리지 않는지 클라우드 가상 환경(Ubuntu)에서 검증하는 핵심 워크플로우입니다.
 
@@ -99,7 +99,7 @@ graph TD
 
 ---
 
-### 3-2. 🤖 AI 코드 리뷰어 파이프라인 ([.github/workflows/gemini-code-review.yml](file:///.github/workflows/gemini-code-review.yml))
+### 3-2. 🤖 AI 코드 리뷰어 파이프라인 ([.github/workflows/gemini-code-review.yml](../.github/workflows/gemini-code-review.yml))
 
 교육생이 제출한 PR 코드를 감지하여 다정한 튜터링 톤으로 1차 코드 리뷰를 남겨주는 자동화 워크플로우입니다.
 
@@ -107,7 +107,7 @@ graph TD
 *   **왜 도입했나요?:** PR 최초 오픈 시에는 자동 1회 가동되지만, 이후 추가 수정 푸시 시에는 API 한도 절약을 위해 자동으로 돌지 않고 개발자가 댓글로 `/review`라고 입력할 때만 수동 호출되도록 설계했습니다.
 
 #### 🐾 Step 1. `Load Gemini Review Prompt`
-*   **어떻게 작동하나요?:** [.github/prompts/gemini-review-prompt.md](file:///.github/prompts/gemini-review-prompt.md) 마크다운 파일의 프롬프트 지침 텍스트를 읽어옵니다.
+*   **어떻게 작동하나요?:** [.github/prompts/gemini-review-prompt.md](../.github/prompts/gemini-review-prompt.md) 마크다운 파일의 프롬프트 지침 텍스트를 읽어옵니다.
 *   **왜 도입했나요?:** AI용 지침 문장을 YAML 워크플로우 파일과 분리 모듈화하여, 지침 수정이 편리하고 가독성을 높였습니다.
 
 #### 🐾 Step 2. `Gemini AI Code Review`
@@ -115,7 +115,7 @@ graph TD
 
 ---
 
-### 3-3. 🏷️ PR 자동 라벨러 파이프라인 ([.github/workflows/pr-labeler.yml](file:///.github/workflows/pr-labeler.yml))
+### 3-3. 🏷️ PR 자동 라벨러 파이프라인 ([.github/workflows/pr-labeler.yml](../.github/workflows/pr-labeler.yml))
 
 #### 🐾 Step 1. `Auto Label & Assignee`
 *   **어떻게 작동하나요?:** PR 작성자를 담당자(Assignee)로 자동 지정하고, 브랜치명(`feat/`, `fix/`, `docs/`) 및 Draft 상태를 감지하여 알맞은 태그 라벨(`feature`, `bugfix`, `documentation`, `WIP`)을 부착합니다.
@@ -128,7 +128,7 @@ graph TD
 앞으로 우리 프로젝트에서 **CI/CD 워크플로우 파일(`.github/workflows/*.yml`)을 수정하거나 새로운 Step/스크립트를 추가하는 경우**, 다음 지침을 반드시 준수해야 합니다:
 
 1.  **문서 업데이트 필수:**
-    *   새로운 Step이 도입되면 본 문서([**docs/cicd-pipeline-guide.md**](file:///Users/sungminjo/workspace/shinhan/shinhan-gaecheokja/docs/cicd-pipeline-guide.md))의 **Part 3 섹션에 해당 Step의 명칭, 작동 방식, 그리고 왜 도입했는지(Why)**를 개발 초급자가 이해할 수 있는 어조로 반드시 추가 기재해야 합니다.
+    *   새로운 Step이 도입되면 본 문서([**docs/cicd-pipeline-guide.md**](./cicd-pipeline-guide.md))의 **Part 3 섹션에 해당 Step의 명칭, 작동 방식, 그리고 왜 도입했는지(Why)**를 개발 초급자가 이해할 수 있는 어조로 반드시 추가 기재해야 합니다.
 2.  **PR 자가 체크리스트 준수:**
     *   PR 제출 시 자가 체크리스트의 `[ ] (CI/CD 변경 시) docs/cicd-pipeline-guide.md 안내 문서를 함께 업데이트하셨나요?` 항목을 반드시 체크하여 제출해야 합니다.
 
