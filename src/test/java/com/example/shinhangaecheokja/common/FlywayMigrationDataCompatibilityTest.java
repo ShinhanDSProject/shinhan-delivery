@@ -30,7 +30,7 @@ class FlywayMigrationDataCompatibilityTest {
   @Test
   @DisplayName("기존 데이터가 적재된 상태에서도 모든 Flyway 마이그레이션이 제약 조건 오류 없이 통과하는지 검증한다.")
   void testMigrationWithExistingData() {
-    // 1. DB 클린업 및 V1 마이그레이션 수행
+    // 1. DB 클린업 및 V2 마이그레이션 수행 (V2에서 member 테이블 생성)
     Flyway flywayV1 =
         Flyway.configure()
             .dataSource(dataSource)

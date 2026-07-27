@@ -85,3 +85,10 @@ spotless {
         endWithNewline()
     }
 }
+
+tasks.register('verify') {
+    group = 'verification'
+    description = 'Spotless 포맷팅 검사 및 전체 테스트를 원스톱 검증하는 하네스 타겟입니다.'
+    dependsOn 'spotlessCheck', 'test'
+}
+
