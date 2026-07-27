@@ -354,7 +354,7 @@
 
     // 가입 완료 제출
     document.getElementById('signupForm').addEventListener('submit', async function(e) {
-        e.preventDefault();
+        e.preventDefault(); //화면 깐박임 방지!
         const resultToast = document.getElementById('resultToast');
 
         const name = document.getElementById('name').value.trim();
@@ -373,9 +373,9 @@
         }
 
         try {
-            const res = await fetch('/api/users/signup', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+            const res = await fetch('/api/users/signup', {  //포장해서 서버로 던지기
+                method: 'POST', //방식은 POST방식
+                headers: { 'Content-Type': 'application/json' },    //내용물은 JSON형태
                 body: JSON.stringify({
                     name,
                     email,
