@@ -91,7 +91,7 @@ PR을 원격 저장소에 제출하기 전, 로컬 개발 환경에서 **AI 자�
 
 1. **로컬 AI 자가 코드 리뷰 (Self-Review):** 기능 구현 완료 후 커밋 전, AI 어시스턴트(Antigravity)가 `git diff` 및 작성 코드를 사전 다각도 검토(컨벤션, 예외 구조, 엣지케이스, DTO 변환)합니다.
 2. **개선사항 로컬 즉시 반영:** 리뷰 지적사항이나 보완점이 발견되면 PR 생성 전 로컬에서 즉시 자체 수정을 거쳐 완성도를 최고 수준으로 끌어올립니다.
-3. **로컬 빌드 & 포맷팅 100% 검증:** `./gradlew spotlessApply && ./gradlew test`를실행하여 43개 전체 테스트가 100% 그린 상태임을 확인한 후 커밋/푸시합니다.
+3. **로컬 빌드, 커버리지 & 포맷팅 100% 검증:** `./gradlew spotlessApply && ./gradlew test jacocoTestReport jacocoTestCoverageVerification`을 실행하여 (1) 전체 테스트 100% 통과, (2) 서비스 계층 커버리지 최소 60% 이상 충족(JaCoCo Quality Gate), (3) ArchUnit 계층 구조 규칙 준수 여부를 종합 검증 후 커밋/푸시합니다.
 4. **무결점(Zero-Defect) PR 생성:** 미완성 커밋이나 오타 수정 커밋을 원격에 올리지 않고, 가장 정돈되고 완전무결한 커밋만을 제출합니다.
 
 ### 7단계: 지속적 피드백 루프 & 컨벤션 자산화 (Continuous Feedback Loop)
