@@ -47,6 +47,7 @@ git config --local commit.template .gitmessage
 * [**초보 개발자 온보딩 및 기능 개발 로드맵 (docs/onboarding-roadmap.md)**](./docs/onboarding-roadmap.md) - 입문자를 위한 필수 학습 순서 및 실전 기능 개발 7단계 흐름 가이드 🚀
 * [**협업 문화 및 자동화 도구 도입 배경 가이드 (docs/development-culture-guide.md)**](./docs/development-culture-guide.md) - 왜 이런 협업 규칙과 DevOps 도구들을 도입했는지, 미도입 시 어떤 장애 참사가 발생하는지 설명해 주는 입문자 필독서 🎓
 * [**Git Flow 및 커밋 컨벤션 가이드 (docs/git-flow-guide.md)**](./docs/git-flow-guide.md) - 브랜치 운용 규칙, Conventional Commits 커밋 헤더 태그 가이드 및 자동 코드 리뷰 연동 규칙
+* [**CI/CD 파이프라인 및 GitHub Actions Step 해설 가이드 (docs/cicd-pipeline-guide.md)**](./docs/cicd-pipeline-guide.md) - 지속적 통합/배포 개념, Actions 동작 원리, 워크플로우 각 Step별 왜 도입했는지 정밀 해설 ⚙️
 * [**기능 개발 전 설계 단계 프로세스 가이드 (docs/design-phase-guide.md)**](./docs/design-phase-guide.md) - 기능 개발에 착수하기 전 작성해야 할 4대 핵심 산출물 양식과 2단계 PR 전략
 * [**로컬 개발 환경 및 자동화 도구 사용 가이드 (docs/developer-env-guide.md)**](./docs/developer-env-guide.md) - Spotless 포맷 자동 가공 명령어, Swagger UI, 로컬 테스트용 더미 데이터 설정
 * [**Flyway 데이터베이스 마이그레이션 가이드 (docs/flyway-guide.md)**](./docs/flyway-guide.md) - Flyway 스크립트 작성 규칙, JPA Buddy 플러그인을 활용한 마이그레이션 방법
