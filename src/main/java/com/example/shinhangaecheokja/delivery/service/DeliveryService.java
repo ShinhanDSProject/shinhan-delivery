@@ -6,10 +6,10 @@ import com.example.shinhangaecheokja.delivery.dto.response.DeliveryResponse;
 import com.example.shinhangaecheokja.delivery.entity.DeliveryRequest;
 import com.example.shinhangaecheokja.delivery.entity.DeliveryStatus;
 import com.example.shinhangaecheokja.delivery.exception.DeliveryRequestNotFoundException;
-import com.example.shinhangaecheokja.delivery.exception.NoAvailableCourierException;
+import com.example.shinhangaecheokja.delivery.exception.InvalidDeliveryDistanceException;
+import com.example.shinhangaecheokja.delivery.exception.InvalidDeliveryWeightException;
 import com.example.shinhangaecheokja.delivery.repository.DeliveryRequestRepository;
 import com.example.shinhangaecheokja.member.service.MemberService;
-import com.example.shinhangaecheokja.vehicle.service.VehicleService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -25,15 +25,13 @@ public class DeliveryService {
 
   private final DeliveryRequestRepository deliveryRequestRepository;
   private final MemberService memberService;
-  private final VehicleService vehicleService;
+  private final MatchingService matchingService;
 
-  /** 고객 존재 여부와 감당 가능한 차량 존재 여부를 검증한 뒤 배송을 요청한다. */
+  /** 고객 존재 여부를 검증한 뒤 배송을 요청하고, 위치·무게·거리 조건에 맞는 배송원을 자동으로 매칭한다. */
   @Transactional
   public DeliveryResponse requestDelivery(DeliveryCreateRequest request) {
     memberService.getMember(request.getCustomerId());
-    if (!vehicleService.existsAvailableVehicle(request.getWeight(), request.getDistance())) {
-      throw new NoAvailableCourierException(request.getWeight(), request.getDistance());
-    }
+    validateWeightAndDistance(request.getWeight(), request.getDistance());
 
     DeliveryRequest deliveryRequest = new DeliveryRequest();
     deliveryRequest.setCustomerId(request.getCustomerId());
@@ -41,10 +39,15 @@ public class DeliveryService {
     deliveryRequest.setDropoffAddress(request.getDropoffAddress());
     deliveryRequest.setWeight(request.getWeight());
     deliveryRequest.setDistance(request.getDistance());
+    deliveryRequest.setPickupLatitude(request.getPickupLatitude());
+    deliveryRequest.setPickupLongitude(request.getPickupLongitude());
     deliveryRequest.setStatus(DeliveryStatus.REQUESTED);
     deliveryRequest.setFeePoint(calculateFee(request.getWeight(), request.getDistance()));
 
-    return DeliveryResponse.from(deliveryRequestRepository.save(deliveryRequest));
+    DeliveryRequest saved = deliveryRequestRepository.save(deliveryRequest);
+    matchingService.autoMatch(saved);
+
+    return DeliveryResponse.from(saved);
   }
 
   /** id로 배송 요청 단건을 조회한다. 없으면 DeliveryRequestNotFoundException. */
@@ -73,6 +76,15 @@ public class DeliveryService {
   public void deleteDeliveryRequest(Long deliveryRequestId) {
     DeliveryRequest deliveryRequest = findDeliveryRequestOrThrow(deliveryRequestId);
     deliveryRequestRepository.delete(deliveryRequest);
+  }
+
+  private void validateWeightAndDistance(double weight, double distance) {
+    if (weight <= 0) {
+      throw new InvalidDeliveryWeightException(weight);
+    }
+    if (distance <= 0) {
+      throw new InvalidDeliveryDistanceException(distance);
+    }
   }
 
   private long calculateFee(double weight, double distance) {

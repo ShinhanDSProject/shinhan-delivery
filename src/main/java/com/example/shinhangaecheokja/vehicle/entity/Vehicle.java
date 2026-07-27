@@ -36,4 +36,14 @@ public class Vehicle {
 
   @Column(name = "max_distance", nullable = false)
   private double maxDistance;
+
+  @Column(nullable = false)
+  private double latitude;
+
+  @Column(nullable = false)
+  private double longitude;
+
+  @Enumerated(EnumType.STRING)
+  @Column(nullable = false, length = 20)
+  private VehicleStatus status;
 }

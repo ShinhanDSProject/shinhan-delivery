@@ -41,7 +41,7 @@ class DeliveryControllerTest {
     when(deliveryService.requestDelivery(any()))
         .thenReturn(
             new DeliveryResponse(
-                1L, 1L, "서울시 강남구", "서울시 서초구", 10, 5, DeliveryStatus.REQUESTED, 600L));
+                1L, 1L, "서울시 강남구", "서울시 서초구", 10, 5, DeliveryStatus.REQUESTED, 600L, 37.5, 127.0));
 
     mockMvc
         .perform(
@@ -51,6 +51,39 @@ class DeliveryControllerTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.customerId").value(1L))
         .andExpect(jsonPath("$.status").value("REQUESTED"));
+  }
+
+  @Test
+  void 위도가_범위를_벗어나면_400을_반환한다() throws Exception {
+    DeliveryCreateRequest request = new DeliveryCreateRequest();
+    request.setCustomerId(1L);
+    request.setWeight(10);
+    request.setDistance(5);
+    request.setPickupLatitude(200);
+    request.setPickupLongitude(127.0);
+
+    mockMvc
+        .perform(
+            post("/api/delivery-requests")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  void 픽업_주소가_없으면_400을_반환한다() throws Exception {
+    DeliveryCreateRequest request = new DeliveryCreateRequest();
+    request.setCustomerId(1L);
+    request.setDropoffAddress("서울시 서초구");
+    request.setWeight(10);
+    request.setDistance(5);
+
+    mockMvc
+        .perform(
+            post("/api/delivery-requests")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isBadRequest());
   }
 
   @Test

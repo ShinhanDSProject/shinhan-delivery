@@ -2,18 +2,26 @@ package com.example.shinhangaecheokja.common.exception;
 
 import com.example.shinhangaecheokja.delivery.exception.AlreadyMatchedException;
 import com.example.shinhangaecheokja.delivery.exception.DeliveryRequestNotFoundException;
+import com.example.shinhangaecheokja.delivery.exception.InvalidDeliveryDistanceException;
+import com.example.shinhangaecheokja.delivery.exception.InvalidDeliveryWeightException;
+import com.example.shinhangaecheokja.delivery.exception.InvalidMatchingTransitionException;
 import com.example.shinhangaecheokja.delivery.exception.MatchingNotFoundException;
 import com.example.shinhangaecheokja.delivery.exception.NoAvailableCourierException;
+import com.example.shinhangaecheokja.delivery.exception.VehicleCapacityMismatchException;
 import com.example.shinhangaecheokja.member.exception.DuplicateMemberException;
 import com.example.shinhangaecheokja.member.exception.MemberNotFoundException;
 import com.example.shinhangaecheokja.payment.exception.InsufficientPointException;
 import com.example.shinhangaecheokja.payment.exception.PointWalletNotFoundException;
 import com.example.shinhangaecheokja.vehicle.exception.InvalidWeightException;
 import com.example.shinhangaecheokja.vehicle.exception.OverMaxDistanceException;
+import com.example.shinhangaecheokja.vehicle.exception.VehicleNotAvailableException;
 import com.example.shinhangaecheokja.vehicle.exception.VehicleNotFoundException;
+import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -28,9 +36,24 @@ public class GlobalExceptionHandler {
   }
 
   /** 입력값 자체가 유효하지 않은 경우 400으로 변환한다. */
-  @ExceptionHandler({InvalidWeightException.class, OverMaxDistanceException.class})
+  @ExceptionHandler({
+    InvalidWeightException.class,
+    OverMaxDistanceException.class,
+    InvalidDeliveryWeightException.class,
+    InvalidDeliveryDistanceException.class
+  })
   public ResponseEntity<ErrorResponse> handleInvalidInput(RuntimeException e) {
     return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
+  }
+
+  /** @Valid 검증 실패(예: 좌표 범위 위반)를 400으로 변환한다. */
+  @ExceptionHandler(MethodArgumentNotValidException.class)
+  public ResponseEntity<ErrorResponse> handleValidationFailure(MethodArgumentNotValidException e) {
+    String message =
+        e.getBindingResult().getFieldErrors().stream()
+            .map(FieldError::getDefaultMessage)
+            .collect(Collectors.joining(", "));
+    return ResponseEntity.badRequest().body(new ErrorResponse(message));
   }
 
   /** 리소스를 찾을 수 없는 경우 404로 변환한다. */
@@ -55,7 +78,10 @@ public class GlobalExceptionHandler {
   @ExceptionHandler({
     NoAvailableCourierException.class,
     AlreadyMatchedException.class,
-    InsufficientPointException.class
+    InsufficientPointException.class,
+    VehicleNotAvailableException.class,
+    InvalidMatchingTransitionException.class,
+    VehicleCapacityMismatchException.class
   })
   public ResponseEntity<ErrorResponse> handleUnprocessable(RuntimeException e) {
     return ResponseEntity.status(HttpStatus.UNPROCESSABLE_CONTENT).body(new ErrorResponse(e.getMessage()));

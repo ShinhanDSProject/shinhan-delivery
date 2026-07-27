@@ -10,11 +10,13 @@ import com.example.shinhangaecheokja.member.service.MemberService;
 import com.example.shinhangaecheokja.vehicle.dto.request.VehicleCreateRequest;
 import com.example.shinhangaecheokja.vehicle.dto.response.VehicleResponse;
 import com.example.shinhangaecheokja.vehicle.entity.Vehicle;
+import com.example.shinhangaecheokja.vehicle.entity.VehicleStatus;
 import com.example.shinhangaecheokja.vehicle.entity.VehicleType;
 import com.example.shinhangaecheokja.vehicle.exception.InvalidWeightException;
 import com.example.shinhangaecheokja.vehicle.exception.OverMaxDistanceException;
 import com.example.shinhangaecheokja.vehicle.exception.VehicleNotFoundException;
 import com.example.shinhangaecheokja.vehicle.repository.VehicleRepository;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -43,6 +45,7 @@ class VehicleServiceTest {
 
     assertThat(response.ownerId()).isEqualTo(1L);
     assertThat(response.type()).isEqualTo(VehicleType.CAR);
+    assertThat(response.status()).isEqualTo(VehicleStatus.AVAILABLE);
   }
 
   @Test
@@ -103,5 +106,45 @@ class VehicleServiceTest {
     VehicleResponse response = vehicleService.getVehicle(1L);
 
     assertThat(response.type()).isEqualTo(VehicleType.DRONE);
+  }
+
+  @Test
+  void 가용상태이면서_무게_거리를_감당하는_차량_후보_목록을_조회한다() {
+    Vehicle vehicle = new Vehicle();
+    vehicle.setOwnerId(1L);
+    vehicle.setType(VehicleType.CAR);
+    vehicle.setMaxWeight(500);
+    vehicle.setMaxDistance(100);
+    vehicle.setStatus(VehicleStatus.AVAILABLE);
+    when(vehicleRepository.findByStatusAndMaxWeightGreaterThanEqualAndMaxDistanceGreaterThanEqual(
+            VehicleStatus.AVAILABLE, 10, 5))
+        .thenReturn(List.of(vehicle));
+
+    List<VehicleResponse> candidates = vehicleService.getCandidateVehicles(10, 5);
+
+    assertThat(candidates).hasSize(1);
+    assertThat(candidates.get(0).status()).isEqualTo(VehicleStatus.AVAILABLE);
+  }
+
+  @Test
+  void 차량을_BUSY_상태로_전환한다() {
+    Vehicle vehicle = new Vehicle();
+    vehicle.setStatus(VehicleStatus.AVAILABLE);
+    when(vehicleRepository.findById(1L)).thenReturn(Optional.of(vehicle));
+
+    vehicleService.markBusy(1L);
+
+    assertThat(vehicle.getStatus()).isEqualTo(VehicleStatus.BUSY);
+  }
+
+  @Test
+  void 차량을_AVAILABLE_상태로_전환한다() {
+    Vehicle vehicle = new Vehicle();
+    vehicle.setStatus(VehicleStatus.BUSY);
+    when(vehicleRepository.findById(1L)).thenReturn(Optional.of(vehicle));
+
+    vehicleService.markAvailable(1L);
+
+    assertThat(vehicle.getStatus()).isEqualTo(VehicleStatus.AVAILABLE);
   }
 }

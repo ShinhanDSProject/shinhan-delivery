@@ -5,10 +5,12 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.example.shinhangaecheokja.delivery.dto.request.MatchingCreateRequest;
+import com.example.shinhangaecheokja.delivery.dto.request.MatchingUpdateRequest;
 import com.example.shinhangaecheokja.delivery.dto.response.MatchingResponse;
 import com.example.shinhangaecheokja.delivery.entity.MatchingStatus;
 import com.example.shinhangaecheokja.delivery.exception.MatchingNotFoundException;
@@ -54,5 +56,30 @@ class MatchingControllerTest {
     when(matchingService.getMatching(eq(999L))).thenThrow(new MatchingNotFoundException(999L));
 
     mockMvc.perform(get("/api/matchings/999")).andExpect(status().isNotFound());
+  }
+
+  @Test
+  void 매칭_생성시_deliveryRequestId가_없으면_400을_반환한다() throws Exception {
+    MatchingCreateRequest request = new MatchingCreateRequest();
+    request.setVehicleId(2L);
+
+    mockMvc
+        .perform(
+            post("/api/matchings")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  void 매칭_상태_변경시_status가_없으면_400을_반환한다() throws Exception {
+    MatchingUpdateRequest request = new MatchingUpdateRequest();
+
+    mockMvc
+        .perform(
+            put("/api/matchings/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isBadRequest());
   }
 }
