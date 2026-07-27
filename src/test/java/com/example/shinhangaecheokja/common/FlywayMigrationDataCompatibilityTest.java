@@ -30,15 +30,15 @@ class FlywayMigrationDataCompatibilityTest {
   @Test
   @DisplayName("기존 데이터가 적재된 상태에서도 모든 Flyway 마이그레이션이 제약 조건 오류 없이 통과하는지 검증한다.")
   void testMigrationWithExistingData() {
-    // 1. DB 클린업 및 V1 마이그레이션 수행
+    // 1. DB 클린업 및 V2 마이그레이션 수행 (V2에서 member 테이블 생성)
     Flyway flywayV1 =
         Flyway.configure()
             .dataSource(dataSource)
             .cleanDisabled(false) // clean 기능 명시적 활성화
-            .target("1") // V1 스키마(초기 스키마) 구축을 타겟팅
+            .target("2") // V2 스키마(member 테이블 생성) 구축을 타겟팅
             .load();
     flywayV1.clean(); // 기존 테스트 스키마 완전 초기화
-    flywayV1.migrate(); // V1 Schema 적용
+    flywayV1.migrate(); // V2 Schema 적용
 
     // 2. V1 스키마 기준 테이블들에 더미 데이터 삽입 (기존 데이터 상태 재현)
     // ⚠️ 주의: V1__init_schema.sql 내의 테이블 구조가 변경(컬럼 삭제 등)되는 경우,

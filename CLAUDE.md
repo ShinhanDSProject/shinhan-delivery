@@ -25,12 +25,20 @@
 Gradle wrapper를 사용하세요(Windows에서는 `gradlew.bat`, bash에서는 `./gradlew`) — 전역에 설치된 Gradle에 의존하지 마세요.
 
 ```
+./scripts/verify.sh            # 로컬 CI 통합 하네스 검증 (Flyway + Spotless + Test 한번에 구동)
 gradlew.bat build              # 전체 빌드 (컴파일 + 테스트)
 gradlew.bat bootRun            # 애플리케이션 실행
 gradlew.bat test               # 전체 테스트 실행
 gradlew.bat spotlessCheck      # 포맷팅 검사 (CI에서 실행 / 작업 완료 선언 전에 실행)
 gradlew.bat spotlessApply      # 컨벤션에 맞게 자동 포맷팅
 ```
+
+### Test Harness & 자가 치유 피드백 루프 (AI 에이전트 필독)
+
+코드를 생성하거나 수정한 후, 작업을 완료하기 전에 **반드시 `./scripts/verify.sh`를 구동하여 검증**해야 합니다.
+1. `./scripts/verify.sh` 구동 중 오류(Spotless 포맷팅 위반, ArchUnit 아키텍처 규칙 위반, Flyway 규격 오류, 단위 테스트 실패) 발생 시,
+2. 출력된 피드백 메시지 및 스택 트레이스를 분석하여 코드를 수정한 뒤,
+3. `./scripts/verify.sh`가 성공(exit status 0)을 반환할 때까지 자가 치유 피드백 루프를 반복하세요.
 
 로컬 DB 연결(`.env`)과 Flyway 마이그레이션 작성법은 `README.md`, `docs/flyway-guide.md`를 참고하세요.
 
