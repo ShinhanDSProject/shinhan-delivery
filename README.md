@@ -25,6 +25,12 @@ DB_PASSWORD=your_password_here
 
 💡 *실행 중 에러가 발생하거나 연결이 되지 않는다면 [**로컬 개발 트러블슈팅 가이드 (docs/troubleshooting.md)**](./docs/troubleshooting.md)를 참고해 주세요.*
 
+### 3. Git 커밋 템플릿 설정 (.gitmessage)
+협업 규칙에 따른 일관된 커밋 작성을 위해 아래 명령어로 로컬 커밋 템플릿을 등록해 주세요. 등록 후 `git commit` 실행 시 버퍼 창에 템플릿 힌트가 자동으로 채워집니다.
+```bash
+git config --local commit.template .gitmessage
+```
+
 👉 [**로컬 개발 환경 및 자동화 도구 사용 가이드 바로가기 (docs/developer-env-guide.md)**](./docs/developer-env-guide.md)
 
 ---

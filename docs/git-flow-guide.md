@@ -97,6 +97,13 @@ feat(member): 이메일 중복 체크 API 구현
 Resolves: #45
 ```
 
+### 💡 Git 커밋 메시지 템플릿 설정 (.gitmessage)
+매번 이 컨벤션 규격을 수동으로 입력하기 어려우므로, 프로젝트 루트에 포함된 `.gitmessage` 파일을 템플릿으로 연동하여 사용하는 것을 권장합니다. 로컬 저장소 터미널에서 다음 명령어를 실행하여 등록할 수 있습니다:
+```bash
+git config --local commit.template .gitmessage
+```
+설정 후 터미널에서 `git commit`을 실행하면 템플릿 가이드라인이 자동으로 커밋 작성 화면에 로드되어 쉽게 규격에 맞춰 커밋을 작성할 수 있습니다.
+
 ---
 
 ## 4. Pull Request 규칙 및 템플릿 (PR Rules)
@@ -106,7 +113,8 @@ Resolves: #45
 ### PR 작성 기본 수칙
 1. **리뷰어(Reviewers) 및 담당자(Assignees) 지정:** 최소 1명 이상의 리뷰어를 지정해야 합니다.
 2. **연관 이슈 연결:** 본문 하단에 관련 이슈 번호를 명시하여 자동으로 닫히도록 설정합니다. (예: `Resolves: #45`)
-3. **작업 증빙 첨부:** UI 작업은 스크린샷, API 작업은 테스트 수행 로그 또는 API 호출 결과를 반드시 본문에 첨부합니다.
+3. **Swagger API 문서화 필수:** API 엔드포인트의 추가, 변경, 삭제가 발생하는 모든 작업은 반드시 관련 Controller 및 DTO에 Swagger 어노테이션 설정을 포함해야 합니다.
+4. **작업 증빙 첨부:** UI 작업은 스크린샷, API 작업은 테스트 수행 로그 또는 API 호출 결과를 반드시 본문에 첨부합니다.
 
 ### PR 템플릿 사용 (AI 및 인간 공통 규칙)
 GitHub의 기본 PR 템플릿 파일이 `[pull_request_template.md](file:///Users/sungminjo/workspace/shinhan/shinhan-gaecheokja/.github/pull_request_template.md)`에 정의되어 있습니다. 
