@@ -41,3 +41,4 @@ DB_PASSWORD=your_password_here
 원활한 공동 작업과 안정적인 배포 흐름을 위해 정의한 규칙들입니다. 작업 진행 전 아래 가이드를 준수해 주세요.
 
 👉 [**Git Flow 및 커밋 컨벤션 가이드 바로가기 (docs/git-flow-guide.md)**](./docs/git-flow-guide.md)
+👉 [**기능 개발 전 설계 단계 프로세스 가이드 바로가기 (docs/design-phase-guide.md)**](./docs/design-phase-guide.md)
