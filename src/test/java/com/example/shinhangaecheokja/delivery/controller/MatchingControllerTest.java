@@ -11,11 +11,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.example.shinhangaecheokja.delivery.dto.request.MatchingCreateRequest;
 import com.example.shinhangaecheokja.delivery.dto.request.MatchingUpdateRequest;
+import com.example.shinhangaecheokja.delivery.dto.response.DeliveryResponse;
 import com.example.shinhangaecheokja.delivery.dto.response.MatchingResponse;
+import com.example.shinhangaecheokja.delivery.entity.DeliveryStatus;
 import com.example.shinhangaecheokja.delivery.entity.MatchingStatus;
 import com.example.shinhangaecheokja.delivery.exception.MatchingNotFoundException;
 import com.example.shinhangaecheokja.delivery.service.MatchingService;
 import java.time.LocalDateTime;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -49,6 +52,22 @@ class MatchingControllerTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.deliveryRequestId").value(1L))
         .andExpect(jsonPath("$.status").value("MATCHED"));
+  }
+
+  @Test
+  void 차량의_열린_콜_목록을_조회한다() throws Exception {
+    when(matchingService.getOpenCalls(2L))
+        .thenReturn(
+            List.of(
+                new DeliveryResponse(
+                    1L, 1L, "서울시 강남구", "서울시 서초구", 10, 5, DeliveryStatus.REQUESTED, 600L, 37.5,
+                    127.0)));
+
+    mockMvc
+        .perform(get("/api/matchings/calls").param("vehicleId", "2"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$[0].id").value(1L))
+        .andExpect(jsonPath("$[0].status").value("REQUESTED"));
   }
 
   @Test
