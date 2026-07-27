@@ -276,4 +276,22 @@ class MatchingServiceTest {
     verify(vehicleService).markAvailable(2L);
     verify(matchingRepository).delete(matching);
   }
+
+  @Test
+  void 이미_COMPLETED된_매칭을_삭제해도_배송요청_상태를_되돌리지_않는다() {
+    Matching matching = new Matching();
+    matching.setDeliveryRequestId(1L);
+    matching.setVehicleId(2L);
+    matching.setStatus(MatchingStatus.COMPLETED);
+    DeliveryRequest deliveryRequest = deliveryRequest(1L);
+    deliveryRequest.setStatus(DeliveryStatus.COMPLETED);
+
+    when(matchingRepository.findById(1L)).thenReturn(Optional.of(matching));
+
+    matchingService.deleteMatching(1L);
+
+    assertThat(deliveryRequest.getStatus()).isEqualTo(DeliveryStatus.COMPLETED);
+    verify(vehicleService, never()).markAvailable(2L);
+    verify(matchingRepository).delete(matching);
+  }
 }

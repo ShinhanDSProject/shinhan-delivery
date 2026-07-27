@@ -124,12 +124,18 @@ public class MatchingService {
     return MatchingResponse.from(matching);
   }
 
-  /** id로 매칭을 조회해 삭제하고, 연결된 배송 요청·차량을 매칭 이전 상태로 되돌린다. */
+  /**
+   * id로 매칭을 조회해 삭제한다. 매칭이 진행 중(MATCHED)이었던 경우에만 연결된 배송 요청·차량을 매칭
+   * 이전 상태로 되돌린다 — 이미 COMPLETED/CANCELLED된 매칭은 배송 요청 상태가 이미 그에 맞게 반영되어
+   * 있으므로 REQUESTED로 되돌리지 않는다.
+   */
   @Transactional
   public void deleteMatching(Long matchingId) {
     Matching matching = findMatchingOrThrow(matchingId);
-    vehicleService.markAvailable(matching.getVehicleId());
-    findDeliveryRequestOrThrow(matching.getDeliveryRequestId()).setStatus(DeliveryStatus.REQUESTED);
+    if (matching.getStatus() == MatchingStatus.MATCHED) {
+      vehicleService.markAvailable(matching.getVehicleId());
+      findDeliveryRequestOrThrow(matching.getDeliveryRequestId()).setStatus(DeliveryStatus.REQUESTED);
+    }
     matchingRepository.delete(matching);
   }
 
