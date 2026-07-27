@@ -23,32 +23,31 @@ for file_path in "$MIGRATION_DIR"/*; do
     continue
   fi
 
-  LINE_NUMBER=0
-  # 파일 내용 라인 단위 순회
-  while IFS= read -r line || [[ -n "$line" ]]; do
-    LINE_NUMBER=$((LINE_NUMBER + 1))
-    
-    # 공백 제거 및 대문자 변환 후 DDL 관련 키워드 탐색
-    upper_line=$(echo "$line" | tr '[:lower:]' '[:upper:]')
-    
-    # 우회 주석이 한 줄에 들어있는 경우 건너뜀 (예: -- linter:ignore-online-ddl)
-    if [[ "$upper_line" == *"--"*"LINTER:IGNORE-ONLINE-DDL"* ]] || [[ "$upper_line" == *"--"*"SKIP-DDL-CHECK"* ]]; then
+  # 세미콜론(;)을 구분자로 사용하여 여러 줄로 작성된 개별 쿼리문 단위로 분할하여 읽어들입의다.
+  # 이렇게 하면 줄바꿈 쿼리문 및 쿼리 윗줄의 주석이 하나의 단일 문자열 버퍼에 포함됩니다.
+  while IFS= read -r -d ';' statement || [[ -n "$statement" ]]; do
+    # 공백 제거 및 대문자 변환
+    upper_statement=$(echo "$statement" | tr '[:lower:]' '[:upper:]')
+
+    # 해당 쿼리 블록 내에 우회 주석이 포함되어 있다면 검사를 건너뜁니다.
+    if [[ "$upper_statement" == *"LINTER:IGNORE-ONLINE-DDL"* ]] || [[ "$upper_statement" == *"SKIP-DDL-CHECK"* ]]; then
       continue
     fi
 
-    # ALTER TABLE, CREATE INDEX, DROP INDEX 키워드가 들어있는 라인 검출
-    if [[ "$upper_line" =~ ALTER[[:space:]]+TABLE || "$upper_line" =~ CREATE[[:space:]]+INDEX || "$upper_line" =~ DROP[[:space:]]+INDEX ]]; then
+    # ALTER TABLE, CREATE INDEX, DROP INDEX 키워드가 포함되어 있는지 정밀 탐색
+    if [[ "$upper_statement" =~ ALTER[[:space:]]+TABLE || "$upper_statement" =~ CREATE[[:space:]]+INDEX || "$upper_statement" =~ DROP[[:space:]]+INDEX ]]; then
       # ALGORITHM=INPLACE와 LOCK=NONE 옵션이 둘 다 명시되어 있는지 확인
-      if [[ "$upper_line" == *"ALGORITHM=INPLACE"* ]] && [[ "$upper_line" == *"LOCK=NONE"* ]]; then
-        # 통과
+      if [[ "$upper_statement" == *"ALGORITHM=INPLACE"* ]] && [[ "$upper_statement" == *"LOCK=NONE"* ]]; then
         continue
       else
         echo "❌ LOCK RISK DETECTED: 무중단 DDL 규격 위배"
-        echo "   📍 파일명: $filename (Line: $LINE_NUMBER)"
-        echo "   📝 쿼리 내용: $line"
+        echo "   📍 파일명: $filename"
+        # 출력 시 너무 긴 공백이나 개행은 정돈하여 표출
+        cleaned_statement=$(echo "$statement" | xargs)
+        echo "   📝 쿼리 내용: $cleaned_statement"
         echo "   💡 해결 가이드:"
         echo "      대용량 테이블 DDL 시 락(Lock)으로 인한 서비스 장애를 막기 위해 구문 끝에 ', ALGORITHM=INPLACE, LOCK=NONE;'을 추가해 주세요."
-        echo "      (만약 해당 DDL 작업이 INPLACE 알고리즘을 지원하지 않는 경우, 쿼리 윗줄이나 옆에 '-- linter:ignore-online-ddl' 주석을 달아 이 경고를 우회할 수 있습니다.)"
+        echo "      (만약 해당 DDL 작업이 INPLACE 알고리즘을 지원하지 않는 경우, 쿼리 바로 윗줄이나 옆에 '-- linter:ignore-online-ddl' 주석을 달아 이 경고를 우회할 수 있습니다.)"
         echo ""
         INVALID_COUNT=$((INVALID_COUNT + 1))
       fi

@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.ActiveProfiles;
 
 /**
  * 데이터베이스 마이그레이션 수행 시, 기존 데이터가 존재할 때 발생할 수 있는 스키마 제약조건 오류를 검증합니다.
@@ -19,6 +20,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
  * 누락하면 기존 레코드들과 충돌이 발생해 마이그레이션이 실패하게 됩니다. 이 테스트는 해당 시나리오를 가상 테스트 데이터와 함께 사전 재현하여 검사합니다.
  */
 @SpringBootTest
+@ActiveProfiles("test") // 테스트 전용 Profile 적용으로 실제 운영/로컬 DB 격리 안전장치 확보
 class FlywayMigrationDataCompatibilityTest {
 
   @Autowired private DataSource dataSource;
@@ -39,6 +41,8 @@ class FlywayMigrationDataCompatibilityTest {
     flywayV1.migrate(); // V1 Schema 적용
 
     // 2. V1 스키마 기준 테이블들에 더미 데이터 삽입 (기존 데이터 상태 재현)
+    // ⚠️ 주의: V1__init_schema.sql 내의 테이블 구조가 변경(컬럼 삭제 등)되는 경우,
+    // 아래 가상 INSERT 구문의 컬럼 규격도 일치하도록 반드시 동기화 수정해 주어야 합니다.
     jdbcTemplate.execute(
         "INSERT INTO member (email, password, name, phone_number, role) "
             + "VALUES ('migration_test@example.com', 'hashed_pass', 'Mig Test', '010-9999-9999', 'CUSTOMER')");
