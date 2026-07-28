@@ -43,4 +43,9 @@ public class Member {
   @Enumerated(EnumType.STRING)
   @Column(nullable = false, length = 20)
   private MemberRole role;
+
+  /** 회원의 역할(Customer/Courier/Admin)을 변경한다. */
+  public void updateRole(MemberRole role) {
+    this.role = role;
+  }
 }

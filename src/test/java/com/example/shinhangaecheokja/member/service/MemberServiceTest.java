@@ -77,4 +77,35 @@ class MemberServiceTest {
 
     assertThat(response.email()).isEqualTo("user@example.com");
   }
+
+  @Test
+  void 역할_변경_시_성공적으로_역할이_업데이트된다() {
+    Member member = new Member();
+    member.setEmail("user@example.com");
+    member.setName("홍길동");
+    member.setPhoneNumber("010-1234-5678");
+    member.setRole(MemberRole.CUSTOMER);
+    when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
+
+    com.example.shinhangaecheokja.member.dto.request.RoleUpdateRequestDto request =
+        new com.example.shinhangaecheokja.member.dto.request.RoleUpdateRequestDto(
+            MemberRole.COURIER);
+
+    MemberResponse response = memberService.updateRole(1L, request);
+
+    assertThat(response.role()).isEqualTo(MemberRole.COURIER);
+    assertThat(member.getRole()).isEqualTo(MemberRole.COURIER);
+  }
+
+  @Test
+  void 존재하지_않는_회원의_역할을_변경하려_하면_EntityNotFoundException을_던진다() {
+    when(memberRepository.findById(999L)).thenReturn(Optional.empty());
+
+    com.example.shinhangaecheokja.member.dto.request.RoleUpdateRequestDto request =
+        new com.example.shinhangaecheokja.member.dto.request.RoleUpdateRequestDto(
+            MemberRole.COURIER);
+
+    assertThatThrownBy(() -> memberService.updateRole(999L, request))
+        .isInstanceOf(com.example.shinhangaecheokja.common.exception.EntityNotFoundException.class);
+  }
 }

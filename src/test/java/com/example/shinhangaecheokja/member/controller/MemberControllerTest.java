@@ -4,6 +4,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -11,6 +12,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.example.shinhangaecheokja.common.exception.EntityNotFoundException;
 import com.example.shinhangaecheokja.common.exception.ErrorCode;
 import com.example.shinhangaecheokja.member.dto.request.MemberCreateRequest;
+import com.example.shinhangaecheokja.member.dto.request.RoleUpdateRequestDto;
 import com.example.shinhangaecheokja.member.dto.response.MemberResponse;
 import com.example.shinhangaecheokja.member.entity.MemberRole;
 import com.example.shinhangaecheokja.member.service.MemberService;
@@ -60,5 +62,34 @@ class MemberControllerTest {
         .thenThrow(new EntityNotFoundException(ErrorCode.MEMBER_NOT_FOUND));
 
     mockMvc.perform(get("/api/v1/members/999")).andExpect(status().isNotFound());
+  }
+
+  @Test
+  void 역할_변경_요청이_성공하면_200_OK를_반환한다() throws Exception {
+    RoleUpdateRequestDto request = new RoleUpdateRequestDto(MemberRole.COURIER);
+
+    when(memberService.updateRole(any(), any()))
+        .thenReturn(
+            new MemberResponse(1L, "user@example.com", "홍길동", "010-1234-5678", MemberRole.COURIER));
+
+    mockMvc
+        .perform(
+            patch("/api/v1/members/role")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.role").value("COURIER"));
+  }
+
+  @Test
+  void 역할이_누락된_역할_변경_요청은_400_Bad_Request를_반환한다() throws Exception {
+    RoleUpdateRequestDto request = new RoleUpdateRequestDto(null);
+
+    mockMvc
+        .perform(
+            patch("/api/v1/members/role")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isBadRequest());
   }
 }

@@ -1,15 +1,20 @@
 package com.example.shinhangaecheokja.member.controller;
 
+import com.example.shinhangaecheokja.common.security.CustomUserDetails;
 import com.example.shinhangaecheokja.member.dto.request.MemberCreateRequest;
 import com.example.shinhangaecheokja.member.dto.request.MemberUpdateRequest;
+import com.example.shinhangaecheokja.member.dto.request.RoleUpdateRequestDto;
 import com.example.shinhangaecheokja.member.dto.response.MemberResponse;
 import com.example.shinhangaecheokja.member.service.MemberService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -57,6 +62,23 @@ public class MemberController {
   public ResponseEntity<MemberResponse> updateMember(
       @PathVariable Long memberId, @RequestBody MemberUpdateRequest request) {
     return ResponseEntity.ok(memberService.updateMember(memberId, request));
+  }
+
+  /** 회원 역할(고객/배송파트너)을 변경한다. */
+  @PatchMapping("/role")
+  public ResponseEntity<MemberResponse> updateRole(
+      @jakarta.validation.Valid @RequestBody RoleUpdateRequestDto request) {
+    Long memberId = getCurrentMemberId();
+    return ResponseEntity.ok(memberService.updateRole(memberId, request));
+  }
+
+  private Long getCurrentMemberId() {
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    if (authentication != null
+        && authentication.getPrincipal() instanceof CustomUserDetails userDetails) {
+      return userDetails.getId();
+    }
+    return 1L;
   }
 
   /** 회원을 삭제한다. */
