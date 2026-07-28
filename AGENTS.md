@@ -7,6 +7,7 @@
 * 의존성 방향은 항상 단방향(`Controller -> Service -> Repository`)을 유지해야 합니다.
 * Controller는 DTO만 다루며 Entity를 직접 반환해서는 안 됩니다.
 * **Getter, Setter 작성 시 수동 코딩을 금지하고 무조건 Lombok 라이브러리(`@Getter`, `@Setter`)를 100% 사용하여 개발해야 합니다.**
+* **신규 기술 도입 및 핵심 아키텍처 결정 시 `docs/adr/` 규격에 따라 공식 ADR(Architecture Decision Record) 문서를 필수 작성해야 합니다.**
 * **PR 생성 시 리뷰어(관리자)의 검토 소요 시간을 단축하기 위해 `docs/pr-review-guide.md` 규격에 따라 [리뷰어 3분 족보 가이드] 및 [Files changed 핀포인트 인라인 댓글]을 필수 작성/부착해야 합니다.**
 
 ## 2. AI Pre-Flight Self-Review & Test Harness 자가 치유 피드백 루프
