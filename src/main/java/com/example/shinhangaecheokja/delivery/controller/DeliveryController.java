@@ -34,8 +34,7 @@ public class DeliveryController {
 
   /** 배송 요청 단건을 조회한다. */
   @GetMapping("/{deliveryRequestId}")
-  public ResponseEntity<DeliveryResponse> getDeliveryRequest(
-      @PathVariable Long deliveryRequestId) {
+  public ResponseEntity<DeliveryResponse> getDeliveryRequest(@PathVariable Long deliveryRequestId) {
     return ResponseEntity.ok(deliveryService.getDeliveryRequest(deliveryRequestId));
   }
 

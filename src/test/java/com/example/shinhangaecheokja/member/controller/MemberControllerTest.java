@@ -8,10 +8,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.example.shinhangaecheokja.common.exception.EntityNotFoundException;
+import com.example.shinhangaecheokja.common.exception.ErrorCode;
 import com.example.shinhangaecheokja.member.dto.request.MemberCreateRequest;
 import com.example.shinhangaecheokja.member.dto.response.MemberResponse;
 import com.example.shinhangaecheokja.member.entity.MemberRole;
-import com.example.shinhangaecheokja.member.exception.MemberNotFoundException;
 import com.example.shinhangaecheokja.member.service.MemberService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,8 +39,10 @@ class MemberControllerTest {
     request.setPhoneNumber("010-1234-5678");
     request.setRole(MemberRole.CUSTOMER);
 
-    when(memberService.createMember(any())).thenReturn(
-        new MemberResponse(1L, "user@example.com", "홍길동", "010-1234-5678", MemberRole.CUSTOMER));
+    when(memberService.createMember(any()))
+        .thenReturn(
+            new MemberResponse(
+                1L, "user@example.com", "홍길동", "010-1234-5678", MemberRole.CUSTOMER));
 
     mockMvc
         .perform(
@@ -53,7 +56,8 @@ class MemberControllerTest {
 
   @Test
   void 존재하지_않는_회원을_조회하면_404를_반환한다() throws Exception {
-    when(memberService.getMember(eq(999L))).thenThrow(new MemberNotFoundException(999L));
+    when(memberService.getMember(eq(999L)))
+        .thenThrow(new EntityNotFoundException(ErrorCode.MEMBER_NOT_FOUND));
 
     mockMvc.perform(get("/api/members/999")).andExpect(status().isNotFound());
   }

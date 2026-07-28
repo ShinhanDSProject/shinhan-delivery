@@ -2,6 +2,8 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '4.1.0'
     id 'io.spring.dependency-management' version '1.1.7'
+    id 'com.diffplug.spotless' version '6.25.0'
+    id 'jacoco'
 }
 
 group = 'com.example'
@@ -34,10 +36,14 @@ dependencies {
     // Dotenv support for Spring Boot
     implementation 'me.paulschwarz:springboot4-dotenv:5.1.0'
     
+    // API Document Automation (Swagger / OpenAPI)
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.3'
+    
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-data-jpa-test'
     testImplementation 'org.springframework.boot:spring-boot-starter-validation-test'
     testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
+    testImplementation 'com.tngtech.archunit:archunit-junit5:1.3.0'
     testCompileOnly 'org.projectlombok:lombok'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     testAnnotationProcessor 'org.projectlombok:lombok'
@@ -45,4 +51,44 @@ dependencies {
 
 tasks.named('test') {
     useJUnitPlatform()
+    finalizedBy jacocoTestReport
 }
+
+jacocoTestReport {
+    dependsOn test
+    reports {
+        xml.required = true
+        csv.required = false
+        html.outputLocation = layout.buildDirectory.dir('reports/jacoco/test/html')
+    }
+}
+
+jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            element = 'CLASS'
+            includes = ['com.example.shinhangaecheokja.*.service.*']
+            limit {
+                counter = 'LINE'
+                value = 'COVEREDRATIO'
+                minimum = 0.60
+            }
+        }
+    }
+}
+
+spotless {
+    java {
+        googleJavaFormat('1.28.0') // Google Java Style (Supports modern JDK)
+        removeUnusedImports()
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
+}
+
+tasks.register('verify') {
+    group = 'verification'
+    description = 'Spotless 포맷팅 검사 및 전체 테스트를 원스톱 검증하는 하네스 타겟입니다.'
+    dependsOn 'spotlessCheck', 'test'
+}
+

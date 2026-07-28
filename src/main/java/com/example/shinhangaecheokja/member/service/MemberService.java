@@ -1,11 +1,12 @@
 package com.example.shinhangaecheokja.member.service;
 
+import com.example.shinhangaecheokja.common.exception.EntityNotFoundException;
+import com.example.shinhangaecheokja.common.exception.ErrorCode;
 import com.example.shinhangaecheokja.member.dto.request.MemberCreateRequest;
 import com.example.shinhangaecheokja.member.dto.request.MemberUpdateRequest;
 import com.example.shinhangaecheokja.member.dto.response.MemberResponse;
 import com.example.shinhangaecheokja.member.entity.Member;
 import com.example.shinhangaecheokja.member.exception.DuplicateMemberException;
-import com.example.shinhangaecheokja.member.exception.MemberNotFoundException;
 import com.example.shinhangaecheokja.member.repository.MemberRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -38,7 +39,7 @@ public class MemberService {
     return MemberResponse.from(memberRepository.save(member));
   }
 
-  /** id로 회원 단건을 조회한다. 없으면 MemberNotFoundException. */
+  /** id로 회원 단건을 조회한다. 없으면 EntityNotFoundException. */
   @Transactional(readOnly = true)
   public MemberResponse getMember(Long memberId) {
     return MemberResponse.from(findMemberOrThrow(memberId));
@@ -59,7 +60,7 @@ public class MemberService {
     return MemberResponse.from(member);
   }
 
-  /** id로 회원을 조회해 삭제한다. 없으면 MemberNotFoundException. */
+  /** id로 회원을 조회해 삭제한다. 없으면 EntityNotFoundException. */
   @Transactional
   public void deleteMember(Long memberId) {
     Member member = findMemberOrThrow(memberId);
@@ -67,6 +68,8 @@ public class MemberService {
   }
 
   private Member findMemberOrThrow(Long memberId) {
-    return memberRepository.findById(memberId).orElseThrow(() -> new MemberNotFoundException(memberId));
+    return memberRepository
+        .findById(memberId)
+        .orElseThrow(() -> new EntityNotFoundException(ErrorCode.MEMBER_NOT_FOUND));
   }
 }

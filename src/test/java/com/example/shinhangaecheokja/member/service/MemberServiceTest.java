@@ -6,11 +6,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import com.example.shinhangaecheokja.member.dto.request.MemberCreateRequest;
+import com.example.shinhangaecheokja.member.dto.response.MemberResponse;
 import com.example.shinhangaecheokja.member.entity.Member;
 import com.example.shinhangaecheokja.member.entity.MemberRole;
 import com.example.shinhangaecheokja.member.exception.DuplicateMemberException;
-import com.example.shinhangaecheokja.member.exception.MemberNotFoundException;
-import com.example.shinhangaecheokja.member.dto.response.MemberResponse;
 import com.example.shinhangaecheokja.member.repository.MemberRepository;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
@@ -38,7 +37,8 @@ class MemberServiceTest {
 
     when(memberRepository.existsByEmail("user@example.com")).thenReturn(false);
     when(passwordEncoder.encode("password123")).thenReturn("encoded-password");
-    when(memberRepository.save(any(Member.class))).thenAnswer(invocation -> invocation.getArgument(0));
+    when(memberRepository.save(any(Member.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
 
     MemberResponse response = memberService.createMember(request);
 
@@ -57,10 +57,11 @@ class MemberServiceTest {
   }
 
   @Test
-  void 존재하지_않는_회원을_조회하면_MemberNotFoundException을_던진다() {
+  void 존재하지_않는_회원을_조회하면_EntityNotFoundException을_던진다() {
     when(memberRepository.findById(1L)).thenReturn(Optional.empty());
 
-    assertThatThrownBy(() -> memberService.getMember(1L)).isInstanceOf(MemberNotFoundException.class);
+    assertThatThrownBy(() -> memberService.getMember(1L))
+        .isInstanceOf(com.example.shinhangaecheokja.common.exception.EntityNotFoundException.class);
   }
 
   @Test

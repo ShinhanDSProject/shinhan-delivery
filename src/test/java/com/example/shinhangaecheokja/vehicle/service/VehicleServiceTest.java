@@ -5,7 +5,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-import com.example.shinhangaecheokja.member.exception.MemberNotFoundException;
 import com.example.shinhangaecheokja.member.service.MemberService;
 import com.example.shinhangaecheokja.vehicle.dto.request.VehicleCreateRequest;
 import com.example.shinhangaecheokja.vehicle.dto.request.VehicleUpdateRequest;
@@ -16,7 +15,6 @@ import com.example.shinhangaecheokja.vehicle.entity.VehicleType;
 import com.example.shinhangaecheokja.vehicle.exception.InvalidWeightException;
 import com.example.shinhangaecheokja.vehicle.exception.OverMaxDistanceException;
 import com.example.shinhangaecheokja.vehicle.exception.VehicleNotAvailableException;
-import com.example.shinhangaecheokja.vehicle.exception.VehicleNotFoundException;
 import com.example.shinhangaecheokja.vehicle.repository.VehicleRepository;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
@@ -40,7 +38,8 @@ class VehicleServiceTest {
     request.setMaxWeight(500);
     request.setMaxDistance(100);
 
-    when(vehicleRepository.save(any(Vehicle.class))).thenAnswer(invocation -> invocation.getArgument(0));
+    when(vehicleRepository.save(any(Vehicle.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
 
     VehicleResponse response = vehicleService.registerVehicle(request);
 
@@ -50,17 +49,20 @@ class VehicleServiceTest {
   }
 
   @Test
-  void 존재하지_않는_소유자면_MemberNotFoundException을_던진다() {
+  void 존재하지_않는_소유자면_EntityNotFoundException을_던진다() {
     VehicleCreateRequest request = new VehicleCreateRequest();
     request.setOwnerId(999L);
     request.setType(VehicleType.CAR);
     request.setMaxWeight(500);
     request.setMaxDistance(100);
 
-    when(memberService.getMember(999L)).thenThrow(new MemberNotFoundException(999L));
+    when(memberService.getMember(999L))
+        .thenThrow(
+            new com.example.shinhangaecheokja.common.exception.EntityNotFoundException(
+                com.example.shinhangaecheokja.common.exception.ErrorCode.MEMBER_NOT_FOUND));
 
     assertThatThrownBy(() -> vehicleService.registerVehicle(request))
-        .isInstanceOf(MemberNotFoundException.class);
+        .isInstanceOf(com.example.shinhangaecheokja.common.exception.EntityNotFoundException.class);
   }
 
   @Test
@@ -88,11 +90,11 @@ class VehicleServiceTest {
   }
 
   @Test
-  void 존재하지_않는_차량을_조회하면_VehicleNotFoundException을_던진다() {
+  void 존재하지_않는_차량을_조회하면_EntityNotFoundException을_던진다() {
     when(vehicleRepository.findById(1L)).thenReturn(Optional.empty());
 
     assertThatThrownBy(() -> vehicleService.getVehicle(1L))
-        .isInstanceOf(VehicleNotFoundException.class);
+        .isInstanceOf(com.example.shinhangaecheokja.common.exception.EntityNotFoundException.class);
   }
 
   @Test
@@ -110,11 +112,11 @@ class VehicleServiceTest {
   }
 
   @Test
-  void 비관적_락으로_존재하지_않는_차량을_조회하면_VehicleNotFoundException을_던진다() {
+  void 비관적_락으로_존재하지_않는_차량을_조회하면_EntityNotFoundException을_던진다() {
     when(vehicleRepository.findByIdForUpdate(1L)).thenReturn(Optional.empty());
 
     assertThatThrownBy(() -> vehicleService.getVehicleForUpdate(1L))
-        .isInstanceOf(VehicleNotFoundException.class);
+        .isInstanceOf(com.example.shinhangaecheokja.common.exception.EntityNotFoundException.class);
   }
 
   @Test

@@ -1,5 +1,7 @@
 package com.example.shinhangaecheokja.payment.service;
 
+import com.example.shinhangaecheokja.common.exception.EntityNotFoundException;
+import com.example.shinhangaecheokja.common.exception.ErrorCode;
 import com.example.shinhangaecheokja.member.service.MemberService;
 import com.example.shinhangaecheokja.payment.dto.request.PointChargeRequest;
 import com.example.shinhangaecheokja.payment.dto.request.PointUseRequest;
@@ -7,7 +9,6 @@ import com.example.shinhangaecheokja.payment.dto.request.PointWalletCreateReques
 import com.example.shinhangaecheokja.payment.dto.response.PointWalletResponse;
 import com.example.shinhangaecheokja.payment.entity.PointWallet;
 import com.example.shinhangaecheokja.payment.exception.InsufficientPointException;
-import com.example.shinhangaecheokja.payment.exception.PointWalletNotFoundException;
 import com.example.shinhangaecheokja.payment.repository.PaymentRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -34,7 +35,7 @@ public class PaymentService {
     return PointWalletResponse.from(paymentRepository.save(wallet));
   }
 
-  /** id로 포인트 지갑 단건을 조회한다. 없으면 PointWalletNotFoundException. */
+  /** id로 포인트 지갑 단건을 조회한다. 없으면 EntityNotFoundException. */
   @Transactional(readOnly = true)
   public PointWalletResponse getWallet(Long walletId) {
     return PointWalletResponse.from(findWalletOrThrow(walletId));
@@ -65,7 +66,7 @@ public class PaymentService {
     return PointWalletResponse.from(wallet);
   }
 
-  /** id로 포인트 지갑을 조회해 삭제한다. 없으면 PointWalletNotFoundException. */
+  /** id로 포인트 지갑을 조회해 삭제한다. 없으면 EntityNotFoundException. */
   @Transactional
   public void deleteWallet(Long walletId) {
     PointWallet wallet = findWalletOrThrow(walletId);
@@ -75,6 +76,6 @@ public class PaymentService {
   private PointWallet findWalletOrThrow(Long walletId) {
     return paymentRepository
         .findById(walletId)
-        .orElseThrow(() -> new PointWalletNotFoundException(walletId));
+        .orElseThrow(() -> new EntityNotFoundException(ErrorCode.POINT_WALLET_NOT_FOUND));
   }
 }

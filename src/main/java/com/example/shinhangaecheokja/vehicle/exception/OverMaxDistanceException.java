@@ -1,9 +1,19 @@
 package com.example.shinhangaecheokja.vehicle.exception;
 
-/** 최대 이동거리(maxDistance)가 0 이하로 유효하지 않을 때 던진다. */
-public class OverMaxDistanceException extends RuntimeException {
+import com.example.shinhangaecheokja.common.exception.BusinessException;
+import com.example.shinhangaecheokja.common.exception.ErrorCode;
 
-  public OverMaxDistanceException(double maxDistance) {
-    super("유효하지 않은 최대 이동거리입니다: " + maxDistance);
+public class OverMaxDistanceException extends BusinessException {
+
+  public OverMaxDistanceException() {
+    super(ErrorCode.INVALID_INPUT_VALUE, "차량 운행 가능 거리를 초과했습니다.");
+  }
+
+  public OverMaxDistanceException(double distance) {
+    super(ErrorCode.INVALID_INPUT_VALUE, "차량 운행 가능 거리를 초과했습니다. (요청 거리: " + distance + "km)");
+  }
+
+  public OverMaxDistanceException(String message) {
+    super(ErrorCode.INVALID_INPUT_VALUE, message);
   }
 }

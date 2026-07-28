@@ -25,12 +25,30 @@
 Gradle wrapper를 사용하세요(Windows에서는 `gradlew.bat`, bash에서는 `./gradlew`) — 전역에 설치된 Gradle에 의존하지 마세요.
 
 ```
+./scripts/verify.sh            # 로컬 CI 통합 하네스 검증 (Flyway + Spotless + Test 한번에 구동)
 gradlew.bat build              # 전체 빌드 (컴파일 + 테스트)
 gradlew.bat bootRun            # 애플리케이션 실행
 gradlew.bat test               # 전체 테스트 실행
 gradlew.bat spotlessCheck      # 포맷팅 검사 (CI에서 실행 / 작업 완료 선언 전에 실행)
 gradlew.bat spotlessApply      # 컨벤션에 맞게 자동 포맷팅
 ```
+
+### AI Pre-Flight Self-Review (사전 셀프 코드 리뷰) & 자가 치유 피드백 루프 (AI 에이전트 필독)
+
+코드를 생성하거나 수정한 후, 작업을 완료하거나 `./pr`을 구동하기 전에 **AI 에이전트는 아래 2단계 사전 검토 루프를 거쳐야 합니다**:
+
+1. **1단계 - AI 사전 셀프 코드 리뷰 (Pre-Flight Self-Review):**
+   - 수정한 코드에 미사용 import, 불필요한 System.out 출력, 변수/메서드 명명 규칙 위반, 주석 미비 사항이 없는지 스스로 1차 셀프 코드 리뷰를 수행하고 보정합니다.
+2. **2단계 - Test Harness 자가 치유 피드백 루프:**
+   - `./scripts/verify.sh`를 구동하여 오류(Spotless 포맷팅 위반, ArchUnit 아키텍처 규칙 위반, Flyway 규격 오류, 단위 테스트 실패) 발생 시, 출력된 에러 메시지와 스택 트레이스를 분석해 스스로 코드를 수정한 뒤 성공(exit status 0)할 때까지 루프를 반복합니다.
+3. **3단계 - Multi-Pass Project Audit (우리 프로젝트 맞춤형 다회차 재검토):**
+   - 1차 빌드/테스트를 통과했더라도, **실제 우리 프로젝트에 적합하고 안전한지 아래 6대 프로젝트 관점**에서 2차, 3차 다각도로 재검토하여 완성도를 100% 확보하세요:
+     1. **아키텍처 순수성:** Controller에서 Entity 반환 금지, Controller -> Repository 직접 참조 금지 (`code-convention.md` 준수)
+     2. **비즈니스 예외 안전성:** 커스텀 예외 던짐 및 `GlobalExceptionHandler` 응답 매핑 부합 여부
+     3. **운영 DB & 마이그레이션 안전성:** Flyway Online DDL 규격 준수 및 기존 데이터 정합성 위배 여부
+     4. **보안 & 데이터 프라이버시:** 하드코딩된 Secret/API 토큰 및 개인정보 유출 위험 여부
+     5. **초보자 개발자 경험 (DX):** Mac/Windows 크로스 플랫폼 지원 및 오류 메시지의 친절한 해설 여부
+     6. **실질적 테스트 가치:** 단순 통과용 깡통 테스트가 아닌 실제 회귀 버그를 잡는 유의미한 검증인가?
 
 로컬 DB 연결(`.env`)과 Flyway 마이그레이션 작성법은 `README.md`, `docs/flyway-guide.md`를 참고하세요.
 
