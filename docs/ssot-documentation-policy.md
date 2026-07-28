@@ -53,6 +53,7 @@ metadata:
 | **팀 개발 문화 & 일하는 방식 7대 철학** | [`docs/engineering-culture-and-working-style.md`](./engineering-culture-and-working-style.md) | `README.md` |
 | **초급 개발자 7단계 태스크 분할 가이드** | [`docs/junior-developer-task-guide.md`](./junior-developer-task-guide.md) | `README.md` |
 | **학습형 3단계 GitHub Issue 작성 규격** | [`docs/learning-oriented-issue-guide.md`](./learning-oriented-issue-guide.md) | `README.md` |
+| **AI 기반 초급자 페어 프로그래밍 가이드** | [`docs/ai-paired-development-guide.md`](./ai-paired-development-guide.md) | `README.md` |
 | **초급자 CRUD & 레이어별 이슈 분할 템플릿** | [`docs/beginner-crud-issue-template-guide.md`](./beginner-crud-issue-template-guide.md) | `README.md` |
 | **프로젝트 착수 전 6대 사전 리스크 감사** | [`docs/pre-launch-risk-and-governance-guide.md`](./pre-launch-risk-and-governance-guide.md) | `README.md` |
 
