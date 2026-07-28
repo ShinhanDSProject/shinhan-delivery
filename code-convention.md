@@ -400,7 +400,7 @@ void 도메인은_다른_도메인의_repository를_직접_참조하지_않는�
   - `feat`, `fix`, `refactor`, `test`, `docs`, `chore`
   - 예시: `feat: 배송 요금 산정 로직 추가`
 - **브랜치명:** `type/도메인-내용` (예: `feat/delivery-fee-calculation`)
-- **PR 단위:** 도메인 하나 + 기능 하나 정도로 작게 유지하며 `Squash and Merge` 병합.
+- **PR 단위:** 도메인 하나 + 기능 하나 정도로 작게 유지하며 `Squash and Merge` 병합. PR 제출 시 리뷰어의 검토 소요 시간을 단축하기 위해 `docs/pr-review-guide.md` 양식에 따라 **[리뷰어 3분 족보 가이드(추천 읽기 순서 + 체크리스트)]를 PR 본문 또는 첫 댓글에 100% 필수 작성**한다.
 
 ---
 
