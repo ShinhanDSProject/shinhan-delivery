@@ -48,10 +48,9 @@ graph TD
 * **평문 Secret 노출 차단:** `application.yaml` 및 소스 코드 내 AWS Access Key, DB 비밀번호, JWT Secret Key의 평문 하드코딩 금지. (환경변수 주입 의무화)
 * **민감정보 로그 노출 차단:** `System.out.println` 및 로깅(`log.info`)에 비밀번호, JWT 토큰, 주민등록번호 등 개인정보 출력 전면 차단.
 
-### 2️⃣ 🏛️ 롬복 100% & 클린 아키텍처 박멸 게이트 (Clean Architecture Enforcement)
-* **수동 Getter/Setter 작성 0개 사수:** `@Getter`, `@Setter` 어노테이션 미사용 시 수동 `getXXX()`, `setXXX()` 작성을 ArchUnit으로 탐지하여 즉시 차단.
-* **Controller Entity 직접 반환 금지:** Controller에서 DTO가 아닌 JPA Entity를 직접 반환할 경우 즉시 빌드 실패 처리.
-* **단방향 의존성 사수:** `Controller ➔ Service ➔ Repository` 단방향 레이어링 위반 시 하네스 차단.
+### 2️⃣ 🏛️ 코딩 컨벤션 단일 원본(SSOT) 자동 집행 게이트
+* **단일 원본(SSOT) 참조:** 모든 코딩 규약(Lombok 100% 사용 수칙, Controller Entity 직접 반환 금지, 단방향 의존성 레이어링)의 **단일 원본은 [`code-convention.md`](../code-convention.md) 문서**입니다.
+* **하네스 자동 집행 역할:** 하네스는 `code-convention.md`에 정의된 규약을 인간 리뷰어 대신 **ArchUnit 및 Spotless**를 통해 100% 자동 검사하여, 위반 시 exit code 1로 즉시 빌드를 차단하는 집행 기관 역할을 수행합니다.
 
 ### 3️⃣ 📊 지속적 커버리지 래칫 게이트 (JaCoCo Coverage Ratchet)
 * **현재 최소 커버리지 게이트:** **라인 커버리지 60%+**
