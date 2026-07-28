@@ -93,6 +93,7 @@ graph LR
 - [ ] 비즈니스 예외가 `GlobalExceptionHandler`에 매핑되어 처리되는가?
 - [ ] Controller에서 Entity를 직접 반환하지 않고 DTO로 변환하는가?
 - [ ] 새로 추가된 모든 클래스에 Lombok `@Getter`/`@Setter`가 100% 적용되었는가?
+- [ ] 신규/수정 문서가 SSOT(단일 원본 관리 원칙)를 준수하여 중복 없이 원본 마크다운 링크로 참조되었는가?
 - [ ] 기존 API 하위 호환성 및 기존 테스트가 깨지지 않고 유지되는가?
 ```
 
