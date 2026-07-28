@@ -45,6 +45,7 @@
    - 버그 발생 시 추측이나 짐작으로 코드를 수정하는 행위("이럴 것 같아서 수정했습니다")를 금지합니다. 반드시 실제 스택트레이스, 로그, 재생 가능한 실패 테스트라는 객관적 실증 증거를 수집한 후에만 수정을 집행합니다.
 8. **기존 API 계약 및 하위 호환성 100% 유지 (Zero Side-Effect Stability):**
    - 기존 응답 DTO 필드, HTTP Status, 파라미터 시그니처의 파괴적 변경(Breaking Change)을 금지하며, 사용 중인 기존 기능에 부작용(Side-effect)이 없음을 전수로 검증합니다.
-9. **작업 단위 완료 시 마이크로 커밋 의무화 (Sub-task Micro-Commit Execution):**
-   - 모든 AI 에이전트와 개발자는 레이어별(DTO, Entity, Service, Controller, Test) 또는 서브태스크 작업 단위가 완성되고 `./scripts/verify.sh` 검증이 통과할 때마다 **지체 없이 Git 마이크로 커밋(Micro-Commit)을 즉시 집행**하여 투명하고 명확한 히스토리를 남깁니다.
+9. **작업 단위 완료 시 `commit` 커맨드 대화형 마이크로 커밋 의무화 (Sub-task Micro-Commit Execution):**
+   - 모든 AI 에이전트와 개발자는 레이어별(DTO, Entity, Service, Controller, Test) 또는 서브태스크 작업 단위가 완성될 때마다 변경 사항과 커밋 메시지 프리뷰를 제시하고, 개발자가 **`commit`** (또는 `/commit`) 명령어를 전송하면 `./scripts/verify.sh` 검증 후 지체 없이 **Git 마이크로 커밋(Micro-Commit)을 즉시 집행**합니다.
+
 

@@ -30,7 +30,30 @@ graph TD
 
 ---
 
-## ⚡ 초간편 5대 슬래시 커맨드(Slash Command) 인터페이스
+## 🌿 세분화 마이크로 커밋(Micro-Commit) & `commit` 커맨드 승인 규칙
+
+개발 진행 시 큰 커밋 1개가 아니라, **레이어/파일 단위 서브태스크가 완성될 때마다 AI가 커밋 프리뷰를 제시하고, 개발자가 `commit` 명령어를 입력하여 즉시 커밋**합니다:
+
+```mermaid
+graph LR
+    SubTask["💻 서머리/파일 작성 완료"] --> AI_Preview["📢 AI 커밋 프리뷰 제시"]
+    AI_Preview --> User_Cmd["💬 개발자 'commit' 입력"]
+    User_Cmd --> Harness["🧪 ./scripts/verify.sh 검증"]
+    Harness --> Git_Commit["✅ git commit 실행"]
+```
+
+### 📌 5단계 세분화 마이크로 커밋 규격 예시 (Issue #93)
+1. **[1단계: DTO]** `feat(#93): [회원] 이메일 로그인 Request/Response DTO 수록`
+2. **[2단계: Entity/Repo]** `feat(#93): [회원] Member Entity @Getter 확인 및 MemberRepository 수록`
+3. **[3단계: Service]** `feat(#93): [회원] MemberService 이메일 검증 및 JWT 발급 비즈니스 로직 구현`
+4. **[4단계: Controller]** `feat(#93): [회원] MemberController POST /login 엔드포인트 수록`
+5. **[5단계: Test]** `test(#93): [회원] MemberService 이메일 로그인 성공 및 예외 단위 테스트 수록`
+
+> **💡 대화형 승인 팁:** 각 파일 작성 완료 후 개발자가 `commit` (또는 `/commit`)이라고 입력하면 AI가 로컬 하네스(`verify.sh`) 구동 후 즉시 해당 서브태스크 마이크로 커밋을 실행합니다.
+
+---
+
+## ⚡ 초간편 6대 슬래시 커맨드(Slash Command) 인터페이스
 
 긴 프롬프트 문장을 매번 복사/붙여넣기할 필요 없이, 초급 개발자는 **터미널이나 AI 차트창에 아래 5가지 한 줄 슬래시 커맨드만 입력**하여 차근차근 개발을 진행할 수 있습니다:
 
