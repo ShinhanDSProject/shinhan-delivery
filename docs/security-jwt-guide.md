@@ -2,7 +2,21 @@
 
 이 문서는 `shinhan-gaecheokja` 프로젝트에 구축된 **Spring Security + JWT (JSON Web Token) 무상태(Stateless) 인증 및 인가 시스템**의 아키텍처 구조와 사용법을 초보 개발자의 눈높이에 맞춰 설명하는 가이드북입니다.
 
+* 📜 **공식 아키텍처 의사결정 기록:** [**ADR-0001: JWT 기반 무상태 인증 체계 채택 (docs/adr/0001-stateless-jwt-authentication.md)**](./adr/0001-stateless-jwt-authentication.md)
+
 ---
+
+## 🐣 초보 개발자를 위한 3분 Q&A (Why & Scope)
+
+### Q1. 로그인은 왜 필요하며, 어떤 범위로 적용해야 하나요?
+* **이유:** 사용자가 본인의 배송 내역, 포인트 잔액, 개인정보만 조회할 수 있도록 **"신원 확인(인증)"**과 **"접근 권한 통제(인가)"**를 집행해야 하기 때문입니다.
+* **적용 범위 (Default-Deny 원칙):** 
+  - 기본적으로 프로젝트 내 **모든 API는 로그인(유효한 JWT 토큰)을 거쳐야만 이용할 수 있도록 통제**합니다.
+  - 단, **로그인(`POST /api/members/login`), 회원가입(`POST /api/members`), API 문서(`Swagger`), 서버 헬스체크(`/actuator/health`)** 4가지 최소한의 필수 입구만 공개(Public)로 허용합니다.
+
+### Q2. 세션/쿠키 방식 대신 왜 JWT(JSON Web Token)를 사용했나요?
+* **서버 무상태성 (Stateless):** 세션 방식은 사용자 로그인 정보를 서버 메모리/DB에 보관해야 하므로, 접속자가 늘어 서버를 10대로 확장(Scale-out)할 때 세션 동기화 서버를 추가해야 합니다.
+* **JWT의 매력:** 토큰 자체에 사용자의 신원 정보와 암호화 서명(Signature)이 들어있어, 서버가 상태를 보관할 필요 없이 **토큰 서명만 검증하면 0.001초 만에 인가 완료**됩니다. 서버를 100대로 확장해도 세션 서버가 필요 없습니다.
 
 ## 📌 1. 아키텍처 핵심 구조 (Architecture Overview)
 

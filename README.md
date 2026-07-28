@@ -55,9 +55,11 @@ git config --local commit.template .gitmessage
 * [**AI 에이전트 행동 지침 및 8대 수칙 (AGENTS.md)**](./AGENTS.md) - Google, Apple, Meta 수준의 최고 결과물을 도출하기 위한 AI/개발자 8대 무결점 작업 원칙 🏛️
 * [**코딩 컨벤션 및 6대 개발 규칙 (code-convention.md)**](./code-convention.md) - 우리 프로젝트에서 개발자와 AI가 엄격히 준수해야 할 단일 원본 코딩 규약 📐
 
+### 📜 아키텍처 의사결정 기록 (ADR - Architecture Decision Records)
+* [**ADR-0001: JWT 기반 무상태 인증 체계 채택 (docs/adr/0001-stateless-jwt-authentication.md)**](./docs/adr/0001-stateless-jwt-authentication.md) - 왜 무상태 JWT 인증을 채택했는지 세션/Basic 인증과의 비교 분석 기록 📜
+
 ### 🛠️ 개발 가이드 및 협업 규칙
 * [**PR 리뷰어 3분 족보 가이드 작성 규격 (docs/pr-review-guide.md)**](./docs/pr-review-guide.md) - 리뷰어의 검토 피로도를 낮추고 3분 만에 핵심 코드를 파악하게 돕는 PR 가이드 작성 규격 🗺️
-* [**Spring Security & JWT 인증/인가 가이드 (docs/security-jwt-guide.md)**](./docs/security-jwt-guide.md) - BCrypt 비밀번호 암호화, JWT Access/Refresh 토큰 발급 및 무상태(Stateless) 보안 시스템 입문서 🔒
 * [**초보 개발자 온보딩 및 기능 개발 로드맵 (docs/onboarding-roadmap.md)**](./docs/onboarding-roadmap.md) - 입문자를 위한 필수 학습 순서 및 실전 기능 개발 7단계 흐름 가이드 🚀
 * [**테스트 하네스 & LLM 피드백 루프 가이드 (docs/harness-and-llm-guide.md)**](./docs/harness-and-llm-guide.md) - 초보자와 AI 사용자를 위한 자동 검사 하네스 및 에러 자가 치유 활용법 🏗️
 * [**LLM 기반 현대 SW 엔지니어링 방법론 가이드 (docs/llm-software-engineering-guide.md)**](./docs/llm-software-engineering-guide.md) - 프롬프트/하네스/컨텍스트 엔지니어링, 루프 엔지니어링, EDD 등 AI 활용 개발 방법론 입문서 🤖
