@@ -96,6 +96,7 @@ graph TD
 #### 🐾 Step 7. `Verify JaCoCo Coverage Gate & ArchUnit Architecture Rules`
 *   **어떻게 작동하나요?:** `./gradlew test jacocoTestReport jacocoTestCoverageVerification`을 실행하여 전체 단위/통합 테스트 통과, ArchUnit 아키텍처 규칙 검증, 및 서비스 계층 커버리지 최소 60% 이상 충족 여부(JaCoCo Quality Gate)를 검증합니다.
 *   **왜 필요하나요?:** 레이어 의존성 위반(`Controller` ➔ `Repository` 직접 호출)을 차단하고, 테스트 코드가 부실한 소스 코드가 메인 브랜치에 병합되는 것을 자동 차단합니다.
+*   **`env` (DB 접속 정보):** `DB_URL`/`DB_USER`/`DB_PASSWORD`/`DB_DRIVER` 4개를 모두 명시적으로 설정해야 합니다. `application.yaml`의 `spring.datasource.driver-class-name`이 `DB_DRIVER` 환경변수가 없을 경우 로컬 무설정(zero-config) 편의를 위해 **H2**로 기본 폴백하도록 되어 있는데, 이 워크플로는 실제 `services: mariadb` 컨테이너를 쓰므로 `DB_DRIVER=org.mariadb.jdbc.Driver`를 반드시 함께 지정해야 합니다. 빠뜨리면 "URL은 MariaDB인데 드라이버는 H2"인 상태가 되어 `ApplicationContext` 로딩 단계에서 전체 테스트가 실패합니다.
 
 #### 🐾 Step 8. `Upload JaCoCo Coverage Report Artifact` (`actions/upload-artifact@v4`)
 *   **어떻게 작동하나요?:** `build/reports/jacoco/test/html/` 경로에 생성된 시각화 HTML 커버리지 리포트를 GitHub Actions 아티팩트(`jacoco-coverage-report`)로 자동 업로드합니다.
