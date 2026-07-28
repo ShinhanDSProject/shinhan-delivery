@@ -6,6 +6,7 @@
 * 모든 코드 작성 및 수정 전 `code-convention.md`와 `CLAUDE.md`를 필독하세요.
 * 의존성 방향은 항상 단방향(`Controller -> Service -> Repository`)을 유지해야 합니다.
 * Controller는 DTO만 다루며 Entity를 직접 반환해서는 안 됩니다.
+* **Getter, Setter 작성 시 수동 코딩을 금지하고 무조건 Lombok 라이브러리(`@Getter`, `@Setter`)를 100% 사용하여 개발해야 합니다.**
 
 ## 2. AI Pre-Flight Self-Review & Test Harness 자가 치유 피드백 루프
 작업을 완료하거나 `./pr`을 구동하기 전에 **반드시 아래 2단계 사전 검토를 완료해야 합니다**:

@@ -5,10 +5,12 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import lombok.Getter;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 
 /** 프론트엔드 및 클라이언트에 반환되는 전역 공통 에러 응답 DTO 클래스입니다. */
+@Getter
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class ErrorResponse {
 
@@ -46,27 +48,8 @@ public class ErrorResponse {
     return new ErrorResponse(errorCode, FieldErrorDetail.of(bindingResult));
   }
 
-  public int getStatus() {
-    return status;
-  }
-
-  public String getCode() {
-    return code;
-  }
-
-  public String getMessage() {
-    return message;
-  }
-
-  public LocalDateTime getTimestamp() {
-    return timestamp;
-  }
-
-  public List<FieldErrorDetail> getErrors() {
-    return errors;
-  }
-
   /** DTO 입출력 필드 검증 실패 시 세부 필드 오류 정보를 담는 정적 내부 클래스입니다. */
+  @Getter
   public static class FieldErrorDetail {
 
     private final String field;
@@ -89,18 +72,6 @@ public class ErrorResponse {
                       error.getRejectedValue() == null ? "" : error.getRejectedValue().toString(),
                       error.getDefaultMessage()))
           .collect(Collectors.toList());
-    }
-
-    public String getField() {
-      return field;
-    }
-
-    public String getValue() {
-      return value;
-    }
-
-    public String getReason() {
-      return reason;
     }
   }
 }

@@ -1,5 +1,7 @@
 package com.example.shinhangaecheokja.common.exception;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
 /**
@@ -7,6 +9,8 @@ import org.springframework.http.HttpStatus;
  *
  * <p>HTTP 상태 코드, 시스템 고유 에러 코드, 사용자 안내 메시지를 일관성 있게 관리합니다.
  */
+@Getter
+@AllArgsConstructor
 public enum ErrorCode {
   // Common Errors
   INVALID_INPUT_VALUE(HttpStatus.BAD_REQUEST, "C001", "유효하지 않은 입력값입니다."),
@@ -31,22 +35,4 @@ public enum ErrorCode {
   private final HttpStatus httpStatus;
   private final String code;
   private final String message;
-
-  ErrorCode(HttpStatus httpStatus, String code, String message) {
-    this.httpStatus = httpStatus;
-    this.code = code;
-    this.message = message;
-  }
-
-  public HttpStatus getHttpStatus() {
-    return httpStatus;
-  }
-
-  public String getCode() {
-    return code;
-  }
-
-  public String getMessage() {
-    return message;
-  }
 }
