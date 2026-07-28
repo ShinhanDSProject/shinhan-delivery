@@ -21,6 +21,7 @@ public class MemberService {
 
   private final MemberRepository memberRepository;
   private final PasswordEncoder passwordEncoder;
+  private final com.example.shinhangaecheokja.common.security.JwtProvider jwtProvider;
 
   /** 이메일 중복을 검증하고 비밀번호를 암호화해 회원을 생성한다. */
   @Transactional
@@ -37,6 +38,28 @@ public class MemberService {
     member.setRole(request.getRole());
 
     return MemberResponse.from(memberRepository.save(member));
+  }
+
+  /** 이메일과 비밀번호를 검증하여 JWT Access/Refresh 토큰을 발급한다. */
+  @Transactional(readOnly = true)
+  public com.example.shinhangaecheokja.member.dto.response.TokenResponse login(
+      com.example.shinhangaecheokja.member.dto.request.LoginRequest request) {
+    Member member =
+        memberRepository
+            .findByEmail(request.getEmail())
+            .orElseThrow(() -> new EntityNotFoundException(ErrorCode.MEMBER_NOT_FOUND));
+
+    if (!passwordEncoder.matches(request.getPassword(), member.getPassword())) {
+      throw new com.example.shinhangaecheokja.common.exception.BusinessException(
+          ErrorCode.INVALID_CREDENTIALS);
+    }
+
+    String accessToken =
+        jwtProvider.createAccessToken(member.getId(), member.getEmail(), member.getRole().name());
+    String refreshToken = jwtProvider.createRefreshToken(member.getId(), member.getEmail());
+
+    return com.example.shinhangaecheokja.member.dto.response.TokenResponse.of(
+        accessToken, refreshToken);
   }
 
   /** id로 회원 단건을 조회한다. 없으면 EntityNotFoundException. */
