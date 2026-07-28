@@ -55,6 +55,9 @@ git config --local commit.template .gitmessage
 * [**AI 에이전트 행동 지침 및 8대 수칙 (AGENTS.md)**](./AGENTS.md) - Google, Apple, Meta 수준의 최고 결과물을 도출하기 위한 AI/개발자 8대 무결점 작업 원칙 🏛️
 * [**코딩 컨벤션 및 6대 개발 규칙 (code-convention.md)**](./code-convention.md) - 우리 프로젝트에서 개발자와 AI가 엄격히 준수해야 할 단일 원본 코딩 규약 📐
 
+### 📜 아키텍처 의사결정 기록 (ADR - Architecture Decision Records)
+* [**ADR-0001: JWT 기반 무상태 인증 체계 채택 (docs/adr/0001-stateless-jwt-authentication.md)**](./docs/adr/0001-stateless-jwt-authentication.md) - 왜 무상태 JWT 인증을 채택했는지 세션/Basic 인증과의 비교 분석 기록 📜
+
 ### 🛠️ 개발 가이드 및 협업 규칙
 * [**PR 리뷰어 3분 족보 가이드 작성 규격 (docs/pr-review-guide.md)**](./docs/pr-review-guide.md) - 리뷰어의 검토 피로도를 낮추고 3분 만에 핵심 코드를 파악하게 돕는 PR 가이드 작성 규격 🗺️
 * [**초보 개발자 온보딩 및 기능 개발 로드맵 (docs/onboarding-roadmap.md)**](./docs/onboarding-roadmap.md) - 입문자를 위한 필수 학습 순서 및 실전 기능 개발 7단계 흐름 가이드 🚀
