@@ -19,12 +19,7 @@ spring:
   flyway:
     enabled: true
     baseline-on-migrate: true
-    repair-on-migrate: true
-    out-of-order: true
-    ignore-migration-patterns: "*:missing"
 
-jwt:
-  member:
-    secret: ${JWT_MEMBER_SECRET:shinhanswacademyshinhanswacademy}
-    access-exp-min: 30
-    refresh-exp-min: 1440
+app:
+  data-seed:
+    enabled: ${DATA_SEED_ENABLED:false}
