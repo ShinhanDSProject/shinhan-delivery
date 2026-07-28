@@ -45,10 +45,10 @@ class MatchingControllerTest {
 
     mockMvc
         .perform(
-            post("/api/matchings")
+            post("/api/v1/matchings")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
-        .andExpect(status().isOk())
+        .andExpect(status().isCreated())
         .andExpect(jsonPath("$.deliveryRequestId").value(1L))
         .andExpect(jsonPath("$.status").value("MATCHED"));
   }
@@ -71,7 +71,7 @@ class MatchingControllerTest {
                     127.0)));
 
     mockMvc
-        .perform(get("/api/matchings/calls").param("vehicleId", "2"))
+        .perform(get("/api/v1/matchings/calls").param("vehicleId", "2"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$[0].id").value(1L))
         .andExpect(jsonPath("$[0].status").value("REQUESTED"));
@@ -84,7 +84,7 @@ class MatchingControllerTest {
             new com.example.shinhangaecheokja.common.exception.EntityNotFoundException(
                 com.example.shinhangaecheokja.common.exception.ErrorCode.DELIVERY_NOT_FOUND));
 
-    mockMvc.perform(get("/api/matchings/999")).andExpect(status().isNotFound());
+    mockMvc.perform(get("/api/v1/matchings/999")).andExpect(status().isNotFound());
   }
 
   @Test
@@ -94,7 +94,7 @@ class MatchingControllerTest {
 
     mockMvc
         .perform(
-            post("/api/matchings")
+            post("/api/v1/matchings")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isBadRequest());
@@ -106,7 +106,7 @@ class MatchingControllerTest {
 
     mockMvc
         .perform(
-            put("/api/matchings/1")
+            put("/api/v1/matchings/1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isBadRequest());

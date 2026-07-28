@@ -7,6 +7,7 @@ import com.example.shinhangaecheokja.delivery.service.DeliveryService;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 /** DeliveryRequest CRUD API를 제공하는 컨트롤러. */
 @RestController
-@RequestMapping("/api/delivery-requests")
+@RequestMapping("/api/v1/delivery-requests")
 @RequiredArgsConstructor
 public class DeliveryController {
 
@@ -29,7 +30,7 @@ public class DeliveryController {
   @PostMapping
   public ResponseEntity<DeliveryResponse> requestDelivery(
       @RequestBody @Valid DeliveryCreateRequest request) {
-    return ResponseEntity.ok(deliveryService.requestDelivery(request));
+    return ResponseEntity.status(HttpStatus.CREATED).body(deliveryService.requestDelivery(request));
   }
 
   /** 배송 요청 단건을 조회한다. */

@@ -44,10 +44,10 @@ class DeliveryControllerTest {
 
     mockMvc
         .perform(
-            post("/api/delivery-requests")
+            post("/api/v1/delivery-requests")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
-        .andExpect(status().isOk())
+        .andExpect(status().isCreated())
         .andExpect(jsonPath("$.customerId").value(1L))
         .andExpect(jsonPath("$.status").value("REQUESTED"));
   }
@@ -63,7 +63,7 @@ class DeliveryControllerTest {
 
     mockMvc
         .perform(
-            post("/api/delivery-requests")
+            post("/api/v1/delivery-requests")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isBadRequest());
@@ -79,7 +79,7 @@ class DeliveryControllerTest {
 
     mockMvc
         .perform(
-            post("/api/delivery-requests")
+            post("/api/v1/delivery-requests")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isBadRequest());
@@ -92,6 +92,6 @@ class DeliveryControllerTest {
             new com.example.shinhangaecheokja.common.exception.EntityNotFoundException(
                 com.example.shinhangaecheokja.common.exception.ErrorCode.DELIVERY_NOT_FOUND));
 
-    mockMvc.perform(get("/api/delivery-requests/999")).andExpect(status().isNotFound());
+    mockMvc.perform(get("/api/v1/delivery-requests/999")).andExpect(status().isNotFound());
   }
 }

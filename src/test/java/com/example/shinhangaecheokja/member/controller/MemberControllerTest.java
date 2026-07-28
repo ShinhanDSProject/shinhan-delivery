@@ -46,10 +46,10 @@ class MemberControllerTest {
 
     mockMvc
         .perform(
-            post("/api/members")
+            post("/api/v1/members")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
-        .andExpect(status().isOk())
+        .andExpect(status().isCreated())
         .andExpect(jsonPath("$.email").value("user@example.com"))
         .andExpect(jsonPath("$.role").value("CUSTOMER"));
   }
@@ -59,6 +59,6 @@ class MemberControllerTest {
     when(memberService.getMember(eq(999L)))
         .thenThrow(new EntityNotFoundException(ErrorCode.MEMBER_NOT_FOUND));
 
-    mockMvc.perform(get("/api/members/999")).andExpect(status().isNotFound());
+    mockMvc.perform(get("/api/v1/members/999")).andExpect(status().isNotFound());
   }
 }

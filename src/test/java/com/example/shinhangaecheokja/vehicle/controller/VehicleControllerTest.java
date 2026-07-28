@@ -44,10 +44,10 @@ class VehicleControllerTest {
 
     mockMvc
         .perform(
-            post("/api/vehicles")
+            post("/api/v1/vehicles")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
-        .andExpect(status().isOk())
+        .andExpect(status().isCreated())
         .andExpect(jsonPath("$.ownerId").value(1L))
         .andExpect(jsonPath("$.type").value("CAR"));
   }
@@ -64,7 +64,7 @@ class VehicleControllerTest {
 
     mockMvc
         .perform(
-            post("/api/vehicles")
+            post("/api/v1/vehicles")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isBadRequest());
@@ -79,7 +79,7 @@ class VehicleControllerTest {
 
     mockMvc
         .perform(
-            post("/api/vehicles")
+            post("/api/v1/vehicles")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isBadRequest());
@@ -92,6 +92,6 @@ class VehicleControllerTest {
             new com.example.shinhangaecheokja.common.exception.EntityNotFoundException(
                 com.example.shinhangaecheokja.common.exception.ErrorCode.VEHICLE_NOT_FOUND));
 
-    mockMvc.perform(get("/api/vehicles/999")).andExpect(status().isNotFound());
+    mockMvc.perform(get("/api/v1/vehicles/999")).andExpect(status().isNotFound());
   }
 }

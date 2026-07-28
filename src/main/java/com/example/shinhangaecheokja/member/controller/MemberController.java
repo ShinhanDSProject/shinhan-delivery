@@ -6,6 +6,7 @@ import com.example.shinhangaecheokja.member.dto.response.MemberResponse;
 import com.example.shinhangaecheokja.member.service.MemberService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 /** Member CRUD API를 제공하는 컨트롤러. */
 @RestController
-@RequestMapping("/api/members")
+@RequestMapping("/api/v1/members")
 @RequiredArgsConstructor
 public class MemberController {
 
@@ -27,7 +28,7 @@ public class MemberController {
   /** 회원을 생성(가입)한다. */
   @PostMapping
   public ResponseEntity<MemberResponse> createMember(@RequestBody MemberCreateRequest request) {
-    return ResponseEntity.ok(memberService.createMember(request));
+    return ResponseEntity.status(HttpStatus.CREATED).body(memberService.createMember(request));
   }
 
   /** 회원 단건을 조회한다. */
