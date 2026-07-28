@@ -60,6 +60,7 @@ git config --local commit.template .gitmessage
 * [**ADR-0001: JWT 기반 무상태 인증 체계 채택 (docs/adr/0001-stateless-jwt-authentication.md)**](./docs/adr/0001-stateless-jwt-authentication.md) - 왜 무상태 JWT 인증을 채택했는지 세션/Basic 인증과의 비교 분석 기록 📜
 
 ### 🛠️ 개발 가이드 및 협업 규칙
+* [**학습 및 지식 공유형 GitHub Issue 분할 가이드 (docs/learning-oriented-issue-guide.md)**](./docs/learning-oriented-issue-guide.md) - 단순 개발을 넘어 팀 전체의 동반 성장을 이끄는 3단계 학습형 이슈 작성 규격 🎓
 * [**초급 개발자를 위한 7단계 초상세 태스크 분할 가이드 (docs/junior-developer-task-guide.md)**](./docs/junior-developer-task-guide.md) - 입문자가 막연함 없이 100% 무결점 코드를 완성하도록 인도하는 Step-by-Step 가이드북 🔰
 * [**Deliver Happiness 전체 기능 명세서 & 개발 로드맵 (docs/project-spec-and-task-breakdown.md)**](./docs/project-spec-and-task-breakdown.md) - 10대 모듈, 30+ REST API 및 6대 스프린트 파트별(BE/FE/DevOps) 태스크 할당서 📦
 * [**단일 원본 관리(SSOT) 문서 정책 가이드 (docs/ssot-documentation-policy.md)**](./docs/ssot-documentation-policy.md) - 정보 중복을 방지하고 지식의 파편화를 차단하는 프로젝트 단일 원본 문서 관리 규격 🏛️
