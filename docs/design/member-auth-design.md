@@ -24,7 +24,8 @@ erDiagram
         String email "Unique Key"
         String password "BCrypt Encoded"
         String name "User Name"
-        String role "CLIENT / COURIER"
+        String phoneNumber "Phone Number"
+        String role "CUSTOMER / COURIER"
     }
 ```
 
@@ -33,14 +34,15 @@ erDiagram
 ## 3. API 명세서 (API Specification)
 
 ### 3.1 회원 가입
-* **엔드포인트:** `POST /api/members`
+* **엔드포인트:** `POST /api/v1/members`
 * **요청 바디 (Request Body):**
   ```json
   {
     "email": "trainee@example.com",
     "password": "securepassword123",
     "name": "홍길동",
-    "role": "CLIENT"
+    "phoneNumber": "010-1234-5678",
+    "role": "CUSTOMER"
   }
   ```
 * **응답 바디 및 상태 코드 (Response Body & Status):**
@@ -50,18 +52,22 @@ erDiagram
       "id": 1,
       "email": "trainee@example.com",
       "name": "홍길동",
-      "role": "CLIENT"
+      "phoneNumber": "010-1234-5678",
+      "role": "CUSTOMER"
     }
     ```
-  * **Failure (409 Conflict - 중복 이메일):**
+  * **Failure (409 Conflict - 중복 이메일, ErrorCode `M002`):**
     ```json
     {
-      "message": "이미 존재하는 이메일입니다: trainee@example.com"
+      "status": 409,
+      "code": "M002",
+      "message": "이미 가입된 이메일 주소입니다. (Email: trainee@example.com)",
+      "timestamp": "2026-07-28T10:00:00"
     }
     ```
 
 ### 3.2 회원 정보 조회
-* **엔드포인트:** `GET /api/members/{id}`
+* **엔드포인트:** `GET /api/v1/members/{id}`
 * **응답 바디 및 상태 코드 (Response Body & Status):**
   * **Success (200 OK):**
     ```json
@@ -69,13 +75,17 @@ erDiagram
       "id": 1,
       "email": "trainee@example.com",
       "name": "홍길동",
-      "role": "CLIENT"
+      "phoneNumber": "010-1234-5678",
+      "role": "CUSTOMER"
     }
     ```
-  * **Failure (404 Not Found - 회원 없음):**
+  * **Failure (404 Not Found - 회원 없음, ErrorCode `M001`):**
     ```json
     {
-      "message": "존재하지 않는 회원입니다: id=99"
+      "status": 404,
+      "code": "M001",
+      "message": "존재하지 않는 회원입니다.",
+      "timestamp": "2026-07-28T10:00:00"
     }
     ```
 
@@ -86,7 +96,7 @@ erDiagram
 - [x] 회원 관리 DB 마이그레이션 스크립트 작성 (`V2__create_member_table.sql`)
 - [x] `Member` 엔티티 매핑 및 `MemberRole` 이늄(enum) 설계
 - [x] `PasswordEncoderConfig` 및 BCrypt 비밀번호 인코더 빈(Bean) 설정
-- [x] `DuplicateMemberException` 및 `MemberNotFoundException` 글로벌 예외 핸들러 매핑
+- [x] `DuplicateMemberException`(`BusinessException` 상속) 및 공통 `EntityNotFoundException` + `ErrorCode.MEMBER_NOT_FOUND` 매핑
 - [x] 회원가입 비즈니스 로직 구현 및 중복 가입 체크 유닛 테스트 작성
 - [x] 회원 조회 비즈니스 로직 구현 및 조회 예외 핸들링 테스트 작성
 - [x] `MemberController` API 엔드포인트 연동 및 슬라이스(Controller) 테스트 구현

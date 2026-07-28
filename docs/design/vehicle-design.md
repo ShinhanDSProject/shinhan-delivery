@@ -22,11 +22,12 @@ erDiagram
     MEMBER ||--o{ VEHICLE : "owns"
     VEHICLE {
         Long id PK "Auto Increment"
-        Long member_id FK "Courier Member"
-        String license_plate "Plate Number"
-        String vehicle_type "TRUCK / BIKE"
+        Long owner_id FK "Courier Member"
+        String type "CAR / DRONE 등 VehicleType"
         Double max_weight "Capacity (kg)"
         Double max_distance "Operating Range (km)"
+        Double latitude "Current Latitude"
+        Double longitude "Current Longitude"
         String status "AVAILABLE / BUSY"
     }
 ```
@@ -36,15 +37,16 @@ erDiagram
 ## 3. API 명세서 (API Specification)
 
 ### 3.1 차량 등록
-* **엔드포인트:** `POST /api/vehicles`
+* **엔드포인트:** `POST /api/v1/vehicles`
 * **요청 바디 (Request Body):**
   ```json
   {
-    "memberId": 2,
-    "licensePlate": "서울12가3456",
-    "vehicleType": "TRUCK",
+    "ownerId": 2,
+    "type": "CAR",
     "maxWeight": 1500.0,
-    "maxDistance": 300.0
+    "maxDistance": 300.0,
+    "latitude": 37.5,
+    "longitude": 127.0
   }
   ```
 * **응답 바디 및 상태 코드 (Response Body & Status):**
@@ -52,40 +54,48 @@ erDiagram
     ```json
     {
       "id": 1,
-      "memberId": 2,
-      "licensePlate": "서울12가3456",
-      "vehicleType": "TRUCK",
+      "ownerId": 2,
+      "type": "CAR",
       "maxWeight": 1500.0,
       "maxDistance": 300.0,
+      "latitude": 37.5,
+      "longitude": 127.0,
       "status": "AVAILABLE"
     }
     ```
-  * **Failure (400 Bad Request - 유효하지 않은 적재중량 또는 거리):**
+  * **Failure (400 Bad Request - 유효하지 않은 적재중량 또는 거리, ErrorCode `C001`):**
     ```json
     {
-      "message": "최대 적재 무게는 0보다 커야 합니다."
+      "status": 400,
+      "code": "C001",
+      "message": "차량 최대 적재 중량을 초과했습니다. (요청 중량: -5.0kg)",
+      "timestamp": "2026-07-28T10:00:00"
     }
     ```
 
 ### 3.2 차량 조회
-* **엔드포인트:** `GET /api/vehicles/{id}`
+* **엔드포인트:** `GET /api/v1/vehicles/{id}`
 * **응답 바디 및 상태 코드 (Response Body & Status):**
   * **Success (200 OK):**
     ```json
     {
       "id": 1,
-      "memberId": 2,
-      "licensePlate": "서울12가3456",
-      "vehicleType": "TRUCK",
+      "ownerId": 2,
+      "type": "CAR",
       "maxWeight": 1500.0,
       "maxDistance": 300.0,
+      "latitude": 37.5,
+      "longitude": 127.0,
       "status": "AVAILABLE"
     }
     ```
-  * **Failure (404 Not Found - 차량 미존재):**
+  * **Failure (404 Not Found - 차량 미존재, ErrorCode `V001`):**
     ```json
     {
-      "message": "존재하지 않는 차량입니다: id=99"
+      "status": 404,
+      "code": "V001",
+      "message": "존재하지 않는 차량입니다.",
+      "timestamp": "2026-07-28T10:00:00"
     }
     ```
 
@@ -95,7 +105,7 @@ erDiagram
 
 - [x] 차량 테이블 생성 DB 마이그레이션 스크립트 작성 (`V3__create_vehicle_table.sql`)
 - [x] `Vehicle` 엔티티 매핑 및 `VehicleType` 이늄(enum) 매핑
-- [x] `InvalidWeightException`, `OverMaxDistanceException` 예외 클래스 정의
+- [x] `InvalidWeightException`, `OverMaxDistanceException`(`BusinessException` 상속) 예외 클래스 정의
 - [x] 회원 아이디 존재 여부 검증 및 차량 사양(무게, 거리 > 0) 검증 비즈니스 로직 설계
 - [x] 차량 등록 및 상태 조회 서비스 구현 및 슬라이스 테스트 작성
 - [x] `VehicleController` API 추가 및 컨트롤러 엔드포인트 테스트 구현

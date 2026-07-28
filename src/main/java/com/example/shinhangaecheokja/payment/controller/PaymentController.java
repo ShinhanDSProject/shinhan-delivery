@@ -7,6 +7,7 @@ import com.example.shinhangaecheokja.payment.dto.response.PointWalletResponse;
 import com.example.shinhangaecheokja.payment.service.PaymentService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 /** PointWallet CRUD API를 제공하는 컨트롤러. */
 @RestController
-@RequestMapping("/api/point-wallets")
+@RequestMapping("/api/v1/point-wallets")
 @RequiredArgsConstructor
 public class PaymentController {
 
@@ -28,7 +29,7 @@ public class PaymentController {
   @PostMapping
   public ResponseEntity<PointWalletResponse> createWallet(
       @RequestBody PointWalletCreateRequest request) {
-    return ResponseEntity.ok(paymentService.createWallet(request));
+    return ResponseEntity.status(HttpStatus.CREATED).body(paymentService.createWallet(request));
   }
 
   /** 포인트 지갑 단건을 조회한다. */

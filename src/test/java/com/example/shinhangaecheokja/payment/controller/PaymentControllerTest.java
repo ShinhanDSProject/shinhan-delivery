@@ -36,10 +36,10 @@ class PaymentControllerTest {
 
     mockMvc
         .perform(
-            post("/api/point-wallets")
+            post("/api/v1/point-wallets")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
-        .andExpect(status().isOk())
+        .andExpect(status().isCreated())
         .andExpect(jsonPath("$.memberId").value(1L))
         .andExpect(jsonPath("$.balance").value(0));
   }
@@ -51,6 +51,6 @@ class PaymentControllerTest {
             new com.example.shinhangaecheokja.common.exception.EntityNotFoundException(
                 com.example.shinhangaecheokja.common.exception.ErrorCode.POINT_WALLET_NOT_FOUND));
 
-    mockMvc.perform(get("/api/point-wallets/999")).andExpect(status().isNotFound());
+    mockMvc.perform(get("/api/v1/point-wallets/999")).andExpect(status().isNotFound());
   }
 }

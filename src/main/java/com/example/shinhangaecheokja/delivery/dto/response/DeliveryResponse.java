@@ -12,7 +12,9 @@ public record DeliveryResponse(
     double weight,
     double distance,
     DeliveryStatus status,
-    long feePoint) {
+    long feePoint,
+    double pickupLatitude,
+    double pickupLongitude) {
 
   /** DeliveryRequest 엔티티를 응답 DTO로 변환한다. */
   public static DeliveryResponse from(DeliveryRequest entity) {
@@ -24,6 +26,8 @@ public record DeliveryResponse(
         entity.getWeight(),
         entity.getDistance(),
         entity.getStatus(),
-        entity.getFeePoint());
+        entity.getFeePoint(),
+        entity.getPickupLatitude(),
+        entity.getPickupLongitude());
   }
 }

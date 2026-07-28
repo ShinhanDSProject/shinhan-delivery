@@ -10,6 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.example.shinhangaecheokja.vehicle.dto.request.VehicleCreateRequest;
 import com.example.shinhangaecheokja.vehicle.dto.response.VehicleResponse;
+import com.example.shinhangaecheokja.vehicle.entity.VehicleStatus;
 import com.example.shinhangaecheokja.vehicle.entity.VehicleType;
 import com.example.shinhangaecheokja.vehicle.service.VehicleService;
 import org.junit.jupiter.api.Test;
@@ -37,16 +38,51 @@ class VehicleControllerTest {
     request.setMaxDistance(100);
 
     when(vehicleService.registerVehicle(any()))
-        .thenReturn(new VehicleResponse(1L, 1L, VehicleType.CAR, 500, 100));
+        .thenReturn(
+            new VehicleResponse(
+                1L, 1L, VehicleType.CAR, 500, 100, 37.5, 127.0, VehicleStatus.AVAILABLE));
 
     mockMvc
         .perform(
-            post("/api/vehicles")
+            post("/api/v1/vehicles")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
-        .andExpect(status().isOk())
+        .andExpect(status().isCreated())
         .andExpect(jsonPath("$.ownerId").value(1L))
         .andExpect(jsonPath("$.type").value("CAR"));
+  }
+
+  @Test
+  void 경도가_범위를_벗어나면_400을_반환한다() throws Exception {
+    VehicleCreateRequest request = new VehicleCreateRequest();
+    request.setOwnerId(1L);
+    request.setType(VehicleType.CAR);
+    request.setMaxWeight(500);
+    request.setMaxDistance(100);
+    request.setLatitude(37.5);
+    request.setLongitude(200);
+
+    mockMvc
+        .perform(
+            post("/api/v1/vehicles")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  void 소유자_id가_없으면_400을_반환한다() throws Exception {
+    VehicleCreateRequest request = new VehicleCreateRequest();
+    request.setType(VehicleType.CAR);
+    request.setMaxWeight(500);
+    request.setMaxDistance(100);
+
+    mockMvc
+        .perform(
+            post("/api/v1/vehicles")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isBadRequest());
   }
 
   @Test
@@ -56,6 +92,6 @@ class VehicleControllerTest {
             new com.example.shinhangaecheokja.common.exception.EntityNotFoundException(
                 com.example.shinhangaecheokja.common.exception.ErrorCode.VEHICLE_NOT_FOUND));
 
-    mockMvc.perform(get("/api/vehicles/999")).andExpect(status().isNotFound());
+    mockMvc.perform(get("/api/v1/vehicles/999")).andExpect(status().isNotFound());
   }
 }

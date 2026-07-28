@@ -4,8 +4,10 @@ import com.example.shinhangaecheokja.delivery.dto.request.DeliveryCreateRequest;
 import com.example.shinhangaecheokja.delivery.dto.request.DeliveryUpdateRequest;
 import com.example.shinhangaecheokja.delivery.dto.response.DeliveryResponse;
 import com.example.shinhangaecheokja.delivery.service.DeliveryService;
+import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 /** DeliveryRequest CRUD API를 제공하는 컨트롤러. */
 @RestController
-@RequestMapping("/api/delivery-requests")
+@RequestMapping("/api/v1/delivery-requests")
 @RequiredArgsConstructor
 public class DeliveryController {
 
@@ -27,8 +29,8 @@ public class DeliveryController {
   /** 배송을 요청한다. */
   @PostMapping
   public ResponseEntity<DeliveryResponse> requestDelivery(
-      @RequestBody DeliveryCreateRequest request) {
-    return ResponseEntity.ok(deliveryService.requestDelivery(request));
+      @RequestBody @Valid DeliveryCreateRequest request) {
+    return ResponseEntity.status(HttpStatus.CREATED).body(deliveryService.requestDelivery(request));
   }
 
   /** 배송 요청 단건을 조회한다. */
@@ -46,7 +48,7 @@ public class DeliveryController {
   /** 배송 요청의 픽업지·도착지를 수정한다. */
   @PutMapping("/{deliveryRequestId}")
   public ResponseEntity<DeliveryResponse> updateDeliveryRequest(
-      @PathVariable Long deliveryRequestId, @RequestBody DeliveryUpdateRequest request) {
+      @PathVariable Long deliveryRequestId, @RequestBody @Valid DeliveryUpdateRequest request) {
     return ResponseEntity.ok(deliveryService.updateDeliveryRequest(deliveryRequestId, request));
   }
 

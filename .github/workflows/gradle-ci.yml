@@ -61,6 +61,7 @@ jobs:
           DB_URL: jdbc:mariadb://localhost:3306/shinhan_gaecheokja
           DB_USER: root
           DB_PASSWORD: password
+          DB_DRIVER: org.mariadb.jdbc.Driver
 
       - name: Upload JaCoCo Coverage Report Artifact
         uses: actions/upload-artifact@v4
@@ -74,3 +75,4 @@ jobs:
           DB_URL: jdbc:mariadb://localhost:3306/shinhan_gaecheokja
           DB_USER: root
           DB_PASSWORD: password
+          DB_DRIVER: org.mariadb.jdbc.Driver

@@ -4,8 +4,10 @@ import com.example.shinhangaecheokja.vehicle.dto.request.VehicleCreateRequest;
 import com.example.shinhangaecheokja.vehicle.dto.request.VehicleUpdateRequest;
 import com.example.shinhangaecheokja.vehicle.dto.response.VehicleResponse;
 import com.example.shinhangaecheokja.vehicle.service.VehicleService;
+import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 /** Vehicle CRUD API를 제공하는 컨트롤러. */
 @RestController
-@RequestMapping("/api/vehicles")
+@RequestMapping("/api/v1/vehicles")
 @RequiredArgsConstructor
 public class VehicleController {
 
@@ -27,8 +29,8 @@ public class VehicleController {
   /** 운송수단을 등록한다. */
   @PostMapping
   public ResponseEntity<VehicleResponse> registerVehicle(
-      @RequestBody VehicleCreateRequest request) {
-    return ResponseEntity.ok(vehicleService.registerVehicle(request));
+      @RequestBody @Valid VehicleCreateRequest request) {
+    return ResponseEntity.status(HttpStatus.CREATED).body(vehicleService.registerVehicle(request));
   }
 
   /** 운송수단 단건을 조회한다. */
@@ -46,7 +48,7 @@ public class VehicleController {
   /** 운송수단 정보를 수정한다. */
   @PutMapping("/{vehicleId}")
   public ResponseEntity<VehicleResponse> updateVehicle(
-      @PathVariable Long vehicleId, @RequestBody VehicleUpdateRequest request) {
+      @PathVariable Long vehicleId, @RequestBody @Valid VehicleUpdateRequest request) {
     return ResponseEntity.ok(vehicleService.updateVehicle(vehicleId, request));
   }
 

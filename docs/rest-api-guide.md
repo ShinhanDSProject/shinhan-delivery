@@ -101,7 +101,7 @@ REST API는 URL에 행위(동사)를 적지 않고, **URL은 '무엇(명사)'인
 앞으로 우리 프로젝트에서 컨트롤러(Controller) 및 DTO를 개발할 때는 다음 4대 규칙을 반드시 준수해야 합니다:
 
 1.  **URL 자원 명명 규칙:**
-    *   URL 경로는 모두 **소문자 복수형 명사**로 작성합니다. (`/api/v1/members`, `/api/v1/vehicles`, `/api/v1/payments`)
+    *   URL 경로는 모두 `/api/v1` 접두사 뒤에 **소문자 복수형 명사**로 작성합니다. (`/api/v1/members`, `/api/v1/vehicles`, `/api/v1/point-wallets`)
     *   단어 구분 시 언더바(`_`)나 카멜케이스(`memberId`) 대신 **하이픈(`-`)**을 사용합니다. (`/api/v1/delivery-requests`)
 2.  **행위와 HTTP 메서드 매핑:**
     *   조회: `GET`, 생성: `POST`, 수정: `PUT`/`PATCH`, 삭제: `DELETE` 규칙을 엄격히 준수하며, URL에 `get`, `create`, `delete` 같은 동사를 섞지 않습니다.

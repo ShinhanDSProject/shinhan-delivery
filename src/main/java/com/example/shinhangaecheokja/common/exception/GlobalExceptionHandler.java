@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -45,9 +46,9 @@ public class GlobalExceptionHandler {
   }
 
   /** 클라이언트의 요청 본문 JSON 형식이 올바르지 않은 예외(HttpMessageNotReadableException)를 처리합니다. */
-  @ExceptionHandler(org.springframework.http.converter.HttpMessageNotReadableException.class)
+  @ExceptionHandler(HttpMessageNotReadableException.class)
   protected ResponseEntity<ErrorResponse> handleHttpMessageNotReadableException(
-      org.springframework.http.converter.HttpMessageNotReadableException e) {
+      HttpMessageNotReadableException e) {
     log.warn("HttpMessageNotReadableException occurred: {}", e.getMessage());
     ErrorCode errorCode = ErrorCode.INVALID_INPUT_VALUE;
     ErrorResponse response = ErrorResponse.of(errorCode, "요청 본문의 JSON 형식이 올바르지 않습니다.");

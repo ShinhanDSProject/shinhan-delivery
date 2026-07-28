@@ -32,7 +32,7 @@ erDiagram
 ## 3. API 명세서 (API Specification)
 
 ### 3.1 포인트 지갑 개설
-* **엔드포인트:** `POST /api/payments/wallets`
+* **엔드포인트:** `POST /api/v1/point-wallets`
 * **요청 바디 (Request Body):**
   ```json
   {
@@ -50,11 +50,10 @@ erDiagram
     ```
 
 ### 3.2 포인트 충전
-* **엔드포인트:** `POST /api/payments/wallets/charge`
+* **엔드포인트:** `POST /api/v1/point-wallets/{walletId}/charge`
 * **요청 바디 (Request Body):**
   ```json
   {
-    "memberId": 1,
     "amount": 50000
   }
   ```
@@ -69,11 +68,10 @@ erDiagram
     ```
 
 ### 3.3 포인트 사용 (차감)
-* **엔드포인트:** `POST /api/payments/wallets/use`
+* **엔드포인트:** `POST /api/v1/point-wallets/{walletId}/use`
 * **요청 바디 (Request Body):**
   ```json
   {
-    "memberId": 1,
     "amount": 15000
   }
   ```
@@ -86,10 +84,13 @@ erDiagram
       "balance": 35000
     }
     ```
-  * **Failure (400 Bad Request - 잔액 부족):**
+  * **Failure (400 Bad Request - 잔액 부족, ErrorCode `P002`):**
     ```json
     {
-      "message": "포인트 잔액이 부족합니다: balance=0, requested=15000"
+      "status": 400,
+      "code": "P002",
+      "message": "포인트 잔액이 부족합니다. (Wallet ID: 1, 요청 금액: 15000)",
+      "timestamp": "2026-07-28T10:00:00"
     }
     ```
 
@@ -99,7 +100,7 @@ erDiagram
 
 - [x] 포인트 지갑 테이블 생성 DB 마이그레이션 스크립트 작성 (`V6__create_point_wallet_table.sql`)
 - [x] `PointWallet` 도메인 Entity 설계 (회원 외래키 unique 제약 조건 설정)
-- [x] `InsufficientPointException`, `PointWalletNotFoundException` 커스텀 에러 클래스 작성
+- [x] `InsufficientPointException`(`BusinessException` 상속) 및 공통 `EntityNotFoundException` + `ErrorCode.POINT_WALLET_NOT_FOUND` 매핑
 - [x] 포인트 지갑 생성/충전/차감 시의 비즈니스 유효성 검증(잔액 점검, 마이너스 충전 방지) 로직 구현
 - [x] `PaymentService` 비즈니스 레이어 로직 작성 및 트랜잭션 원자성(Atomicity) 단위 테스트 구현
 - [x] `PaymentController` 엔드포인트 연동 및 API E2E 검증 테스트 구현

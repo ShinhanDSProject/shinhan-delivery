@@ -7,11 +7,14 @@ import static org.mockito.Mockito.when;
 
 import com.example.shinhangaecheokja.member.service.MemberService;
 import com.example.shinhangaecheokja.vehicle.dto.request.VehicleCreateRequest;
+import com.example.shinhangaecheokja.vehicle.dto.request.VehicleUpdateRequest;
 import com.example.shinhangaecheokja.vehicle.dto.response.VehicleResponse;
 import com.example.shinhangaecheokja.vehicle.entity.Vehicle;
+import com.example.shinhangaecheokja.vehicle.entity.VehicleStatus;
 import com.example.shinhangaecheokja.vehicle.entity.VehicleType;
 import com.example.shinhangaecheokja.vehicle.exception.InvalidWeightException;
 import com.example.shinhangaecheokja.vehicle.exception.OverMaxDistanceException;
+import com.example.shinhangaecheokja.vehicle.exception.VehicleNotAvailableException;
 import com.example.shinhangaecheokja.vehicle.repository.VehicleRepository;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
@@ -42,6 +45,7 @@ class VehicleServiceTest {
 
     assertThat(response.ownerId()).isEqualTo(1L);
     assertThat(response.type()).isEqualTo(VehicleType.CAR);
+    assertThat(response.status()).isEqualTo(VehicleStatus.AVAILABLE);
   }
 
   @Test
@@ -105,5 +109,84 @@ class VehicleServiceTest {
     VehicleResponse response = vehicleService.getVehicle(1L);
 
     assertThat(response.type()).isEqualTo(VehicleType.DRONE);
+  }
+
+  @Test
+  void 비관적_락으로_존재하지_않는_차량을_조회하면_EntityNotFoundException을_던진다() {
+    when(vehicleRepository.findByIdForUpdate(1L)).thenReturn(Optional.empty());
+
+    assertThatThrownBy(() -> vehicleService.getVehicleForUpdate(1L))
+        .isInstanceOf(com.example.shinhangaecheokja.common.exception.EntityNotFoundException.class);
+  }
+
+  @Test
+  void 비관적_락으로_존재하는_차량을_조회하면_VehicleResponse를_반환한다() {
+    Vehicle vehicle = new Vehicle();
+    vehicle.setOwnerId(1L);
+    vehicle.setType(VehicleType.DRONE);
+    vehicle.setMaxWeight(10);
+    vehicle.setMaxDistance(20);
+    when(vehicleRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(vehicle));
+
+    VehicleResponse response = vehicleService.getVehicleForUpdate(1L);
+
+    assertThat(response.type()).isEqualTo(VehicleType.DRONE);
+  }
+
+  @Test
+  void AVAILABLE_상태면_차량_정보를_수정한다() {
+    Vehicle vehicle = new Vehicle();
+    vehicle.setStatus(VehicleStatus.AVAILABLE);
+    vehicle.setType(VehicleType.CAR);
+    vehicle.setMaxWeight(500);
+    vehicle.setMaxDistance(100);
+    when(vehicleRepository.findById(1L)).thenReturn(Optional.of(vehicle));
+
+    VehicleUpdateRequest request = new VehicleUpdateRequest();
+    request.setType(VehicleType.DRONE);
+    request.setMaxWeight(10);
+    request.setMaxDistance(20);
+
+    VehicleResponse response = vehicleService.updateVehicle(1L, request);
+
+    assertThat(response.type()).isEqualTo(VehicleType.DRONE);
+    assertThat(response.maxWeight()).isEqualTo(10);
+  }
+
+  @Test
+  void BUSY_상태면_차량_수정_시_VehicleNotAvailableException을_던진다() {
+    Vehicle vehicle = new Vehicle();
+    vehicle.setStatus(VehicleStatus.BUSY);
+    when(vehicleRepository.findById(1L)).thenReturn(Optional.of(vehicle));
+
+    VehicleUpdateRequest request = new VehicleUpdateRequest();
+    request.setType(VehicleType.DRONE);
+    request.setMaxWeight(10);
+    request.setMaxDistance(20);
+
+    assertThatThrownBy(() -> vehicleService.updateVehicle(1L, request))
+        .isInstanceOf(VehicleNotAvailableException.class);
+  }
+
+  @Test
+  void 차량을_BUSY_상태로_전환한다() {
+    Vehicle vehicle = new Vehicle();
+    vehicle.setStatus(VehicleStatus.AVAILABLE);
+    when(vehicleRepository.findById(1L)).thenReturn(Optional.of(vehicle));
+
+    vehicleService.markBusy(1L);
+
+    assertThat(vehicle.getStatus()).isEqualTo(VehicleStatus.BUSY);
+  }
+
+  @Test
+  void 차량을_AVAILABLE_상태로_전환한다() {
+    Vehicle vehicle = new Vehicle();
+    vehicle.setStatus(VehicleStatus.BUSY);
+    when(vehicleRepository.findById(1L)).thenReturn(Optional.of(vehicle));
+
+    vehicleService.markAvailable(1L);
+
+    assertThat(vehicle.getStatus()).isEqualTo(VehicleStatus.AVAILABLE);
   }
 }

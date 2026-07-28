@@ -338,6 +338,24 @@ public class DeliveryController {
 
 ---
 
+## 12.1 동시성 제어
+
+동시 요청으로 정확성이 깨지면 안 되는 자원(포인트 잔액, 차량 배정, 배송 매칭 등)은 **비관적 락(Pessimistic Lock)**으로 보호한다. 상세 원리·데드락 회피·테스트 작성법은 `docs/concurrency-control-guide.md`를 참고하고, 여기서는 코딩 전에 알아야 할 핵심만 정리한다.
+
+- Repository에 `findByIdForUpdate`라는 이름으로 비관적 쓰기 락 조회 메서드를 추가한다.
+
+  ```java
+  @Lock(LockModeType.PESSIMISTIC_WRITE)
+  @Query("select w from PointWallet w where w.id = :id")
+  Optional<PointWallet> findByIdForUpdate(@Param("id") Long id);
+  ```
+
+- 값을 **변경**하는 Service 메서드(충전/차감, 배정 등)만 `findByIdForUpdate`를 쓴다. 단순 조회(GET)에는 락을 걸지 않고 기존 `findById`를 그대로 쓴다.
+- 한 트랜잭션에서 여러 리소스에 락을 걸어야 하면(예: 배송 요청 → 차량) **항상 같은 순서**로 락을 획득해 데드락을 방지한다.
+- 새로운 동시성 민감 로직을 추가하면 `ExecutorService` + `CountDownLatch`(스레드 풀 크기는 반드시 동시 요청 수 이상) 패턴으로 최소 100개 동시 요청 테스트를 작성하고, 최종 데이터 정합성(잔액이 음수가 아닌지, 유실 없이 정확한지)을 assert한다.
+
+---
+
 ## 13. 로깅 규칙
 
 - `Service` 계층에서 예외를 던지기 직전, 또는 `GlobalExceptionHandler`에서 로그를 남긴다. 같은 예외를 여러 군데서 중복 로깅하지 않는다.
@@ -391,25 +409,63 @@ void 도메인은_다른_도메인의_repository를_직접_참조하지_않는�
 
 ---
 
-## 15. Git 커밋 / 이슈 / 브랜치 컨벤션
+## 15. 데이터베이스 마이그레이션 규칙
 
-- **GitHub 이슈 규격:** `[카테고리] 요약 설명` 형식 (`[Feature]`, `[Security]`, `[Concurrency]`, `[Testing]`, `[Observability]`, `[Ops]`, `[Bug]`, `[Docs]`)
-  - 예시: `[Security] Spring Security 및 JWT 기반 REST API 인증/인가 체계 구축`
-  - `.github/ISSUE_TEMPLATE/` 템플릿(개요, 세부 요구사항, 완료 정의) 사용 의무화
-- **커밋 메시지:** `type: 설명` 형식 (Conventional Commits 기반)
-  - `feat`, `fix`, `refactor`, `test`, `docs`, `chore`
-  - 예시: `feat: 배송 요금 산정 로직 추가`
-- **브랜치명:** `type/도메인-내용` (예: `feat/delivery-fee-calculation`)
-- **PR 단위:** 도메인 하나 + 기능 하나 정도로 작게 유지하며 `Squash and Merge` 병합. 신규 기술 도입 및 핵심 아키텍처 결정 시 `docs/adr/` 규격에 따라 **ADR(Architecture Decision Record)**을 100% 필수 작성하며, PR 제출 시 `docs/pr-review-guide.md` 양식에 따라 **[리뷰어 3분 족보 가이드]** 및 **[Files changed 탭 핀포인트 인라인 댓글]**을 필수 작성/부착한다.
+스키마 변경은 Hibernate가 아니라 **Flyway**로만 관리한다 (`spring.jpa.hibernate.ddl-auto: validate`). 상세 작동 원리·IDE 활용법은 `docs/flyway-guide.md`를 참고하고, 여기서는 커밋 전 반드시 지켜야 할 핵심만 정리한다.
+
+- **파일 위치/네이밍**: `src/main/resources/db/migration/V<버전번호>__<설명>.sql` (언더스코어 2개 필수). 예: `V7__add_location_to_vehicle.sql`
+- **이미 반영된 마이그레이션 파일은 절대 수정하지 않는다.** 로컬/서버 DB에 한 번이라도 적용된 파일을 고치면 Checksum 불일치로 다음 구동이 실패한다. 수정이 필요하면 버전을 올린 새 파일을 추가한다.
+- Entity에 필드를 추가/변경했다면, **같은 PR 안에 대응하는 마이그레이션 파일을 함께 커밋**한다. Entity만 바꾸고 마이그레이션을 빠뜨리면 `ddl-auto: validate`에 의해 애플리케이션이 기동 실패한다.
+- 여러 테이블을 함께 바꿔야 하면 파일 하나에 `ALTER TABLE` 여러 개를 순서대로 넣어도 되고, 논리적으로 성격이 다르면 파일을 나눠도 된다 — 팀 판단에 맡긴다.
 
 ---
 
-## 16. 체크리스트 (PR 리뷰 시 확인)
+## 16. Git 커밋 / 브랜치 / PR 컨벤션
+
+브랜치 전략·PR 규칙의 전체 내용은 `docs/git-flow-guide.md`가 기준 문서이며, 여기서는 코딩 전에 알아야 할 핵심만 요약한다.
+
+### 16.1 브랜치 전략
+
+| 브랜치 유형 | 용도 | 이름 규칙 | 대상 상위 브랜치 |
+|---|---|---|---|
+| `main` | 배포 가능한 가장 안정적인 브랜치 | `main` | - |
+| `develop` | 다음 버전을 위한 기능이 모이는 통합 브랜치 | `develop` | `main` |
+| `feature` | 신규 기능/버그 수정 작업 브랜치 | `feat/도메인-내용` (예: `feat/delivery-fee-calculation`) | `develop` |
+| `release` | 배포 준비 및 최종 QA | `release/<버전>` | `develop` |
+| `hotfix` | 배포된 `main`의 긴급 장애 패치 | `hotfix/<이슈번호>-<요약>` | `main` |
+
+- 작업 시작 전 `develop`을 최신화한 뒤 그 위에서 브랜치를 분기한다. `hotfix`만 예외적으로 `main`에서 분기해 `main`으로 PR한다.
+- 머지 후 로컬 작업 브랜치는 삭제한다.
+
+### 16.2 커밋 메시지
+
+- 최소 형식: `type: 설명` (`feat`, `fix`, `refactor`, `test`, `docs`, `chore`, `style`)
+  - 예: `feat: 배송 요금 산정 로직 추가`
+- 변경 배경까지 남기고 싶으면 `docs/git-flow-guide.md`의 확장 형식(`type(scope): subject` + 본문 + 푸터)을 써도 된다. 최소 형식과 상충하지 않는, 필요할 때만 쓰는 선택 사항이다.
+
+### 16.3 PR 규칙
+
+- 리뷰어를 최소 1명 이상 지정한다.
+- 연관 이슈가 있으면 본문에 명시해 자동으로 닫히게 한다 (예: `Resolves: #45`).
+- `.github/pull_request_template.md`의 항목(요약 / 주요 변경 사항 / 리뷰 포인트 / 스크린샷·테스트 결과)을 빠짐없이 채운다 — UI 작업은 스크린샷, API 작업은 테스트 로그나 호출 결과를 첨부한다.
+- PR 단위는 도메인 하나 + 기능 하나 정도로 작게 유지하며, `Squash and Merge`로 병합한다.
+- 신규 기술 도입 및 핵심 아키텍처 결정 시 `docs/adr/` 규격에 따라 **ADR(Architecture Decision Record)**을 100% 필수 작성하며, PR 제출 시 `docs/pr-review-guide.md` 양식에 따라 **[리뷰어 3분 족보 가이드]** 및 **[Files changed 탭 핀포인트 인라인 댓글]**을 필수 작성/부착한다.
+
+### 16.4 GitHub 이슈 규격
+
+- `[카테고리] 요약 설명` 형식 (`[Feature]`, `[Security]`, `[Concurrency]`, `[Testing]`, `[Observability]`, `[Ops]`, `[Bug]`, `[Docs]`)
+  - 예시: `[Security] Spring Security 및 JWT 기반 REST API 인증/인가 체계 구축`
+- `.github/ISSUE_TEMPLATE/` 템플릿(개요, 세부 요구사항, 완료 정의) 사용을 의무화한다.
+
+---
+
+## 17. 체크리스트 (PR 리뷰 시 확인)
 
 - [ ] Controller가 Entity를 직접 반환하지 않고 DTO로 변환하는가?
 - [ ] 비즈니스 로직이 Controller가 아니라 Service에 있는가?
 - [ ] 예상 가능한 실패가 커스텀 예외로 표현되고, `GlobalExceptionHandler`에 매핑이 추가되어 있는가?
 - [ ] `@Transactional`이 Service 계층에만 붙어 있는가?
+- [ ] 잔액/배정처럼 동시 요청에 취약한 로직을 변경했다면 `findByIdForUpdate`(비관적 락)와 동시성 테스트(`docs/concurrency-control-guide.md`)를 추가했는가?
 - [ ] `@Autowired` 필드 주입이 아니라 생성자 주입을 쓰는가?
 - [ ] Repository가 Entity 1개당 1개씩 대응되는가?
 - [ ] 다른 도메인의 Repository/Entity를 직접 참조하지 않고, 필요하면 그 도메인의 Service를 거쳤는가?
@@ -417,3 +473,6 @@ void 도메인은_다른_도메인의_repository를_직접_참조하지_않는�
 - [ ] 새로 추가한 서비스 로직에 단위 테스트가 있는가? (given_when_then 네이밍)
 - [ ] ArchUnit 테스트(레이어 의존성 규칙)가 깨지지 않는가?
 - [ ] Spotless 포맷팅 검사를 통과하는가?
+- [ ] Entity 필드를 추가/변경했다면 대응하는 Flyway 마이그레이션 파일을 새로 추가했는가? (기존 마이그레이션 파일을 수정하지 않았는가?)
+- [ ] `develop`을 대상으로 브랜치를 분기·PR 했는가? (`hotfix`는 `main` 예외)
+- [ ] 리뷰어를 지정하고, PR 템플릿의 요약/변경사항/리뷰 포인트/테스트 결과를 모두 작성했는가?

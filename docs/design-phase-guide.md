@@ -79,7 +79,7 @@ graph TD
 ### 3. API 명세서 (API Specification)
 컨트롤러를 만들기 전에 클라이언트와 서버가 주고받을 데이터 포맷을 테이블 형식으로 약속합니다.
 
-* **엔드포인트:** `POST /api/delivery-requests` (배송 요청 및 자동 매칭 실행)
+* **엔드포인트:** `POST /api/v1/delivery-requests` (배송 요청 및 자동 매칭 실행)
 * **요청 바디 (Request Body):**
   ```json
   {

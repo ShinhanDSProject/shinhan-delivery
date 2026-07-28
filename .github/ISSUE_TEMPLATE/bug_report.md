@@ -12,7 +12,7 @@ assignees: ''
 ---
 
 ## 🔬 재현 절차 (Steps to Reproduce)
-1. 요청 API: `POST /api/...`
+1. 요청 API: `POST /api/v1/...`
 2. 전송 Payload: `{ ... }`
 3. 발생 에러 메시지 / 스택트레이스
 

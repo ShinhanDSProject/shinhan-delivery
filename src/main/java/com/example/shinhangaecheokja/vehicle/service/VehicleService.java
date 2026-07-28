@@ -7,8 +7,10 @@ import com.example.shinhangaecheokja.vehicle.dto.request.VehicleCreateRequest;
 import com.example.shinhangaecheokja.vehicle.dto.request.VehicleUpdateRequest;
 import com.example.shinhangaecheokja.vehicle.dto.response.VehicleResponse;
 import com.example.shinhangaecheokja.vehicle.entity.Vehicle;
+import com.example.shinhangaecheokja.vehicle.entity.VehicleStatus;
 import com.example.shinhangaecheokja.vehicle.exception.InvalidWeightException;
 import com.example.shinhangaecheokja.vehicle.exception.OverMaxDistanceException;
+import com.example.shinhangaecheokja.vehicle.exception.VehicleNotAvailableException;
 import com.example.shinhangaecheokja.vehicle.repository.VehicleRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +36,9 @@ public class VehicleService {
     vehicle.setType(request.getType());
     vehicle.setMaxWeight(request.getMaxWeight());
     vehicle.setMaxDistance(request.getMaxDistance());
+    vehicle.setLatitude(request.getLatitude());
+    vehicle.setLongitude(request.getLongitude());
+    vehicle.setStatus(VehicleStatus.AVAILABLE);
 
     return VehicleResponse.from(vehicleRepository.save(vehicle));
   }
@@ -44,28 +49,53 @@ public class VehicleService {
     return VehicleResponse.from(findVehicleOrThrow(vehicleId));
   }
 
+  /**
+   * 매칭(배정) 직전에 비관적 쓰기 락으로 Vehicle을 조회한다. 동시에 들어온 다른 매칭 요청이 같은 차량을 동시에 가져가지 못하도록, 호출한 트랜잭션이 끝날 때까지
+   * 해당 차량 행을 잠근다.
+   */
+  @Transactional
+  public VehicleResponse getVehicleForUpdate(Long vehicleId) {
+    return VehicleResponse.from(
+        vehicleRepository
+            .findByIdForUpdate(vehicleId)
+            .orElseThrow(() -> new EntityNotFoundException(ErrorCode.VEHICLE_NOT_FOUND)));
+  }
+
   /** 전체 Vehicle 목록을 조회한다. */
   @Transactional(readOnly = true)
   public List<VehicleResponse> getVehicles() {
     return vehicleRepository.findAll().stream().map(VehicleResponse::from).toList();
   }
 
-  /** 주어진 무게·거리를 감당할 수 있는 차량이 하나라도 있는지 확인한다. */
-  @Transactional(readOnly = true)
-  public boolean existsAvailableVehicle(double weight, double distance) {
-    return vehicleRepository.existsByMaxWeightGreaterThanEqualAndMaxDistanceGreaterThanEqual(
-        weight, distance);
+  /** Vehicle을 BUSY 상태로 전환한다. */
+  @Transactional
+  public void markBusy(Long vehicleId) {
+    findVehicleOrThrow(vehicleId).setStatus(VehicleStatus.BUSY);
   }
 
-  /** 무게/거리 유효성을 검증한 뒤 Vehicle의 종류·무게·거리를 수정한다. ownerId는 변경하지 않는다. */
+  /** Vehicle을 AVAILABLE 상태로 전환한다. */
+  @Transactional
+  public void markAvailable(Long vehicleId) {
+    findVehicleOrThrow(vehicleId).setStatus(VehicleStatus.AVAILABLE);
+  }
+
+  /**
+   * 무게/거리 유효성을 검증한 뒤 Vehicle의 종류·무게·거리를 수정한다. ownerId는 변경하지 않는다. 이미 배정되어 BUSY인 차량은 수정할 수
+   * 없다(AVAILABLE 상태에서만 허용).
+   */
   @Transactional
   public VehicleResponse updateVehicle(Long vehicleId, VehicleUpdateRequest request) {
     validateWeightAndDistance(request.getMaxWeight(), request.getMaxDistance());
 
     Vehicle vehicle = findVehicleOrThrow(vehicleId);
+    if (vehicle.getStatus() != VehicleStatus.AVAILABLE) {
+      throw new VehicleNotAvailableException(vehicleId);
+    }
     vehicle.setType(request.getType());
     vehicle.setMaxWeight(request.getMaxWeight());
     vehicle.setMaxDistance(request.getMaxDistance());
+    vehicle.setLatitude(request.getLatitude());
+    vehicle.setLongitude(request.getLongitude());
     return VehicleResponse.from(vehicle);
   }
 
