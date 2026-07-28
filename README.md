@@ -52,6 +52,9 @@ git config --local commit.template .gitmessage
 아래 링크를 클릭하여 해당하는 가이드 및 설계 내용을 확인하실 수 있습니다.
 
 ### 🏆 세계 최고 수준 개발 표준 & AI 행동 규범
+* [**팀 개발 문화 & 일하는 방식 7대 철학 가이드 (docs/engineering-culture-and-working-style.md)**](./docs/engineering-culture-and-working-style.md) - 비난 없는 심리적 안전, 15분 질문 룰, 공감 코드 리뷰 7대 문화 🕊️
+* [**프로젝트 착수 전 6대 사전 리스크 감사 & 거버넌스 가이드 (docs/pre-launch-risk-and-governance-guide.md)**](./docs/pre-launch-risk-and-governance-guide.md) - 개발자/리더/PM 관점 6대 리스크 방어 수칙 🛡️
+* [**팀 리더십 & 프로젝트 운용 프레임워크 가이드 (docs/team-operating-model-guide.md)**](./docs/team-operating-model-guide.md) - 리더와 팀원이 협업할 때 준수할 5대 운용 기둥 및 문화 프레임워크 👑
 * [**AI 에이전트 행동 지침 및 8대 수칙 (AGENTS.md)**](./AGENTS.md) - Google, Apple, Meta 수준의 최고 결과물을 도출하기 위한 AI/개발자 8대 무결점 작업 원칙 🏛️
 * [**코딩 컨벤션 및 6대 개발 규칙 (code-convention.md)**](./code-convention.md) - 우리 프로젝트에서 개발자와 AI가 엄격히 준수해야 할 단일 원본 코딩 규약 📐
 
@@ -59,6 +62,11 @@ git config --local commit.template .gitmessage
 * [**ADR-0001: JWT 기반 무상태 인증 체계 채택 (docs/adr/0001-stateless-jwt-authentication.md)**](./docs/adr/0001-stateless-jwt-authentication.md) - 왜 무상태 JWT 인증을 채택했는지 세션/Basic 인증과의 비교 분석 기록 📜
 
 ### 🛠️ 개발 가이드 및 협업 규칙
+* [**AI 기반 초급자 페어 프로그래밍 & 차근차근 개발 가이드 (docs/ai-paired-development-guide.md)**](./docs/ai-paired-development-guide.md) - 초급자가 AI와 5단계 순차 워크플로우로 무결점 코드를 완성하는 가이드 🤖
+* [**초급자 전용 CRUD & 레이어별 초상세 이슈 분할 가이드 (docs/beginner-crud-issue-template-guide.md)**](./docs/beginner-crud-issue-template-guide.md) - DTO, Entity, Service, Controller 단계별 디테일 가이드 템플릿 🔰
+* [**학습 및 지식 공유형 GitHub Issue 분할 가이드 (docs/learning-oriented-issue-guide.md)**](./docs/learning-oriented-issue-guide.md) - 단순 개발을 넘어 팀 전체의 동반 성장을 이끄는 3단계 학습형 이슈 작성 규격 🎓
+* [**초급 개발자를 위한 7단계 초상세 태스크 분할 가이드 (docs/junior-developer-task-guide.md)**](./docs/junior-developer-task-guide.md) - 입문자가 막연함 없이 100% 무결점 코드를 완성하도록 인도하는 Step-by-Step 가이드북 🔰
+* [**Deliver Happiness 전체 기능 명세서 & 개발 로드맵 (docs/project-spec-and-task-breakdown.md)**](./docs/project-spec-and-task-breakdown.md) - 10대 모듈, 30+ REST API 및 6대 스프린트 파트별(BE/FE/DevOps) 태스크 할당서 📦
 * [**단일 원본 관리(SSOT) 문서 정책 가이드 (docs/ssot-documentation-policy.md)**](./docs/ssot-documentation-policy.md) - 정보 중복을 방지하고 지식의 파편화를 차단하는 프로젝트 단일 원본 문서 관리 규격 🏛️
 * [**테스트 하네스 구축 및 검증 항목 판단 정책 가이드 (docs/harness-decision-framework.md)**](./docs/harness-decision-framework.md) - 하네스에 추가할 검증 항목 4대 판단 프레임워크 및 무결점 결함 0개를 위한 초엄격 6대 통제 정책 🛡️
 * [**PR 리뷰어 3분 족보 가이드 작성 규격 (docs/pr-review-guide.md)**](./docs/pr-review-guide.md) - 리뷰어의 검토 피로도를 낮추고 3분 만에 핵심 코드를 파악하게 돕는 PR 가이드 작성 규격 🗺️

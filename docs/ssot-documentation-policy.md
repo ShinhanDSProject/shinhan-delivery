@@ -48,6 +48,29 @@ metadata:
 | **Git Flow & 커밋 컨벤션** | [`docs/git-flow-guide.md`](./git-flow-guide.md) | `README.md` |
 | **REST API 설계 규격** | [`docs/rest-api-guide.md`](./rest-api-guide.md) | `README.md` |
 | **전역 예외 처리 규격** | [`docs/exception-handling-guide.md`](./exception-handling-guide.md) | `README.md` |
+| **프로젝트 전체 기능 명세 & 스프린트 로드맵** | [`docs/project-spec-and-task-breakdown.md`](./project-spec-and-task-breakdown.md) | `README.md` |
+| **팀 리더십 & 프로젝트 운용 프레임워크** | [`docs/team-operating-model-guide.md`](./team-operating-model-guide.md) | `README.md` |
+| **팀 개발 문화 & 일하는 방식 7대 철학** | [`docs/engineering-culture-and-working-style.md`](./engineering-culture-and-working-style.md) | `README.md` |
+| **초급 개발자 7단계 태스크 분할 가이드** | [`docs/junior-developer-task-guide.md`](./junior-developer-task-guide.md) | `README.md` |
+| **학습형 3단계 GitHub Issue 작성 규격** | [`docs/learning-oriented-issue-guide.md`](./learning-oriented-issue-guide.md) | `README.md` |
+| **AI 기반 초급자 페어 프로그래밍 가이드** | [`docs/ai-paired-development-guide.md`](./ai-paired-development-guide.md) | `README.md` |
+| **초급자 CRUD & 레이어별 이슈 분할 템플릿** | [`docs/beginner-crud-issue-template-guide.md`](./beginner-crud-issue-template-guide.md) | `README.md` |
+| **프로젝트 착수 전 6대 사전 리스크 감사** | [`docs/pre-launch-risk-and-governance-guide.md`](./pre-launch-risk-and-governance-guide.md) | `README.md` |
+
+---
+
+## 🧭 4. 신규 가이드북 종합 내비게이션 & 읽기 흐름도 (Document Navigation Map)
+
+프로젝트에 참여하는 팀원(리더, 팀원, 초급 개발자)이 자신의 역할과 상황에 따라 **어떤 순서로 문서를 참조해야 하는지 보여주는 통합 내비게이션 지도**입니다:
+
+```mermaid
+graph TD
+    Start["🚀 프로젝트 참여"] --> Role{"역할 파악"}
+    
+    Role -->|👑 팀장 / PM| LeaderFlow["1. team-operating-model-guide.md (팀 운용)<br/>2. pre-launch-risk-and-governance-guide.md (사전 리스크)<br/>3. project-spec-and-task-breakdown.md (전체 로드맵)"]
+    Role -->|🔰 초급 개발자| JuniorFlow["1. engineering-culture-and-working-style.md (개발 문화)<br/>2. junior-developer-task-guide.md (7단계 태스크)<br/>3. beginner-crud-issue-template-guide.md (CRUD 템플릿)<br/>4. ai-paired-development-guide.md (AI 슬래시 커맨드)"]
+    Role -->|🎓 이슈 작성자| IssueFlow["1. learning-oriented-issue-guide.md (3단계 학습형 이슈)"]
+```
 
 ---
 
