@@ -20,9 +20,11 @@ public class JwtProvider {
   private final long refreshTokenExpiration;
 
   public JwtProvider(
-      @Value("${jwt.secret}") String secret,
-      @Value("${jwt.access-token-expiration}") long accessTokenExpiration,
-      @Value("${jwt.refresh-token-expiration}") long refreshTokenExpiration) {
+      @Value(
+              "${jwt.secret:shinhan-gaecheokja-super-secret-key-for-jwt-authentication-token-security-2026-very-long}")
+          String secret,
+      @Value("${jwt.access-token-expiration:3600000}") long accessTokenExpiration,
+      @Value("${jwt.refresh-token-expiration:1209600000}") long refreshTokenExpiration) {
     this.secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
     this.accessTokenExpiration = accessTokenExpiration;
     this.refreshTokenExpiration = refreshTokenExpiration;
