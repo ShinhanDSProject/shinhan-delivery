@@ -652,22 +652,17 @@
         }
 
         try {
-            const res = await fetch('/api/users/courier-signup', {
+            // TODO: vehicle/activityRegion/preferredWeight는 아직 회원가입 API와 연결되어 있지 않다.
+            // 차량 등록은 회원가입과 별도로 POST /api/v1/vehicles 호출이 필요하다(ownerId 필요).
+            const res = await fetch('/api/v1/members', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     name,
                     email,
                     password,
-                    confirmPassword,
                     phoneNumber,
-                    vehicle,
-                    activityRegion,
-                    preferredWeight,
-                    termsAgreed,
-                    privacyAgreed,
-                    safetyAgreed,
-                    marketingAgreed
+                    role: 'COURIER'
                 })
             });
 

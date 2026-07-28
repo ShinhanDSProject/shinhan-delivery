@@ -409,18 +409,15 @@
         }
 
         try {
-            const res = await fetch('/api/users/signup', {  //포장해서 서버로 던지기
+            const res = await fetch('/api/v1/members', {  //포장해서 서버로 던지기
                 method: 'POST', //방식은 POST방식
                 headers: { 'Content-Type': 'application/json' },    //내용물은 JSON형태
                 body: JSON.stringify({
                     name,
                     email,
                     password,
-                    confirmPassword,
                     phoneNumber,
-                    termsAgreed,
-                    privacyAgreed,
-                    marketingAgreed
+                    role: 'CUSTOMER'
                 })
             });
 
