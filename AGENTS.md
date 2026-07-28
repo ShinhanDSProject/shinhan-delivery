@@ -8,7 +8,8 @@
 * Controller는 DTO만 다루며 Entity를 직접 반환해서는 안 됩니다.
 * **Getter, Setter 작성 시 수동 코딩을 금지하고 무조건 Lombok 라이브러리(`@Getter`, `@Setter`)를 100% 사용하여 개발해야 합니다.**
 * **신규 기술 도입 및 핵심 아키텍처 결정 시 `docs/adr/` 규격에 따라 공식 ADR(Architecture Decision Record) 문서를 필수 작성해야 합니다.**
-* **PR 생성 시 리뷰어(관리자)의 검토 소요 시간을 단축하기 위해 `docs/pr-review-guide.md` 규격에 따라 [리뷰어 3분 족보 가이드] 및 [Files changed 핀포인트 인라인 댓글]을 필수 작성/부착해야 합니다.**
+* **PR 생성 시 리뷰어(관리자)의 검토 소요 시간을 단축하기 위해 `docs/pr-review-guide.md` 및 `.github/pull_request_template.md` 규격에 따라 [리뷰어 3분 족보 가이드 5대 표준 구성 요소(1분 서머리, Mermaid 읽기 순서, 파일별 체크포인트, 리뷰어 1초 체크리스트, Files changed 핀포인트 인라인 댓글 3개)] 전체를 절대로 1줄 요약으로 축약하지 말고 100% 원본 서식 그대로 본문에 필수 작성/부착해야 합니다.**
+
 
 ## 2. AI Pre-Flight Self-Review & Test Harness 자가 치유 피드백 루프
 작업을 완료하거나 `./pr`을 구동하기 전에 **반드시 아래 2단계 사전 검토를 완료해야 합니다**:
@@ -45,3 +46,7 @@
    - 버그 발생 시 추측이나 짐작으로 코드를 수정하는 행위("이럴 것 같아서 수정했습니다")를 금지합니다. 반드시 실제 스택트레이스, 로그, 재생 가능한 실패 테스트라는 객관적 실증 증거를 수집한 후에만 수정을 집행합니다.
 8. **기존 API 계약 및 하위 호환성 100% 유지 (Zero Side-Effect Stability):**
    - 기존 응답 DTO 필드, HTTP Status, 파라미터 시그니처의 파괴적 변경(Breaking Change)을 금지하며, 사용 중인 기존 기능에 부작용(Side-effect)이 없음을 전수로 검증합니다.
+9. **작업 단위 완료 시 `commit` 커맨드 대화형 마이크로 커밋 의무화 (Sub-task Micro-Commit Execution):**
+   - 모든 AI 에이전트와 개발자는 레이어별(DTO, Entity, Service, Controller, Test) 또는 서브태스크 작업 단위가 완성될 때마다 변경 사항과 커밋 메시지 프리뷰를 제시하고, 개발자가 **`commit`** (또는 `/commit`) 명령어를 전송하면 `./scripts/verify.sh` 검증 후 지체 없이 **Git 마이크로 커밋(Micro-Commit)을 즉시 집행**합니다.
+
+
