@@ -1,8 +1,18 @@
+---
+metadata:
+  version: "1.1.0"
+  ssot_owner: "docs/security-jwt-guide.md"
+  last_updated: "2026-07-28"
+  status: "APPROVED (SSOT Primary)"
+---
+
 # 🔒 Spring Security & JWT 인증/인가 체계 가이드
 
 이 문서는 `shinhan-gaecheokja` 프로젝트에 구축된 **Spring Security + JWT (JSON Web Token) 무상태(Stateless) 인증 및 인가 시스템**의 아키텍처 구조와 사용법을 초보 개발자의 눈높이에 맞춰 설명하는 가이드북입니다.
 
-* 📜 **공식 아키텍처 의사결정 기록:** [**ADR-0001: JWT 기반 무상태 인증 체계 채택 (docs/adr/0001-stateless-jwt-authentication.md)**](./adr/0001-stateless-jwt-authentication.md)
+> [!IMPORTANT]
+> 본 가이드북은 [docs/ssot-documentation-policy.md](./ssot-documentation-policy.md)의 **전문 기술 문서화 표준 작성 규격**을 준수합니다.
+> 공식 의사결정 배말 배경 및 Trade-off는 [ADR-0001: JWT 기반 무상태 인증 체계 채택](./adr/0001-stateless-jwt-authentication.md) 문서에서 확인할 수 있습니다.
 
 ---
 

@@ -1,6 +1,17 @@
+---
+metadata:
+  version: "1.1.0"
+  ssot_owner: "docs/harness-decision-framework.md"
+  last_updated: "2026-07-28"
+  status: "APPROVED (SSOT Primary)"
+---
+
 # 🛡️ 테스트 하네스(Test Harness) 구축 및 검증 항목 판단 정책 가이드북
 
 이 문서는 `shinhan-gaecheokja` 프로젝트에서 **무결점 결함 0개(Zero-Defect Quality Gate)를 사수하고 개발자와 AI의 코드 품질을 자동 검증하기 위해 구축하는 테스트 하네스(`./scripts/verify.sh`)의 의사결정 판단 정책 및 초엄격 하네스 수칙**을 정리한 팀 가이드북입니다.
+
+> [!NOTE]
+> 본 가이드북은 [docs/ssot-documentation-policy.md](./ssot-documentation-policy.md)의 **전문 기술 문서화 표준 작성 규격**을 준수하며, 로컬 검증 속도 예산(15초) 및 무결점 0개 게이트를 정의하는 유일한 단일 원본(SSOT)입니다.
 
 ---
 
