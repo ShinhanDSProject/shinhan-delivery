@@ -6,6 +6,7 @@ import com.example.shinhangaecheokja.member.repository.MemberRepository;
 import com.example.shinhangaecheokja.payment.entity.PointWallet;
 import com.example.shinhangaecheokja.payment.repository.PaymentRepository;
 import com.example.shinhangaecheokja.vehicle.entity.Vehicle;
+import com.example.shinhangaecheokja.vehicle.entity.VehicleStatus;
 import com.example.shinhangaecheokja.vehicle.entity.VehicleType;
 import com.example.shinhangaecheokja.vehicle.repository.VehicleRepository;
 import lombok.RequiredArgsConstructor;
@@ -91,6 +92,7 @@ public class DataSeedInitializer implements CommandLineRunner {
             .type(type)
             .maxWeight(maxWeight)
             .maxDistance(maxDistance)
+                .status(VehicleStatus.AVAILABLE)
             .build();
     return vehicleRepository.save(vehicle);
   }
