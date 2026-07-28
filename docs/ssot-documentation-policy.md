@@ -59,6 +59,21 @@ metadata:
 
 ---
 
+## 🧭 4. 신규 가이드북 종합 내비게이션 & 읽기 흐름도 (Document Navigation Map)
+
+프로젝트에 참여하는 팀원(리더, 팀원, 초급 개발자)이 자신의 역할과 상황에 따라 **어떤 순서로 문서를 참조해야 하는지 보여주는 통합 내비게이션 지도**입니다:
+
+```mermaid
+graph TD
+    Start["🚀 프로젝트 참여"] --> Role{"역할 파악"}
+    
+    Role -->|👑 팀장 / PM| LeaderFlow["1. team-operating-model-guide.md (팀 운용)<br/>2. pre-launch-risk-and-governance-guide.md (사전 리스크)<br/>3. project-spec-and-task-breakdown.md (전체 로드맵)"]
+    Role -->|🔰 초급 개발자| JuniorFlow["1. engineering-culture-and-working-style.md (개발 문화)<br/>2. junior-developer-task-guide.md (7단계 태스크)<br/>3. beginner-crud-issue-template-guide.md (CRUD 템플릿)<br/>4. ai-paired-development-guide.md (AI 슬래시 커맨드)"]
+    Role -->|🎓 이슈 작성자| IssueFlow["1. learning-oriented-issue-guide.md (3단계 학습형 이슈)"]
+```
+
+---
+
 ## 🏆 5. 세계 최고 수준(World-Class) 전문 기술 문서화 5대 작성 규격
 
 문서의 기술적 깊이(Technical Depth)와 가독성, 전문적 권위를 극대화하기 위해 앞으로 프로젝트 내 **모든 마크다운 문서는 다음 5대 작성 규격을 100% 반영**합니다:
