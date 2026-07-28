@@ -80,7 +80,7 @@ class PaymentServiceTest {
     PointWallet wallet = new PointWallet();
     wallet.setMemberId(1L);
     wallet.setBalance(1000L);
-    when(paymentRepository.findById(1L)).thenReturn(Optional.of(wallet));
+    when(paymentRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(wallet));
 
     PointChargeRequest request = new PointChargeRequest();
     request.setAmount(500L);
@@ -95,7 +95,7 @@ class PaymentServiceTest {
     PointWallet wallet = new PointWallet();
     wallet.setMemberId(1L);
     wallet.setBalance(1000L);
-    when(paymentRepository.findById(1L)).thenReturn(Optional.of(wallet));
+    when(paymentRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(wallet));
 
     PointUseRequest request = new PointUseRequest();
     request.setAmount(300L);
@@ -110,7 +110,7 @@ class PaymentServiceTest {
     PointWallet wallet = new PointWallet();
     wallet.setMemberId(1L);
     wallet.setBalance(100L);
-    when(paymentRepository.findById(1L)).thenReturn(Optional.of(wallet));
+    when(paymentRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(wallet));
 
     PointUseRequest request = new PointUseRequest();
     request.setAmount(500L);

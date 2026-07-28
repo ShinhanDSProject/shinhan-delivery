@@ -47,18 +47,24 @@ public class PaymentService {
     return paymentRepository.findAll().stream().map(PointWalletResponse::from).toList();
   }
 
-  /** 포인트 지갑에 포인트를 충전한다. */
+  /**
+   * 포인트 지갑에 포인트를 충전한다. 동일 지갑에 대한 동시 충전·차감 요청이 잔액을 잃어버리지 않도록 비관적 쓰기 락으로 지갑을 조회해, 호출한 트랜잭션이 끝날 때까지 해당
+   * 지갑 행을 잠근다.
+   */
   @Transactional
   public PointWalletResponse chargePoint(Long walletId, PointChargeRequest request) {
-    PointWallet wallet = findWalletOrThrow(walletId);
+    PointWallet wallet = findWalletForUpdateOrThrow(walletId);
     wallet.setBalance(wallet.getBalance() + request.getAmount());
     return PointWalletResponse.from(wallet);
   }
 
-  /** 다른 도메인 Service가 회원의 포인트를 차감할 때 사용한다. 잔액이 부족하면 InsufficientPointException. */
+  /**
+   * 다른 도메인 Service가 회원의 포인트를 차감할 때 사용한다. 잔액이 부족하면 InsufficientPointException. 동일 지갑에 대한 동시 차감 요청으로
+   * 잔액이 음수가 되지 않도록 비관적 쓰기 락으로 지갑을 조회한다.
+   */
   @Transactional
   public PointWalletResponse usePoint(Long walletId, PointUseRequest request) {
-    PointWallet wallet = findWalletOrThrow(walletId);
+    PointWallet wallet = findWalletForUpdateOrThrow(walletId);
     if (wallet.getBalance() < request.getAmount()) {
       throw new InsufficientPointException(walletId, request.getAmount());
     }
@@ -76,6 +82,12 @@ public class PaymentService {
   private PointWallet findWalletOrThrow(Long walletId) {
     return paymentRepository
         .findById(walletId)
+        .orElseThrow(() -> new EntityNotFoundException(ErrorCode.POINT_WALLET_NOT_FOUND));
+  }
+
+  private PointWallet findWalletForUpdateOrThrow(Long walletId) {
+    return paymentRepository
+        .findByIdForUpdate(walletId)
         .orElseThrow(() -> new EntityNotFoundException(ErrorCode.POINT_WALLET_NOT_FOUND));
   }
 }
