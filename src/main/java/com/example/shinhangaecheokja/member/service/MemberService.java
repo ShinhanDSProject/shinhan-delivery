@@ -1,11 +1,12 @@
 package com.example.shinhangaecheokja.member.service;
 
+import com.example.shinhangaecheokja.common.exception.EntityNotFoundException;
+import com.example.shinhangaecheokja.common.exception.ErrorCode;
 import com.example.shinhangaecheokja.member.dto.request.MemberCreateRequest;
 import com.example.shinhangaecheokja.member.dto.request.MemberUpdateRequest;
 import com.example.shinhangaecheokja.member.dto.response.MemberResponse;
 import com.example.shinhangaecheokja.member.entity.Member;
 import com.example.shinhangaecheokja.member.exception.DuplicateMemberException;
-import com.example.shinhangaecheokja.member.exception.MemberNotFoundException;
 import com.example.shinhangaecheokja.member.repository.MemberRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,7 @@ public class MemberService {
 
   private final MemberRepository memberRepository;
   private final PasswordEncoder passwordEncoder;
+  private final com.example.shinhangaecheokja.common.security.JwtProvider jwtProvider;
 
   /** 이메일 중복을 검증하고 비밀번호를 암호화해 회원을 생성한다. */
   @Transactional
@@ -38,7 +40,29 @@ public class MemberService {
     return MemberResponse.from(memberRepository.save(member));
   }
 
-  /** id로 회원 단건을 조회한다. 없으면 MemberNotFoundException. */
+  /** 이메일과 비밀번호를 검증하여 JWT Access/Refresh 토큰을 발급한다. */
+  @Transactional(readOnly = true)
+  public com.example.shinhangaecheokja.member.dto.response.TokenResponse login(
+      com.example.shinhangaecheokja.member.dto.request.LoginRequest request) {
+    Member member =
+        memberRepository
+            .findByEmail(request.getEmail())
+            .orElseThrow(() -> new EntityNotFoundException(ErrorCode.MEMBER_NOT_FOUND));
+
+    if (!passwordEncoder.matches(request.getPassword(), member.getPassword())) {
+      throw new com.example.shinhangaecheokja.common.exception.BusinessException(
+          ErrorCode.INVALID_CREDENTIALS);
+    }
+
+    String accessToken =
+        jwtProvider.createAccessToken(member.getId(), member.getEmail(), member.getRole().name());
+    String refreshToken = jwtProvider.createRefreshToken(member.getId(), member.getEmail());
+
+    return com.example.shinhangaecheokja.member.dto.response.TokenResponse.of(
+        accessToken, refreshToken);
+  }
+
+  /** id로 회원 단건을 조회한다. 없으면 EntityNotFoundException. */
   @Transactional(readOnly = true)
   public MemberResponse getMember(Long memberId) {
     return MemberResponse.from(findMemberOrThrow(memberId));
@@ -59,7 +83,7 @@ public class MemberService {
     return MemberResponse.from(member);
   }
 
-  /** id로 회원을 조회해 삭제한다. 없으면 MemberNotFoundException. */
+  /** id로 회원을 조회해 삭제한다. 없으면 EntityNotFoundException. */
   @Transactional
   public void deleteMember(Long memberId) {
     Member member = findMemberOrThrow(memberId);
@@ -67,6 +91,8 @@ public class MemberService {
   }
 
   private Member findMemberOrThrow(Long memberId) {
-    return memberRepository.findById(memberId).orElseThrow(() -> new MemberNotFoundException(memberId));
+    return memberRepository
+        .findById(memberId)
+        .orElseThrow(() -> new EntityNotFoundException(ErrorCode.MEMBER_NOT_FOUND));
   }
 }

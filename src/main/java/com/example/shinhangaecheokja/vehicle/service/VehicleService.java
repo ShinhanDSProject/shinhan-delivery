@@ -1,5 +1,7 @@
 package com.example.shinhangaecheokja.vehicle.service;
 
+import com.example.shinhangaecheokja.common.exception.EntityNotFoundException;
+import com.example.shinhangaecheokja.common.exception.ErrorCode;
 import com.example.shinhangaecheokja.member.service.MemberService;
 import com.example.shinhangaecheokja.vehicle.dto.request.VehicleCreateRequest;
 import com.example.shinhangaecheokja.vehicle.dto.request.VehicleUpdateRequest;
@@ -7,7 +9,6 @@ import com.example.shinhangaecheokja.vehicle.dto.response.VehicleResponse;
 import com.example.shinhangaecheokja.vehicle.entity.Vehicle;
 import com.example.shinhangaecheokja.vehicle.exception.InvalidWeightException;
 import com.example.shinhangaecheokja.vehicle.exception.OverMaxDistanceException;
-import com.example.shinhangaecheokja.vehicle.exception.VehicleNotFoundException;
 import com.example.shinhangaecheokja.vehicle.repository.VehicleRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -37,7 +38,7 @@ public class VehicleService {
     return VehicleResponse.from(vehicleRepository.save(vehicle));
   }
 
-  /** id로 Vehicle 단건을 조회한다. 없으면 VehicleNotFoundException. */
+  /** id로 Vehicle 단건을 조회한다. 없으면 EntityNotFoundException. */
   @Transactional(readOnly = true)
   public VehicleResponse getVehicle(Long vehicleId) {
     return VehicleResponse.from(findVehicleOrThrow(vehicleId));
@@ -68,7 +69,7 @@ public class VehicleService {
     return VehicleResponse.from(vehicle);
   }
 
-  /** id로 Vehicle을 조회해 삭제한다. 없으면 VehicleNotFoundException. */
+  /** id로 Vehicle을 조회해 삭제한다. 없으면 EntityNotFoundException. */
   @Transactional
   public void deleteVehicle(Long vehicleId) {
     Vehicle vehicle = findVehicleOrThrow(vehicleId);
@@ -87,6 +88,6 @@ public class VehicleService {
   private Vehicle findVehicleOrThrow(Long vehicleId) {
     return vehicleRepository
         .findById(vehicleId)
-        .orElseThrow(() -> new VehicleNotFoundException(vehicleId));
+        .orElseThrow(() -> new EntityNotFoundException(ErrorCode.VEHICLE_NOT_FOUND));
   }
 }

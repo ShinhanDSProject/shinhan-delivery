@@ -10,11 +10,8 @@ import com.example.shinhangaecheokja.delivery.dto.response.MatchingResponse;
 import com.example.shinhangaecheokja.delivery.entity.Matching;
 import com.example.shinhangaecheokja.delivery.entity.MatchingStatus;
 import com.example.shinhangaecheokja.delivery.exception.AlreadyMatchedException;
-import com.example.shinhangaecheokja.delivery.exception.DeliveryRequestNotFoundException;
-import com.example.shinhangaecheokja.delivery.exception.MatchingNotFoundException;
 import com.example.shinhangaecheokja.delivery.repository.DeliveryRequestRepository;
 import com.example.shinhangaecheokja.delivery.repository.MatchingRepository;
-import com.example.shinhangaecheokja.vehicle.exception.VehicleNotFoundException;
 import com.example.shinhangaecheokja.vehicle.service.VehicleService;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
@@ -39,7 +36,8 @@ class MatchingServiceTest {
 
     when(deliveryRequestRepository.existsById(1L)).thenReturn(true);
     when(matchingRepository.existsByDeliveryRequestId(1L)).thenReturn(false);
-    when(matchingRepository.save(any(Matching.class))).thenAnswer(invocation -> invocation.getArgument(0));
+    when(matchingRepository.save(any(Matching.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
 
     MatchingResponse response = matchingService.createMatching(request);
 
@@ -49,7 +47,7 @@ class MatchingServiceTest {
   }
 
   @Test
-  void 존재하지_않는_배송요청이면_DeliveryRequestNotFoundException을_던진다() {
+  void 존재하지_않는_배송요청이면_EntityNotFoundException을_던진다() {
     MatchingCreateRequest request = new MatchingCreateRequest();
     request.setDeliveryRequestId(999L);
     request.setVehicleId(2L);
@@ -57,20 +55,23 @@ class MatchingServiceTest {
     when(deliveryRequestRepository.existsById(999L)).thenReturn(false);
 
     assertThatThrownBy(() -> matchingService.createMatching(request))
-        .isInstanceOf(DeliveryRequestNotFoundException.class);
+        .isInstanceOf(com.example.shinhangaecheokja.common.exception.EntityNotFoundException.class);
   }
 
   @Test
-  void 존재하지_않는_차량이면_VehicleNotFoundException을_던진다() {
+  void 존재하지_않는_차량이면_EntityNotFoundException을_던진다() {
     MatchingCreateRequest request = new MatchingCreateRequest();
     request.setDeliveryRequestId(1L);
     request.setVehicleId(999L);
 
     when(deliveryRequestRepository.existsById(1L)).thenReturn(true);
-    when(vehicleService.getVehicle(999L)).thenThrow(new VehicleNotFoundException(999L));
+    when(vehicleService.getVehicle(999L))
+        .thenThrow(
+            new com.example.shinhangaecheokja.common.exception.EntityNotFoundException(
+                com.example.shinhangaecheokja.common.exception.ErrorCode.VEHICLE_NOT_FOUND));
 
     assertThatThrownBy(() -> matchingService.createMatching(request))
-        .isInstanceOf(VehicleNotFoundException.class);
+        .isInstanceOf(com.example.shinhangaecheokja.common.exception.EntityNotFoundException.class);
   }
 
   @Test
@@ -87,11 +88,11 @@ class MatchingServiceTest {
   }
 
   @Test
-  void 존재하지_않는_매칭을_조회하면_MatchingNotFoundException을_던진다() {
+  void 존재하지_않는_매칭을_조회하면_EntityNotFoundException을_던진다() {
     when(matchingRepository.findById(1L)).thenReturn(Optional.empty());
 
     assertThatThrownBy(() -> matchingService.getMatching(1L))
-        .isInstanceOf(MatchingNotFoundException.class);
+        .isInstanceOf(com.example.shinhangaecheokja.common.exception.EntityNotFoundException.class);
   }
 
   @Test

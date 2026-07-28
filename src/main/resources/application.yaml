@@ -16,3 +16,12 @@ spring:
   flyway:
     enabled: true
     baseline-on-migrate: true
+
+app:
+  data-seed:
+    enabled: ${DATA_SEED_ENABLED:false}
+
+jwt:
+  secret: shinhan-gaecheokja-super-secret-key-for-jwt-authentication-token-security-2026-very-long
+  access-token-expiration: 3600000 # 1시간
+  refresh-token-expiration: 1209600000 # 14일

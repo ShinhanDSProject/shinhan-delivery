@@ -11,7 +11,7 @@
 1. **계층은 위에서 아래로만 의존한다.** `Controller → Service → Repository`. 역방향 의존(Repository가 Service를 참조하는 등)은 금지.
 2. **비즈니스 로직은 Service 계층에 모은다.** Controller는 요청을 받아 Service를 호출하고 결과를 응답으로 변환하는 역할만 한다. Entity는 데이터와 최소한의 자기 검증만 가진다.
 3. **에러는 예외(Exception)로 처리한다.** 커스텀 예외를 던지고, `@RestControllerAdvice`(전역 예외 처리기)에서 HTTP 응답으로 변환한다.
-4. Entity는 JPA 표준 방식(`@Entity`, Lombok `@Getter`/`@Setter`)을 따른다. 별도의 불변 객체(Value Object)나 `Result` 타입 같은 함수형 패턴은 쓰지 않는다.
+4. Entity 및 모든 DTO/Java 클래스의 `Getter`, `Setter` 메서드는 직접 코드로 수동 작성하지 않고 **무조건 Lombok 라이브러리(`@Getter`, `@Setter`)를 100% 사용하여 개발**한다. 수동 `getXXX()`, `setXXX()` 메서드 작성은 엄격히 금지된다. 별도의 불변 객체(Value Object)나 `Result` 타입 같은 함수형 패턴은 쓰지 않는다.
 
 ---
 
@@ -191,80 +191,43 @@ public class VehicleService {
 
 ## 6. 예외 처리
 
-### 6.1 커스텀 예외
+### 6.1 최상위 비즈니스 예외(BusinessException) & 공통 EntityNotFoundException
 
-도메인별로 의미 있는 예외를 만든다. 전부 `RuntimeException`을 상속한다 (checked exception 금지 — 메서드 시그니처가 지저분해지고 람다와도 안 맞음). 각 예외는 해당 도메인 패키지의 `exception` 하위(예: `vehicle.exception.InvalidWeightException`)에 둔다. `ErrorResponse`와 `GlobalExceptionHandler`만 도메인 전체가 공유하므로 `common.exception`에 둔다.
+프로젝트의 모든 커스텀 예외는 최상위 `BusinessException`(`RuntimeException` 상속)을 상속받고, `ErrorCode` Enum을 주입받아 예외 정보를 정밀하게 전달한다.
+
+- **`BusinessException`**: 프로젝트 내 모든 비즈니스 예외의 최상위 부모 클래스
+- **`EntityNotFoundException`**: 존재하지 않는 리소스 조회 시 사용하는 공통 예외. 도메인마다 `XxxNotFoundException` 클래스를 무분별하게 새로 만들지 않고, `new EntityNotFoundException(ErrorCode.MEMBER_NOT_FOUND)` 형태로 조합하여 사용(KISS 및 클래스 폭발 방지 원칙 준수)
+- **`ErrorCode`**: HTTP 상태 코드, 고유 에러 코드(`C001`, `M001` 등), 사용자 안내 메시지를 `common.exception` 패키지에서 통합 관리하는 Enum
 
 ```java
-public class InvalidWeightException extends RuntimeException {
-    public InvalidWeightException(double weight) {
-        super("유효하지 않은 무게입니다: " + weight);
-    }
-}
+// 공통 리소스 미존재 예외 발생 시
+Member member = memberRepository.findById(memberId)
+    .orElseThrow(() -> new EntityNotFoundException(ErrorCode.MEMBER_NOT_FOUND));
 
-public class MemberNotFoundException extends RuntimeException {
-    public MemberNotFoundException(Long memberId) {
-        super("존재하지 않는 회원입니다: " + memberId);
-    }
-}
-
-public class AlreadyMatchedException extends RuntimeException {
-    public AlreadyMatchedException(Long deliveryRequestId) {
-        super("이미 매칭된 배송 요청입니다: " + deliveryRequestId);
+// 특수 도메인 비즈니스 예외 정의 시 (BusinessException 상속)
+public class DuplicateMemberException extends BusinessException {
+    public DuplicateMemberException(String email) {
+        super(ErrorCode.DUPLICATE_EMAIL, "이미 가입된 이메일 주소입니다. (Email: " + email + ")");
     }
 }
 ```
 
-### 6.2 전역 예외 처리기
+### 6.2 전역 예외 처리기 & 표준 에러 응답 DTO
 
-모든 예외 → HTTP 응답 변환을 **한 곳**(`GlobalExceptionHandler`)에서 담당한다. Controller마다 `try-catch`를 흩어놓지 않는다.
+모든 예외 → HTTP 응답 변환은 **전역 예외 처리기(`GlobalExceptionHandler`)**가 한곳에서 담당한다. Controller에 `try-catch`를 작성하지 않는다.
 
-```java
-@RestControllerAdvice
-public class GlobalExceptionHandler {
+- **`ErrorResponse` DTO**: `status`, `code`, `message`, `timestamp`, `errors`(유효성 검사 세부 내역) 필드로 구성되며, `@JsonInclude(NON_EMPTY)`를 적용해 불필요한 null/빈 배열 출력을 직렬화에서 생략한다.
+- **`GlobalExceptionHandler`**: `@RestControllerAdvice` 기반으로 `BusinessException`, `MethodArgumentNotValidException`(@Valid 실패), `HttpMessageNotReadableException`(JSON 파싱 실패), `HttpRequestMethodNotSupportedException`, 및 `Exception`(500 스택트레이스 은폐)을 수집 포착한다.
 
-    @ExceptionHandler({InvalidWeightException.class, OverMaxDistanceException.class})
-    public ResponseEntity<ErrorResponse> handleBadRequest(RuntimeException e) {
-        return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
-    }
+### 6.3 예외 → HTTP 상태코드 & 에러코드 매핑 기준
 
-    @ExceptionHandler(MemberNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleNotFound(MemberNotFoundException e) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(e.getMessage()));
-    }
-
-    @ExceptionHandler(DuplicateMemberException.class)
-    public ResponseEntity<ErrorResponse> handleConflict(DuplicateMemberException e) {
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(e.getMessage()));
-    }
-
-    @ExceptionHandler({NoAvailableCourierException.class, AlreadyMatchedException.class,
-            InsufficientPointException.class})
-    public ResponseEntity<ErrorResponse> handleUnprocessable(RuntimeException e) {
-        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(new ErrorResponse(e.getMessage()));
-    }
-
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleUnexpected(Exception e) {
-        // 예상 못한 예외는 500으로, 원인은 로그로만 남기고 사용자에겐 상세 노출 안 함
-        return ResponseEntity.internalServerError().body(new ErrorResponse("서버 오류가 발생했습니다."));
-    }
-}
-```
-
-```java
-public record ErrorResponse(String message) {}
-```
-
-### 6.3 예외 → HTTP 상태코드 매핑 기준
-
-| 예외 유형 | HTTP 상태 | 예시 |
-|---|---|---|
-| 입력 값 자체가 유효하지 않음 | `400 Bad Request` | `InvalidWeightException`, `OverMaxDistanceException` |
-| 리소스 없음 | `404 Not Found` | `MemberNotFoundException` |
-| 중복/충돌 | `409 Conflict` | `DuplicateMemberException` |
-| 비즈니스 규칙상 처리 불가 | `422 Unprocessable Entity` | `NoAvailableCourierException`, `AlreadyMatchedException`, `InsufficientPointException` |
-| 예상 못한 서버 오류 | `500 Internal Server Error` | 그 외 모든 예외 |
+| 예외 유형 | HTTP 상태 | ErrorCode 예시 | 응답 메시지 예시 |
+|---|---|---|---|
+| 입력 값 검증/포맷 오류 | `400 Bad Request` | `INVALID_INPUT_VALUE` (`C001`) | 유효하지 않은 입력값입니다. / 요청 본문의 JSON 형식이 올바르지 않습니다. |
+| 리소스 미존재 | `404 Not Found` | `MEMBER_NOT_FOUND` (`M001`), `VEHICLE_NOT_FOUND` (`V001`) | 존재하지 않는 회원입니다. |
+| 중복/충돌 | `409 Conflict` | `DUPLICATE_EMAIL` (`M002`) | 이미 가입된 이메일 주소입니다. |
+| 잔액 부족 등 비즈니스 규칙 위반 | `400 Bad Request` | `INSUFFICIENT_BALANCE` (`P002`) | 포인트 잔액이 부족합니다. |
+| 미처 포착하지 못한 서버 내부 오류 | `500 Internal Server Error` | `INTERNAL_SERVER_ERROR` (`C003`) | 서버 내부 오류가 발생했습니다. (스택트레이스 서버 로깅 후 은폐) |
 
 ---
 
@@ -428,13 +391,16 @@ void 도메인은_다른_도메인의_repository를_직접_참조하지_않는�
 
 ---
 
-## 15. Git 커밋 / 브랜치 컨벤션
+## 15. Git 커밋 / 이슈 / 브랜치 컨벤션
 
-- 커밋 메시지: `type: 설명` 형식 (Conventional Commits 기반)
+- **GitHub 이슈 규격:** `[카테고리] 요약 설명` 형식 (`[Feature]`, `[Security]`, `[Concurrency]`, `[Testing]`, `[Observability]`, `[Ops]`, `[Bug]`, `[Docs]`)
+  - 예시: `[Security] Spring Security 및 JWT 기반 REST API 인증/인가 체계 구축`
+  - `.github/ISSUE_TEMPLATE/` 템플릿(개요, 세부 요구사항, 완료 정의) 사용 의무화
+- **커밋 메시지:** `type: 설명` 형식 (Conventional Commits 기반)
   - `feat`, `fix`, `refactor`, `test`, `docs`, `chore`
-  - 예: `feat: 배송 요금 산정 로직 추가`
-- 브랜치명: `type/도메인-내용` (예: `feat/delivery-fee-calculation`)
-- PR 단위: 도메인 하나 + 기능 하나 정도로 작게 유지.
+  - 예시: `feat: 배송 요금 산정 로직 추가`
+- **브랜치명:** `type/도메인-내용` (예: `feat/delivery-fee-calculation`)
+- **PR 단위:** 도메인 하나 + 기능 하나 정도로 작게 유지하며 `Squash and Merge` 병합. 신규 기술 도입 및 핵심 아키텍처 결정 시 `docs/adr/` 규격에 따라 **ADR(Architecture Decision Record)**을 100% 필수 작성하며, PR 제출 시 `docs/pr-review-guide.md` 양식에 따라 **[리뷰어 3분 족보 가이드]** 및 **[Files changed 탭 핀포인트 인라인 댓글]**을 필수 작성/부착한다.
 
 ---
 

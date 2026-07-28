@@ -1,11 +1,12 @@
 package com.example.shinhangaecheokja.delivery.service;
 
+import com.example.shinhangaecheokja.common.exception.EntityNotFoundException;
+import com.example.shinhangaecheokja.common.exception.ErrorCode;
 import com.example.shinhangaecheokja.delivery.dto.request.DeliveryCreateRequest;
 import com.example.shinhangaecheokja.delivery.dto.request.DeliveryUpdateRequest;
 import com.example.shinhangaecheokja.delivery.dto.response.DeliveryResponse;
 import com.example.shinhangaecheokja.delivery.entity.DeliveryRequest;
 import com.example.shinhangaecheokja.delivery.entity.DeliveryStatus;
-import com.example.shinhangaecheokja.delivery.exception.DeliveryRequestNotFoundException;
 import com.example.shinhangaecheokja.delivery.exception.NoAvailableCourierException;
 import com.example.shinhangaecheokja.delivery.repository.DeliveryRequestRepository;
 import com.example.shinhangaecheokja.member.service.MemberService;
@@ -47,7 +48,7 @@ public class DeliveryService {
     return DeliveryResponse.from(deliveryRequestRepository.save(deliveryRequest));
   }
 
-  /** id로 배송 요청 단건을 조회한다. 없으면 DeliveryRequestNotFoundException. */
+  /** id로 배송 요청 단건을 조회한다. 없으면 EntityNotFoundException. */
   @Transactional(readOnly = true)
   public DeliveryResponse getDeliveryRequest(Long deliveryRequestId) {
     return DeliveryResponse.from(findDeliveryRequestOrThrow(deliveryRequestId));
@@ -61,14 +62,15 @@ public class DeliveryService {
 
   /** 배송 요청의 픽업지·도착지를 수정한다. 고객·무게·거리·요금은 변경하지 않는다. */
   @Transactional
-  public DeliveryResponse updateDeliveryRequest(Long deliveryRequestId, DeliveryUpdateRequest request) {
+  public DeliveryResponse updateDeliveryRequest(
+      Long deliveryRequestId, DeliveryUpdateRequest request) {
     DeliveryRequest deliveryRequest = findDeliveryRequestOrThrow(deliveryRequestId);
     deliveryRequest.setPickupAddress(request.getPickupAddress());
     deliveryRequest.setDropoffAddress(request.getDropoffAddress());
     return DeliveryResponse.from(deliveryRequest);
   }
 
-  /** id로 배송 요청을 조회해 삭제한다. 없으면 DeliveryRequestNotFoundException. */
+  /** id로 배송 요청을 조회해 삭제한다. 없으면 EntityNotFoundException. */
   @Transactional
   public void deleteDeliveryRequest(Long deliveryRequestId) {
     DeliveryRequest deliveryRequest = findDeliveryRequestOrThrow(deliveryRequestId);
@@ -82,6 +84,6 @@ public class DeliveryService {
   private DeliveryRequest findDeliveryRequestOrThrow(Long deliveryRequestId) {
     return deliveryRequestRepository
         .findById(deliveryRequestId)
-        .orElseThrow(() -> new DeliveryRequestNotFoundException(deliveryRequestId));
+        .orElseThrow(() -> new EntityNotFoundException(ErrorCode.DELIVERY_NOT_FOUND));
   }
 }
