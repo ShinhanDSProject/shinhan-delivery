@@ -59,6 +59,7 @@ git config --local commit.template .gitmessage
 * [**ADR-0001: JWT 기반 무상태 인증 체계 채택 (docs/adr/0001-stateless-jwt-authentication.md)**](./docs/adr/0001-stateless-jwt-authentication.md) - 왜 무상태 JWT 인증을 채택했는지 세션/Basic 인증과의 비교 분석 기록 📜
 
 ### 🛠️ 개발 가이드 및 협업 규칙
+* [**Deliver Happiness 전체 기능 명세서 & 개발 로드맵 (docs/project-spec-and-task-breakdown.md)**](./docs/project-spec-and-task-breakdown.md) - 10대 모듈, 30+ REST API 및 6대 스프린트 파트별(BE/FE/DevOps) 태스크 할당서 📦
 * [**단일 원본 관리(SSOT) 문서 정책 가이드 (docs/ssot-documentation-policy.md)**](./docs/ssot-documentation-policy.md) - 정보 중복을 방지하고 지식의 파편화를 차단하는 프로젝트 단일 원본 문서 관리 규격 🏛️
 * [**테스트 하네스 구축 및 검증 항목 판단 정책 가이드 (docs/harness-decision-framework.md)**](./docs/harness-decision-framework.md) - 하네스에 추가할 검증 항목 4대 판단 프레임워크 및 무결점 결함 0개를 위한 초엄격 6대 통제 정책 🛡️
 * [**PR 리뷰어 3분 족보 가이드 작성 규격 (docs/pr-review-guide.md)**](./docs/pr-review-guide.md) - 리뷰어의 검토 피로도를 낮추고 3분 만에 핵심 코드를 파악하게 돕는 PR 가이드 작성 규격 🗺️
