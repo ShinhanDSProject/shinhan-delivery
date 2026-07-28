@@ -102,3 +102,20 @@ graph LR
 
 - **개발자/AI 필수 수칙:** 본 가이드라인은 `AGENTS.md` 및 `code-convention.md`에 명문화되어 관리됩니다.
 - **PR 오픈 시:** `./pr` 구동 또는 PR 오픈 직후 본 족보 가이드를 PR 본문이나 첫 댓글로 즉시 수록하여 리뷰를 요청합니다.
+
+---
+
+## 🎯 5. Files changed 탭 핀포인트 인라인 댓글 (Inline Comment) 작성 수칙
+
+대형 PR 검토 시 리뷰어의 시선 이동(Context Switching)을 최소화하기 위해, **주요 핵심 코드 라인(Line)에 핀포인트 인라인 리뷰 댓글(Inline Review Comment)**을 동시 부착합니다.
+
+### 📌 인라인 댓글 부착 대상 기준 (Target Lines):
+1. **보안/암호화 집행 구문:** BCrypt 암호화, JWT 서명/파싱, 권한 체크 구문
+2. **트랜잭션/동시성 제어 구문:** JPA Lock, `@Transactional(readOnly = true)`, 비관적 락 설정 구문
+3. **아키텍처/예외 전환 구문:** `BusinessException` / `EntityNotFoundException` 예외 던짐 라인
+4. **리뷰어가 질문할 법한 비즈니스 정책 구문:** 허용 URI (`permitAll()`), 잔액 계산 로직
+
+### 💡 인라인 댓글 작성 서식 예시:
+> **💡 [리뷰어 핀포인트 안내]**  
+> **역할:** 이 구문은 평문 비밀번호를 **BCrypt 10라운드 단방향 해시 알고리즘**으로 암호화하여 DB에 안전하게 저장하는 핵심 보안 라인입니다.  
+> **체크 포인트:** 평문 유출 위험이 없으며 `MemberSecurityTest`에서 100% 검증되었습니다.
