@@ -52,6 +52,7 @@ git config --local commit.template .gitmessage
 아래 링크를 클릭하여 해당하는 가이드 및 설계 내용을 확인하실 수 있습니다.
 
 ### 🏆 세계 최고 수준 개발 표준 & AI 행동 규범
+* [**프로젝트 착수 전 6대 사전 리스크 감사 & 거버넌스 가이드 (docs/pre-launch-risk-and-governance-guide.md)**](./docs/pre-launch-risk-and-governance-guide.md) - 개발자/리더/PM 관점 6대 리스크 방어 수칙 🛡️
 * [**팀 리더십 & 프로젝트 운용 프레임워크 가이드 (docs/team-operating-model-guide.md)**](./docs/team-operating-model-guide.md) - 리더와 팀원이 협업할 때 준수할 5대 운용 기둥 및 문화 프레임워크 👑
 * [**AI 에이전트 행동 지침 및 8대 수칙 (AGENTS.md)**](./AGENTS.md) - Google, Apple, Meta 수준의 최고 결과물을 도출하기 위한 AI/개발자 8대 무결점 작업 원칙 🏛️
 * [**코딩 컨벤션 및 6대 개발 규칙 (code-convention.md)**](./code-convention.md) - 우리 프로젝트에서 개발자와 AI가 엄격히 준수해야 할 단일 원본 코딩 규약 📐
