@@ -338,6 +338,24 @@ public class DeliveryController {
 
 ---
 
+## 12.1 동시성 제어
+
+동시 요청으로 정확성이 깨지면 안 되는 자원(포인트 잔액, 차량 배정, 배송 매칭 등)은 **비관적 락(Pessimistic Lock)**으로 보호한다. 상세 원리·데드락 회피·테스트 작성법은 `docs/concurrency-control-guide.md`를 참고하고, 여기서는 코딩 전에 알아야 할 핵심만 정리한다.
+
+- Repository에 `findByIdForUpdate`라는 이름으로 비관적 쓰기 락 조회 메서드를 추가한다.
+
+  ```java
+  @Lock(LockModeType.PESSIMISTIC_WRITE)
+  @Query("select w from PointWallet w where w.id = :id")
+  Optional<PointWallet> findByIdForUpdate(@Param("id") Long id);
+  ```
+
+- 값을 **변경**하는 Service 메서드(충전/차감, 배정 등)만 `findByIdForUpdate`를 쓴다. 단순 조회(GET)에는 락을 걸지 않고 기존 `findById`를 그대로 쓴다.
+- 한 트랜잭션에서 여러 리소스에 락을 걸어야 하면(예: 배송 요청 → 차량) **항상 같은 순서**로 락을 획득해 데드락을 방지한다.
+- 새로운 동시성 민감 로직을 추가하면 `ExecutorService` + `CountDownLatch`(스레드 풀 크기는 반드시 동시 요청 수 이상) 패턴으로 최소 100개 동시 요청 테스트를 작성하고, 최종 데이터 정합성(잔액이 음수가 아닌지, 유실 없이 정확한지)을 assert한다.
+
+---
+
 ## 13. 로깅 규칙
 
 - `Service` 계층에서 예외를 던지기 직전, 또는 `GlobalExceptionHandler`에서 로그를 남긴다. 같은 예외를 여러 군데서 중복 로깅하지 않는다.
@@ -446,6 +464,7 @@ void 도메인은_다른_도메인의_repository를_직접_참조하지_않는�
 - [ ] 비즈니스 로직이 Controller가 아니라 Service에 있는가?
 - [ ] 예상 가능한 실패가 커스텀 예외로 표현되고, `GlobalExceptionHandler`에 매핑이 추가되어 있는가?
 - [ ] `@Transactional`이 Service 계층에만 붙어 있는가?
+- [ ] 잔액/배정처럼 동시 요청에 취약한 로직을 변경했다면 `findByIdForUpdate`(비관적 락)와 동시성 테스트(`docs/concurrency-control-guide.md`)를 추가했는가?
 - [ ] `@Autowired` 필드 주입이 아니라 생성자 주입을 쓰는가?
 - [ ] Repository가 Entity 1개당 1개씩 대응되는가?
 - [ ] 다른 도메인의 Repository/Entity를 직접 참조하지 않고, 필요하면 그 도메인의 Service를 거쳤는가?
