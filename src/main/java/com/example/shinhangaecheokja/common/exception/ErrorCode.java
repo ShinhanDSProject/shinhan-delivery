@@ -21,6 +21,8 @@ public enum ErrorCode {
   // Member Domain Errors
   MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "M001", "존재하지 않는 회원입니다."),
   DUPLICATE_EMAIL(HttpStatus.CONFLICT, "M002", "이미 가입된 이메일 주소입니다."),
+  INVALID_CREDENTIALS(HttpStatus.UNAUTHORIZED, "M003", "이메일 또는 비밀번호가 일치하지 않습니다."),
+  UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "A001", "인증 권한이 필요합니다."),
 
   // Vehicle Domain Errors
   VEHICLE_NOT_FOUND(HttpStatus.NOT_FOUND, "V001", "존재하지 않는 차량입니다."),

@@ -449,6 +449,7 @@ void 도메인은_다른_도메인의_repository를_직접_참조하지_않는�
 - 연관 이슈가 있으면 본문에 명시해 자동으로 닫히게 한다 (예: `Resolves: #45`).
 - `.github/pull_request_template.md`의 항목(요약 / 주요 변경 사항 / 리뷰 포인트 / 스크린샷·테스트 결과)을 빠짐없이 채운다 — UI 작업은 스크린샷, API 작업은 테스트 로그나 호출 결과를 첨부한다.
 - PR 단위는 도메인 하나 + 기능 하나 정도로 작게 유지하며, `Squash and Merge`로 병합한다.
+- 신규 기술 도입 및 핵심 아키텍처 결정 시 `docs/adr/` 규격에 따라 **ADR(Architecture Decision Record)**을 100% 필수 작성하며, PR 제출 시 `docs/pr-review-guide.md` 양식에 따라 **[리뷰어 3분 족보 가이드]** 및 **[Files changed 탭 핀포인트 인라인 댓글]**을 필수 작성/부착한다.
 
 ### 16.4 GitHub 이슈 규격
 

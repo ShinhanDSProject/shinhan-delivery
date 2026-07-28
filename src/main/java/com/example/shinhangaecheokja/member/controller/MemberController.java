@@ -27,8 +27,17 @@ public class MemberController {
 
   /** 회원을 생성(가입)한다. */
   @PostMapping
-  public ResponseEntity<MemberResponse> createMember(@RequestBody MemberCreateRequest request) {
+  public ResponseEntity<MemberResponse> createMember(
+      @jakarta.validation.Valid @RequestBody MemberCreateRequest request) {
     return ResponseEntity.status(HttpStatus.CREATED).body(memberService.createMember(request));
+  }
+
+  /** 회원 로그인(JWT 토큰 발급)을 처리한다. */
+  @PostMapping("/login")
+  public ResponseEntity<com.example.shinhangaecheokja.member.dto.response.TokenResponse> login(
+      @jakarta.validation.Valid @RequestBody
+          com.example.shinhangaecheokja.member.dto.request.LoginRequest request) {
+    return ResponseEntity.ok(memberService.login(request));
   }
 
   /** 회원 단건을 조회한다. */

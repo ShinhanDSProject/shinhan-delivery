@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>배송파트너 로그인 - 신한 개척자</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0046ff;
+            --primary-hover: #003cd6;
+            --text-dark: #1e293b;
+            --text-muted: #64748b;
+            --input-bg: #f8fafc;
+            --input-border: #e2e8f0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f0f4f9 0%, #e2e8f0 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 40px 20px;
+            color: var(--text-dark);
+        }
+
+        .page {
+            position: relative;
+            background: #ffffff;
+            width: 100%;
+            max-width: 480px;
+            padding: 40px 36px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 70, 255, 0.08);
+            transition: transform 0.3s ease;
+        }
+
+        .back-button {
+            position: absolute;
+            top: 36px;
+            left: 28px;
+            width: 36px;
+            height: 36px;
+            padding: 0;
+            border: 0;
+            background: transparent;
+            color: #334155;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.15s ease, transform 0.15s ease;
+        }
+
+        .back-button:hover {
+            color: var(--primary);
+            transform: translateX(-2px);
+        }
+
+        .back-button::before {
+            content: '';
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-left: 2.5px solid currentColor;
+            border-bottom: 2.5px solid currentColor;
+            transform: rotate(45deg);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .header .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            background-color: rgba(0, 70, 255, 0.08);
+            color: var(--primary);
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .header h1 {
+            font-size: 26px;
+            color: #000000;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .header p {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-top: 6px;
+        }
+
+        form {
+            margin-top: 24px;
+        }
+
+        .field {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #334155;
+        }
+
+        input {
+            width: 100%;
+            height: 48px;
+            padding: 0 16px;
+            border: 1px solid var(--input-border);
+            border-radius: 8px;
+            outline: none;
+            background: var(--input-bg);
+            color: var(--text-dark);
+            font-size: 15px;
+            transition: border-color .15s, background .15s, box-shadow .15s;
+        }
+
+        input::placeholder {
+            color: #94a3b8;
+        }
+
+        input:focus {
+            border-color: var(--primary);
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(0, 70, 255, 0.1);
+        }
+
+        .message {
+            display: none;
+            margin-top: -10px;
+            margin-bottom: 16px;
+            color: #ef4444;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .message.show {
+            display: block;
+        }
+
+        .message.success {
+            color: #10b981;
+        }
+
+        .bottom {
+            margin-top: 28px;
+        }
+
+        .login-button {
+            width: 100%;
+            height: 50px;
+            border: 0;
+            border-radius: 8px;
+            background: var(--primary);
+            color: #fff;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            letter-spacing: -0.3px;
+            transition: background .15s, transform .15s;
+        }
+
+        .login-button:hover {
+            background: var(--primary-hover);
+        }
+
+        .login-button:active {
+            transform: scale(.99);
+        }
+
+        .login-button:disabled {
+            background: #93c5fd;
+            cursor: wait;
+        }
+
+        .links {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 16px;
+            margin-top: 20px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .links a {
+            color: var(--primary);
+            text-decoration: none;
+            transition: color 0.15s ease;
+        }
+
+        .links a:hover {
+            text-decoration: underline;
+        }
+
+        .links span {
+            width: 1px;
+            height: 14px;
+            background: #cbd5e1;
+        }
+
+        .links .signup-link {
+            color: #64748b;
+        }
+
+        @media (max-width: 520px) {
+            .page {
+                padding: 32px 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+<main class="page">
+    <button class="back-button" type="button" aria-label="이용 방식 선택 페이지로 이동" onclick="location.href='/onboarding/index.html?screen=4'"></button>
+
+    <div class="header">
+        <span class="badge">Shinhan Delivery Partner</span>
+        <h1>배송파트너 로그인</h1>
+        <p>신한 개척자 배송 파트너 계정으로 로그인해주세요</p>
+    </div>
+
+    <form id="courierLoginForm" novalidate>
+        <div class="field">
+            <label for="email">이메일 주소</label>
+            <input id="email" name="email" type="email" placeholder="partner@shinhan.com" autocomplete="email" required>
+        </div>
+        <div class="field">
+            <label for="password">비밀번호</label>
+            <input id="password" name="password" type="password" placeholder="비밀번호를 입력해주세요" autocomplete="current-password" required>
+        </div>
+        <p id="message" class="message" role="alert" aria-live="polite"></p>
+    </form>
+
+    <div class="bottom">
+        <button id="loginButton" class="login-button" type="submit" form="courierLoginForm">로그인</button>
+        <nav class="links" aria-label="계정 관련 링크">
+            <a href="#" id="forgotPassword">비밀번호를 잊으셨나요?</a>
+            <span aria-hidden="true"></span>
+            <a class="signup-link" href="/courier-signup.html">배송원 회원가입</a>
+        </nav>
+    </div>
+</main>
+
+<script>
+    const loginForm = document.getElementById('courierLoginForm');
+    const loginButton = document.getElementById('loginButton');
+    const message = document.getElementById('message');
+
+    function showMessage(text, isSuccess = false) {
+        message.textContent = text;
+        message.className = isSuccess ? 'message show success' : 'message show';
+    }
+
+    loginForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        message.classList.remove('show');
+
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
+        if (!email || !password) {
+            showMessage('이메일 주소와 비밀번호를 모두 입력해주세요.');
+            return;
+        }
+
+        loginButton.disabled = true;
+        loginButton.textContent = '로그인 중...';
+        try {
+            const response = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+            const data = await response.json();
+            if (!response.ok) {
+                showMessage(data.message || '이메일 또는 비밀번호가 올바르지 않습니다.');
+                return;
+            }
+
+            localStorage.setItem('accessToken', data.accessToken);
+            localStorage.setItem('tokenType', data.tokenType || 'Bearer');
+            showMessage('배송파트너 로그인에 성공했습니다.', true);
+        } catch (error) {
+            showMessage('서버 통신 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+        } finally {
+            loginButton.disabled = false;
+            loginButton.textContent = '로그인';
+        }
+    });
+
+    document.getElementById('forgotPassword').addEventListener('click', (event) => {
+        event.preventDefault();
+        showMessage('비밀번호 찾기 기능은 아직 준비 중입니다.');
+    });
+</script>
+</body>
+</html>
