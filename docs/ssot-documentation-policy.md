@@ -48,6 +48,13 @@ metadata:
 | **Git Flow & 커밋 컨벤션** | [`docs/git-flow-guide.md`](./git-flow-guide.md) | `README.md` |
 | **REST API 설계 규격** | [`docs/rest-api-guide.md`](./rest-api-guide.md) | `README.md` |
 | **전역 예외 처리 규격** | [`docs/exception-handling-guide.md`](./exception-handling-guide.md) | `README.md` |
+| **프로젝트 전체 기능 명세 & 스프린트 로드맵** | [`docs/project-spec-and-task-breakdown.md`](./project-spec-and-task-breakdown.md) | `README.md` |
+| **팀 리더십 & 프로젝트 운용 프레임워크** | [`docs/team-operating-model-guide.md`](./team-operating-model-guide.md) | `README.md` |
+| **팀 개발 문화 & 일하는 방식 7대 철학** | [`docs/engineering-culture-and-working-style.md`](./engineering-culture-and-working-style.md) | `README.md` |
+| **초급 개발자 7단계 태스크 분할 가이드** | [`docs/junior-developer-task-guide.md`](./junior-developer-task-guide.md) | `README.md` |
+| **학습형 3단계 GitHub Issue 작성 규격** | [`docs/learning-oriented-issue-guide.md`](./learning-oriented-issue-guide.md) | `README.md` |
+| **초급자 CRUD & 레이어별 이슈 분할 템플릿** | [`docs/beginner-crud-issue-template-guide.md`](./beginner-crud-issue-template-guide.md) | `README.md` |
+| **프로젝트 착수 전 6대 사전 리스크 감사** | [`docs/pre-launch-risk-and-governance-guide.md`](./pre-launch-risk-and-governance-guide.md) | `README.md` |
 
 ---
 
