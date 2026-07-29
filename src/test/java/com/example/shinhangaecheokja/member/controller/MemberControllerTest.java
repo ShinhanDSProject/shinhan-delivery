@@ -61,4 +61,49 @@ class MemberControllerTest {
 
     mockMvc.perform(get("/api/v1/members/999")).andExpect(status().isNotFound());
   }
+
+  @Test
+  void 유효하지_않은_이메일로_회원_생성_요청시_400을_반환한다() throws Exception {
+    MemberCreateRequest request = new MemberCreateRequest();
+    request.setEmail("invalid-email-format");
+    request.setPassword("password123");
+    request.setName("홍길동");
+    request.setPhoneNumber("010-1234-5678");
+
+    mockMvc
+        .perform(
+            post("/api/v1/members")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  void 비밀번호가_8자_미만이면_회원_생성_요청시_400을_반환한다() throws Exception {
+    MemberCreateRequest request = new MemberCreateRequest();
+    request.setEmail("user@example.com");
+    request.setPassword("short");
+    request.setName("홍길동");
+    request.setPhoneNumber("010-1234-5678");
+
+    mockMvc
+        .perform(
+            post("/api/v1/members")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  void 필수_입력값이_누락되면_회원_생성_요청시_400을_반환한다() throws Exception {
+    MemberCreateRequest request = new MemberCreateRequest();
+    // email, password, name, phoneNumber 누락
+
+    mockMvc
+        .perform(
+            post("/api/v1/members")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isBadRequest());
+  }
 }
