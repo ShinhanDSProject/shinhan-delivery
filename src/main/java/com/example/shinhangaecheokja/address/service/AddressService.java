@@ -43,10 +43,11 @@ public class AddressService {
   @Transactional
   public AddressResponse updateAddress(Long id, Long memberId, AddressUpdateRequest request) {
     Address address = findAddressOrThrow(id, memberId);
-    address.setAlias(request.getAlias());
-    address.setAddress(request.getAddress());
-    address.setDetailAddress(request.getDetailAddress());
-    address.setPickupGuide(request.getPickupGuide());
+    address.update(
+        request.getAlias(),
+        request.getAddress(),
+        request.getDetailAddress(),
+        request.getPickupGuide());
     return AddressResponse.from(address);
   }
 

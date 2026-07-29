@@ -12,9 +12,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -70,15 +68,9 @@ public class AddressController {
   }
 
   private Long extractMemberId(CustomUserDetails userDetails) {
-    if (userDetails != null && userDetails.getId() != null) {
-      return userDetails.getId();
+    if (userDetails == null || userDetails.getId() == null) {
+      throw new BusinessException(ErrorCode.UNAUTHORIZED);
     }
-    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-    if (auth != null
-        && auth.getPrincipal() instanceof CustomUserDetails customUser
-        && customUser.getId() != null) {
-      return customUser.getId();
-    }
-    throw new BusinessException(ErrorCode.UNAUTHORIZED);
+    return userDetails.getId();
   }
 }

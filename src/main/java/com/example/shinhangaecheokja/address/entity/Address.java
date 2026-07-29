@@ -10,12 +10,10 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 /** 자주 쓰는 주소 엔티티. 특정 회원의 별칭, 주소, 상세주소, 픽업가이드를 관리한다. */
 @Entity
 @Getter
-@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -40,4 +38,12 @@ public class Address {
 
   @Column(name = "pickup_guide", length = 255)
   private String pickupGuide;
+
+  /** 주소 정보를 수정하는 도메인 비즈니스 메서드. */
+  public void update(String alias, String address, String detailAddress, String pickupGuide) {
+    this.alias = alias;
+    this.address = address;
+    this.detailAddress = detailAddress;
+    this.pickupGuide = pickupGuide;
+  }
 }
