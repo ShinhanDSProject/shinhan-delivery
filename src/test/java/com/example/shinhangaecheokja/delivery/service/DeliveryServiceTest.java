@@ -8,16 +8,20 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.example.shinhangaecheokja.delivery.dto.request.DeliveryCreateRequest;
+import com.example.shinhangaecheokja.delivery.dto.request.DeliveryEstimateRequest;
 import com.example.shinhangaecheokja.delivery.dto.request.DeliveryUpdateRequest;
+import com.example.shinhangaecheokja.delivery.dto.response.DeliveryEstimateResponse;
 import com.example.shinhangaecheokja.delivery.dto.response.DeliveryResponse;
 import com.example.shinhangaecheokja.delivery.entity.DeliveryRequest;
 import com.example.shinhangaecheokja.delivery.entity.DeliveryStatus;
+import com.example.shinhangaecheokja.delivery.entity.ItemSize;
 import com.example.shinhangaecheokja.delivery.exception.AlreadyMatchedException;
 import com.example.shinhangaecheokja.delivery.exception.InvalidDeliveryDistanceException;
 import com.example.shinhangaecheokja.delivery.exception.InvalidDeliveryWeightException;
 import com.example.shinhangaecheokja.delivery.repository.DeliveryRequestRepository;
 import com.example.shinhangaecheokja.delivery.repository.MatchingRepository;
 import com.example.shinhangaecheokja.member.service.MemberService;
+import java.math.BigDecimal;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -166,5 +170,75 @@ class DeliveryServiceTest {
     assertThatThrownBy(() -> deliveryService.deleteDeliveryRequest(1L))
         .isInstanceOf(AlreadyMatchedException.class);
     verify(deliveryRequestRepository, never()).delete(any(DeliveryRequest.class));
+  }
+
+  @Test
+  void 출발지와_도착지_좌표가_같으면_거리할증_없이_기본료_무게할증_크기할증만_반환한다() {
+    DeliveryEstimateRequest request = new DeliveryEstimateRequest();
+    request.setPickupLatitude(37.5665);
+    request.setPickupLongitude(126.9780);
+    request.setDestinationLatitude(37.5665);
+    request.setDestinationLongitude(126.9780);
+    request.setWeight(10.0);
+    request.setItemSize(ItemSize.MEDIUM);
+
+    DeliveryEstimateResponse response = deliveryService.estimateFee(request);
+
+    assertThat(response.baseFee()).isEqualByComparingTo(BigDecimal.valueOf(3000));
+    assertThat(response.distanceSurcharge()).isEqualByComparingTo(BigDecimal.ZERO);
+    assertThat(response.weightSurcharge()).isEqualByComparingTo(BigDecimal.valueOf(2000));
+    assertThat(response.sizeSurcharge()).isEqualByComparingTo(BigDecimal.valueOf(1500));
+    assertThat(response.totalFee()).isEqualByComparingTo(BigDecimal.valueOf(6500));
+  }
+
+  @Test
+  void 서울에서_부산까지_거리_무게_크기를_반영해_요금을_산정한다() {
+    DeliveryEstimateRequest request = new DeliveryEstimateRequest();
+    request.setPickupLatitude(37.5665);
+    request.setPickupLongitude(126.9780);
+    request.setDestinationLatitude(35.1796);
+    request.setDestinationLongitude(129.0756);
+    request.setWeight(10.0);
+    request.setItemSize(ItemSize.MEDIUM);
+
+    DeliveryEstimateResponse response = deliveryService.estimateFee(request);
+
+    assertThat(response.baseFee()).isEqualByComparingTo(BigDecimal.valueOf(3000));
+    assertThat(response.distanceSurcharge()).isEqualByComparingTo(BigDecimal.valueOf(162556));
+    assertThat(response.weightSurcharge()).isEqualByComparingTo(BigDecimal.valueOf(2000));
+    assertThat(response.sizeSurcharge()).isEqualByComparingTo(BigDecimal.valueOf(50267));
+    assertThat(response.totalFee()).isEqualByComparingTo(BigDecimal.valueOf(217823));
+  }
+
+  @Test
+  void 물품_크기가_SMALL이면_크기할증이_없다() {
+    DeliveryEstimateRequest request = new DeliveryEstimateRequest();
+    request.setPickupLatitude(37.5665);
+    request.setPickupLongitude(126.9780);
+    request.setDestinationLatitude(37.5665);
+    request.setDestinationLongitude(126.9780);
+    request.setWeight(10.0);
+    request.setItemSize(ItemSize.SMALL);
+
+    DeliveryEstimateResponse response = deliveryService.estimateFee(request);
+
+    assertThat(response.sizeSurcharge()).isEqualByComparingTo(BigDecimal.ZERO);
+    assertThat(response.totalFee()).isEqualByComparingTo(BigDecimal.valueOf(5000));
+  }
+
+  @Test
+  void 물품_크기가_LARGE이면_60퍼센트_할증이_붙는다() {
+    DeliveryEstimateRequest request = new DeliveryEstimateRequest();
+    request.setPickupLatitude(37.5665);
+    request.setPickupLongitude(126.9780);
+    request.setDestinationLatitude(37.5665);
+    request.setDestinationLongitude(126.9780);
+    request.setWeight(10.0);
+    request.setItemSize(ItemSize.LARGE);
+
+    DeliveryEstimateResponse response = deliveryService.estimateFee(request);
+
+    assertThat(response.sizeSurcharge()).isEqualByComparingTo(BigDecimal.valueOf(3000));
+    assertThat(response.totalFee()).isEqualByComparingTo(BigDecimal.valueOf(8000));
   }
 }

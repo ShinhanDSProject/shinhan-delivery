@@ -1,7 +1,9 @@
 package com.example.shinhangaecheokja.delivery.controller;
 
 import com.example.shinhangaecheokja.delivery.dto.request.DeliveryCreateRequest;
+import com.example.shinhangaecheokja.delivery.dto.request.DeliveryEstimateRequest;
 import com.example.shinhangaecheokja.delivery.dto.request.DeliveryUpdateRequest;
+import com.example.shinhangaecheokja.delivery.dto.response.DeliveryEstimateResponse;
 import com.example.shinhangaecheokja.delivery.dto.response.DeliveryResponse;
 import com.example.shinhangaecheokja.delivery.service.DeliveryService;
 import jakarta.validation.Valid;
@@ -31,6 +33,13 @@ public class DeliveryController {
   public ResponseEntity<DeliveryResponse> requestDelivery(
       @RequestBody @Valid DeliveryCreateRequest request) {
     return ResponseEntity.status(HttpStatus.CREATED).body(deliveryService.requestDelivery(request));
+  }
+
+  /** 배송 요청을 생성하지 않고 예상 요금만 미리 계산한다. */
+  @PostMapping("/estimate")
+  public ResponseEntity<DeliveryEstimateResponse> estimateFee(
+      @RequestBody @Valid DeliveryEstimateRequest request) {
+    return ResponseEntity.ok(deliveryService.estimateFee(request));
   }
 
   /** 배송 요청 단건을 조회한다. */

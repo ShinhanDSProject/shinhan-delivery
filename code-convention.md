@@ -12,6 +12,7 @@
 2. **비즈니스 로직은 Service 계층에 모은다.** Controller는 요청을 받아 Service를 호출하고 결과를 응답으로 변환하는 역할만 한다. Entity는 데이터와 최소한의 자기 검증만 가진다.
 3. **에러는 예외(Exception)로 처리한다.** 커스텀 예외를 던지고, `@RestControllerAdvice`(전역 예외 처리기)에서 HTTP 응답으로 변환한다.
 4. Entity 및 모든 DTO/Java 클래스의 `Getter`, `Setter` 메서드는 직접 코드로 수동 작성하지 않고 **무조건 Lombok 라이브러리(`@Getter`, `@Setter`)를 100% 사용하여 개발**한다. 수동 `getXXX()`, `setXXX()` 메서드 작성은 엄격히 금지된다. 별도의 불변 객체(Value Object)나 `Result` 타입 같은 함수형 패턴은 쓰지 않는다.
+5. **신규 기능은 설계 문서를 먼저 작성한다.** 코드를 작성하기 전에 `docs/design/기능명-design.md`(User Story·성공 기준, ERD 또는 아키텍처 흐름도, API/메시지 명세, 작업 분할(WBS))를 먼저 작성해 설계를 정리한 뒤 구현에 들어간다. 별도 설계 리뷰 승인까지는 필수가 아니며, 문서화 자체가 목적이다 (`docs/design-phase-guide.md` 참고).
 
 ---
 
@@ -442,6 +443,7 @@ void 도메인은_다른_도메인의_repository를_직접_참조하지_않는�
 - 최소 형식: `type: 설명` (`feat`, `fix`, `refactor`, `test`, `docs`, `chore`, `style`)
   - 예: `feat: 배송 요금 산정 로직 추가`
 - 변경 배경까지 남기고 싶으면 `docs/git-flow-guide.md`의 확장 형식(`type(scope): subject` + 본문 + 푸터)을 써도 된다. 최소 형식과 상충하지 않는, 필요할 때만 쓰는 선택 사항이다.
+- 큰 단위로 한 번에 커밋하지 않고, DTO/Entity/Service/Controller/Test 등 레이어(서브태스크) 단위로 작업이 완성될 때마다 커밋 프리뷰를 제시하고 개발자가 `commit`(또는 `/commit`) 명령을 입력하면 `./scripts/verify.sh` 검증 통과 후 즉시 마이크로 커밋을 집행한다 (`AGENTS.md` Principle 9, `docs/ai-paired-development-guide.md` 참고).
 
 ### 16.3 PR 규칙
 
