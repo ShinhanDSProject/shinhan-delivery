@@ -7,4 +7,5 @@ public record DeliveryEstimateResponse(
     BigDecimal baseFee,
     BigDecimal distanceSurcharge,
     BigDecimal weightSurcharge,
+    BigDecimal sizeSurcharge,
     BigDecimal totalFee) {}

@@ -13,6 +13,7 @@ import com.example.shinhangaecheokja.delivery.dto.request.DeliveryEstimateReques
 import com.example.shinhangaecheokja.delivery.dto.response.DeliveryEstimateResponse;
 import com.example.shinhangaecheokja.delivery.dto.response.DeliveryResponse;
 import com.example.shinhangaecheokja.delivery.entity.DeliveryStatus;
+import com.example.shinhangaecheokja.delivery.entity.ItemSize;
 import com.example.shinhangaecheokja.delivery.service.DeliveryService;
 import java.math.BigDecimal;
 import org.junit.jupiter.api.Test;
@@ -96,6 +97,7 @@ class DeliveryControllerTest {
     request.setDestinationLatitude(35.1796);
     request.setDestinationLongitude(129.0756);
     request.setWeight(10.0);
+    request.setItemSize(ItemSize.MEDIUM);
 
     when(deliveryService.estimateFee(any()))
         .thenReturn(
@@ -103,7 +105,8 @@ class DeliveryControllerTest {
                 BigDecimal.valueOf(3000),
                 BigDecimal.valueOf(162556),
                 BigDecimal.valueOf(2000),
-                BigDecimal.valueOf(167556)));
+                BigDecimal.valueOf(50267),
+                BigDecimal.valueOf(217823)));
 
     mockMvc
         .perform(
@@ -111,7 +114,7 @@ class DeliveryControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.totalFee").value(167556));
+        .andExpect(jsonPath("$.totalFee").value(217823));
   }
 
   @Test
@@ -120,6 +123,7 @@ class DeliveryControllerTest {
     request.setDestinationLatitude(35.1796);
     request.setDestinationLongitude(129.0756);
     request.setWeight(10.0);
+    request.setItemSize(ItemSize.MEDIUM);
 
     mockMvc
         .perform(
@@ -137,6 +141,24 @@ class DeliveryControllerTest {
     request.setDestinationLatitude(35.1796);
     request.setDestinationLongitude(129.0756);
     request.setWeight(0.0);
+    request.setItemSize(ItemSize.MEDIUM);
+
+    mockMvc
+        .perform(
+            post("/api/v1/delivery-requests/estimate")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  void 견적_요청에_물품_크기가_없으면_400을_반환한다() throws Exception {
+    DeliveryEstimateRequest request = new DeliveryEstimateRequest();
+    request.setPickupLatitude(37.5665);
+    request.setPickupLongitude(126.9780);
+    request.setDestinationLatitude(35.1796);
+    request.setDestinationLongitude(129.0756);
+    request.setWeight(10.0);
 
     mockMvc
         .perform(
