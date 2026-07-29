@@ -28,9 +28,6 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class DeliveryService {
 
-  private static final long FEE_PER_DISTANCE = 100L;
-  private static final long FEE_PER_WEIGHT = 10L;
-
   private static final double EARTH_RADIUS_KM = 6371.0;
   private static final BigDecimal ESTIMATE_BASE_FEE = BigDecimal.valueOf(3000);
   private static final BigDecimal ESTIMATE_FEE_PER_KM = BigDecimal.valueOf(500);
@@ -42,33 +39,48 @@ public class DeliveryService {
   private final MemberService memberService;
   private final MatchingRepository matchingRepository;
 
-  /** 고객 존재 여부를 검증한 뒤 배송을 요청한다. 매칭은 차량이 콜을 수락하면서 별도로 이루어진다. */
+  /**
+   * 고객 존재 여부를 검증한 뒤 배송을 요청한다. 요금은 {@link #estimateFee}와 동일한 공식으로 서버가 직접 계산한다(거리는 클라이언트가 준 값이 아니라
+   * 좌표로 계산 — 요금 조작 방지). 매칭은 차량이 콜을 수락하면서 별도로 이루어진다.
+   */
   @Transactional
   public DeliveryResponse requestDelivery(DeliveryCreateRequest request) {
     memberService.getMember(request.getCustomerId());
-    validateWeightAndDistance(request.getWeight(), request.getDistance());
+    validateWeight(request.getWeight());
+
+    double distanceKm =
+        calculateHaversineDistance(
+            request.getPickupLatitude(),
+            request.getPickupLongitude(),
+            request.getDropoffLatitude(),
+            request.getDropoffLongitude());
+    validateDistance(distanceKm);
+
+    DeliveryEstimateResponse fee =
+        calculateFee(distanceKm, request.getWeight(), request.getItemSize());
 
     DeliveryRequest deliveryRequest = new DeliveryRequest();
     deliveryRequest.setCustomerId(request.getCustomerId());
     deliveryRequest.setPickupAddress(request.getPickupAddress());
     deliveryRequest.setDropoffAddress(request.getDropoffAddress());
     deliveryRequest.setWeight(request.getWeight());
-    deliveryRequest.setDistance(request.getDistance());
+    deliveryRequest.setDistance(distanceKm);
     deliveryRequest.setPickupLatitude(request.getPickupLatitude());
     deliveryRequest.setPickupLongitude(request.getPickupLongitude());
+    deliveryRequest.setDropoffLatitude(request.getDropoffLatitude());
+    deliveryRequest.setDropoffLongitude(request.getDropoffLongitude());
+    deliveryRequest.setItemSize(request.getItemSize());
     deliveryRequest.setStatus(DeliveryStatus.REQUESTED);
-    deliveryRequest.setFeePoint(calculateFee(request.getWeight(), request.getDistance()));
+    // calculateFee()가 매 단계 setScale(0, HALF_UP)을 거치므로 totalFee는 항상 정수다. longValueExact()를 쓰는
+    // 이유는, 만약 나중에 요금 정책이 바뀌어 이 불변조건이 깨지면 소수점을 조용히 버리지 않고 즉시 예외로 드러내기 위함이다.
+    deliveryRequest.setFeePoint(fee.totalFee().longValueExact());
 
     DeliveryRequest saved = deliveryRequestRepository.save(deliveryRequest);
 
     return DeliveryResponse.from(saved);
   }
 
-  /**
-   * 배송 요청을 생성하지 않고 예상 요금만 계산한다. 기본료 + 거리 할증(하버사인 거리 × km당 요금) + 무게 할증(무게 × kg당 요금)의 소계에, 물품 크기별
-   * 할증률(SMALL 0%/MEDIUM 30%/LARGE 60%)을 곱한 크기 할증을 더한다. {@link #calculateFee}(실제 배송 요청 생성 시 쓰는 식)와는
-   * 별개의 공식이다.
-   */
+  /** 배송 요청을 생성하지 않고 예상 요금만 계산한다({@link #requestDelivery}와 완전히 동일한 공식). */
   @Transactional(readOnly = true)
   public DeliveryEstimateResponse estimateFee(DeliveryEstimateRequest request) {
     double distanceKm =
@@ -78,19 +90,24 @@ public class DeliveryService {
             request.getDestinationLatitude(),
             request.getDestinationLongitude());
 
+    return calculateFee(distanceKm, request.getWeight(), request.getItemSize());
+  }
+
+  /**
+   * 기본료 + 거리 할증(하버사인 거리 × km당 요금) + 무게 할증(무게 × kg당 요금)의 소계에, 물품 크기별 할증률(SMALL 0%/MEDIUM 30%/LARGE
+   * 60%)을 곱한 크기 할증을 더한다. {@link #requestDelivery}와 {@link #estimateFee}가 공유하는 단일 요금 공식이다.
+   */
+  private DeliveryEstimateResponse calculateFee(
+      double distanceKm, double weight, ItemSize itemSize) {
     BigDecimal distanceSurcharge =
         ESTIMATE_FEE_PER_KM
             .multiply(BigDecimal.valueOf(distanceKm))
             .setScale(0, RoundingMode.HALF_UP);
     BigDecimal weightSurcharge =
-        ESTIMATE_FEE_PER_KG
-            .multiply(BigDecimal.valueOf(request.getWeight()))
-            .setScale(0, RoundingMode.HALF_UP);
+        ESTIMATE_FEE_PER_KG.multiply(BigDecimal.valueOf(weight)).setScale(0, RoundingMode.HALF_UP);
     BigDecimal subtotal = ESTIMATE_BASE_FEE.add(distanceSurcharge).add(weightSurcharge);
     BigDecimal sizeSurcharge =
-        subtotal
-            .multiply(sizeSurchargeRate(request.getItemSize()))
-            .setScale(0, RoundingMode.HALF_UP);
+        subtotal.multiply(sizeSurchargeRate(itemSize)).setScale(0, RoundingMode.HALF_UP);
     BigDecimal totalFee = subtotal.add(sizeSurcharge);
 
     return new DeliveryEstimateResponse(
@@ -160,17 +177,17 @@ public class DeliveryService {
     deliveryRequestRepository.delete(deliveryRequest);
   }
 
-  private void validateWeightAndDistance(double weight, double distance) {
+  private void validateWeight(double weight) {
     if (weight <= 0) {
       throw new InvalidDeliveryWeightException(weight);
     }
-    if (distance <= 0) {
-      throw new InvalidDeliveryDistanceException(distance);
-    }
   }
 
-  private long calculateFee(double weight, double distance) {
-    return Math.round(distance * FEE_PER_DISTANCE + weight * FEE_PER_WEIGHT);
+  /** 출발지·도착지 좌표가 같으면(거리 0) 유효하지 않은 배송 요청으로 거절한다. */
+  private void validateDistance(double distanceKm) {
+    if (distanceKm <= 0) {
+      throw new InvalidDeliveryDistanceException(distanceKm);
+    }
   }
 
   private DeliveryRequest findDeliveryRequestOrThrow(Long deliveryRequestId) {

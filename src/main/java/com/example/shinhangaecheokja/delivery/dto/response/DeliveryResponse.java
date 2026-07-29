@@ -2,6 +2,7 @@ package com.example.shinhangaecheokja.delivery.dto.response;
 
 import com.example.shinhangaecheokja.delivery.entity.DeliveryRequest;
 import com.example.shinhangaecheokja.delivery.entity.DeliveryStatus;
+import com.example.shinhangaecheokja.delivery.entity.ItemSize;
 
 /** 배송 요청 응답 DTO. */
 public record DeliveryResponse(
@@ -14,7 +15,10 @@ public record DeliveryResponse(
     DeliveryStatus status,
     long feePoint,
     double pickupLatitude,
-    double pickupLongitude) {
+    double pickupLongitude,
+    double dropoffLatitude,
+    double dropoffLongitude,
+    ItemSize itemSize) {
 
   /** DeliveryRequest 엔티티를 응답 DTO로 변환한다. */
   public static DeliveryResponse from(DeliveryRequest entity) {
@@ -28,6 +32,9 @@ public record DeliveryResponse(
         entity.getStatus(),
         entity.getFeePoint(),
         entity.getPickupLatitude(),
-        entity.getPickupLongitude());
+        entity.getPickupLongitude(),
+        entity.getDropoffLatitude(),
+        entity.getDropoffLongitude(),
+        entity.getItemSize());
   }
 }
