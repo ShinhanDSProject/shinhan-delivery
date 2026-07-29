@@ -244,4 +244,33 @@ class DeliveryServiceTest {
     assertThat(response.sizeSurcharge()).isEqualByComparingTo(BigDecimal.valueOf(3000));
     assertThat(response.totalFee()).isEqualByComparingTo(BigDecimal.valueOf(8000));
   }
+
+  @Test
+  void 견적_금액과_실제_배송_요청_금액이_동일한_입력에_대해_항상_일치한다() {
+    DeliveryEstimateRequest estimateRequest = new DeliveryEstimateRequest();
+    estimateRequest.setPickupLatitude(37.0);
+    estimateRequest.setPickupLongitude(127.0);
+    estimateRequest.setDestinationLatitude(38.0);
+    estimateRequest.setDestinationLongitude(127.0);
+    estimateRequest.setWeight(10.0);
+    estimateRequest.setItemSize(ItemSize.MEDIUM);
+
+    DeliveryCreateRequest createRequest = new DeliveryCreateRequest();
+    createRequest.setCustomerId(1L);
+    createRequest.setPickupAddress("서울시 강남구");
+    createRequest.setDropoffAddress("서울시 서초구");
+    createRequest.setWeight(10);
+    createRequest.setPickupLatitude(37.0);
+    createRequest.setPickupLongitude(127.0);
+    createRequest.setDropoffLatitude(38.0);
+    createRequest.setDropoffLongitude(127.0);
+    createRequest.setItemSize(ItemSize.MEDIUM);
+    when(deliveryRequestRepository.save(any(DeliveryRequest.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
+
+    DeliveryEstimateResponse estimate = deliveryService.estimateFee(estimateRequest);
+    DeliveryResponse created = deliveryService.requestDelivery(createRequest);
+
+    assertThat(created.feePoint()).isEqualTo(estimate.totalFee().longValueExact());
+  }
 }
