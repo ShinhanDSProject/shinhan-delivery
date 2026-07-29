@@ -1,15 +1,20 @@
 package com.example.shinhangaecheokja.member.controller;
 
+import com.example.shinhangaecheokja.member.dto.request.LoginRequest;
 import com.example.shinhangaecheokja.member.dto.request.MemberCreateRequest;
+import com.example.shinhangaecheokja.member.dto.request.MemberRoleUpdateRequest;
 import com.example.shinhangaecheokja.member.dto.request.MemberUpdateRequest;
 import com.example.shinhangaecheokja.member.dto.response.MemberResponse;
+import com.example.shinhangaecheokja.member.dto.response.TokenResponse;
 import com.example.shinhangaecheokja.member.service.MemberService;
+import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -17,7 +22,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-/** Member CRUD API를 제공하는 컨트롤러. */
+/** Member CRUD 및 역할 변경 API를 제공하는 컨트롤러. */
 @RestController
 @RequestMapping("/api/v1/members")
 @RequiredArgsConstructor
@@ -28,15 +33,13 @@ public class MemberController {
   /** 회원을 생성(가입)한다. */
   @PostMapping
   public ResponseEntity<MemberResponse> createMember(
-      @jakarta.validation.Valid @RequestBody MemberCreateRequest request) {
+      @Valid @RequestBody MemberCreateRequest request) {
     return ResponseEntity.status(HttpStatus.CREATED).body(memberService.createMember(request));
   }
 
   /** 회원 로그인(JWT 토큰 발급)을 처리한다. */
   @PostMapping("/login")
-  public ResponseEntity<com.example.shinhangaecheokja.member.dto.response.TokenResponse> login(
-      @jakarta.validation.Valid @RequestBody
-          com.example.shinhangaecheokja.member.dto.request.LoginRequest request) {
+  public ResponseEntity<TokenResponse> login(@Valid @RequestBody LoginRequest request) {
     return ResponseEntity.ok(memberService.login(request));
   }
 
@@ -60,11 +63,9 @@ public class MemberController {
   }
 
   /** 회원의 역할(CUSTOMER/COURIER)을 변경한다. */
-  @org.springframework.web.bind.annotation.PatchMapping("/{memberId}/role")
+  @PatchMapping("/{memberId}/role")
   public ResponseEntity<MemberResponse> updateRole(
-      @PathVariable Long memberId,
-      @jakarta.validation.Valid @RequestBody
-          com.example.shinhangaecheokja.member.dto.request.MemberRoleUpdateRequest request) {
+      @PathVariable Long memberId, @Valid @RequestBody MemberRoleUpdateRequest request) {
     return ResponseEntity.ok(memberService.updateRole(memberId, request.getRole()));
   }
 

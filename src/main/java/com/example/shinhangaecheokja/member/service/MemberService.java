@@ -1,11 +1,16 @@
 package com.example.shinhangaecheokja.member.service;
 
+import com.example.shinhangaecheokja.common.exception.BusinessException;
 import com.example.shinhangaecheokja.common.exception.EntityNotFoundException;
 import com.example.shinhangaecheokja.common.exception.ErrorCode;
+import com.example.shinhangaecheokja.common.security.JwtProvider;
+import com.example.shinhangaecheokja.member.dto.request.LoginRequest;
 import com.example.shinhangaecheokja.member.dto.request.MemberCreateRequest;
 import com.example.shinhangaecheokja.member.dto.request.MemberUpdateRequest;
 import com.example.shinhangaecheokja.member.dto.response.MemberResponse;
+import com.example.shinhangaecheokja.member.dto.response.TokenResponse;
 import com.example.shinhangaecheokja.member.entity.Member;
+import com.example.shinhangaecheokja.member.entity.MemberRole;
 import com.example.shinhangaecheokja.member.exception.DuplicateMemberException;
 import com.example.shinhangaecheokja.member.repository.MemberRepository;
 import java.util.List;
@@ -14,14 +19,14 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/** Member 관련 유스케이스(가입/조회/수정/삭제)를 담당하는 서비스. */
+/** Member 관련 유스케이스(가입/조회/수정/역할변경/삭제)를 담당하는 서비스. */
 @Service
 @RequiredArgsConstructor
 public class MemberService {
 
   private final MemberRepository memberRepository;
   private final PasswordEncoder passwordEncoder;
-  private final com.example.shinhangaecheokja.common.security.JwtProvider jwtProvider;
+  private final JwtProvider jwtProvider;
 
   /** 이메일 중복을 검증하고 비밀번호를 암호화해 회원을 생성한다. */
   @Transactional
@@ -42,24 +47,21 @@ public class MemberService {
 
   /** 이메일과 비밀번호를 검증하여 JWT Access/Refresh 토큰을 발급한다. */
   @Transactional(readOnly = true)
-  public com.example.shinhangaecheokja.member.dto.response.TokenResponse login(
-      com.example.shinhangaecheokja.member.dto.request.LoginRequest request) {
+  public TokenResponse login(LoginRequest request) {
     Member member =
         memberRepository
             .findByEmail(request.getEmail())
             .orElseThrow(() -> new EntityNotFoundException(ErrorCode.MEMBER_NOT_FOUND));
 
     if (!passwordEncoder.matches(request.getPassword(), member.getPassword())) {
-      throw new com.example.shinhangaecheokja.common.exception.BusinessException(
-          ErrorCode.INVALID_CREDENTIALS);
+      throw new BusinessException(ErrorCode.INVALID_CREDENTIALS);
     }
 
     String accessToken =
         jwtProvider.createAccessToken(member.getId(), member.getEmail(), member.getRole().name());
     String refreshToken = jwtProvider.createRefreshToken(member.getId(), member.getEmail());
 
-    return com.example.shinhangaecheokja.member.dto.response.TokenResponse.of(
-        accessToken, refreshToken);
+    return TokenResponse.of(accessToken, refreshToken);
   }
 
   /** id로 회원 단건을 조회한다. 없으면 EntityNotFoundException. */
@@ -85,10 +87,9 @@ public class MemberService {
 
   /** 회원의 역할(CUSTOMER / COURIER)을 변경한다. */
   @Transactional
-  public MemberResponse updateRole(
-      Long memberId, com.example.shinhangaecheokja.member.entity.MemberRole role) {
+  public MemberResponse updateRole(Long memberId, MemberRole role) {
     Member member = findMemberOrThrow(memberId);
-    member.setRole(role);
+    member.changeRole(role);
     return MemberResponse.from(member);
   }
 
