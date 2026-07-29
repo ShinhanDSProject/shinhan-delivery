@@ -1,5 +1,6 @@
 package com.example.shinhangaecheokja.delivery.dto.request;
 
+import com.example.shinhangaecheokja.delivery.entity.ItemSize;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
@@ -36,4 +37,7 @@ public class DeliveryEstimateRequest {
   @NotNull(message = "물품 무게는 필수입니다.")
   @DecimalMin(value = "0.0", inclusive = false, message = "물품 무게는 0보다 커야 합니다.")
   private Double weight;
+
+  @NotNull(message = "물품 크기는 필수입니다.")
+  private ItemSize itemSize;
 }
