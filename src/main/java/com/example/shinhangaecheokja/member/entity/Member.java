@@ -43,4 +43,16 @@ public class Member {
   @Enumerated(EnumType.STRING)
   @Column(nullable = false, length = 20)
   private MemberRole role;
+
+  /** 회원의 역할(CUSTOMER/COURIER)을 변경한다. ADMIN 권한 승격은 직접 변경을 불허한다. */
+  public void changeRole(MemberRole newRole) {
+    if (newRole == null) {
+      throw new IllegalArgumentException("변경할 역할은 필수 선택 항목입니다.");
+    }
+    if (newRole == MemberRole.ADMIN) {
+      throw new com.example.shinhangaecheokja.common.exception.BusinessException(
+          com.example.shinhangaecheokja.common.exception.ErrorCode.INVALID_INPUT_VALUE);
+    }
+    this.role = newRole;
+  }
 }
