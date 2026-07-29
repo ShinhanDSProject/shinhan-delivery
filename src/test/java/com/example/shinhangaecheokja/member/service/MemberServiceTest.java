@@ -77,4 +77,41 @@ class MemberServiceTest {
 
     assertThat(response.email()).isEqualTo("user@example.com");
   }
+
+  @Test
+  void 로그인한_본인의_프로필을_조회한다() {
+    Member member = new Member();
+    member.setEmail("my@example.com");
+    member.setName("김철수");
+    member.setPhoneNumber("010-9876-5432");
+    member.setRole(MemberRole.CUSTOMER);
+    when(memberRepository.findById(2L)).thenReturn(Optional.of(member));
+
+    com.example.shinhangaecheokja.member.dto.response.MemberProfileResponseDto response =
+        memberService.getMyProfile(2L);
+
+    assertThat(response.email()).isEqualTo("my@example.com");
+    assertThat(response.name()).isEqualTo("김철수");
+    assertThat(response.phoneNumber()).isEqualTo("010-9876-5432");
+  }
+
+  @Test
+  void 로그인한_본인의_프로필_이름과_연락처를_수정한다() {
+    Member member = new Member();
+    member.setEmail("my@example.com");
+    member.setName("김철수");
+    member.setPhoneNumber("010-9876-5432");
+    member.setRole(MemberRole.CUSTOMER);
+    when(memberRepository.findById(2L)).thenReturn(Optional.of(member));
+
+    com.example.shinhangaecheokja.member.dto.request.MemberProfileUpdateRequestDto request =
+        new com.example.shinhangaecheokja.member.dto.request.MemberProfileUpdateRequestDto(
+            "김영희", "010-1111-2222");
+
+    com.example.shinhangaecheokja.member.dto.response.MemberProfileResponseDto response =
+        memberService.updateMyProfile(2L, request);
+
+    assertThat(response.name()).isEqualTo("김영희");
+    assertThat(response.phoneNumber()).isEqualTo("010-1111-2222");
+  }
 }

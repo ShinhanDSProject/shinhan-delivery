@@ -6,7 +6,9 @@ import com.example.shinhangaecheokja.common.exception.ErrorCode;
 import com.example.shinhangaecheokja.common.security.JwtProvider;
 import com.example.shinhangaecheokja.member.dto.request.LoginRequest;
 import com.example.shinhangaecheokja.member.dto.request.MemberCreateRequest;
+import com.example.shinhangaecheokja.member.dto.request.MemberProfileUpdateRequestDto;
 import com.example.shinhangaecheokja.member.dto.request.MemberUpdateRequest;
+import com.example.shinhangaecheokja.member.dto.response.MemberProfileResponseDto;
 import com.example.shinhangaecheokja.member.dto.response.MemberResponse;
 import com.example.shinhangaecheokja.member.dto.response.TokenResponse;
 import com.example.shinhangaecheokja.member.entity.Member;
@@ -74,6 +76,22 @@ public class MemberService {
   @Transactional(readOnly = true)
   public List<MemberResponse> getMembers() {
     return memberRepository.findAll().stream().map(MemberResponse::from).toList();
+  }
+
+  /** 로그인한 본인의 프로필 정보를 조회한다. */
+  @Transactional(readOnly = true)
+  public MemberProfileResponseDto getMyProfile(Long memberId) {
+    return MemberProfileResponseDto.from(findMemberOrThrow(memberId));
+  }
+
+  /** 로그인한 본인의 프로필 정보(이름, 연락처)를 수정한다. */
+  @Transactional
+  public MemberProfileResponseDto updateMyProfile(
+      Long memberId, MemberProfileUpdateRequestDto request) {
+    Member member = findMemberOrThrow(memberId);
+    member.setName(request.getName());
+    member.setPhoneNumber(request.getPhoneNumber());
+    return MemberProfileResponseDto.from(member);
   }
 
   /** 회원의 이름·연락처를 수정한다. 이메일/비밀번호/역할은 변경하지 않는다. */

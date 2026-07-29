@@ -1,9 +1,12 @@
 package com.example.shinhangaecheokja.member.controller;
 
+import com.example.shinhangaecheokja.common.security.CustomUserDetails;
 import com.example.shinhangaecheokja.member.dto.request.LoginRequest;
 import com.example.shinhangaecheokja.member.dto.request.MemberCreateRequest;
+import com.example.shinhangaecheokja.member.dto.request.MemberProfileUpdateRequestDto;
 import com.example.shinhangaecheokja.member.dto.request.MemberRoleUpdateRequest;
 import com.example.shinhangaecheokja.member.dto.request.MemberUpdateRequest;
+import com.example.shinhangaecheokja.member.dto.response.MemberProfileResponseDto;
 import com.example.shinhangaecheokja.member.dto.response.MemberResponse;
 import com.example.shinhangaecheokja.member.dto.response.TokenResponse;
 import com.example.shinhangaecheokja.member.service.MemberService;
@@ -41,6 +44,33 @@ public class MemberController {
   @PostMapping("/login")
   public ResponseEntity<TokenResponse> login(@Valid @RequestBody LoginRequest request) {
     return ResponseEntity.ok(memberService.login(request));
+  }
+
+  /** 인증된 본인의 프로필 정보를 조회한다. */
+  @GetMapping({"/me", "/api/members/me"})
+  public ResponseEntity<MemberProfileResponseDto> getMyProfile(
+      org.springframework.security.core.Authentication authentication) {
+    Long memberId = extractMemberId(authentication);
+    return ResponseEntity.ok(memberService.getMyProfile(memberId));
+  }
+
+  /** 인증된 본인의 프로필 정보(이름, 연락처)를 수정한다. */
+  @PatchMapping({"/me", "/api/members/me"})
+  public ResponseEntity<MemberProfileResponseDto> updateMyProfile(
+      org.springframework.security.core.Authentication authentication,
+      @Valid @RequestBody MemberProfileUpdateRequestDto request) {
+    Long memberId = extractMemberId(authentication);
+    return ResponseEntity.ok(memberService.updateMyProfile(memberId, request));
+  }
+
+  private Long extractMemberId(org.springframework.security.core.Authentication authentication) {
+    if (authentication != null
+        && authentication.getPrincipal() instanceof CustomUserDetails userDetails
+        && userDetails.getId() != null) {
+      return userDetails.getId();
+    }
+    throw new com.example.shinhangaecheokja.common.exception.BusinessException(
+        com.example.shinhangaecheokja.common.exception.ErrorCode.UNAUTHORIZED);
   }
 
   /** 회원 단건을 조회한다. */
