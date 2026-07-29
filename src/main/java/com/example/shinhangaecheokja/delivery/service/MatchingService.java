@@ -98,6 +98,15 @@ public class MatchingService {
     return matchingRepository.findAll().stream().map(MatchingResponse::from).toList();
   }
 
+  /** 배송 요청 id로 매칭을 조회한다. 없으면 EntityNotFoundException. */
+  @Transactional(readOnly = true)
+  public MatchingResponse getMatchingByDeliveryRequestId(Long deliveryRequestId) {
+    return matchingRepository
+        .findByDeliveryRequestId(deliveryRequestId)
+        .map(MatchingResponse::from)
+        .orElseThrow(() -> new EntityNotFoundException(ErrorCode.MATCHING_NOT_FOUND));
+  }
+
   /** 매칭 상태를 변경하고, 연결된 배송 요청·차량 상태도 함께 동기화한다. */
   @Transactional
   public MatchingResponse updateMatching(Long matchingId, MatchingUpdateRequest request) {
