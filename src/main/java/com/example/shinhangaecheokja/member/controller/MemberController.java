@@ -1,5 +1,7 @@
 package com.example.shinhangaecheokja.member.controller;
 
+import com.example.shinhangaecheokja.common.exception.BusinessException;
+import com.example.shinhangaecheokja.common.exception.ErrorCode;
 import com.example.shinhangaecheokja.common.security.CustomUserDetails;
 import com.example.shinhangaecheokja.member.dto.request.LoginRequest;
 import com.example.shinhangaecheokja.member.dto.request.MemberCreateRequest;
@@ -15,6 +17,9 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -47,30 +52,33 @@ public class MemberController {
   }
 
   /** 인증된 본인의 프로필 정보를 조회한다. */
-  @GetMapping({"/me", "/api/members/me"})
+  @GetMapping("/me")
   public ResponseEntity<MemberProfileResponseDto> getMyProfile(
-      org.springframework.security.core.Authentication authentication) {
-    Long memberId = extractMemberId(authentication);
-    return ResponseEntity.ok(memberService.getMyProfile(memberId));
+      @AuthenticationPrincipal CustomUserDetails userDetails) {
+    CustomUserDetails resolved = resolveUserDetails(userDetails);
+    return ResponseEntity.ok(memberService.getMyProfile(resolved.getId()));
   }
 
   /** 인증된 본인의 프로필 정보(이름, 연락처)를 수정한다. */
-  @PatchMapping({"/me", "/api/members/me"})
+  @PatchMapping("/me")
   public ResponseEntity<MemberProfileResponseDto> updateMyProfile(
-      org.springframework.security.core.Authentication authentication,
+      @AuthenticationPrincipal CustomUserDetails userDetails,
       @Valid @RequestBody MemberProfileUpdateRequestDto request) {
-    Long memberId = extractMemberId(authentication);
-    return ResponseEntity.ok(memberService.updateMyProfile(memberId, request));
+    CustomUserDetails resolved = resolveUserDetails(userDetails);
+    return ResponseEntity.ok(memberService.updateMyProfile(resolved.getId(), request));
   }
 
-  private Long extractMemberId(org.springframework.security.core.Authentication authentication) {
-    if (authentication != null
-        && authentication.getPrincipal() instanceof CustomUserDetails userDetails
-        && userDetails.getId() != null) {
-      return userDetails.getId();
+  private CustomUserDetails resolveUserDetails(CustomUserDetails userDetails) {
+    if (userDetails != null && userDetails.getId() != null) {
+      return userDetails;
     }
-    throw new com.example.shinhangaecheokja.common.exception.BusinessException(
-        com.example.shinhangaecheokja.common.exception.ErrorCode.UNAUTHORIZED);
+    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    if (auth != null
+        && auth.getPrincipal() instanceof CustomUserDetails customUser
+        && customUser.getId() != null) {
+      return customUser;
+    }
+    throw new BusinessException(ErrorCode.UNAUTHORIZED);
   }
 
   /** 회원 단건을 조회한다. */

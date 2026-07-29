@@ -11,6 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.example.shinhangaecheokja.common.exception.EntityNotFoundException;
 import com.example.shinhangaecheokja.common.exception.ErrorCode;
+import com.example.shinhangaecheokja.common.exception.GlobalExceptionHandler;
 import com.example.shinhangaecheokja.common.security.CustomUserDetails;
 import com.example.shinhangaecheokja.member.dto.request.MemberCreateRequest;
 import com.example.shinhangaecheokja.member.dto.request.MemberProfileUpdateRequestDto;
@@ -18,21 +19,43 @@ import com.example.shinhangaecheokja.member.dto.response.MemberProfileResponseDt
 import com.example.shinhangaecheokja.member.dto.response.MemberResponse;
 import com.example.shinhangaecheokja.member.entity.MemberRole;
 import com.example.shinhangaecheokja.member.service.MemberService;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.method.annotation.AuthenticationPrincipalArgumentResolver;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import tools.jackson.databind.ObjectMapper;
 
-@WebMvcTest(MemberController.class)
+@ExtendWith(MockitoExtension.class)
 class MemberControllerTest {
 
-  @Autowired private MockMvc mockMvc;
-  @Autowired private ObjectMapper objectMapper;
+  private MockMvc mockMvc;
+  private final ObjectMapper objectMapper = new ObjectMapper();
 
-  @MockitoBean private MemberService memberService;
+  @Mock private MemberService memberService;
+  @InjectMocks private MemberController memberController;
+
+  @BeforeEach
+  void setUp() {
+    mockMvc =
+        MockMvcBuilders.standaloneSetup(memberController)
+            .setCustomArgumentResolvers(new AuthenticationPrincipalArgumentResolver())
+            .setControllerAdvice(new GlobalExceptionHandler())
+            .build();
+  }
+
+  @AfterEach
+  void tearDown() {
+    SecurityContextHolder.clearContext();
+  }
 
   @Test
   void 회원_생성_요청을_받으면_생성된_회원을_반환한다() throws Exception {
@@ -114,9 +137,10 @@ class MemberControllerTest {
   @Test
   void 인증된_사용자의_내_프로필을_정상_조회한다() throws Exception {
     CustomUserDetails customUser = new CustomUserDetails(10L, "my@example.com", "pass", "CUSTOMER");
-    org.springframework.security.authentication.UsernamePasswordAuthenticationToken auth =
-        new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(
-            customUser, null, customUser.getAuthorities());
+    UsernamePasswordAuthenticationToken auth =
+        new UsernamePasswordAuthenticationToken(customUser, null, customUser.getAuthorities());
+    SecurityContextHolder.getContext().setAuthentication(auth);
+
     MemberProfileResponseDto response =
         new MemberProfileResponseDto(
             10L, "my@example.com", "홍길동", "010-1234-5678", MemberRole.CUSTOMER);
@@ -136,9 +160,10 @@ class MemberControllerTest {
   @Test
   void 인증된_사용자의_내_프로필을_성공적으로_수정한다() throws Exception {
     CustomUserDetails customUser = new CustomUserDetails(10L, "my@example.com", "pass", "CUSTOMER");
-    org.springframework.security.authentication.UsernamePasswordAuthenticationToken auth =
-        new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(
-            customUser, null, customUser.getAuthorities());
+    UsernamePasswordAuthenticationToken auth =
+        new UsernamePasswordAuthenticationToken(customUser, null, customUser.getAuthorities());
+    SecurityContextHolder.getContext().setAuthentication(auth);
+
     MemberProfileUpdateRequestDto request =
         new MemberProfileUpdateRequestDto("김철수", "010-9876-5432");
     MemberProfileResponseDto response =
@@ -161,9 +186,10 @@ class MemberControllerTest {
   @Test
   void 유효하지_않은_전화번호로_프로필_수정시_400을_반환한다() throws Exception {
     CustomUserDetails customUser = new CustomUserDetails(10L, "my@example.com", "pass", "CUSTOMER");
-    org.springframework.security.authentication.UsernamePasswordAuthenticationToken auth =
-        new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(
-            customUser, null, customUser.getAuthorities());
+    UsernamePasswordAuthenticationToken auth =
+        new UsernamePasswordAuthenticationToken(customUser, null, customUser.getAuthorities());
+    SecurityContextHolder.getContext().setAuthentication(auth);
+
     MemberProfileUpdateRequestDto request =
         new MemberProfileUpdateRequestDto("김철수", "invalid-phone");
 
