@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -52,6 +53,19 @@ public class GlobalExceptionHandler {
     log.warn("HttpMessageNotReadableException occurred: {}", e.getMessage());
     ErrorCode errorCode = ErrorCode.INVALID_INPUT_VALUE;
     ErrorResponse response = ErrorResponse.of(errorCode, "요청 본문의 JSON 형식이 올바르지 않습니다.");
+    return new ResponseEntity<>(response, errorCode.getHttpStatus());
+  }
+
+  /**
+   * {@code @PreAuthorize} 인가 실패 예외(AccessDeniedException 및 그 하위 타입인 AuthorizationDeniedException)를
+   * 처리합니다. 메서드 시큐리티 예외는 Spring Security의 필터가 아니라 이 {@code @RestControllerAdvice}(DispatcherServlet
+   * 내부)에서 먼저 잡히므로, 여기서 직접 403으로 변환해야 한다.
+   */
+  @ExceptionHandler(AccessDeniedException.class)
+  protected ResponseEntity<ErrorResponse> handleAccessDeniedException(AccessDeniedException e) {
+    log.warn("AccessDeniedException occurred: {}", e.getMessage());
+    ErrorCode errorCode = ErrorCode.ACCESS_DENIED;
+    ErrorResponse response = ErrorResponse.of(errorCode);
     return new ResponseEntity<>(response, errorCode.getHttpStatus());
   }
 

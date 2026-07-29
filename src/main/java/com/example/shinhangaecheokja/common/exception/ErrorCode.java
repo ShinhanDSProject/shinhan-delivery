@@ -19,6 +19,7 @@ public enum ErrorCode {
   ENTITY_NOT_FOUND(HttpStatus.NOT_FOUND, "C004", "존재하지 않는 리소스입니다."),
   INVALID_FILE_TYPE(HttpStatus.BAD_REQUEST, "C005", "허용되지 않는 파일 형식입니다."),
   FILE_TOO_LARGE(HttpStatus.BAD_REQUEST, "C006", "파일 크기가 허용 범위를 초과했습니다."),
+  ACCESS_DENIED(HttpStatus.FORBIDDEN, "C007", "접근 권한이 없습니다."),
 
   // Member Domain Errors
   MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "M001", "존재하지 않는 회원입니다."),
@@ -43,7 +44,10 @@ public enum ErrorCode {
 
   // Payment Domain Errors
   POINT_WALLET_NOT_FOUND(HttpStatus.NOT_FOUND, "P001", "포인트 지갑 정보를 찾을 수 없습니다."),
-  INSUFFICIENT_BALANCE(HttpStatus.BAD_REQUEST, "P002", "포인트 잔액이 부족합니다.");
+  INSUFFICIENT_BALANCE(HttpStatus.BAD_REQUEST, "P002", "포인트 잔액이 부족합니다."),
+
+  // Notification Domain Errors
+  NOTIFICATION_NOT_FOUND(HttpStatus.NOT_FOUND, "N001", "존재하지 않는 알림입니다.");
 
   private final HttpStatus httpStatus;
   private final String code;
