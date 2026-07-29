@@ -11,6 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.example.shinhangaecheokja.common.security.JwtProvider;
 import com.example.shinhangaecheokja.notification.dto.response.NotificationResponse;
+import com.example.shinhangaecheokja.notification.exception.NotificationAccessDeniedException;
 import com.example.shinhangaecheokja.notification.service.NotificationService;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -66,5 +67,17 @@ class NotificationControllerTest {
         .perform(patch("/api/v1/notifications/1/read").header("Authorization", "Bearer " + token))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.read").value(true));
+  }
+
+  @Test
+  void 본인_알림이_아니면_403을_반환한다() throws Exception {
+    String token = jwtProvider.createAccessToken(2L, "stranger@test.com", "CUSTOMER");
+    when(notificationService.markAsRead(1L, 2L))
+        .thenThrow(new NotificationAccessDeniedException(1L, 2L));
+
+    mockMvc
+        .perform(patch("/api/v1/notifications/1/read").header("Authorization", "Bearer " + token))
+        .andExpect(status().isForbidden())
+        .andExpect(jsonPath("$.code").value("C007"));
   }
 }

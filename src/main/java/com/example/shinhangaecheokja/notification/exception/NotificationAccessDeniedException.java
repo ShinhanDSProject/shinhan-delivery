@@ -8,7 +8,7 @@ public class NotificationAccessDeniedException extends BusinessException {
 
   public NotificationAccessDeniedException(Long notificationId, Long memberId) {
     super(
-        ErrorCode.UNAUTHORIZED,
+        ErrorCode.ACCESS_DENIED,
         "해당 알림에 접근할 권한이 없습니다: notificationId=" + notificationId + ", memberId=" + memberId);
   }
 }

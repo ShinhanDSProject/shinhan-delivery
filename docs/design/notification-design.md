@@ -34,6 +34,7 @@ erDiagram
 ```
 
 * `V10__create_notification_table.sql`로 테이블만 생성한다(시드 데이터 없음 — 알림 생성 API가 없어서 실제 데이터는 다른 도메인 이벤트가 생기면 추후 채워짐).
+* `V11__add_notification_indexes.sql`로 `(member_id, created_at)`, `(member_id, category, created_at)` 복합 인덱스를 추가한다 — 조회가 항상 `memberId`로 필터링 후 `createdAt` 정렬(선택적으로 `category` 필터 추가)이라, 데이터가 쌓이면 이 인덱스 없이는 Full Scan + Filesort가 발생한다. `V10`은 이미 로컬 DB에 적용돼 체크섬이 고정된 상태라(V7에서 배운 교훈), 인덱스를 같은 파일에 추가하지 않고 새 마이그레이션으로 분리했다.
 
 ---
 
@@ -65,16 +66,17 @@ erDiagram
 * **응답 바디 및 상태 코드 (Response Body & Status):**
   * **Success (200 OK):** 갱신된 `NotificationResponse` 반환(`read: true`).
   * **Failure (404 Not Found - 알림 없음, ErrorCode `N001`)**
-  * **Failure (401 Unauthorized - 본인 알림이 아님, ErrorCode `A001` 재사용):** 기존 `UNAUTHORIZED` 에러코드를 재사용한다(신규 코드 추가 안 함 — `tracking` 도메인의 `UnauthorizedTrackingAccessException`과 동일 패턴).
+  * **Failure (403 Forbidden - 본인 알림이 아님, ErrorCode `C007` 재사용):** 로그인 자체는 됐지만 그 리소스에 대한 권한이 없는 상황이라 REST 의미상 401(비인증)이 아니라 403(권한 없음)이 맞다. 이번 PR에서 새로 만든 `ErrorCode.ACCESS_DENIED`(C007)를 재사용한다(신규 코드 추가 안 함). *(`tracking` 도메인의 `UnauthorizedTrackingAccessException`은 같은 상황에 401을 쓰는 기존 패턴이었으나, 이번에 지적받아 여기서는 의미상 더 정확한 403으로 감 — `tracking` 쪽은 이번 범위에서 안 건드림)*
 
 ---
 
 ## 4. 작업 분할 목록 (WBS)
 
-- [ ] `V10__create_notification_table.sql` 마이그레이션 작성
+- [x] `V10__create_notification_table.sql` 마이그레이션 작성
+- [ ] `V11__add_notification_indexes.sql`로 조회 성능용 복합 인덱스 추가
 - [ ] `Notification` Entity + `NotificationRepository`(`findByMemberIdOrderByCreatedAtDesc`, `findByMemberIdAndCategoryOrderByCreatedAtDesc`) 작성
 - [ ] `NotificationResponse` record 작성
-- [ ] `ErrorCode.NOTIFICATION_NOT_FOUND`(N001) 추가, `NotificationAccessDeniedException`(`ErrorCode.UNAUTHORIZED` 재사용) 추가
+- [ ] `ErrorCode.NOTIFICATION_NOT_FOUND`(N001) 추가, `NotificationAccessDeniedException`(`ErrorCode.ACCESS_DENIED` 재사용) 추가
 - [ ] `NotificationService`: `getNotifications(memberId, category, pageable)`, `markAsRead(notificationId, memberId)`(소유권 검증 포함)
 - [ ] `NotificationController`: `GET /api/v1/notifications`, `PATCH /api/v1/notifications/{id}/read` — 둘 다 `@PreAuthorize("isAuthenticated()")` + `@AuthenticationPrincipal`
 - [ ] 단위 테스트(페이징 조회, category 필터링, 읽음 처리, 소유자 아니면 거절, 미인증 시 403)
