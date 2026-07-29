@@ -48,7 +48,9 @@ public class FileUploadService {
       throw new UncheckedIOException("이미지 저장에 실패했습니다.", e);
     }
 
-    return new ImageUploadResponse(baseUrl + "/" + filename);
+    String normalizedBaseUrl =
+        baseUrl.endsWith("/") ? baseUrl.substring(0, baseUrl.length() - 1) : baseUrl;
+    return new ImageUploadResponse(normalizedBaseUrl + "/" + filename);
   }
 
   private String extractExtension(MultipartFile file) {

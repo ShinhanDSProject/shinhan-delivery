@@ -1,5 +1,6 @@
 package com.example.shinhangaecheokja.upload.config;
 
+import java.nio.file.Path;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
@@ -17,7 +18,8 @@ public class UploadWebConfig implements WebMvcConfigurer {
 
   @Override
   public void addResourceHandlers(ResourceHandlerRegistry registry) {
-    String location = uploadDir.endsWith("/") ? uploadDir : uploadDir + "/";
+    String absolutePath = Path.of(uploadDir).toAbsolutePath().normalize().toString();
+    String location = absolutePath.endsWith("/") ? absolutePath : absolutePath + "/";
     registry.addResourceHandler(baseUrl + "/**").addResourceLocations("file:" + location);
   }
 }
