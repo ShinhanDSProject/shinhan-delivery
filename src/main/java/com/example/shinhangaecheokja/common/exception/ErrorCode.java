@@ -19,6 +19,7 @@ public enum ErrorCode {
   ENTITY_NOT_FOUND(HttpStatus.NOT_FOUND, "C004", "존재하지 않는 리소스입니다."),
   INVALID_FILE_TYPE(HttpStatus.BAD_REQUEST, "C005", "허용되지 않는 파일 형식입니다."),
   FILE_TOO_LARGE(HttpStatus.BAD_REQUEST, "C006", "파일 크기가 허용 범위를 초과했습니다."),
+  ACCESS_DENIED(HttpStatus.FORBIDDEN, "C007", "접근 권한이 없습니다."),
 
   // Member Domain Errors
   MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "M001", "존재하지 않는 회원입니다."),

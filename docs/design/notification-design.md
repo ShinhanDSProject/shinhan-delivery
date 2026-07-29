@@ -39,7 +39,7 @@ erDiagram
 
 ## 3. API 명세서 (API Specification)
 
-인증이 필요한 첫 API라, `Authorization: Bearer <accessToken>` 헤더가 없거나 유효하지 않으면 두 엔드포인트 모두 `403 Forbidden`을 반환한다(`@PreAuthorize`가 던지는 `AccessDeniedException`은 Spring Security의 `ExceptionTranslationFilter`가 우리 `GlobalExceptionHandler` 이전에 가로채므로, 이 저장소의 표준 `ErrorResponse` JSON 형식이 아니라 Spring Security 기본 403 응답이 나간다 — 알려진 제약이며 이번 범위에서 커스터마이징하지 않는다).
+인증이 필요한 첫 API라, `Authorization: Bearer <accessToken>` 헤더가 없거나 유효하지 않으면 두 엔드포인트 모두 `403 Forbidden`(ErrorCode `C007`, 표준 `ErrorResponse` 형식)을 반환한다. `@PreAuthorize`가 던지는 `AuthorizationDeniedException`(`AccessDeniedException`의 하위 타입)은 Spring Security의 필터가 아니라 `DispatcherServlet` 내부(메서드 시큐리티는 컨트롤러 호출을 감싸는 AOP라서)에서 발생하기 때문에, Security의 `ExceptionTranslationFilter`보다 먼저 우리 `GlobalExceptionHandler`에 도달한다 — 그래서 `GlobalExceptionHandler`에 `AccessDeniedException` 핸들러를 새로 추가해 표준 형식으로 응답하도록 했다.
 
 ### 3.1 알림 목록 조회
 * **엔드포인트:** `GET /api/v1/notifications?category={선택}&page={n}&size={n}`
