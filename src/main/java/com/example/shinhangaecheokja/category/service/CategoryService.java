@@ -14,9 +14,9 @@ public class CategoryService {
 
   private final CategoryRepository categoryRepository;
 
-  /** 전체 카테고리 목록을 조회한다. */
+  /** 전체 카테고리 목록을 id 오름차순으로 조회한다. */
   @Transactional(readOnly = true)
   public List<CategoryResponse> getCategories() {
-    return categoryRepository.findAll().stream().map(CategoryResponse::from).toList();
+    return categoryRepository.findAllByOrderByIdAsc().stream().map(CategoryResponse::from).toList();
   }
 }

@@ -23,7 +23,7 @@ class CategoryServiceTest {
   void 저장된_카테고리_목록을_전부_반환한다() {
     List<Category> categories =
         List.of(newCategory(1L, "전자기기/가전"), newCategory(2L, "식품/음료"), newCategory(3L, "의류/패션잡화"));
-    when(categoryRepository.findAll()).thenReturn(categories);
+    when(categoryRepository.findAllByOrderByIdAsc()).thenReturn(categories);
 
     List<CategoryResponse> responses = categoryService.getCategories();
 
@@ -35,7 +35,7 @@ class CategoryServiceTest {
 
   @Test
   void 저장된_카테고리가_없으면_빈_목록을_반환한다() {
-    when(categoryRepository.findAll()).thenReturn(List.of());
+    when(categoryRepository.findAllByOrderByIdAsc()).thenReturn(List.of());
 
     List<CategoryResponse> responses = categoryService.getCategories();
 
