@@ -442,6 +442,7 @@ void 도메인은_다른_도메인의_repository를_직접_참조하지_않는�
 - 최소 형식: `type: 설명` (`feat`, `fix`, `refactor`, `test`, `docs`, `chore`, `style`)
   - 예: `feat: 배송 요금 산정 로직 추가`
 - 변경 배경까지 남기고 싶으면 `docs/git-flow-guide.md`의 확장 형식(`type(scope): subject` + 본문 + 푸터)을 써도 된다. 최소 형식과 상충하지 않는, 필요할 때만 쓰는 선택 사항이다.
+- 큰 단위로 한 번에 커밋하지 않고, DTO/Entity/Service/Controller/Test 등 레이어(서브태스크) 단위로 작업이 완성될 때마다 커밋 프리뷰를 제시하고 개발자가 `commit`(또는 `/commit`) 명령을 입력하면 `./scripts/verify.sh` 검증 통과 후 즉시 마이크로 커밋을 집행한다 (`AGENTS.md` Principle 9, `docs/ai-paired-development-guide.md` 참고).
 
 ### 16.3 PR 규칙
 
