@@ -59,6 +59,15 @@ public class MemberController {
     return ResponseEntity.ok(memberService.updateMember(memberId, request));
   }
 
+  /** 회원의 역할(CUSTOMER/COURIER)을 변경한다. */
+  @org.springframework.web.bind.annotation.PatchMapping("/{memberId}/role")
+  public ResponseEntity<MemberResponse> updateRole(
+      @PathVariable Long memberId,
+      @jakarta.validation.Valid @RequestBody
+          com.example.shinhangaecheokja.member.dto.request.MemberRoleUpdateRequest request) {
+    return ResponseEntity.ok(memberService.updateRole(memberId, request.getRole()));
+  }
+
   /** 회원을 삭제한다. */
   @DeleteMapping("/{memberId}")
   public ResponseEntity<Void> deleteMember(@PathVariable Long memberId) {

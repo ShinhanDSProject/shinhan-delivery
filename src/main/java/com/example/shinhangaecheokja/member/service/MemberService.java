@@ -83,6 +83,15 @@ public class MemberService {
     return MemberResponse.from(member);
   }
 
+  /** 회원의 역할(CUSTOMER / COURIER)을 변경한다. */
+  @Transactional
+  public MemberResponse updateRole(
+      Long memberId, com.example.shinhangaecheokja.member.entity.MemberRole role) {
+    Member member = findMemberOrThrow(memberId);
+    member.setRole(role);
+    return MemberResponse.from(member);
+  }
+
   /** id로 회원을 조회해 삭제한다. 없으면 EntityNotFoundException. */
   @Transactional
   public void deleteMember(Long memberId) {
