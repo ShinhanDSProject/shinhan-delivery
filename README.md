@@ -96,3 +96,5 @@ git config --local commit.template .gitmessage
 * [**배송 매칭 설계서 (docs/design/matching-design.md)**](./docs/design/matching-design.md) - 수동 배송 매칭, 상태 수정/삭제에 따른 실시간 리소스 데이터 동기화 API 명세 및 ERD
 * [**포인트 지갑 및 결제 설계서 (docs/design/point-wallet-design.md)**](./docs/design/point-wallet-design.md) - 지갑 개설, 충전, 차감 검증 및 잔액 에러 처리 API 명세 및 ERD
 * [**실시간 위치 추적 설계서 (docs/design/tracking-design.md)**](./docs/design/tracking-design.md) - WebSocket(STOMP) 기반 실시간 위치 브로드캐스트, CONNECT/SUBSCRIBE 인증·인가 흐름 및 메시지 명세
+* [**물품 카테고리 목록 조회 설계서 (docs/design/category-design.md)**](./docs/design/category-design.md) - 물품 카테고리 12종 마이그레이션 시딩 및 목록 조회 API 명세
+* [**이미지 업로드 설계서 (docs/design/image-upload-design.md)**](./docs/design/image-upload-design.md) - Multipart 이미지 업로드, 확장자·크기 검증 및 정적 리소스 서빙 API 명세
