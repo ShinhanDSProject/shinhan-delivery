@@ -51,4 +51,14 @@ public class DeliveryRequest {
 
   @Column(name = "pickup_longitude", nullable = false)
   private double pickupLongitude;
+
+  @Column(name = "dropoff_latitude", nullable = false)
+  private double dropoffLatitude;
+
+  @Column(name = "dropoff_longitude", nullable = false)
+  private double dropoffLongitude;
+
+  @Enumerated(EnumType.STRING)
+  @Column(name = "item_size", nullable = false, length = 20)
+  private ItemSize itemSize = ItemSize.MEDIUM;
 }
