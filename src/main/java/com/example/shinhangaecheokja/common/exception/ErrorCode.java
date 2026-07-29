@@ -43,7 +43,10 @@ public enum ErrorCode {
 
   // Payment Domain Errors
   POINT_WALLET_NOT_FOUND(HttpStatus.NOT_FOUND, "P001", "포인트 지갑 정보를 찾을 수 없습니다."),
-  INSUFFICIENT_BALANCE(HttpStatus.BAD_REQUEST, "P002", "포인트 잔액이 부족합니다.");
+  INSUFFICIENT_BALANCE(HttpStatus.BAD_REQUEST, "P002", "포인트 잔액이 부족합니다."),
+
+  // Notification Domain Errors
+  NOTIFICATION_NOT_FOUND(HttpStatus.NOT_FOUND, "N001", "존재하지 않는 알림입니다.");
 
   private final HttpStatus httpStatus;
   private final String code;

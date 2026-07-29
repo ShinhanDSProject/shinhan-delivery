@@ -65,7 +65,7 @@ erDiagram
 * **응답 바디 및 상태 코드 (Response Body & Status):**
   * **Success (200 OK):** 갱신된 `NotificationResponse` 반환(`read: true`).
   * **Failure (404 Not Found - 알림 없음, ErrorCode `N001`)**
-  * **Failure (409 Conflict - 본인 알림이 아님, ErrorCode `A001` 재사용):** 기존 `UNAUTHORIZED` 에러코드를 재사용한다(신규 코드 추가 안 함).
+  * **Failure (401 Unauthorized - 본인 알림이 아님, ErrorCode `A001` 재사용):** 기존 `UNAUTHORIZED` 에러코드를 재사용한다(신규 코드 추가 안 함 — `tracking` 도메인의 `UnauthorizedTrackingAccessException`과 동일 패턴).
 
 ---
 
