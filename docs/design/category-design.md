@@ -23,27 +23,25 @@ erDiagram
     CATEGORY {
         Long id PK "Auto Increment"
         String name "Category Name"
-        String icon_url "Icon Asset Path"
     }
 ```
 
-* Figma(`customer-category-selection` 화면) 기준 실제 카테고리 12종을 `V8__create_category_table.sql` 마이그레이션의 INSERT로 시딩한다. `DataSeedInitializer`(로컬 더미 데이터 전용, `.env` 플래그로 on/off)가 아니라 마이그레이션으로 넣는 이유는, 카테고리가 dev/test/prod 모든 환경에 항상 존재해야 하는 실제 마스터 데이터이기 때문이다.
-* `iconUrl`은 실제 아이콘 에셋/CDN이 아직 없어 `/icons/category-{slug}.svg` 형태의 placeholder 문자열로 채운다.
+* 카테고리 12종을 `V8__create_category_table.sql` 마이그레이션의 INSERT로 시딩한다. `DataSeedInitializer`(로컬 더미 데이터 전용, `.env` 플래그로 on/off)가 아니라 마이그레이션으로 넣는 이유는, 카테고리가 dev/test/prod 모든 환경에 항상 존재해야 하는 실제 마스터 데이터이기 때문이다.
 
-| name | icon_url |
-|---|---|
-| 전자기기/가전 | /icons/category-electronics.svg |
-| 식품/음료 | /icons/category-food.svg |
-| 의류/패션잡화 | /icons/category-fashion.svg |
-| 서류/문서 | /icons/category-document.svg |
-| 생활용품/잡화 | /icons/category-household.svg |
-| 가구/인테리어 | /icons/category-furniture.svg |
-| 화장품/뷰티 | /icons/category-beauty.svg |
-| 도서/음반 | /icons/category-book.svg |
-| 스포츠/레저 | /icons/category-sports.svg |
-| 반려동물 용품 | /icons/category-pet.svg |
-| 꽃/식물 | /icons/category-plant.svg |
-| 기타 | /icons/category-etc.svg |
+| name |
+|---|
+| 전자기기/가전 |
+| 식품/음료 |
+| 의류/패션잡화 |
+| 서류/문서 |
+| 생활용품/잡화 |
+| 가구/인테리어 |
+| 화장품/뷰티 |
+| 도서/음반 |
+| 스포츠/레저 |
+| 반려동물 용품 |
+| 꽃/식물 |
+| 기타 |
 
 ---
 
@@ -56,8 +54,8 @@ erDiagram
   * **Success (200 OK):** 리스트를 래핑하지 않고 배열로 직접 반환한다(`getDeliveryRequests()` 등 기존 목록 조회 API와 동일 패턴).
     ```json
     [
-      { "id": 1, "name": "전자기기/가전", "iconUrl": "/icons/category-electronics.svg" },
-      { "id": 2, "name": "식품/음료", "iconUrl": "/icons/category-food.svg" }
+      { "id": 1, "name": "전자기기/가전" },
+      { "id": 2, "name": "식품/음료" }
     ]
     ```
 
