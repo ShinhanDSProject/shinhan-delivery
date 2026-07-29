@@ -44,9 +44,11 @@ class DeliveryServiceTest {
     request.setPickupAddress("서울시 강남구");
     request.setDropoffAddress("서울시 서초구");
     request.setWeight(10);
-    request.setDistance(5);
-    request.setPickupLatitude(37.5);
+    request.setPickupLatitude(37.0);
     request.setPickupLongitude(127.0);
+    request.setDropoffLatitude(38.0);
+    request.setDropoffLongitude(127.0);
+    request.setItemSize(ItemSize.MEDIUM);
 
     when(deliveryRequestRepository.save(any(DeliveryRequest.class)))
         .thenAnswer(invocation -> invocation.getArgument(0));
@@ -54,7 +56,7 @@ class DeliveryServiceTest {
     DeliveryResponse response = deliveryService.requestDelivery(request);
 
     assertThat(response.customerId()).isEqualTo(1L);
-    assertThat(response.feePoint()).isEqualTo(600L);
+    assertThat(response.feePoint()).isEqualTo(78776L);
     assertThat(response.status()).isEqualTo(DeliveryStatus.REQUESTED);
   }
 
@@ -63,7 +65,6 @@ class DeliveryServiceTest {
     DeliveryCreateRequest request = new DeliveryCreateRequest();
     request.setCustomerId(999L);
     request.setWeight(10);
-    request.setDistance(5);
 
     when(memberService.getMember(999L))
         .thenThrow(
@@ -79,18 +80,20 @@ class DeliveryServiceTest {
     DeliveryCreateRequest request = new DeliveryCreateRequest();
     request.setCustomerId(1L);
     request.setWeight(-5);
-    request.setDistance(5);
 
     assertThatThrownBy(() -> deliveryService.requestDelivery(request))
         .isInstanceOf(InvalidDeliveryWeightException.class);
   }
 
   @Test
-  void 거리가_0이하면_InvalidDeliveryDistanceException을_던진다() {
+  void 출발지와_도착지_좌표가_같으면_InvalidDeliveryDistanceException을_던진다() {
     DeliveryCreateRequest request = new DeliveryCreateRequest();
     request.setCustomerId(1L);
     request.setWeight(10);
-    request.setDistance(0);
+    request.setPickupLatitude(37.0);
+    request.setPickupLongitude(127.0);
+    request.setDropoffLatitude(37.0);
+    request.setDropoffLongitude(127.0);
 
     assertThatThrownBy(() -> deliveryService.requestDelivery(request))
         .isInstanceOf(InvalidDeliveryDistanceException.class);

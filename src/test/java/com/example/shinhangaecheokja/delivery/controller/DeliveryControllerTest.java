@@ -39,12 +39,28 @@ class DeliveryControllerTest {
     request.setPickupAddress("서울시 강남구");
     request.setDropoffAddress("서울시 서초구");
     request.setWeight(10);
-    request.setDistance(5);
+    request.setPickupLatitude(37.0);
+    request.setPickupLongitude(127.0);
+    request.setDropoffLatitude(38.0);
+    request.setDropoffLongitude(127.0);
+    request.setItemSize(ItemSize.MEDIUM);
 
     when(deliveryService.requestDelivery(any()))
         .thenReturn(
             new DeliveryResponse(
-                1L, 1L, "서울시 강남구", "서울시 서초구", 10, 5, DeliveryStatus.REQUESTED, 600L, 37.5, 127.0));
+                1L,
+                1L,
+                "서울시 강남구",
+                "서울시 서초구",
+                10,
+                111.19,
+                DeliveryStatus.REQUESTED,
+                78776L,
+                37.0,
+                127.0,
+                38.0,
+                127.0,
+                ItemSize.MEDIUM));
 
     mockMvc
         .perform(
@@ -61,7 +77,6 @@ class DeliveryControllerTest {
     DeliveryCreateRequest request = new DeliveryCreateRequest();
     request.setCustomerId(1L);
     request.setWeight(10);
-    request.setDistance(5);
     request.setPickupLatitude(200);
     request.setPickupLongitude(127.0);
 
@@ -79,7 +94,6 @@ class DeliveryControllerTest {
     request.setCustomerId(1L);
     request.setDropoffAddress("서울시 서초구");
     request.setWeight(10);
-    request.setDistance(5);
 
     mockMvc
         .perform(

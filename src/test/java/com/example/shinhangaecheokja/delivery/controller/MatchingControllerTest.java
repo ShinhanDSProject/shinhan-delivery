@@ -14,6 +14,7 @@ import com.example.shinhangaecheokja.delivery.dto.request.MatchingUpdateRequest;
 import com.example.shinhangaecheokja.delivery.dto.response.DeliveryResponse;
 import com.example.shinhangaecheokja.delivery.dto.response.MatchingResponse;
 import com.example.shinhangaecheokja.delivery.entity.DeliveryStatus;
+import com.example.shinhangaecheokja.delivery.entity.ItemSize;
 import com.example.shinhangaecheokja.delivery.entity.MatchingStatus;
 import com.example.shinhangaecheokja.delivery.service.MatchingService;
 import java.time.LocalDateTime;
@@ -68,7 +69,10 @@ class MatchingControllerTest {
                     DeliveryStatus.REQUESTED,
                     600L,
                     37.5,
-                    127.0)));
+                    127.0,
+                    37.6,
+                    127.1,
+                    ItemSize.MEDIUM)));
 
     mockMvc
         .perform(get("/api/v1/matchings/calls").param("vehicleId", "2"))
