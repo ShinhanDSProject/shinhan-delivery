@@ -4,31 +4,58 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.example.shinhangaecheokja.common.exception.EntityNotFoundException;
 import com.example.shinhangaecheokja.common.exception.ErrorCode;
+import com.example.shinhangaecheokja.common.exception.GlobalExceptionHandler;
+import com.example.shinhangaecheokja.common.security.CustomUserDetails;
 import com.example.shinhangaecheokja.member.dto.request.MemberCreateRequest;
+import com.example.shinhangaecheokja.member.dto.request.MemberProfileUpdateRequestDto;
+import com.example.shinhangaecheokja.member.dto.response.MemberProfileResponseDto;
 import com.example.shinhangaecheokja.member.dto.response.MemberResponse;
 import com.example.shinhangaecheokja.member.entity.MemberRole;
 import com.example.shinhangaecheokja.member.service.MemberService;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.method.annotation.AuthenticationPrincipalArgumentResolver;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import tools.jackson.databind.ObjectMapper;
 
-@WebMvcTest(MemberController.class)
+@ExtendWith(MockitoExtension.class)
 class MemberControllerTest {
 
-  @Autowired private MockMvc mockMvc;
-  @Autowired private ObjectMapper objectMapper;
+  private MockMvc mockMvc;
+  private final ObjectMapper objectMapper = new ObjectMapper();
 
-  @MockitoBean private MemberService memberService;
+  @Mock private MemberService memberService;
+  @InjectMocks private MemberController memberController;
+
+  @BeforeEach
+  void setUp() {
+    mockMvc =
+        MockMvcBuilders.standaloneSetup(memberController)
+            .setCustomArgumentResolvers(new AuthenticationPrincipalArgumentResolver())
+            .setControllerAdvice(new GlobalExceptionHandler())
+            .build();
+  }
+
+  @AfterEach
+  void tearDown() {
+    SecurityContextHolder.clearContext();
+  }
 
   @Test
   void 회원_생성_요청을_받으면_생성된_회원을_반환한다() throws Exception {
@@ -105,5 +132,78 @@ class MemberControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  void 인증된_사용자의_내_프로필을_정상_조회한다() throws Exception {
+    CustomUserDetails customUser = new CustomUserDetails(10L, "my@example.com", "pass", "CUSTOMER");
+    UsernamePasswordAuthenticationToken auth =
+        new UsernamePasswordAuthenticationToken(customUser, null, customUser.getAuthorities());
+    SecurityContextHolder.getContext().setAuthentication(auth);
+
+    MemberProfileResponseDto response =
+        new MemberProfileResponseDto(
+            10L, "my@example.com", "홍길동", "010-1234-5678", MemberRole.CUSTOMER);
+
+    when(memberService.getMyProfile(eq(10L))).thenReturn(response);
+
+    mockMvc
+        .perform(get("/api/v1/members/me").principal(auth))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.id").value(10))
+        .andExpect(jsonPath("$.email").value("my@example.com"))
+        .andExpect(jsonPath("$.name").value("홍길동"))
+        .andExpect(jsonPath("$.phoneNumber").value("010-1234-5678"))
+        .andExpect(jsonPath("$.role").value("CUSTOMER"));
+  }
+
+  @Test
+  void 인증된_사용자의_내_프로필을_성공적으로_수정한다() throws Exception {
+    CustomUserDetails customUser = new CustomUserDetails(10L, "my@example.com", "pass", "CUSTOMER");
+    UsernamePasswordAuthenticationToken auth =
+        new UsernamePasswordAuthenticationToken(customUser, null, customUser.getAuthorities());
+    SecurityContextHolder.getContext().setAuthentication(auth);
+
+    MemberProfileUpdateRequestDto request =
+        new MemberProfileUpdateRequestDto("김철수", "010-9876-5432");
+    MemberProfileResponseDto response =
+        new MemberProfileResponseDto(
+            10L, "my@example.com", "김철수", "010-9876-5432", MemberRole.CUSTOMER);
+
+    when(memberService.updateMyProfile(eq(10L), any())).thenReturn(response);
+
+    mockMvc
+        .perform(
+            patch("/api/v1/members/me")
+                .principal(auth)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.name").value("김철수"))
+        .andExpect(jsonPath("$.phoneNumber").value("010-9876-5432"));
+  }
+
+  @Test
+  void 유효하지_않은_전화번호로_프로필_수정시_400을_반환한다() throws Exception {
+    CustomUserDetails customUser = new CustomUserDetails(10L, "my@example.com", "pass", "CUSTOMER");
+    UsernamePasswordAuthenticationToken auth =
+        new UsernamePasswordAuthenticationToken(customUser, null, customUser.getAuthorities());
+    SecurityContextHolder.getContext().setAuthentication(auth);
+
+    MemberProfileUpdateRequestDto request =
+        new MemberProfileUpdateRequestDto("김철수", "invalid-phone");
+
+    mockMvc
+        .perform(
+            patch("/api/v1/members/me")
+                .principal(auth)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  void 인증되지_않은_사용자가_내_프로필_조회시_401을_반환한다() throws Exception {
+    mockMvc.perform(get("/api/v1/members/me")).andExpect(status().isUnauthorized());
   }
 }
