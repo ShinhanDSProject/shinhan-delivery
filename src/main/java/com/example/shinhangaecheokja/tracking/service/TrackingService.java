@@ -62,6 +62,7 @@ public class TrackingService {
     messagingTemplate.convertAndSend("/topic/delivery/" + deliveryId + "/location", broadcast);
   }
 
+  /** 매칭 전(EntityNotFoundException)이면 아직 소유주가 없는 것으로 본다. */
   private boolean isMatchedVehicleOwner(Long deliveryId, Long memberId) {
     try {
       MatchingResponse matching = matchingService.getMatchingByDeliveryRequestId(deliveryId);

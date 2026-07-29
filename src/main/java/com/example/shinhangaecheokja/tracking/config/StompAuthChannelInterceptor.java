@@ -44,6 +44,7 @@ public class StompAuthChannelInterceptor implements ChannelInterceptor {
     return message;
   }
 
+  /** CONNECT 시 Authorization 헤더의 JWT를 검증하고, 통과하면 인증 주체를 세션에 고정한다. */
   private void authenticate(StompHeaderAccessor accessor) {
     String bearerToken = accessor.getFirstNativeHeader("Authorization");
     String token =
@@ -56,6 +57,7 @@ public class StompAuthChannelInterceptor implements ChannelInterceptor {
     accessor.setUser(jwtProvider.getAuthentication(token));
   }
 
+  /** 배송 추적 채널 구독 시 deliveryId를 뽑아 TrackingService에 권한 검증을 위임한다. */
   private void authorizeSubscribe(StompHeaderAccessor accessor) {
     String destination = accessor.getDestination();
     if (destination == null || !PATH_MATCHER.match(SUBSCRIBE_DESTINATION_PATTERN, destination)) {

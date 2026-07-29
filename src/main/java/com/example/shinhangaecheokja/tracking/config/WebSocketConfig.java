@@ -16,24 +16,27 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
   private final StompAuthChannelInterceptor stompAuthChannelInterceptor;
 
   /**
-   * 인터셉터가 (SimpMessagingTemplate을 쓰는) TrackingService를 참조하고, SimpMessagingTemplate은 이 설정 클래스가 다시
-   * 필요하므로 순환 빈 생성을 막기 위해 {@code @Lazy}로 늦게 주입한다.
+   * 순환 빈 생성(WebSocketConfig → interceptor → TrackingService → SimpMessagingTemplate) 방지를 위해 지연
+   * 주입한다.
    */
   public WebSocketConfig(@Lazy StompAuthChannelInterceptor stompAuthChannelInterceptor) {
     this.stompAuthChannelInterceptor = stompAuthChannelInterceptor;
   }
 
+  /** WebSocket 핸드셰이크 진입점. 인증은 {@link StompAuthChannelInterceptor}가 CONNECT에서 처리한다. */
   @Override
   public void registerStompEndpoints(StompEndpointRegistry registry) {
     registry.addEndpoint("/ws").setAllowedOriginPatterns("*");
   }
 
+  /** {@code /topic}은 서버→클라이언트 브로드캐스트, {@code /app}은 클라이언트→서버 발행(컨트롤러 라우팅) prefix. */
   @Override
   public void configureMessageBroker(MessageBrokerRegistry registry) {
     registry.enableSimpleBroker("/topic");
     registry.setApplicationDestinationPrefixes("/app");
   }
 
+  /** REST의 JwtAuthenticationFilter에 대응하는 인증·인가 인터셉터를 인바운드 채널에 등록한다. */
   @Override
   public void configureClientInboundChannel(ChannelRegistration registration) {
     registration.interceptors(stompAuthChannelInterceptor);
