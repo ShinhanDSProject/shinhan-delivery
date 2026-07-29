@@ -106,6 +106,31 @@ erDiagram
     }
     ```
 
+### 3.3 배송 요금 견적
+* **엔드포인트:** `POST /api/v1/delivery-requests/estimate`
+* **설명:** 실제 배송 요청을 생성하지 않고, 출발지·도착지 좌표와 물품 무게만으로 예상 요금을 미리 계산한다. 기본료(3,000원) + 거리 할증(하버사인 거리 × 500원/km) + 무게 할증(무게(kg) × 200원/kg)을 합산한다. 3.1의 `feePoint` 계산식(거리×100원+무게×10원, 클라이언트가 준 raw distance 사용)과는 별개의 공식이며 통합하지 않는다.
+* **요청 바디 (Request Body):**
+  ```json
+  {
+    "pickupLatitude": 37.5665,
+    "pickupLongitude": 126.9780,
+    "destinationLatitude": 35.1796,
+    "destinationLongitude": 129.0756,
+    "weight": 10
+  }
+  ```
+* **응답 바디 및 상태 코드 (Response Body & Status):**
+  * **Success (200 OK):** (서울시청 → 부산시청, 약 325.1km, 10kg 기준)
+    ```json
+    {
+      "baseFee": 3000,
+      "distanceSurcharge": 162556,
+      "weightSurcharge": 2000,
+      "totalFee": 167556
+    }
+    ```
+  * **Failure (400 Bad Request - 좌표/무게 누락 또는 무게 0 이하):** 표준 `MethodArgumentNotValidException` 처리(`GlobalExceptionHandler`)를 그대로 따른다.
+
 ---
 
 ## 4. 작업 분할 목록 (WBS)
@@ -116,3 +141,6 @@ erDiagram
 - [x] 화주 고객 정보 유효성 검사 및 화물 무게·거리 유효 범위(`> 0`) 체크 비즈니스 로직 작성
 - [x] 배송 요청 등록/조회 서비스 레이어 비즈니스 로직 설계 및 단위 테스트 구현
 - [x] `DeliveryController` 및 API 컨트롤러 슬라이스 통합 테스트 구현
+- [ ] 배송 요금 견적(`POST /estimate`) 요청/응답 DTO 추가
+- [ ] `DeliveryService.estimateFee()` + 하버사인 거리 계산 로직 추가
+- [ ] `DeliveryController`에 견적 엔드포인트 추가 및 단위 테스트(동일 좌표/장거리/좌표·무게 누락) 구현
