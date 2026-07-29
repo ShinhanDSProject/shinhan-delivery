@@ -92,7 +92,7 @@ public class DataSeedInitializer implements CommandLineRunner {
             .type(type)
             .maxWeight(maxWeight)
             .maxDistance(maxDistance)
-                .status(VehicleStatus.AVAILABLE)
+            .status(VehicleStatus.AVAILABLE)
             .build();
     return vehicleRepository.save(vehicle);
   }
