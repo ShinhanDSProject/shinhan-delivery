@@ -158,6 +158,8 @@ graph TD
 * [**프로젝트 착수 전 6대 사전 리스크 감사 & 거버넌스 가이드 (docs/pre-launch-risk-and-governance-guide.md)**](./docs/pre-launch-risk-and-governance-guide.md) - 개발자/리더/PM 관점 6대 리스크 방어 수칙 🛡️
 * [**공통 디자인 시스템 가이드 (docs/design-system.md)**](./docs/design-system.md) - UI 토큰, 공통 컴포넌트, Thymeleaf Fragment 및 스타일 가이드 🎨
 * [**그래프 엔지니어링 & 에이전트 오케스트레이션 가이드 (docs/graph-engineering-architecture.md)**](./docs/graph-engineering-architecture.md) - LangGraph, GraphRAG 및 지식 그래프 아키텍처 가이드북 🕸️
+* [**LangGraph 기반 에이전트 오케스트레이션 가이드 (docs/langgraph-implementation-guide.md)**](./docs/langgraph-implementation-guide.md) - LangGraph StateGraph 에이전트 흐름 제어 가이드 🤖
+* [**GraphRAG 지식 그래프 검색 가이드 (docs/graphrag-implementation-guide.md)**](./docs/graphrag-implementation-guide.md) - 지식 데이터셋 및 다단계 추론 검색 엔진 🔍
 * [**프로젝트 전체 지식 그래프 인덱스 (docs/project-knowledge-graph.md)**](./docs/project-knowledge-graph.md) - 문서, 백엔드 계층, DB 스키마 간 지식 네트워크 지도 🗺️
 * [**AI 에이전트 행동 지침 및 8대 수칙 (AGENTS.md)**](./AGENTS.md) - 무결점 작업 원칙 🏛️
 * [**코딩 컨벤션 및 6대 개발 규칙 (code-convention.md)**](./code-convention.md) - 프로젝트 표준 단일 원본 코딩 규약 📐
