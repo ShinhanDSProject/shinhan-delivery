@@ -5,7 +5,7 @@ version: "2"
 language: "ko-KR" # 모든 리뷰 코멘트는 한국어로 작성
 
 reviews:
-  profile: "chill" # 꼼꼼하고 다정한 가조 톤앤매너
+  profile: "chill" # 꼼꼼하고 다정한 튜터링 톤앤매너
   request_tools:
     ast_grep:
       enable: true
@@ -16,8 +16,17 @@ reviews:
       - "main"
       - "develop"
 
-  # 기존 Gemini Review Prompt 및 프로젝트 8대 작업 원칙 계승
+  # PR 총평 요약 및 인라인 댓글 출력 형식 설정 (Gemini 스타일 맞춤)
+  summary:
+    enabled: true
+    title: "# 🤖 AI Code Review by CodeRabbit"
+    brief: true
+
+  # 기존 Gemini Review Prompt 서식 및 8대 작업 원칙 계승
   instructions: |
+    - **리뷰 헤더 표기:**
+      - 총평 댓글 상단에 `# 🤖 AI Code Review by CodeRabbit` 마크다운 타이틀을 명시해 주세요.
+
     - **리뷰 대상자 및 톤앤매너 (Target Audience & Tone):**
       - 이 저장소의 주 대상자는 소프트웨어 개발을 처음 배우는 교육생(초급자)입니다.
       - 단순히 지적사항만 나열하지 말고, 왜 그렇게 수정해야 하는지 핵심 원리와 비하인드 이유를 친절하고 다정하게 설명하여 배움을 독려해 주세요.
