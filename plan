@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# ==============================================================================
+# LangGraph /plan Executable CLI for shinhan-gaecheokja
+# Usage: ./plan 108  or  ./plan #108  or  ./plan "이슈 설명"
+# ==============================================================================
+
+if [ -z "$1" ]; then
+    echo "⚠️ 사용법: ./plan <이슈번호 또는 이슈설명>"
+    echo "예시: ./plan 108"
+    exit 1
+fi
+
+python3 scripts/langgraph/issue_plan_graph.py "$1"
