@@ -2,10 +2,14 @@ package com.example.shinhangaecheokja.common.exception;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import jakarta.validation.ConstraintViolationException;
+import java.util.Set;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.web.servlet.NoHandlerFoundException;
 
 class GlobalExceptionHandlerTest {
 
@@ -27,6 +31,76 @@ class GlobalExceptionHandlerTest {
     assertThat(body.getStatus()).isEqualTo(404);
     assertThat(body.getCode()).isEqualTo("M001");
     assertThat(body.getMessage()).isEqualTo("존재하지 않는 회원입니다.");
+  }
+
+  @Test
+  @DisplayName("409 Conflict BusinessException 발생 시 상태 409와 M002 에러 코드가 반환된다.")
+  void handleBusinessException_conflict_returns409() {
+    // given
+    BusinessException exception = new BusinessException(ErrorCode.DUPLICATE_EMAIL);
+
+    // when
+    ResponseEntity<ErrorResponse> responseEntity = handler.handleBusinessException(exception);
+
+    // then
+    assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+    ErrorResponse body = responseEntity.getBody();
+    assertThat(body).isNotNull();
+    assertThat(body.getStatus()).isEqualTo(409);
+    assertThat(body.getCode()).isEqualTo("M002");
+  }
+
+  @Test
+  @DisplayName("AccessDeniedException 발생 시 403 상태와 C007 에러 코드가 반환된다.")
+  void handleAccessDeniedException_returns403() {
+    // given
+    AccessDeniedException exception = new AccessDeniedException("접근 거부");
+
+    // when
+    ResponseEntity<ErrorResponse> responseEntity = handler.handleAccessDeniedException(exception);
+
+    // then
+    assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+    ErrorResponse body = responseEntity.getBody();
+    assertThat(body).isNotNull();
+    assertThat(body.getStatus()).isEqualTo(403);
+    assertThat(body.getCode()).isEqualTo("C007");
+  }
+
+  @Test
+  @DisplayName("존재하지 않는 경로 요청 시(NoHandlerFoundException) 404 상태와 C004 에러 코드가 반환된다.")
+  void handleNoHandlerFoundException_returns404() {
+    // given
+    NoHandlerFoundException exception = new NoHandlerFoundException("GET", "/api/unknown", null);
+
+    // when
+    ResponseEntity<ErrorResponse> responseEntity = handler.handleNoHandlerFoundException(exception);
+
+    // then
+    assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+    ErrorResponse body = responseEntity.getBody();
+    assertThat(body).isNotNull();
+    assertThat(body.getStatus()).isEqualTo(404);
+    assertThat(body.getCode()).isEqualTo("C004");
+  }
+
+  @Test
+  @DisplayName("ConstraintViolationException 발생 시 400 상태와 C001 에러 코드가 반환된다.")
+  void handleConstraintViolationException_returns400() {
+    // given
+    ConstraintViolationException exception =
+        new ConstraintViolationException("유효하지 않은 입력값", Set.of());
+
+    // when
+    ResponseEntity<ErrorResponse> responseEntity =
+        handler.handleConstraintViolationException(exception);
+
+    // then
+    assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+    ErrorResponse body = responseEntity.getBody();
+    assertThat(body).isNotNull();
+    assertThat(body.getStatus()).isEqualTo(400);
+    assertThat(body.getCode()).isEqualTo("C001");
   }
 
   @Test

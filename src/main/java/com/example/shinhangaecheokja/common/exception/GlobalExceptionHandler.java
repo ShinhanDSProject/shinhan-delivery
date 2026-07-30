@@ -1,5 +1,6 @@
 package com.example.shinhangaecheokja.common.exception;
 
+import jakarta.validation.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -10,6 +11,7 @@ import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.NoHandlerFoundException;
 
 /** 애플리케이션 전역에서 발생하는 예외를 포착하여 표준 에러 응답 객체(ErrorResponse)로 변환하는 컨트롤러 어드바이스입니다. */
 @RestControllerAdvice
@@ -66,6 +68,33 @@ public class GlobalExceptionHandler {
     log.warn("AccessDeniedException occurred: {}", e.getMessage());
     ErrorCode errorCode = ErrorCode.ACCESS_DENIED;
     ErrorResponse response = ErrorResponse.of(errorCode);
+    return new ResponseEntity<>(response, errorCode.getHttpStatus());
+  }
+
+  /**
+   * 존재하지 않는 API 경로 요청 예외(NoHandlerFoundException)를 처리합니다.
+   *
+   * <p>DispatcherServlet이 요청에 매핑된 핸들러를 찾지 못할 때 발생하며, 404 응답으로 변환합니다.
+   */
+  @ExceptionHandler(NoHandlerFoundException.class)
+  protected ResponseEntity<ErrorResponse> handleNoHandlerFoundException(NoHandlerFoundException e) {
+    log.warn("NoHandlerFoundException occurred: {} {}", e.getHttpMethod(), e.getRequestURL());
+    ErrorCode errorCode = ErrorCode.ENTITY_NOT_FOUND;
+    ErrorResponse response = ErrorResponse.of(errorCode);
+    return new ResponseEntity<>(response, errorCode.getHttpStatus());
+  }
+
+  /**
+   * {@code @PathVariable}, {@code @RequestParam} 제약 조건 위반 예외(ConstraintViolationException)를 처리합니다.
+   *
+   * <p>{@code @Validated} + Bean Validation 제약 조건 위반 시 발생하며, 400 응답으로 변환합니다.
+   */
+  @ExceptionHandler(ConstraintViolationException.class)
+  protected ResponseEntity<ErrorResponse> handleConstraintViolationException(
+      ConstraintViolationException e) {
+    log.warn("ConstraintViolationException occurred: {}", e.getMessage());
+    ErrorCode errorCode = ErrorCode.INVALID_INPUT_VALUE;
+    ErrorResponse response = ErrorResponse.of(errorCode, e.getMessage());
     return new ResponseEntity<>(response, errorCode.getHttpStatus());
   }
 

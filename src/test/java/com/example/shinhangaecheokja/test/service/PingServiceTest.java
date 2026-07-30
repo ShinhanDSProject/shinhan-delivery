@@ -15,6 +15,7 @@ class PingServiceTest {
   void getPingMessage_returnsPongWithTimestamp() {
     PingResponse response = pingService.getPingMessage();
 
+    assertThat(response).isNotNull();
     assertThat(response.getMessage()).isEqualTo("pong");
     assertThat(response.getTimestamp()).isNotNull();
   }

@@ -36,3 +36,12 @@ jwt:
   secret: shinhan-gaecheokja-super-secret-key-for-jwt-authentication-token-security-2026-very-long
   access-token-expiration: 3600000 # 1시간
   refresh-token-expiration: 1209600000 # 14일
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never
