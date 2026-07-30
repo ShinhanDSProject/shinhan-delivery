@@ -159,7 +159,7 @@ graph TD
 * [**공통 디자인 시스템 가이드 (docs/design-system.md)**](./docs/design-system.md) - UI 토큰, 공통 컴포넌트, Thymeleaf Fragment 및 스타일 가이드 🎨
 * [**그래프 엔지니어링 & 에이전트 오케스트레이션 가이드 (docs/graph-engineering-architecture.md)**](./docs/graph-engineering-architecture.md) - LangGraph, GraphRAG 및 지식 그래프 아키텍처 가이드북 🕸️
 * [**LangGraph 기반 에이전트 오케스트레이션 가이드 (docs/langgraph-implementation-guide.md)**](./docs/langgraph-implementation-guide.md) - LangGraph StateGraph 에이전트 흐름 제어 가이드 🤖
-* [**LangGraph 이슈 기획 & 자동화 파이프라인 가이드 (docs/langgraph-planning-workflow-guide.md)**](./docs/langgraph-planning-workflow-guide.md) - /plan 워크플로우를 승화한 8단계 이슈 기획 엔진 📋
+* [**LangGraph 이슈 기획 & 자동화 파이프라인 가이드 (docs/langgraph-planning-workflow-guide.md)**](./docs/langgraph-planning-workflow-guide.md) - /plan 워크플로우를 승화한 8단계 이슈 기획 엔진 ([공식 패키지 엔지니어링 코드](./scripts/langgraph/official_langgraph_engine.py)) 📋
 * [**GraphRAG 지식 그래프 검색 가이드 (docs/graphrag-implementation-guide.md)**](./docs/graphrag-implementation-guide.md) - 지식 데이터셋 및 다단계 추론 검색 엔진 🔍
 * [**프로젝트 전체 지식 그래프 인덱스 (docs/project-knowledge-graph.md)**](./docs/project-knowledge-graph.md) - 문서, 백엔드 계층, DB 스키마 간 지식 네트워크 지도 🗺️
 * [**AI 에이전트 행동 지침 및 8대 수칙 (AGENTS.md)**](./AGENTS.md) - 무결점 작업 원칙 🏛️
