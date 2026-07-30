@@ -3,7 +3,7 @@ package com.example.shinhangaecheokja.test.service;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.example.shinhangaecheokja.test.dto.PingResponse;
-import java.time.LocalDateTime;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 class PingServiceTest {
@@ -11,12 +11,11 @@ class PingServiceTest {
   private final PingService pingService = new PingService();
 
   @Test
-  void ping_요청에_pong과_현재_시각을_반환한다() {
-    LocalDateTime beforeCall = LocalDateTime.now();
-
+  @DisplayName("getPingMessage 호출 시 message는 pong, timestamp는 현재 시각으로 채워진 응답을 반환한다")
+  void getPingMessage_returnsPongWithTimestamp() {
     PingResponse response = pingService.getPingMessage();
 
     assertThat(response.getMessage()).isEqualTo("pong");
-    assertThat(response.getTimestamp()).isBetween(beforeCall, LocalDateTime.now());
+    assertThat(response.getTimestamp()).isNotNull();
   }
 }

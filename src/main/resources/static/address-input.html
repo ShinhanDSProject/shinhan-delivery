@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>배송 신청 예약 - 신한 개척자</title>
+    <link rel="stylesheet" href="/css/design-system.css">
+    <script src="/js/utils/geo.js"></script>
+    <script src="/js/utils/storage.js"></script>
+    <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=bc0d2e17087637bd52851cb9a43d19df&libraries=services&autoload=false"></script>
+    <style>
+        :root {
+            --primary: var(--color-blue-500);
+            --text-dark: var(--color-black-200);
+            --text-muted: var(--color-grey-500);
+            --surface: #F8F8F8;
+            --border: var(--color-grey-50);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: var(--font-family-base);
+        }
+
+        body {
+            min-height: 100vh;
+            color: var(--text-dark);
+            background: var(--surface);
+        }
+
+        .page {
+            max-width: 480px;
+            margin: 0 auto;
+            min-height: 100vh;
+            background: var(--surface);
+            display: flex;
+            flex-direction: column;
+        }
+
+        header.top {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 20px;
+        }
+
+        .back-button {
+            width: 32px;
+            height: 32px;
+            min-width: 32px;
+            border-radius: 999px;
+            border: 0;
+            background: rgba(0, 0, 0, 0.02);
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        header.top h1 {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        main.form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            padding: 8px 16px 12px;
+        }
+
+        .field label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        .field-box {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            height: 52px;
+            padding: 0 12px;
+            background: var(--surface);
+            border: 0;
+            border-radius: 16px;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+            font-family: var(--font-family-base);
+        }
+
+        .field-box svg {
+            width: 20px;
+            height: 20px;
+            min-width: 20px;
+            color: var(--text-muted);
+        }
+
+        .field-box .value {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-dark);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .field-box .value.placeholder {
+            font-weight: 400;
+            color: var(--text-muted);
+        }
+
+        .recent-section {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .recent-section > span {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-muted);
+        }
+
+        .recent-list {
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            gap: 8px;
+            padding: 12px;
+            background: #fff;
+            border-radius: 16px;
+        }
+
+        .recent-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            background: transparent;
+            border: 0;
+            text-align: left;
+            padding: 0;
+            cursor: pointer;
+            font-family: var(--font-family-base);
+        }
+
+        .recent-item svg {
+            width: 18px;
+            height: 18px;
+            min-width: 18px;
+            color: var(--text-muted);
+        }
+
+        .recent-item .title {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+
+        .recent-item .subtitle {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .recent-divider {
+            height: 1px;
+            background: #E5E7EB;
+        }
+
+        .recent-empty {
+            font-size: 13px;
+            color: var(--text-muted);
+            padding: 4px 0;
+        }
+
+        .guide-box textarea {
+            width: 100%;
+            min-height: 52px;
+            padding: 12px;
+            background: #fff;
+            border: 0;
+            border-radius: 16px;
+            font-family: var(--font-family-base);
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--text-dark);
+            resize: vertical;
+        }
+
+        .guide-box textarea::placeholder {
+            color: var(--color-blue-500);
+            font-weight: 500;
+        }
+
+        .size-tabs {
+            display: flex;
+            gap: 8px;
+        }
+
+        .size-tabs button {
+            flex: 1;
+            padding: 8px 6px;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            color: var(--text-dark);
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: var(--font-family-base);
+        }
+
+        .size-tabs button.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: #fff;
+        }
+
+        .fee-card {
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            height: 80px;
+            padding: 0 16px;
+            background: #fff;
+            border: 1px solid var(--primary);
+            border-radius: 20px;
+        }
+
+        .fee-card.visible {
+            display: flex;
+        }
+
+        .fee-card .fee-label {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .fee-card .fee-value {
+            font-size: 25px;
+            font-weight: 800;
+            color: var(--primary);
+            margin-top: 6px;
+        }
+
+        .fee-card .fee-meta {
+            width: 140px;
+            text-align: right;
+            font-size: 10px;
+            color: var(--text-muted);
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .fee-loading {
+            font-size: 13px;
+            color: var(--text-muted);
+            padding: 8px 0;
+        }
+
+        footer.bottom {
+            display: flex;
+            justify-content: center;
+            padding: 16px;
+            margin-top: auto;
+        }
+
+        footer.bottom button {
+            width: 100%;
+            max-width: 350px;
+            height: 60px;
+            border: 0;
+            border-radius: 15px;
+            background: var(--primary);
+            color: #fff;
+            font-size: 20px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        footer.bottom button:disabled {
+            background: var(--color-grey-100);
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+<main class="page">
+    <header class="top">
+        <button class="back-button" type="button" aria-label="홈으로 이동" onclick="location.href='/home.html'">
+            <svg viewBox="0 0 24 24" fill="none" width="20" height="20"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <h1>배송 신청 예약</h1>
+    </header>
+
+    <div class="form">
+        <div class="field">
+            <label>출발지 (문앞 픽업)</label>
+            <button type="button" class="field-box" id="pickupField" onclick="goToPickupMap()">
+                <svg viewBox="0 0 24 24" fill="none"><path d="M12 21s7-6.5 7-11.5A7 7 0 0 0 5 9.5C5 14.5 12 21 12 21z" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="9.5" r="2.5" stroke="currentColor" stroke-width="1.8"/></svg>
+                <span class="value placeholder" id="pickupValue">위치 확인 중...</span>
+            </button>
+        </div>
+
+        <div class="field">
+            <label>도착지 (상대방 문앞)</label>
+            <button type="button" class="field-box" id="dropoffField" onclick="goToDestinationMap()">
+                <svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.8"/><path d="M21 21l-4.3-4.3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+                <span class="value placeholder" id="dropoffValue">도착지 주소를 검색하세요</span>
+            </button>
+        </div>
+
+        <div class="recent-section">
+            <span>최근 목록</span>
+            <div class="recent-list" id="recentList">
+                <div class="recent-empty">불러오는 중...</div>
+            </div>
+        </div>
+
+        <div class="field guide-box">
+            <label>문앞 픽업 가이드 상세</label>
+            <textarea id="pickupGuide" placeholder="예: 공동현관 #1004 문 앞 고양이 서랍장 위" maxlength="255"></textarea>
+        </div>
+
+        <div class="field">
+            <label style="font-size:13px;">물품 크기</label>
+            <div class="size-tabs" id="sizeTabs">
+                <button type="button" data-size="SMALL">소형 (우체국박스 소)</button>
+                <button type="button" data-size="MEDIUM" class="active">중형 (기내 캐리어급)</button>
+                <button type="button" data-size="LARGE">대형 (이사 박스급)</button>
+            </div>
+        </div>
+
+        <div class="fee-card" id="feeCard">
+            <div>
+                <div class="fee-label">자동 산정 예상 요금</div>
+                <div class="fee-value" id="feeValue">- Point</div>
+            </div>
+            <div class="fee-meta">
+                <span id="feeDistance">거리: -</span>
+                <span id="feeBalance">보유 - pt</span>
+            </div>
+        </div>
+        <div class="fee-loading" id="feeLoading" style="display:none;">예상 요금 계산 중...</div>
+    </div>
+
+    <footer class="bottom">
+        <button type="button" id="nextButton" disabled onclick="onNext()">다음</button>
+    </footer>
+</main>
+
+<script>
+    // Figma 화면엔 무게 입력 UI가 없어, 물품 크기별 대표 무게를 임시로 가정한다.
+    // TODO: 실제 무게 입력/측정 방식이 정해지면 이 값을 대체한다.
+    const NOMINAL_WEIGHT_BY_SIZE = { SMALL: 2, MEDIUM: 7, LARGE: 15 };
+
+    function authHeader() {
+        const token = localStorage.getItem('accessToken');
+        const tokenType = localStorage.getItem('tokenType') || 'Bearer';
+        if (!token) return null;
+        return `${tokenType} ${token}`;
+    }
+
+    function notReady() {
+        const existing = document.getElementById('toast');
+        if (existing) existing.remove();
+        const toast = document.createElement('div');
+        toast.id = 'toast';
+        toast.textContent = '아직 준비 중인 기능입니다.';
+        toast.style.cssText =
+            'position:fixed;left:50%;bottom:90px;transform:translateX(-50%);' +
+            'background:#1e293b;color:#fff;padding:10px 20px;border-radius:999px;' +
+            'font-size:13px;z-index:100;';
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 2000);
+    }
+
+    function goToPickupMap() {
+        location.href = '/pickup-map.html';
+    }
+
+    function goToDestinationMap() {
+        location.href = '/destination-map.html';
+    }
+
+    function renderPoint(field, point) {
+        const el = document.getElementById(field === 'pickup' ? 'pickupValue' : 'dropoffValue');
+        if (!point || !point.address) {
+            el.textContent = field === 'pickup' ? '위치를 확인할 수 없어요. 눌러서 지정해주세요.' : '도착지 주소를 검색하세요';
+            el.classList.add('placeholder');
+            return;
+        }
+        el.textContent = point.detail ? `${point.address} (${point.detail})` : point.address;
+        el.classList.remove('placeholder');
+    }
+
+    async function loadRecentAddresses() {
+        const listEl = document.getElementById('recentList');
+        const header = authHeader();
+        if (!header) return;
+        try {
+            const response = await fetch('/api/v1/addresses', { headers: { Authorization: header } });
+            if (!response.ok) throw new Error('failed');
+            const addresses = await response.json();
+            if (addresses.length === 0) {
+                listEl.innerHTML = '<div class="recent-empty">자주 쓰는 주소가 없어요.</div>';
+                return;
+            }
+            listEl.innerHTML = '';
+            addresses.forEach((addr, idx) => {
+                if (idx > 0) {
+                    const divider = document.createElement('div');
+                    divider.className = 'recent-divider';
+                    listEl.appendChild(divider);
+                }
+                const item = document.createElement('button');
+                item.type = 'button';
+                item.className = 'recent-item';
+
+                const icon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                icon.setAttribute('viewBox', '0 0 24 24');
+                icon.setAttribute('fill', 'none');
+                icon.innerHTML =
+                    '<path d="M12 21s7-6.5 7-11.5A7 7 0 0 0 5 9.5C5 14.5 12 21 12 21z" stroke="currentColor" stroke-width="1.8"/>' +
+                    '<circle cx="12" cy="9.5" r="2.5" stroke="currentColor" stroke-width="1.8"/>';
+
+                const textWrap = document.createElement('span');
+                const title = document.createElement('span');
+                title.className = 'title';
+                title.style.display = 'block';
+                title.textContent = addr.alias;
+                const subtitle = document.createElement('span');
+                subtitle.className = 'subtitle';
+                subtitle.textContent = addr.address + (addr.detailAddress ? ' ' + addr.detailAddress : '');
+                textWrap.appendChild(title);
+                textWrap.appendChild(subtitle);
+
+                item.appendChild(icon);
+                item.appendChild(textWrap);
+                item.addEventListener('click', () => selectRecentAddress(addr));
+                listEl.appendChild(item);
+            });
+        } catch (error) {
+            listEl.innerHTML = '<div class="recent-empty">최근 목록을 불러오지 못했어요.</div>';
+        }
+    }
+
+    function selectRecentAddress(addr) {
+        if (!window.kakao || !window.kakao.maps) {
+            notReady();
+            return;
+        }
+        kakao.maps.load(() => {
+            const geocoder = new kakao.maps.services.Geocoder();
+            geocoder.addressSearch(addr.address, (results, status) => {
+                if (status !== kakao.maps.services.Status.OK || results.length === 0) {
+                    notReady();
+                    return;
+                }
+                const draft = loadDraft();
+                draft.dropoff = {
+                    address: addr.address,
+                    detail: addr.detailAddress || '',
+                    lat: parseFloat(results[0].y),
+                    lng: parseFloat(results[0].x)
+                };
+                saveDraft(draft);
+                renderPoint('dropoff', draft.dropoff);
+                maybeEstimateFee();
+            });
+        });
+    }
+
+    function detectCurrentLocation() {
+        const draft = loadDraft();
+        if (draft.pickup && draft.pickup.address) {
+            renderPoint('pickup', draft.pickup);
+            maybeEstimateFee();
+            return;
+        }
+        if (!navigator.geolocation) {
+            renderPoint('pickup', null);
+            return;
+        }
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+                if (!window.kakao || !window.kakao.maps) {
+                    renderPoint('pickup', null);
+                    return;
+                }
+                kakao.maps.load(() => {
+                    const geocoder = new kakao.maps.services.Geocoder();
+                    geocoder.coord2Address(lng, lat, (results, status) => {
+                        const address =
+                            status === kakao.maps.services.Status.OK && results.length > 0
+                                ? results[0].address.address_name
+                                : `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+                        const draft2 = loadDraft();
+                        draft2.pickup = { address, detail: '내 위치', lat, lng };
+                        saveDraft(draft2);
+                        renderPoint('pickup', draft2.pickup);
+                        maybeEstimateFee();
+                    });
+                });
+            },
+            () => renderPoint('pickup', null)
+        );
+    }
+
+    function selectedItemSize() {
+        const active = document.querySelector('#sizeTabs button.active');
+        return active ? active.dataset.size : 'MEDIUM';
+    }
+
+    document.getElementById('sizeTabs').addEventListener('click', (event) => {
+        const button = event.target.closest('button[data-size]');
+        if (!button) return;
+        document.querySelectorAll('#sizeTabs button').forEach((b) => b.classList.remove('active'));
+        button.classList.add('active');
+        const draft = loadDraft();
+        draft.itemSize = button.dataset.size;
+        saveDraft(draft);
+        maybeEstimateFee();
+    });
+
+    document.getElementById('pickupGuide').addEventListener('change', (event) => {
+        const draft = loadDraft();
+        draft.pickupGuide = event.target.value;
+        saveDraft(draft);
+    });
+
+    let myMemberId = null;
+    let myPointBalance = null;
+
+    async function loadMyPointBalance() {
+        const header = authHeader();
+        if (!header) return;
+        try {
+            const meResponse = await fetch('/api/v1/members/me', { headers: { Authorization: header } });
+            if (!meResponse.ok) return;
+            const me = await meResponse.json();
+            myMemberId = me.id;
+            const walletsResponse = await fetch('/api/v1/point-wallets', { headers: { Authorization: header } });
+            if (!walletsResponse.ok) return;
+            const wallets = await walletsResponse.json();
+            const myWallet = wallets.find((w) => w.memberId === myMemberId);
+            myPointBalance = myWallet ? myWallet.balance : 0;
+        } catch (error) {
+            myPointBalance = null;
+        }
+    }
+
+    let estimateTimer = null;
+
+    function maybeEstimateFee() {
+        const draft = loadDraft();
+        const feeCard = document.getElementById('feeCard');
+        const feeLoading = document.getElementById('feeLoading');
+        const nextButton = document.getElementById('nextButton');
+
+        if (!draft.pickup || !draft.dropoff) {
+            feeCard.classList.remove('visible');
+            feeLoading.style.display = 'none';
+            nextButton.disabled = true;
+            return;
+        }
+
+        clearTimeout(estimateTimer);
+        estimateTimer = setTimeout(async () => {
+            feeCard.classList.remove('visible');
+            feeLoading.style.display = 'block';
+            const itemSize = draft.itemSize || selectedItemSize();
+            const weight = NOMINAL_WEIGHT_BY_SIZE[itemSize] || 2;
+
+            try {
+                const response = await fetch('/api/v1/delivery-requests/estimate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        pickupLatitude: draft.pickup.lat,
+                        pickupLongitude: draft.pickup.lng,
+                        destinationLatitude: draft.dropoff.lat,
+                        destinationLongitude: draft.dropoff.lng,
+                        weight,
+                        itemSize
+                    })
+                });
+                feeLoading.style.display = 'none';
+                if (!response.ok) {
+                    nextButton.disabled = true;
+                    return;
+                }
+                const estimate = await response.json();
+                document.getElementById('feeValue').textContent =
+                    `${Number(estimate.totalFee).toLocaleString()} Point`;
+
+                const km = haversineKm(draft.pickup.lat, draft.pickup.lng, draft.dropoff.lat, draft.dropoff.lng);
+                document.getElementById('feeDistance').textContent = `거리: ~${km.toFixed(1)}km`;
+
+                if (myPointBalance === null) {
+                    await loadMyPointBalance();
+                }
+                document.getElementById('feeBalance').textContent =
+                    myPointBalance === null ? '보유 포인트 확인 불가' : `보유 ${myPointBalance.toLocaleString()} pt`;
+
+                feeCard.classList.add('visible');
+                nextButton.disabled = false;
+            } catch (error) {
+                feeLoading.style.display = 'none';
+                nextButton.disabled = true;
+            }
+        }, 300);
+    }
+
+    function onNext() {
+        // 결제/확인 화면(customer-payment-confirmation)은 별도 이슈 범위라 아직 연결하지 않는다.
+        notReady();
+    }
+
+    (function init() {
+        if (!authHeader()) {
+            location.replace('/login.html');
+            return;
+        }
+        const draft = loadDraft();
+        document.querySelectorAll('#sizeTabs button').forEach((b) => {
+            b.classList.toggle('active', b.dataset.size === (draft.itemSize || 'MEDIUM'));
+        });
+        if (draft.pickupGuide) {
+            document.getElementById('pickupGuide').value = draft.pickupGuide;
+        }
+        renderPoint('pickup', draft.pickup);
+        renderPoint('dropoff', draft.dropoff);
+        detectCurrentLocation();
+        loadRecentAddresses();
+        maybeEstimateFee();
+    })();
+</script>
+</body>
+</html>
