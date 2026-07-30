@@ -30,7 +30,7 @@ if [ ! -f "$GRADLE_CMD" ]; then
 fi
 
 # Step 1: Flyway 파일명 린팅
-echo -e "\n${YELLOW}📌 [1/4] Flyway 마이그레이션 파일명 규격 검사...${RESET}"
+echo -e "\n${YELLOW}📌 [1/5] Flyway 마이그레이션 파일명 규격 검사...${RESET}"
 if bash scripts/lint-flyway-filenames.sh; then
     echo -e "${GREEN}  ✓ Flyway 파일명 규격 검사 통과${RESET}"
 else
@@ -39,7 +39,7 @@ else
 fi
 
 # Step 2: Flyway DDL 린팅
-echo -e "\n${YELLOW}📌 [2/4] Flyway 마이그레이션 DDL 규격 검사...${RESET}"
+echo -e "\n${YELLOW}📌 [2/5] Flyway 마이그레이션 DDL 규격 검사...${RESET}"
 if bash scripts/lint-flyway-ddl.sh; then
     echo -e "${GREEN}  ✓ Flyway DDL 규격 검사 통과${RESET}"
 else
@@ -47,8 +47,17 @@ else
     exit 1
 fi
 
-# Step 3: Spotless 포맷팅 검사
-echo -e "\n${YELLOW}📌 [3/4] Spotless 코드 포맷팅 스타일 검사...${RESET}"
+# Step 3: UI 디자인 시스템 린팅
+echo -e "\n${YELLOW}📌 [3/5] UI 공통 디자인 시스템 규격 검사...${RESET}"
+if bash scripts/lint-design-system.sh; then
+    echo -e "${GREEN}  ✓ UI 공통 디자인 시스템 검사 통과${RESET}"
+else
+    echo -e "${RED}  ❌ [피드백] UI 디자인 시스템 규격 위반! HTML 파일 내 design-system.css 연동 여부를 확인하세요.${RESET}"
+    exit 1
+fi
+
+# Step 4: Spotless 포맷팅 검사
+echo -e "\n${YELLOW}📌 [4/5] Spotless 코드 포맷팅 스타일 검사...${RESET}"
 if $GRADLE_CMD spotlessCheck --quiet; then
     echo -e "${GREEN}  ✓ 코드 포맷팅(Spotless) 검사 통과${RESET}"
 else
@@ -56,8 +65,8 @@ else
     exit 1
 fi
 
-# Step 4: Gradle 테스트 & 빌드
-echo -e "\n${YELLOW}📌 [4/4] Gradle 테스트 실행 및 아키텍처/단위 검사...${RESET}"
+# Step 5: Gradle 테스트 & 빌드
+echo -e "\n${YELLOW}📌 [5/5] Gradle 테스트 실행 및 아키텍처/단위 검사...${RESET}"
 if $GRADLE_CMD test; then
     echo -e "${GREEN}  ✓ 테스트 및 빌드 검사 통과${RESET}"
 else
