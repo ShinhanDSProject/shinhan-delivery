@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>픽업 위치 지정 - 신한 개척자</title>
     <link rel="stylesheet" href="/css/design-system.css">
+    <script src="/js/utils/storage.js"></script>
     <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=bc0d2e17087637bd52851cb9a43d19df&libraries=services&autoload=false"></script>
     <style>
         :root {
@@ -207,20 +208,7 @@
 </main>
 
 <script>
-    const DRAFT_KEY = 'deliveryDraft';
     const DEFAULT_CENTER = { lat: 37.5665, lng: 126.9780 }; // 서울시청 (위치 정보 없을 때 대체 중심)
-
-    function loadDraft() {
-        try {
-            return JSON.parse(sessionStorage.getItem(DRAFT_KEY)) || {};
-        } catch (e) {
-            return {};
-        }
-    }
-
-    function saveDraft(draft) {
-        sessionStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
-    }
 
     let map;
     let geocoder;

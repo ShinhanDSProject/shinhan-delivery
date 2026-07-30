@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>배송 신청 예약 - 신한 개척자</title>
     <link rel="stylesheet" href="/css/design-system.css">
+    <script src="/js/utils/geo.js"></script>
+    <script src="/js/utils/storage.js"></script>
     <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=bc0d2e17087637bd52851cb9a43d19df&libraries=services&autoload=false"></script>
     <style>
         :root {
@@ -358,40 +360,15 @@
 </main>
 
 <script>
-    const DRAFT_KEY = 'deliveryDraft';
     // Figma 화면엔 무게 입력 UI가 없어, 물품 크기별 대표 무게를 임시로 가정한다.
     // TODO: 실제 무게 입력/측정 방식이 정해지면 이 값을 대체한다.
     const NOMINAL_WEIGHT_BY_SIZE = { SMALL: 2, MEDIUM: 7, LARGE: 15 };
-    const EARTH_RADIUS_KM = 6371;
-
-    // 백엔드 DeliveryService와 동일한 하버사인 공식. estimate 응답엔 raw 거리값이 없어 화면 표시용으로 별도 계산한다.
-    function haversineKm(lat1, lon1, lat2, lon2) {
-        const toRad = (deg) => (deg * Math.PI) / 180;
-        const dLat = toRad(lat2 - lat1);
-        const dLon = toRad(lon2 - lon1);
-        const a =
-            Math.sin(dLat / 2) ** 2 +
-            Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
-        return EARTH_RADIUS_KM * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    }
 
     function authHeader() {
         const token = localStorage.getItem('accessToken');
         const tokenType = localStorage.getItem('tokenType') || 'Bearer';
         if (!token) return null;
         return `${tokenType} ${token}`;
-    }
-
-    function loadDraft() {
-        try {
-            return JSON.parse(sessionStorage.getItem(DRAFT_KEY)) || {};
-        } catch (e) {
-            return {};
-        }
-    }
-
-    function saveDraft(draft) {
-        sessionStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
     }
 
     function notReady() {
@@ -449,13 +426,27 @@
                 const item = document.createElement('button');
                 item.type = 'button';
                 item.className = 'recent-item';
-                item.innerHTML = `
-                    <svg viewBox="0 0 24 24" fill="none"><path d="M12 21s7-6.5 7-11.5A7 7 0 0 0 5 9.5C5 14.5 12 21 12 21z" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="9.5" r="2.5" stroke="currentColor" stroke-width="1.8"/></svg>
-                    <span>
-                        <span class="title" style="display:block;">${addr.alias}</span>
-                        <span class="subtitle">${addr.address}${addr.detailAddress ? ' ' + addr.detailAddress : ''}</span>
-                    </span>
-                `;
+
+                const icon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                icon.setAttribute('viewBox', '0 0 24 24');
+                icon.setAttribute('fill', 'none');
+                icon.innerHTML =
+                    '<path d="M12 21s7-6.5 7-11.5A7 7 0 0 0 5 9.5C5 14.5 12 21 12 21z" stroke="currentColor" stroke-width="1.8"/>' +
+                    '<circle cx="12" cy="9.5" r="2.5" stroke="currentColor" stroke-width="1.8"/>';
+
+                const textWrap = document.createElement('span');
+                const title = document.createElement('span');
+                title.className = 'title';
+                title.style.display = 'block';
+                title.textContent = addr.alias;
+                const subtitle = document.createElement('span');
+                subtitle.className = 'subtitle';
+                subtitle.textContent = addr.address + (addr.detailAddress ? ' ' + addr.detailAddress : '');
+                textWrap.appendChild(title);
+                textWrap.appendChild(subtitle);
+
+                item.appendChild(icon);
+                item.appendChild(textWrap);
                 item.addEventListener('click', () => selectRecentAddress(addr));
                 listEl.appendChild(item);
             });

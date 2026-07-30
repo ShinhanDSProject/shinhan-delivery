@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>도착지 확인 - 신한 개척자</title>
     <link rel="stylesheet" href="/css/design-system.css">
+    <script src="/js/utils/geo.js"></script>
+    <script src="/js/utils/storage.js"></script>
     <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=bc0d2e17087637bd52851cb9a43d19df&libraries=services&autoload=false"></script>
     <style>
         :root {
@@ -247,32 +249,7 @@
 </main>
 
 <script>
-    const DRAFT_KEY = 'deliveryDraft';
     const DEFAULT_CENTER = { lat: 37.5665, lng: 126.9780 }; // 서울시청 (위치 정보 없을 때 대체 중심)
-    const EARTH_RADIUS_KM = 6371;
-
-    function loadDraft() {
-        try {
-            return JSON.parse(sessionStorage.getItem(DRAFT_KEY)) || {};
-        } catch (e) {
-            return {};
-        }
-    }
-
-    function saveDraft(draft) {
-        sessionStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
-    }
-
-    // 백엔드 DeliveryService와 동일한 하버사인 공식 (요금 계산과 무관한 화면 표시용 추정치)
-    function haversineKm(lat1, lon1, lat2, lon2) {
-        const toRad = (deg) => (deg * Math.PI) / 180;
-        const dLat = toRad(lat2 - lat1);
-        const dLon = toRad(lon2 - lon1);
-        const a =
-            Math.sin(dLat / 2) ** 2 +
-            Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
-        return EARTH_RADIUS_KM * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    }
 
     let map;
     let geocoder;
