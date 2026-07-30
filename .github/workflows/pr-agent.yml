@@ -25,12 +25,13 @@ jobs:
       - name: PR Agent Action
         uses: Codium-ai/pr-agent@main
         env:
-          OPENAI.KEY: ${{ secrets.OPENAI_API_KEY || secrets.ANTHROPIC_API_KEY || secrets.GEMINI_API_KEY }}
+          GEMINI.KEY: ${{ secrets.GEMINI_API_KEY }}
+          OPENAI.KEY: ${{ secrets.OPENAI_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CONFIG.MODEL: "gemini/gemini-1.5-flash"
           PR_REVIEWER.REQUIRE_CANVAS_REVIEW: "false"
           PR_REVIEWER.REQUIRE_SECURITY_REVIEW: "true"
           PR_REVIEWER.REQUIRE_TESTS_REVIEW: "true"
-          CONFIG.MODEL: "gpt-4o-mini" # 또는 무료/오픈 모델
           PR_REVIEWER.PERSISTENT_COMMENT: "true"
           # 교육생을 위한 친절한 한국어 튜터링 톤 및 규칙 주입
           PR_REVIEWER.EXTRA_INSTRUCTIONS: |
