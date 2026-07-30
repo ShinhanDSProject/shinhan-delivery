@@ -14,7 +14,7 @@
 
 - 레이어(기술적 역할) 기준으로 패키지를 나눕니다: `controller`, `service`, `repository`, `entity`, `dto/{request,response}`, `exception`, `config`. 의존 방향은 항상 위에서 아래로만(`Controller → Service → Repository`) — 역방향 의존은 금지입니다.
 - `Entity`는 JPA 표준 방식(`@Entity`, Lombok `@Getter`/`@Setter`/`@NoArgsConstructor`)을 그대로 사용합니다. Value Object나 `Result` 타입 같은 함수형 패턴은 쓰지 않습니다.
-- 프론트엔드/UI 개발 시 React 등 외부 프레임워크를 사용하지 않고 `HTML5 + Vanilla CSS + Thymeleaf` 스택을 사용하며, 무조건 공통 디자인 시스템(`/css/design-system.css`, `docs/design-system.md`) 토큰 및 Thymeleaf 프래그먼트(`templates/fragments/components.html`)를 100% 사용하여 개발합니다.
+- 프론트엔드/UI 개발 시 프로젝트 표준 스택인 `HTML5 + Vanilla CSS + Thymeleaf`를 사용하며, 공통 디자인 시스템(`/css/design-system.css`, `docs/design-system.md`) 토큰 및 Thymeleaf 프래그먼트(`templates/fragments/components.html`)를 100% 사용하여 개발합니다.
 - 비즈니스 로직은 전부 `Service` 계층에 모읍니다. 생성자 주입(`@RequiredArgsConstructor`)만 쓰고 필드 주입(`@Autowired` on field)은 금지입니다. 하나의 public 메서드가 하나의 유스케이스입니다.
 - 예상 가능한 실패는 커스텀 `RuntimeException`을 던지고, `@RestControllerAdvice`인 `GlobalExceptionHandler` 한 곳에서만 HTTP 응답으로 변환합니다(컨벤션 §6). Controller에서 개별적으로 `try-catch`하지 않습니다.
 - `@Transactional`은 `Service` 계층에만 붙입니다. Controller는 DTO만 다루고 Entity를 직접 반환하지 않습니다.

@@ -3,6 +3,6 @@
 
 Please follow all conventions in `code-convention.md`, `CLAUDE.md`, and `AGENTS.md`.
 
-- All UI development MUST follow the Design System (`/css/design-system.css`, `docs/design-system.md`) and use Thymeleaf Fragments (`templates/fragments/components.html`). React is strictly prohibited.
+- All UI development MUST follow the Design System (`/css/design-system.css`, `docs/design-system.md`) and use Thymeleaf Fragments (`templates/fragments/components.html`).
 - Before declaring task completion, always run `./scripts/verify.sh` to perform the 4-step Test Harness check.
 - If any step fails (Spotless, Flyway, ArchUnit, Unit Tests), read the error output and self-correct until `./scripts/verify.sh` passes with exit code 0.

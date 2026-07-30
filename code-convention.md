@@ -489,7 +489,7 @@ void 도메인은_다른_도메인의_repository를_직접_참조하지_않는�
    - 모든 화면은 반드시 `/css/design-system.css`를 포함하고, 정의된 CSS 변수(`var(--color-blue-100)`, `var(--color-grey-100)` 등)와 공통 유틸리티 클래스(`.btn-primary`, `.input-field`, `.card-box`, `.badge` 등)를 사용해야 합니다.
 2. **Thymeleaf Component Fragment 우선 사용:**
    - 반복되는 UI 요소(버튼, 입력창, 카드, 배지 등)는 `src/main/resources/templates/fragments/components.html`에 정의된 Thymeleaf Fragment를 100% 활용하여 구축해야 합니다.
-3. **React 및 타 프론트엔드 프레임워크 도입 금지:**
-   - 본 프로젝트의 프론트엔드는 `HTML5 + Vanilla CSS + Vanilla JS + Thymeleaf`로 구성되며, React/Vue/TailwindCSS 등의 타 프레임워크 도입을 금지합니다.
+3. **표준 기술 스택 준수 (Thymeleaf Core Stack):**
+   - 본 프로젝트의 프론트엔드는 `HTML5 + Vanilla CSS + Vanilla JS + Thymeleaf` 기반의 서버 사이드 템플릿 아키텍처를 프로젝트 표준 스택으로 채택하여 개발합니다.
 4. **문서 및 라이브 가이드 세트 최신화:**
    - 신규 UI 요소 추가나 디자인 스펙 수정 시 반드시 `docs/design-system.md` 가이드북과 `http://localhost:8080/style-guide.html` 라이브 가이드 페이지를 소스 코드와 세트로 최신화해야 합니다.

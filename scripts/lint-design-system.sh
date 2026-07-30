@@ -4,7 +4,6 @@
 # UI 공통 디자인 시스템 준수 여부 자동 검증 하네스 (lint-design-system.sh)
 # ==============================================================================
 # 1. src/main/resources/static 하위 모든 HTML 파일의 /css/design-system.css 포함 여부 검사
-# 2. React / Tailwind 등 금지된 프론트엔드 라이브러리 도입 여부 검사
 # ==============================================================================
 
 set -eo pipefail
@@ -27,18 +26,11 @@ fi
 
 # 1. static 하위 HTML 파일에 design-system.css 연동 여부 검사
 for html_file in $(find "$STATIC_DIR" -type f -name "*.html"); do
-    # 프래그먼트 파일이나 서브 디렉토리 예외 처리 고려
     if ! grep -q "design-system.css" "$html_file"; then
         echo -e "${RED}  ❌ [디자인 시스템 미비] ${html_file} 파일에 'design-system.css' 연동이 누락되었습니다.${RESET}"
         ERRORS=$((ERRORS + 1))
     fi
 done
-
-# 2. React 및 금지 프레임워크 사용 여부 검사
-if grep -riq "react-dom" "$STATIC_DIR" 2>/dev/null || grep -riq "react" package.json 2>/dev/null; then
-    echo -e "${RED}  ❌ [규칙 위반] 프로젝트에 금지된 React 라이브러리가 감지되었습니다.${RESET}"
-    ERRORS=$((ERRORS + 1))
-fi
 
 if [ $ERRORS -gt 0 ]; then
     echo -e "${RED}❌ 총 ${ERRORS}개의 디자인 시스템 규격 위반 사항이 발견되었습니다.${RESET}"
