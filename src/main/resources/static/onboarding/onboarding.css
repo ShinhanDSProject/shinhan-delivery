@@ -1,9 +1,9 @@
 :root {
-  --blue: #3182f6;
-  --blue-dark: #2672de;
-  --ink: #202936;
-  --muted: #758197;
-  --line: #e6eaf0;
+  --blue: var(--color-blue-100);
+  --blue-dark: var(--color-blue-500);
+  --ink: var(--color-black-200);
+  --muted: var(--color-grey-300);
+  --line: var(--color-grey-50);
   --canvas: #f8f9fc;
 }
 
