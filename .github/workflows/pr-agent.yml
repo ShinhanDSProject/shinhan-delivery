@@ -29,6 +29,9 @@ jobs:
           OPENAI.KEY: ${{ secrets.OPENAI_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CONFIG.MODEL: "gemini/gemini-1.5-flash"
+          GITHUB_ACTION_CONFIG.AUTO_REVIEW: "true"
+          GITHUB_ACTION_CONFIG.AUTO_DESCRIBE: "true"
+          GITHUB_ACTION_CONFIG.AUTO_IMPROVE: "true"
           PR_REVIEWER.REQUIRE_CANVAS_REVIEW: "false"
           PR_REVIEWER.REQUIRE_SECURITY_REVIEW: "true"
           PR_REVIEWER.REQUIRE_TESTS_REVIEW: "true"
