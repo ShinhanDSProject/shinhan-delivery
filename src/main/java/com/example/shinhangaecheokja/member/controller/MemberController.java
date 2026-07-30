@@ -5,6 +5,7 @@ import com.example.shinhangaecheokja.common.exception.ErrorCode;
 import com.example.shinhangaecheokja.common.security.CustomUserDetails;
 import com.example.shinhangaecheokja.member.dto.request.LoginRequest;
 import com.example.shinhangaecheokja.member.dto.request.MemberCreateRequest;
+import com.example.shinhangaecheokja.member.dto.request.MemberPasswordUpdateRequest;
 import com.example.shinhangaecheokja.member.dto.request.MemberProfileUpdateRequestDto;
 import com.example.shinhangaecheokja.member.dto.request.MemberRoleUpdateRequest;
 import com.example.shinhangaecheokja.member.dto.request.MemberUpdateRequest;
@@ -66,6 +67,16 @@ public class MemberController {
       @Valid @RequestBody MemberProfileUpdateRequestDto request) {
     CustomUserDetails resolved = resolveUserDetails(userDetails);
     return ResponseEntity.ok(memberService.updateMyProfile(resolved.getId(), request));
+  }
+
+  /** 인증된 본인의 비밀번호를 변경한다. */
+  @PatchMapping("/password")
+  public ResponseEntity<Void> updatePassword(
+      @AuthenticationPrincipal CustomUserDetails userDetails,
+      @Valid @RequestBody MemberPasswordUpdateRequest request) {
+    CustomUserDetails resolved = resolveUserDetails(userDetails);
+    memberService.updatePassword(resolved.getId(), request);
+    return ResponseEntity.noContent().build();
   }
 
   private CustomUserDetails resolveUserDetails(CustomUserDetails userDetails) {
