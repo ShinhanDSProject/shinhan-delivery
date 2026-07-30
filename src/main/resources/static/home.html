@@ -295,17 +295,21 @@
             padding: 16px 32px calc(16px + env(safe-area-inset-bottom));
         }
 
-        nav.bottom-tab-bar button {
+        nav.bottom-tab-bar button,
+        nav.bottom-tab-bar a {
             border: 0;
             background: transparent;
             color: var(--text-muted);
             display: flex;
             align-items: center;
             justify-content: center;
+            padding: 2px 6px;
+            text-decoration: none;
             cursor: pointer;
         }
 
-        nav.bottom-tab-bar button svg {
+        nav.bottom-tab-bar button svg,
+        nav.bottom-tab-bar a svg {
             width: 30px;
             height: 30px;
         }
@@ -317,7 +321,7 @@
             line-height: 1;
         }
 
-        nav.bottom-tab-bar button.active {
+        nav.bottom-tab-bar .active {
             color: var(--primary);
         }
     </style>
@@ -370,12 +374,12 @@
     <button type="button" aria-label="포인트" onclick="notReady()">
         <span class="point-icon" aria-hidden="true">P</span>
     </button>
-    <button type="button" class="active" aria-label="홈" aria-current="page" onclick="location.href='/home.html'">
+    <a href="/home.html" class="active" aria-label="홈" aria-current="page">
         <svg viewBox="0 0 24 24" fill="none"><path d="M4 11 12 4l8 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 10v9a1 1 0 0 0 1 1h4v-6h2v6h4a1 1 0 0 0 1-1v-9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-    </button>
-    <button type="button" aria-label="마이페이지" onclick="location.href='/my-page.html'">
+    </a>
+    <a href="/my-page.html" aria-label="마이페이지">
         <svg viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-    </button>
+    </a>
 </nav>
 
 <script>
