@@ -55,4 +55,12 @@ public class Member {
     }
     this.role = newRole;
   }
+
+  /** 암호화된 새 비밀번호로 회원 비밀번호를 변경한다. */
+  public void changePassword(String encodedPassword) {
+    if (encodedPassword == null || encodedPassword.isBlank()) {
+      throw new IllegalArgumentException("암호화된 비밀번호는 필수입니다.");
+    }
+    this.password = encodedPassword;
+  }
 }

@@ -6,6 +6,7 @@ import com.example.shinhangaecheokja.common.exception.ErrorCode;
 import com.example.shinhangaecheokja.common.security.JwtProvider;
 import com.example.shinhangaecheokja.member.dto.request.LoginRequest;
 import com.example.shinhangaecheokja.member.dto.request.MemberCreateRequest;
+import com.example.shinhangaecheokja.member.dto.request.MemberPasswordUpdateRequest;
 import com.example.shinhangaecheokja.member.dto.request.MemberProfileUpdateRequestDto;
 import com.example.shinhangaecheokja.member.dto.request.MemberUpdateRequest;
 import com.example.shinhangaecheokja.member.dto.response.MemberProfileResponseDto;
@@ -92,6 +93,24 @@ public class MemberService {
     member.setName(request.getName());
     member.setPhoneNumber(request.getPhoneNumber());
     return MemberProfileResponseDto.from(member);
+  }
+
+  /** 현재 비밀번호를 확인한 뒤 새 비밀번호를 BCrypt로 암호화해 저장한다. */
+  @Transactional
+  public void updatePassword(Long memberId, MemberPasswordUpdateRequest request) {
+    Member member = findMemberOrThrow(memberId);
+
+    if (!request.getNewPassword().equals(request.getConfirmNewPassword())) {
+      throw new BusinessException(ErrorCode.PASSWORD_CONFIRMATION_MISMATCH);
+    }
+    if (!passwordEncoder.matches(request.getCurrentPassword(), member.getPassword())) {
+      throw new BusinessException(ErrorCode.CURRENT_PASSWORD_MISMATCH);
+    }
+    if (passwordEncoder.matches(request.getNewPassword(), member.getPassword())) {
+      throw new BusinessException(ErrorCode.PASSWORD_REUSE_NOT_ALLOWED);
+    }
+
+    member.changePassword(passwordEncoder.encode(request.getNewPassword()));
   }
 
   /** 회원의 이름·연락처를 수정한다. 이메일/비밀번호/역할은 변경하지 않는다. */

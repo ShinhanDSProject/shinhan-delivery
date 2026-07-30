@@ -2,6 +2,7 @@ package com.example.shinhangaecheokja.member.controller;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -14,6 +15,7 @@ import com.example.shinhangaecheokja.common.exception.ErrorCode;
 import com.example.shinhangaecheokja.common.exception.GlobalExceptionHandler;
 import com.example.shinhangaecheokja.common.security.CustomUserDetails;
 import com.example.shinhangaecheokja.member.dto.request.MemberCreateRequest;
+import com.example.shinhangaecheokja.member.dto.request.MemberPasswordUpdateRequest;
 import com.example.shinhangaecheokja.member.dto.request.MemberProfileUpdateRequestDto;
 import com.example.shinhangaecheokja.member.dto.response.MemberProfileResponseDto;
 import com.example.shinhangaecheokja.member.dto.response.MemberResponse;
@@ -181,6 +183,44 @@ class MemberControllerTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.name").value("김철수"))
         .andExpect(jsonPath("$.phoneNumber").value("010-9876-5432"));
+  }
+
+  @Test
+  void 인증된_사용자가_비밀번호를_변경하면_204를_반환한다() throws Exception {
+    CustomUserDetails customUser = new CustomUserDetails(10L, "my@example.com", "pass", "CUSTOMER");
+    UsernamePasswordAuthenticationToken auth =
+        new UsernamePasswordAuthenticationToken(customUser, null, customUser.getAuthorities());
+    SecurityContextHolder.getContext().setAuthentication(auth);
+    MemberPasswordUpdateRequest request =
+        new MemberPasswordUpdateRequest("OldPassword1!", "NewPassword2@", "NewPassword2@");
+
+    mockMvc
+        .perform(
+            patch("/api/v1/members/password")
+                .principal(auth)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isNoContent());
+
+    verify(memberService).updatePassword(eq(10L), any(MemberPasswordUpdateRequest.class));
+  }
+
+  @Test
+  void 새_비밀번호가_복잡도_규칙을_지키지_않으면_400을_반환한다() throws Exception {
+    CustomUserDetails customUser = new CustomUserDetails(10L, "my@example.com", "pass", "CUSTOMER");
+    UsernamePasswordAuthenticationToken auth =
+        new UsernamePasswordAuthenticationToken(customUser, null, customUser.getAuthorities());
+    SecurityContextHolder.getContext().setAuthentication(auth);
+    MemberPasswordUpdateRequest request =
+        new MemberPasswordUpdateRequest("OldPassword1!", "passwordonly", "passwordonly");
+
+    mockMvc
+        .perform(
+            patch("/api/v1/members/password")
+                .principal(auth)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isBadRequest());
   }
 
   @Test

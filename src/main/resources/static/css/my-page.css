@@ -341,6 +341,60 @@ a {
   cursor: not-allowed;
 }
 
+.password-field {
+  position: relative;
+}
+
+.password-field .field-input {
+  padding-right: 50px;
+}
+
+.password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 9px;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  color: #788391;
+  background: transparent;
+  cursor: pointer;
+  transform: translateY(-50%);
+}
+
+.password-toggle:hover {
+  color: var(--mypage-primary);
+  background: var(--mypage-primary-soft);
+}
+
+.password-rules {
+  display: grid;
+  gap: 7px;
+  margin: 10px 0 24px;
+  padding: 0;
+  color: #818b99;
+  font-size: 12px;
+  list-style: none;
+}
+
+.password-rule::before {
+  display: inline-block;
+  width: 17px;
+  content: "○";
+}
+
+.password-rule.is-valid {
+  color: #14804a;
+}
+
+.password-rule.is-valid::before {
+  content: "✓";
+}
+
 .field-hint {
   min-height: 18px;
   margin: 7px 2px 0;
@@ -515,6 +569,88 @@ a {
 
 .content-view.is-hidden {
   display: none;
+}
+
+.notice-list {
+  display: grid;
+  gap: 12px;
+}
+
+.notice-card {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  min-height: 82px;
+  padding: 17px 18px;
+  border: 1px solid var(--mypage-border);
+  border-radius: 14px;
+  color: #1f2329;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(21, 23, 26, 0.025);
+  text-align: left;
+  cursor: pointer;
+}
+
+.notice-card:hover {
+  border-color: #cbdcf4;
+  transform: translateY(-1px);
+}
+
+.notice-card__title {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0 0 7px;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.4;
+}
+
+.notice-card__date {
+  margin: 0;
+  color: #9099a6;
+  font-size: 11px;
+}
+
+.notice-pin {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-red-100);
+}
+
+.notice-detail-view {
+  display: none;
+}
+
+.notice-detail-view.is-open {
+  display: block;
+}
+
+.notice-detail__title {
+  margin: 4px 0 8px;
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1.4;
+  letter-spacing: -0.03em;
+}
+
+.notice-detail__meta {
+  margin: 0 0 20px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--mypage-border);
+  color: #858f9c;
+  font-size: 11px;
+}
+
+.notice-detail__content {
+  margin: 0;
+  color: #343941;
+  font-size: 14px;
+  line-height: 1.85;
+  white-space: pre-line;
 }
 
 .toast {
