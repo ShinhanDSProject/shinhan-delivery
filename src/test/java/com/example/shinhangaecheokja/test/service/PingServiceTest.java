@@ -11,12 +11,10 @@ class PingServiceTest {
   private final PingService pingService = new PingService();
 
   @Test
-  @DisplayName("getPingMessage() 호출 시 message가 'pong'이고 timestamp가 null이 아닌 PingResponse를 반환한다.")
-  void getPingMessage_returnsValidPongResponse() {
-    // when
+  @DisplayName("getPingMessage 호출 시 message는 pong, timestamp는 현재 시각으로 채워진 응답을 반환한다")
+  void getPingMessage_returnsPongWithTimestamp() {
     PingResponse response = pingService.getPingMessage();
 
-    // then
     assertThat(response).isNotNull();
     assertThat(response.getMessage()).isEqualTo("pong");
     assertThat(response.getTimestamp()).isNotNull();

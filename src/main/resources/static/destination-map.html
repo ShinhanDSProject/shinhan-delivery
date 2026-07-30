@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>도착지 확인 - 신한 개척자</title>
+    <link rel="stylesheet" href="/css/design-system.css">
+    <script src="/js/utils/geo.js"></script>
+    <script src="/js/utils/storage.js"></script>
+    <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=bc0d2e17087637bd52851cb9a43d19df&libraries=services&autoload=false"></script>
+    <style>
+        :root {
+            --primary: #EA4335;
+            --text-dark: var(--color-black-200);
+            --text-muted: var(--color-grey-300);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: var(--font-family-base);
+        }
+
+        html, body {
+            height: 100%;
+        }
+
+        body {
+            color: var(--text-dark);
+        }
+
+        .page {
+            max-width: 480px;
+            margin: 0 auto;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        header.top {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 20px;
+        }
+
+        .back-button {
+            width: 32px;
+            height: 32px;
+            min-width: 32px;
+            border-radius: 999px;
+            border: 0;
+            background: rgba(255, 255, 255, 0.85);
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+        }
+
+        header.top h1 {
+            font-size: 18px;
+            font-weight: 700;
+            background: rgba(255, 255, 255, 0.85);
+            padding: 4px 12px;
+            border-radius: 8px;
+        }
+
+        #map {
+            flex: 1;
+            width: 100%;
+            background: #E2E8F0;
+        }
+
+        .center-pin {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .center-pin .label {
+            background: var(--primary);
+            color: #fff;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 6px 12px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
+            white-space: nowrap;
+        }
+
+        .center-pin .dot {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--primary);
+            border: 4px solid #fff;
+            box-shadow: 0 4px 12px rgba(234, 67, 53, 0.4);
+        }
+
+        .sheet {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            padding: 20px;
+            background: #fff;
+            border-radius: 24px 24px 40px 40px;
+            box-shadow: 0 -10px 20px rgba(0, 0, 0, 0.12);
+        }
+
+        .sheet-top {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .resolved-address .tag {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .resolved-address .road {
+            font-size: 16px;
+            font-weight: 800;
+            margin-top: 4px;
+        }
+
+        .resolved-address .jibun {
+            font-size: 13px;
+            color: #4A5568;
+            margin-top: 2px;
+        }
+
+        .distance-badge {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 6px 12px;
+            background: var(--color-blue-50);
+            border-radius: 8px;
+            min-width: 64px;
+            height: fit-content;
+        }
+
+        .distance-badge.visible {
+            display: flex;
+        }
+
+        .distance-badge .km {
+            font-size: 14px;
+            font-weight: 800;
+            color: var(--color-blue-30);
+        }
+
+        .distance-badge .eta {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--color-blue-30);
+        }
+
+        .detail-field label {
+            display: block;
+            font-size: 12px;
+            font-weight: 700;
+            color: #4A5568;
+            margin-bottom: 6px;
+        }
+
+        .detail-field input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--color-grey-50);
+            border-radius: 8px;
+            font-family: var(--font-family-base);
+            font-size: 14px;
+        }
+
+        .confirm-button {
+            width: 100%;
+            padding: 16px 0;
+            border: 0;
+            border-radius: 12px;
+            background: var(--primary);
+            color: #fff;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .confirm-button:disabled {
+            background: var(--color-grey-100);
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+<main class="page">
+    <header class="top">
+        <button class="back-button" type="button" aria-label="뒤로 가기" onclick="history.back()">
+            <svg viewBox="0 0 24 24" fill="none" width="20" height="20"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <h1>도착지 확인</h1>
+    </header>
+
+    <div id="map"></div>
+    <div class="center-pin">
+        <span class="label">도착지 지정</span>
+        <span class="dot"></span>
+    </div>
+
+    <div class="sheet">
+        <div class="sheet-top">
+            <div class="resolved-address">
+                <div class="tag">도착지</div>
+                <div class="road" id="roadAddress">위치를 확인하는 중...</div>
+                <div class="jibun" id="jibunAddress"></div>
+            </div>
+            <div class="distance-badge" id="distanceBadge">
+                <span class="km" id="distanceKm">-</span>
+                <span class="eta" id="distanceEta">-</span>
+            </div>
+        </div>
+        <div class="detail-field">
+            <label>상세 주소 입력</label>
+            <input type="text" id="detailInput" placeholder="예: 사랑 빌딩 302호" maxlength="255">
+        </div>
+        <button type="button" class="confirm-button" id="confirmButton" disabled onclick="confirmDestination()">도착지 확인</button>
+    </div>
+</main>
+
+<script>
+    const DEFAULT_CENTER = { lat: 37.5665, lng: 126.9780 }; // 서울시청 (위치 정보 없을 때 대체 중심)
+
+    let map;
+    let geocoder;
+    let currentCenter;
+
+    function updateDistanceBadge() {
+        const draft = loadDraft();
+        const badge = document.getElementById('distanceBadge');
+        if (!draft.pickup || !draft.pickup.lat || !currentCenter) {
+            badge.classList.remove('visible');
+            return;
+        }
+        const km = haversineKm(draft.pickup.lat, draft.pickup.lng, currentCenter.lat, currentCenter.lng);
+        const etaMinutes = Math.max(1, Math.round((km / 20) * 60));
+        document.getElementById('distanceKm').textContent = `${km.toFixed(1)} km`;
+        document.getElementById('distanceEta').textContent = `예상 ${etaMinutes}분`;
+        badge.classList.add('visible');
+    }
+
+    function updateResolvedAddress() {
+        const center = map.getCenter();
+        currentCenter = { lat: center.getLat(), lng: center.getLng() };
+        geocoder.coord2Address(currentCenter.lng, currentCenter.lat, (results, status) => {
+            if (status !== kakao.maps.services.Status.OK || results.length === 0) {
+                document.getElementById('roadAddress').textContent = '이 위치의 주소를 찾을 수 없어요';
+                document.getElementById('jibunAddress').textContent = '';
+                document.getElementById('confirmButton').disabled = true;
+                return;
+            }
+            const road = results[0].road_address
+                ? results[0].road_address.address_name
+                : results[0].address.address_name;
+            const jibun = results[0].address ? `지번: ${results[0].address.address_name}` : '';
+            document.getElementById('roadAddress').textContent = road;
+            document.getElementById('jibunAddress').textContent = jibun;
+            document.getElementById('confirmButton').disabled = false;
+            currentCenter.address = road;
+            updateDistanceBadge();
+        });
+    }
+
+    function confirmDestination() {
+        if (!currentCenter || !currentCenter.address) return;
+        const draft = loadDraft();
+        draft.dropoff = {
+            address: currentCenter.address,
+            detail: document.getElementById('detailInput').value.trim(),
+            lat: currentCenter.lat,
+            lng: currentCenter.lng
+        };
+        saveDraft(draft);
+        location.href = '/address-input.html';
+    }
+
+    function initMap(center) {
+        const container = document.getElementById('map');
+        map = new kakao.maps.Map(container, { center: new kakao.maps.LatLng(center.lat, center.lng), level: 5 });
+        geocoder = new kakao.maps.services.Geocoder();
+        kakao.maps.event.addListener(map, 'idle', updateResolvedAddress);
+        updateResolvedAddress();
+    }
+
+    (function init() {
+        if (!localStorage.getItem('accessToken')) {
+            location.replace('/login.html');
+            return;
+        }
+        const draft = loadDraft();
+        const startCenter = draft.dropoff && draft.dropoff.lat
+            ? { lat: draft.dropoff.lat, lng: draft.dropoff.lng }
+            : (draft.pickup && draft.pickup.lat ? { lat: draft.pickup.lat, lng: draft.pickup.lng } : null);
+
+        kakao.maps.load(() => {
+            if (startCenter) {
+                initMap(startCenter);
+                return;
+            }
+            if (!navigator.geolocation) {
+                initMap(DEFAULT_CENTER);
+                return;
+            }
+            navigator.geolocation.getCurrentPosition(
+                (position) => initMap({ lat: position.coords.latitude, lng: position.coords.longitude }),
+                () => initMap(DEFAULT_CENTER)
+            );
+        });
+    })();
+</script>
+</body>
+</html>
