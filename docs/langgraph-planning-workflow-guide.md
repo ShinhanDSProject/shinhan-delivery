@@ -62,6 +62,9 @@ graph TD
 ## 4. 실전 실행 명령어
 
 ```bash
-# LangGraph 기획 & 자동화 오케스트레이터 구동 (예시: Issue #108 개발)
-python3 scripts/langgraph/issue_plan_graph.py "Issue #108: POST /api/v1/deliveries/pay 결제 API 구현"
+# 1. 이슈 번호만으로 GitHub Issue 정보를 자동 연동하여 LangGraph 기획 구동 (추천 ⭐)
+./plan 108
+
+# 2. 파이썬 스크립트로 구동
+python3 scripts/langgraph/issue_plan_graph.py "108"
 ```
