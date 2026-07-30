@@ -1,0 +1,41 @@
+# CodeRabbit AI Configuration for shinhan-gaecheokja
+# Reference: https://docs.coderabbit.ai/guides/configure-coderabbit
+
+version: "2"
+language: "ko-KR" # 한국어로 리뷰 작성
+
+reviews:
+  profile: "chill" # 꼼꼼하고 가독성 높은 리뷰 톤앤매너
+  request_tools:
+    ast_grep:
+      enable: true
+  auto_review:
+    enabled: true
+    drafts: false
+    base_branches:
+      - "main"
+      - "develop"
+
+  # 프로젝트 맞춤형 가이드라인 및 아키텍처 수칙 주입
+  instructions: |
+    - 모든 리뷰와 코멘트는 친절한 한국어(ko-KR)로 작성해 주세요.
+    - 프로젝트 아키텍처 규칙: 의존성 방향은 단방향(`Controller -> Service -> Repository`)을 항상 유지해야 합니다.
+    - Getter, Setter 작성 시 수동 코딩을 금지하고 무조건 Lombok 라이브러리(`@Getter`, `@Setter`)를 사용해야 합니다.
+    - Spring Boot 3.4+ 모킹 테스트 작성 시 `@MockitoBean`을 사용했는지 확인해 주세요.
+    - 소스 코드에 `System.out.println` 콘솔 출력이 포함되어 있다면 `log.info` 또는 `log.error`로 변경을 권장해 주세요.
+    - PR 템플릿의 리뷰어 3분 족보 가이드 규격을 준수했는지 가볍게 확인해 주세요.
+
+chat:
+  auto_reply: true
+
+knowledge_base:
+  opt_out: false
+  learnings:
+    listen: true
+
+# 린팅 및 검사 도구 연동
+tools:
+  github-checks:
+    enabled: true
+  shellcheck:
+    enabled: true
