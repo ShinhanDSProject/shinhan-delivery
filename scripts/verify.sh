@@ -7,7 +7,7 @@
 # 1. Flyway 마이그레이션 파일명 규격 검사
 # 2. Flyway 마이그레이션 DDL 규칙 (Online DDL) 검사
 # 3. Spotless 코드 포맷팅 스타일 검사
-# 4. Gradle 테스트 및 전체 빌드 검사
+# 4. Gradle 테스트, JaCoCo 커버리지 및 전체 빌드 검사
 # ==============================================================================
 
 set -eo pipefail
@@ -65,12 +65,12 @@ else
     exit 1
 fi
 
-# Step 5: Gradle 테스트 & 빌드
-echo -e "\n${YELLOW}📌 [5/5] Gradle 테스트 실행 및 아키텍처/단위 검사...${RESET}"
-if $GRADLE_CMD test; then
-    echo -e "${GREEN}  ✓ 테스트 및 빌드 검사 통과${RESET}"
+# Step 5: Gradle 테스트, JaCoCo 커버리지 & 빌드
+echo -e "\n${YELLOW}📌 [5/5] Gradle 테스트·커버리지 및 아키텍처/단위 검사...${RESET}"
+if $GRADLE_CMD test jacocoTestReport jacocoTestCoverageVerification; then
+    echo -e "${GREEN}  ✓ 테스트, 커버리지 및 빌드 검사 통과${RESET}"
 else
-    echo -e "${RED}  ❌ [피드백] 테스트 실패!${RESET}"
+    echo -e "${RED}  ❌ [피드백] 테스트 또는 JaCoCo 커버리지 검증 실패!${RESET}"
     echo -e "${RED}  💡 AI 에이전트 자가 치유 팁: 위 스택 트레이스 에러 로그를 읽고 코드를 보정한 뒤 다시 구동하세요.${RESET}"
     exit 1
 fi
