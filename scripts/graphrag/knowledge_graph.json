@@ -1,0 +1,24 @@
+{
+  "nodes": [
+    { "id": "MemberController", "type": "Controller", "description": "Handles member role updates and profile REST endpoints (/api/v1/members)" },
+    { "id": "MemberService", "type": "Service", "description": "Encapsulates member business logic and transactional operations" },
+    { "id": "MemberRepository", "type": "Repository", "description": "Spring Data JPA interface for Member entity" },
+    { "id": "MemberEntity", "type": "Entity", "description": "JPA entity mapping member DB table" },
+    { "id": "DesignSystemCSS", "type": "DesignSystem", "description": "Vanilla CSS variables and tokens stylesheet (/css/design-system.css)" },
+    { "id": "ThymeleafComponents", "type": "Fragment", "description": "Reusable HTML component fragments (templates/fragments/components.html)" },
+    { "id": "TestHarnessScript", "type": "Harness", "description": "5-step automated verification harness script (scripts/verify.sh)" },
+    { "id": "DesignSystemLinter", "type": "Linter", "description": "Design system linter script (scripts/lint-design-system.sh)" },
+    { "id": "LangGraphEngine", "type": "Orchestration", "description": "LangGraph StateGraph agentic workflow engine (scripts/langgraph/agent_graph.py)" },
+    { "id": "GraphRAGEngine", "type": "KnowledgeGraph", "description": "GraphRAG entity-relationship search engine (scripts/graphrag/graphrag_search.py)" }
+  ],
+  "edges": [
+    { "source": "MemberController", "target": "MemberService", "relation": "DELEGATES_TO" },
+    { "source": "MemberService", "target": "MemberRepository", "relation": "DELEGATES_TO" },
+    { "source": "MemberRepository", "target": "MemberEntity", "relation": "PERSISTS" },
+    { "source": "TestHarnessScript", "target": "DesignSystemLinter", "relation": "EXECUTES" },
+    { "source": "DesignSystemLinter", "target": "DesignSystemCSS", "relation": "VALIDATES_LINK" },
+    { "source": "ThymeleafComponents", "target": "DesignSystemCSS", "relation": "USES_TOKENS" },
+    { "source": "LangGraphEngine", "target": "TestHarnessScript", "relation": "VERIFIES_STATE" },
+    { "source": "GraphRAGEngine", "target": "LangGraphEngine", "relation": "MAPS_KNOWLEDGE" }
+  ]
+}

@@ -157,6 +157,10 @@ graph TD
 ### 🏛️ 개발 거버넌스 & AI 행동 수칙
 * [**프로젝트 착수 전 6대 사전 리스크 감사 & 거버넌스 가이드 (docs/pre-launch-risk-and-governance-guide.md)**](./docs/pre-launch-risk-and-governance-guide.md) - 개발자/리더/PM 관점 6대 리스크 방어 수칙 🛡️
 * [**공통 디자인 시스템 가이드 (docs/design-system.md)**](./docs/design-system.md) - UI 토큰, 공통 컴포넌트, Thymeleaf Fragment 및 스타일 가이드 🎨
+* [**그래프 엔지니어링 & 에이전트 오케스트레이션 가이드 (docs/graph-engineering-architecture.md)**](./docs/graph-engineering-architecture.md) - LangGraph, GraphRAG 및 지식 그래프 아키텍처 가이드북 🕸️
+* [**LangGraph 기반 에이전트 오케스트레이션 가이드 (docs/langgraph-implementation-guide.md)**](./docs/langgraph-implementation-guide.md) - LangGraph StateGraph 에이전트 흐름 제어 가이드 🤖
+* [**GraphRAG 지식 그래프 검색 가이드 (docs/graphrag-implementation-guide.md)**](./docs/graphrag-implementation-guide.md) - 지식 데이터셋 및 다단계 추론 검색 엔진 🔍
+* [**프로젝트 전체 지식 그래프 인덱스 (docs/project-knowledge-graph.md)**](./docs/project-knowledge-graph.md) - 문서, 백엔드 계층, DB 스키마 간 지식 네트워크 지도 🗺️
 * [**AI 에이전트 행동 지침 및 8대 수칙 (AGENTS.md)**](./AGENTS.md) - 무결점 작업 원칙 🏛️
 * [**코딩 컨벤션 및 6대 개발 규칙 (code-convention.md)**](./code-convention.md) - 프로젝트 표준 단일 원본 코딩 규약 📐
 
@@ -173,6 +177,7 @@ graph TD
 * [**물품 카테고리 목록 조회 설계서 (docs/design/category-design.md)**](./docs/design/category-design.md) - 물품 카테고리 12종 마이그레이션 시딩 및 목록 조회 API 명세 🏷️
 * [**이미지 업로드 설계서 (docs/design/image-upload-design.md)**](./docs/design/image-upload-design.md) - Multipart 이미지 업로드, 확장자·크기 검증 및 정적 리소스 서빙 API 명세 🖼️
 * [**알림 목록 조회/읽음 처리 설계서 (docs/design/notification-design.md)**](./docs/design/notification-design.md) - 로그인 사용자 기준 알림 페이징 조회, 카테고리 필터링 및 읽음 처리 API 명세 🔔
+* [**배송 도메인 상태 전이 그래프 명세서 (docs/design/delivery-state-graph.md)**](./docs/design/delivery-state-graph.md) - 배송 주문 생애주기 상태 전이 그래프, 멱등성 및 동시성 락 규칙 명세 🕸️
 
 ### 📋 양식 & 트러블슈팅 템플릿
 * [**기능 개발 이슈 템플릿 (.github/ISSUE_TEMPLATE/feature_request.md)**](./.github/ISSUE_TEMPLATE/feature_request.md) - 신규 기능 등록 양식 🚀

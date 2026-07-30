@@ -478,3 +478,18 @@ void 도메인은_다른_도메인의_repository를_직접_참조하지_않는�
 - [ ] Entity 필드를 추가/변경했다면 대응하는 Flyway 마이그레이션 파일을 새로 추가했는가? (기존 마이그레이션 파일을 수정하지 않았는가?)
 - [ ] `develop`을 대상으로 브랜치를 분기·PR 했는가? (`hotfix`는 `main` 예외)
 - [ ] 리뷰어를 지정하고, PR 템플릿의 요약/변경사항/리뷰 포인트/테스트 결과를 모두 작성했는가?
+- [ ] UI 개발 시 `/css/design-system.css` 토큰 및 `templates/fragments/components.html` Thymeleaf 프래그먼트를 100% 준수하였는가?
+
+---
+
+## 18. 프론트엔드 & UI 개발 컨벤션 (Design System & Thymeleaf Rules)
+
+1. **공통 디자인 시스템 100% 준수 (Design Token First):**
+   - 프로젝트 내 모든 HTML 및 Thymeleaf UI 개발 시 임의의 인라인 CSS 작성이나 별도의 커스텀 색상 지정을 엄격히 금지합니다.
+   - 모든 화면은 반드시 `/css/design-system.css`를 포함하고, 정의된 CSS 변수(`var(--color-blue-100)`, `var(--color-grey-100)` 등)와 공통 유틸리티 클래스(`.btn-primary`, `.input-field`, `.card-box`, `.badge` 등)를 사용해야 합니다.
+2. **Thymeleaf Component Fragment 우선 사용:**
+   - 반복되는 UI 요소(버튼, 입력창, 카드, 배지 등)는 `src/main/resources/templates/fragments/components.html`에 정의된 Thymeleaf Fragment를 100% 활용하여 구축해야 합니다.
+3. **표준 기술 스택 준수 (Thymeleaf Core Stack):**
+   - 본 프로젝트의 프론트엔드는 `HTML5 + Vanilla CSS + Vanilla JS + Thymeleaf` 기반의 서버 사이드 템플릿 아키텍처를 프로젝트 표준 스택으로 채택하여 개발합니다.
+4. **문서 및 라이브 가이드 세트 최신화:**
+   - 신규 UI 요소 추가나 디자인 스펙 수정 시 반드시 `docs/design-system.md` 가이드북과 `http://localhost:8080/style-guide.html` 라이브 가이드 페이지를 소스 코드와 세트로 최신화해야 합니다.
