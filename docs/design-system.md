@@ -144,3 +144,7 @@ Thymeleaf 템플릿에서 공통 프래그먼트를 불러와 손쉽게 조립�
 <!-- 4. 상태 배지 프래그먼트 -->
 <span th:replace="~{fragments/components :: badge('매칭완료', 'success')}"></span>
 ```
+
+> 💡 **Spring Form 바인딩 팁 (th:field)**  
+> Spring DTO 바인딩이 필요한 폼 개발 시, `<input class="input-field" th:field="*{email}">` 형태로 `th:field`를 직접 사용하면 `id`, `name`, `value`가 바인딩 객체 사양에 따라 자동 생성됩니다.
+

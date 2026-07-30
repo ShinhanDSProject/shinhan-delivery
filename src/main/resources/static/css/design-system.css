@@ -9,6 +9,7 @@
   --color-orange-100: #FA9200;
   --color-white-100:  #FFFFFF;
   --color-yellow-100: #F7E600;
+  --color-yellow-200: #E6D500; /* Kakao Hover */
 
   --color-blue-30:   #4A90FF;
   --color-blue-50:   #EBF3FF;
@@ -18,6 +19,7 @@
   --color-green-50:  #D1FAE5;
   --color-green-100: #03C75A;
   --color-green-200: #10B981;
+  --color-green-300: #02B351; /* Naver Hover */
 
   --color-black-100: #000000;
   --color-black-200: #212121;
@@ -25,6 +27,7 @@
   --color-red-30:    #FEE2E2;
   --color-red-50:    #FCA5A5;
   --color-red-100:   #EF4444;
+  --color-red-200:   #DC2626; /* Danger Hover */
 
   --color-grey-30:   #EFEFEF;
   --color-grey-50:   #E2E8F0;
@@ -213,7 +216,7 @@ body {
 }
 
 .btn-kakao:hover:not(:disabled) {
-  background-color: #E6D500;
+  background-color: var(--color-yellow-200);
 }
 
 .btn-naver {
@@ -222,7 +225,7 @@ body {
 }
 
 .btn-naver:hover:not(:disabled) {
-  background-color: #02B351;
+  background-color: var(--color-green-300);
 }
 
 .btn-apple {
@@ -250,7 +253,7 @@ body {
 }
 
 .btn-danger:hover:not(:disabled) {
-  background-color: #DC2626;
+  background-color: var(--color-red-200);
 }
 
 .btn-cancel {
