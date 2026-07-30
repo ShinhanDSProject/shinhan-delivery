@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>물품 정보 - 신한 개척자</title>
+    <link rel="stylesheet" href="/css/design-system.css">
+    <script src="/js/utils/storage.js"></script>
+    <style>
+        :root {
+            --primary: var(--color-blue-500);
+            --accent: var(--color-blue-30);
+            --text-dark: var(--color-black-200);
+            --text-muted: #4A5568;
+            --surface: #FAFBFD;
+            --border: #E2E8F0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: var(--font-family-base);
+        }
+
+        body {
+            min-height: 100vh;
+            color: var(--text-dark);
+            background: #fff;
+        }
+
+        .page {
+            max-width: 480px;
+            margin: 0 auto;
+            min-height: 100vh;
+            background: #fff;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header.top {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 20px;
+        }
+
+        .back-button {
+            width: 32px;
+            height: 32px;
+            min-width: 32px;
+            border-radius: 999px;
+            border: 0;
+            background: rgba(0, 0, 0, 0.02);
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        header.top h1 {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .form {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            padding: 20px;
+            flex: 1;
+        }
+
+        .field label {
+            display: block;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .photo-upload {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            height: 160px;
+            width: 100%;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            cursor: pointer;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .photo-upload svg {
+            width: 36px;
+            height: 36px;
+            color: var(--text-muted);
+        }
+
+        .photo-upload span {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .photo-upload img {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .size-row {
+            display: flex;
+            gap: 8px;
+        }
+
+        .size-row button {
+            flex: 1;
+            padding: 10px 6px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-dark);
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: var(--font-family-base);
+        }
+
+        .size-row button.active {
+            background: #EBF3FF;
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .category-field {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 14px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            width: 100%;
+            cursor: pointer;
+            font-family: var(--font-family-base);
+        }
+
+        .category-field .value {
+            font-size: 14px;
+            color: var(--text-dark);
+        }
+
+        .category-field .value.placeholder {
+            color: #94A3B8;
+        }
+
+        .category-field svg {
+            width: 18px;
+            height: 18px;
+            color: var(--text-muted);
+        }
+
+        .weight-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .weight-header .value {
+            font-size: 16px;
+            font-weight: 800;
+            color: var(--accent);
+        }
+
+        input[type="range"] {
+            width: 100%;
+            accent-color: var(--accent);
+        }
+
+        .weight-ticks {
+            position: relative;
+            height: 14px;
+            margin-top: 6px;
+            font-size: 11px;
+            color: #94A3B8;
+        }
+
+        .weight-ticks span {
+            position: absolute;
+            top: 0;
+            transform: translateX(-50%);
+            white-space: nowrap;
+        }
+
+        .weight-ticks span:first-child {
+            left: 0;
+            transform: none;
+        }
+
+        .weight-ticks span:last-child {
+            left: 100%;
+            transform: translateX(-100%);
+        }
+
+        footer.bottom {
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        footer.bottom button {
+            width: 100%;
+            max-width: 350px;
+            height: 56px;
+            border: 0;
+            border-radius: 12px;
+            background: var(--primary);
+            color: #fff;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        footer.bottom button:disabled {
+            background: #94A3B8;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+<main class="page">
+    <header class="top">
+        <button class="back-button" type="button" aria-label="뒤로 가기" onclick="history.back()">
+            <svg viewBox="0 0 24 24" fill="none" width="20" height="20"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <h1>물품 정보</h1>
+    </header>
+
+    <div class="form">
+        <div class="field">
+            <label>물품 사진</label>
+            <button type="button" class="photo-upload" id="photoUploadBtn">
+                <img id="photoPreviewImg" style="display:none;" alt="등록한 물품 사진 미리보기">
+                <svg id="photoIcon" viewBox="0 0 24 24" fill="none"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="12" cy="13" r="4" stroke="currentColor" stroke-width="1.8"/></svg>
+                <span id="photoLabel">물품 사진 촬영</span>
+            </button>
+            <input type="file" id="photoInput" accept="image/jpeg,image/png,image/webp" style="display:none;">
+        </div>
+
+        <div class="field">
+            <label>크기 선택</label>
+            <div class="size-row" id="sizeRow">
+                <button type="button" data-size="SMALL">소형 (우체국박스 소)</button>
+                <button type="button" data-size="MEDIUM">중형 (기내 캐리어급)</button>
+                <button type="button" data-size="LARGE">대형 (이사 박스급)</button>
+            </div>
+        </div>
+
+        <div class="field">
+            <label>카테고리</label>
+            <button type="button" class="category-field" id="categoryField" onclick="location.href='/category-selection.html'">
+                <span class="value placeholder" id="categoryValue">카테고리를 선택하세요</span>
+                <svg viewBox="0 0 24 24" fill="none"><polyline points="6 9 12 15 18 9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+        </div>
+
+        <div class="field">
+            <div class="weight-header">
+                <label style="margin-bottom:0;">물품 무게</label>
+                <span class="value" id="weightValue">1 kg</span>
+            </div>
+            <input type="range" id="weightSlider" min="1" max="50" step="1" value="1">
+            <div class="weight-ticks">
+                <span style="left: 0%;">1kg</span>
+                <span style="left: 18.4%;">10kg</span>
+                <span style="left: 38.8%;">20kg</span>
+                <span style="left: 59.2%;">30kg</span>
+                <span style="left: 79.6%;">40kg</span>
+                <span style="left: 100%;">50kg</span>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bottom">
+        <button type="button" id="nextButton" disabled onclick="confirmItemDetail()">다음</button>
+    </footer>
+</main>
+
+<script>
+    function authHeader() {
+        const token = localStorage.getItem('accessToken');
+        const tokenType = localStorage.getItem('tokenType') || 'Bearer';
+        if (!token) return null;
+        return `${tokenType} ${token}`;
+    }
+
+    let uploadedPhotoUrl = null;
+    let selectedSize = null;
+
+    document.getElementById('photoUploadBtn').addEventListener('click', () => {
+        document.getElementById('photoInput').click();
+    });
+
+    document.getElementById('photoInput').addEventListener('change', async (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const label = document.getElementById('photoLabel');
+        label.textContent = '업로드 중...';
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+            const header = authHeader();
+            const response = await fetch('/api/v1/uploads/image', {
+                method: 'POST',
+                headers: header ? { Authorization: header } : undefined,
+                body: formData
+            });
+            if (!response.ok) throw new Error('upload failed');
+            const result = await response.json();
+            uploadedPhotoUrl = result.imageUrl;
+
+            document.getElementById('photoPreviewImg').src = uploadedPhotoUrl;
+            document.getElementById('photoPreviewImg').style.display = 'block';
+            document.getElementById('photoIcon').style.display = 'none';
+            label.textContent = '';
+
+            const draft = loadDraft();
+            draft.itemPhotoUrl = uploadedPhotoUrl;
+            saveDraft(draft);
+        } catch (error) {
+            label.textContent = '업로드에 실패했어요. 다시 시도해주세요';
+        }
+    });
+
+    function checkReady() {
+        document.getElementById('nextButton').disabled = !(selectedSize && loadDraft().categoryId);
+    }
+
+    document.getElementById('sizeRow').addEventListener('click', (event) => {
+        const button = event.target.closest('button[data-size]');
+        if (!button) return;
+        selectedSize = button.dataset.size;
+        document.querySelectorAll('#sizeRow button').forEach((b) => b.classList.toggle('active', b === button));
+
+        const draft = loadDraft();
+        draft.itemSize = selectedSize;
+        saveDraft(draft);
+        checkReady();
+    });
+
+    document.getElementById('weightSlider').addEventListener('input', (event) => {
+        document.getElementById('weightValue').textContent = `${event.target.value} kg`;
+
+        const draft = loadDraft();
+        draft.weight = Number(event.target.value);
+        saveDraft(draft);
+    });
+
+    function renderCategoryField(draft) {
+        const el = document.getElementById('categoryValue');
+        if (draft.categoryName) {
+            el.textContent = draft.categoryName;
+            el.classList.remove('placeholder');
+        } else {
+            el.textContent = '카테고리를 선택하세요';
+            el.classList.add('placeholder');
+        }
+    }
+
+    function confirmItemDetail() {
+        const draft = loadDraft();
+        if (!selectedSize || !draft.categoryId) return;
+        draft.itemSize = selectedSize;
+        draft.weight = Number(document.getElementById('weightSlider').value);
+        draft.itemPhotoUrl = uploadedPhotoUrl;
+        saveDraft(draft);
+        location.href = '/address-input.html';
+    }
+
+    (function init() {
+        if (!authHeader()) {
+            location.replace('/login.html');
+            return;
+        }
+        const draft = loadDraft();
+        renderCategoryField(draft);
+
+        if (draft.itemSize) {
+            selectedSize = draft.itemSize;
+            document.querySelectorAll('#sizeRow button').forEach((b) => {
+                b.classList.toggle('active', b.dataset.size === draft.itemSize);
+            });
+        }
+        if (draft.weight) {
+            document.getElementById('weightSlider').value = draft.weight;
+            document.getElementById('weightValue').textContent = `${draft.weight} kg`;
+        }
+        if (draft.itemPhotoUrl) {
+            uploadedPhotoUrl = draft.itemPhotoUrl;
+            document.getElementById('photoPreviewImg').src = uploadedPhotoUrl;
+            document.getElementById('photoPreviewImg').style.display = 'block';
+            document.getElementById('photoIcon').style.display = 'none';
+            document.getElementById('photoLabel').textContent = '';
+        }
+        checkReady();
+    })();
+</script>
+</body>
+</html>

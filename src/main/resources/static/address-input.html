@@ -65,7 +65,7 @@
             font-weight: 700;
         }
 
-        main.form {
+        .form {
             display: flex;
             flex-direction: column;
             gap: 20px;
@@ -181,49 +181,6 @@
             padding: 4px 0;
         }
 
-        .guide-box textarea {
-            width: 100%;
-            min-height: 52px;
-            padding: 12px;
-            background: #fff;
-            border: 0;
-            border-radius: 16px;
-            font-family: var(--font-family-base);
-            font-size: 15px;
-            font-weight: 500;
-            color: var(--text-dark);
-            resize: vertical;
-        }
-
-        .guide-box textarea::placeholder {
-            color: var(--color-blue-500);
-            font-weight: 500;
-        }
-
-        .size-tabs {
-            display: flex;
-            gap: 8px;
-        }
-
-        .size-tabs button {
-            flex: 1;
-            padding: 8px 6px;
-            border-radius: 999px;
-            border: 1px solid var(--border);
-            background: var(--surface);
-            color: var(--text-dark);
-            font-size: 12px;
-            font-weight: 700;
-            cursor: pointer;
-            font-family: var(--font-family-base);
-        }
-
-        .size-tabs button.active {
-            background: var(--primary);
-            border-color: var(--primary);
-            color: #fff;
-        }
-
         .fee-card {
             display: none;
             align-items: center;
@@ -327,18 +284,20 @@
             </div>
         </div>
 
-        <div class="field guide-box">
-            <label>문앞 픽업 가이드 상세</label>
-            <textarea id="pickupGuide" placeholder="예: 공동현관 #1004 문 앞 고양이 서랍장 위" maxlength="255"></textarea>
+        <div class="field">
+            <label>픽업 가이드</label>
+            <button type="button" class="field-box" id="pickupGuideField" onclick="location.href='/pickup-guide.html'">
+                <svg viewBox="0 0 24 24" fill="none"><path d="M9 12h6M9 16h6M9 8h1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><rect x="4" y="4" width="16" height="16" rx="2" stroke="currentColor" stroke-width="1.8"/></svg>
+                <span class="value placeholder" id="pickupGuideValue">픽업 가이드를 입력해주세요</span>
+            </button>
         </div>
 
         <div class="field">
-            <label style="font-size:13px;">물품 크기</label>
-            <div class="size-tabs" id="sizeTabs">
-                <button type="button" data-size="SMALL">소형 (우체국박스 소)</button>
-                <button type="button" data-size="MEDIUM" class="active">중형 (기내 캐리어급)</button>
-                <button type="button" data-size="LARGE">대형 (이사 박스급)</button>
-            </div>
+            <label>물품 정보</label>
+            <button type="button" class="field-box" id="itemDetailField" onclick="location.href='/item-detail.html'">
+                <svg viewBox="0 0 24 24" fill="none"><path d="M21 8V21H3V8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M1 3h22v5H1z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 12h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+                <span class="value placeholder" id="itemDetailValue">물품 정보를 입력해주세요</span>
+            </button>
         </div>
 
         <div class="fee-card" id="feeCard">
@@ -360,9 +319,7 @@
 </main>
 
 <script>
-    // Figma 화면엔 무게 입력 UI가 없어, 물품 크기별 대표 무게를 임시로 가정한다.
-    // TODO: 실제 무게 입력/측정 방식이 정해지면 이 값을 대체한다.
-    const NOMINAL_WEIGHT_BY_SIZE = { SMALL: 2, MEDIUM: 7, LARGE: 15 };
+    const SIZE_LABEL = { SMALL: '소형', MEDIUM: '중형', LARGE: '대형' };
 
     function authHeader() {
         const token = localStorage.getItem('accessToken');
@@ -519,27 +476,27 @@
         );
     }
 
-    function selectedItemSize() {
-        const active = document.querySelector('#sizeTabs button.active');
-        return active ? active.dataset.size : 'MEDIUM';
+    function renderPickupGuideSummary(draft) {
+        const el = document.getElementById('pickupGuideValue');
+        if (!draft.pickupGuide || !draft.pickupGuide.locationNote) {
+            el.textContent = '픽업 가이드를 입력해주세요';
+            el.classList.add('placeholder');
+            return;
+        }
+        el.textContent = draft.pickupGuide.locationNote;
+        el.classList.remove('placeholder');
     }
 
-    document.getElementById('sizeTabs').addEventListener('click', (event) => {
-        const button = event.target.closest('button[data-size]');
-        if (!button) return;
-        document.querySelectorAll('#sizeTabs button').forEach((b) => b.classList.remove('active'));
-        button.classList.add('active');
-        const draft = loadDraft();
-        draft.itemSize = button.dataset.size;
-        saveDraft(draft);
-        maybeEstimateFee();
-    });
-
-    document.getElementById('pickupGuide').addEventListener('change', (event) => {
-        const draft = loadDraft();
-        draft.pickupGuide = event.target.value;
-        saveDraft(draft);
-    });
+    function renderItemDetailSummary(draft) {
+        const el = document.getElementById('itemDetailValue');
+        if (!draft.itemSize || !draft.weight || !draft.categoryName) {
+            el.textContent = '물품 정보를 입력해주세요';
+            el.classList.add('placeholder');
+            return;
+        }
+        el.textContent = `${SIZE_LABEL[draft.itemSize] || draft.itemSize} · ${draft.categoryName} · ${draft.weight}kg`;
+        el.classList.remove('placeholder');
+    }
 
     let myMemberId = null;
     let myPointBalance = null;
@@ -570,7 +527,7 @@
         const feeLoading = document.getElementById('feeLoading');
         const nextButton = document.getElementById('nextButton');
 
-        if (!draft.pickup || !draft.dropoff) {
+        if (!draft.pickup || !draft.dropoff || !draft.itemSize || !draft.weight) {
             feeCard.classList.remove('visible');
             feeLoading.style.display = 'none';
             nextButton.disabled = true;
@@ -581,8 +538,8 @@
         estimateTimer = setTimeout(async () => {
             feeCard.classList.remove('visible');
             feeLoading.style.display = 'block';
-            const itemSize = draft.itemSize || selectedItemSize();
-            const weight = NOMINAL_WEIGHT_BY_SIZE[itemSize] || 2;
+            const itemSize = draft.itemSize;
+            const weight = draft.weight;
 
             try {
                 const response = await fetch('/api/v1/delivery-requests/estimate', {
@@ -635,12 +592,8 @@
             return;
         }
         const draft = loadDraft();
-        document.querySelectorAll('#sizeTabs button').forEach((b) => {
-            b.classList.toggle('active', b.dataset.size === (draft.itemSize || 'MEDIUM'));
-        });
-        if (draft.pickupGuide) {
-            document.getElementById('pickupGuide').value = draft.pickupGuide;
-        }
+        renderPickupGuideSummary(draft);
+        renderItemDetailSummary(draft);
         renderPoint('pickup', draft.pickup);
         renderPoint('dropoff', draft.dropoff);
         detectCurrentLocation();
