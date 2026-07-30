@@ -30,13 +30,10 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CONFIG.MODEL: "gemini/gemini-1.5-flash"
           GITHUB_ACTION_CONFIG.AUTO_REVIEW: "true"
-          GITHUB_ACTION_CONFIG.AUTO_DESCRIBE: "true"
           GITHUB_ACTION_CONFIG.AUTO_IMPROVE: "true"
-          PR_REVIEWER.REQUIRE_CANVAS_REVIEW: "false"
-          PR_REVIEWER.REQUIRE_SECURITY_REVIEW: "true"
-          PR_REVIEWER.REQUIRE_TESTS_REVIEW: "true"
+          GITHUB_ACTION_CONFIG.ENABLE_HEARTBEAT: "false"
+          GITHUB_ACTION_RUNNER.OVERRIDE_EVENTS: "opened,reopened,synchronize"
           PR_REVIEWER.PERSISTENT_COMMENT: "true"
-          # 교육생을 위한 친절한 한국어 튜터링 톤 및 규칙 주입
           PR_REVIEWER.EXTRA_INSTRUCTIONS: |
             - 모든 리뷰 의견 및 요약은 반드시 친절하고 다정한 한국어(ko-KR)로 작성해 주세요.
             - 주요 대상자는 소프트웨어 개발을 처음 배우는 교육생(초급자)입니다.
