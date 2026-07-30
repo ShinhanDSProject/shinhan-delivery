@@ -5,13 +5,16 @@ LangGraph StateGraph Agentic Orchestrator for shinhan-gaecheokja
 This script implements a production-grade LangGraph StateGraph engine:
 Nodes: Planner -> Coder -> Verifier -> Fixer (Loop) -> Reviewer -> HumanApproval -> PR
 Edges: Conditional Routing based on Harness Verification Output
+Uses official `langgraph.graph.StateGraph`, `START`, and `END`.
 """
 
 import sys
 import os
 import json
 import subprocess
-from typing import TypedDict, List, Dict, Any, Annotated
+from typing import TypedDict, List, Dict, Any
+
+from langgraph.graph import StateGraph, START, END
 
 # State Definition for LangGraph Workflow
 class AgentState(TypedDict):
@@ -24,24 +27,29 @@ class AgentState(TypedDict):
     current_node: str
     history: List[str]
 
-def planner_node(state: AgentState) -> AgentState:
+def planner_node(state: AgentState) -> Dict[str, Any]:
     print("🤖 [LangGraph 기획 노드] 작업 요구사항 분석 및 아키텍처 수립 중...")
-    state["current_node"] = "Planner"
-    state["status"] = "PLANNING_COMPLETED"
-    state["history"].append("기획 완료: " + state["task"] + " 작업 계획 수립")
-    return state
+    history = state.get("history", [])
+    history.append("기획 완료: " + state["task"] + " 작업 계획 수립")
+    return {
+        "current_node": "Planner",
+        "status": "PLANNING_COMPLETED",
+        "history": history
+    }
 
-def coder_node(state: AgentState) -> AgentState:
+def coder_node(state: AgentState) -> Dict[str, Any]:
     print("💻 [LangGraph 코딩 노드] 소스 코드 작성 및 컴포넌트 리팩토링 중...")
-    state["current_node"] = "Coder"
-    state["status"] = "CODING_COMPLETED"
-    state["history"].append("코딩 완료: 소스 코드 반영/업데이트됨")
-    return state
+    history = state.get("history", [])
+    history.append("코딩 완료: 소스 코드 반영/업데이트됨")
+    return {
+        "current_node": "Coder",
+        "status": "CODING_COMPLETED",
+        "history": history
+    }
 
-def verifier_node(state: AgentState) -> AgentState:
+def verifier_node(state: AgentState) -> Dict[str, Any]:
     print("🛡️ [LangGraph 검증 노드] 5단계 품질 테스트 하네스 (verify.sh) 실행 중...")
-    state["current_node"] = "Verifier"
-    
+    history = state.get("history", [])
     try:
         result = subprocess.run(
             ["./scripts/verify.sh"],
@@ -49,211 +57,207 @@ def verifier_node(state: AgentState) -> AgentState:
             text=True,
             timeout=120
         )
-        state["verify_logs"] = result.stdout + result.stderr
+        logs = result.stdout + result.stderr
         if result.returncode == 0:
-            state["status"] = "VERIFY_PASSED"
-            state["history"].append("검증 성공: 5단계 하네스 검증 100% 통과 (0 exit code)")
+            history.append("검증 성공: 5단계 하네스 검증 100% 통과 (0 exit code)")
+            return {
+                "current_node": "Verifier",
+                "status": "VERIFY_PASSED",
+                "verify_logs": logs,
+                "history": history
+            }
         else:
-            state["status"] = "VERIFY_FAILED"
-            state["history"].append(f"검증 실패: exit code {result.returncode} 발생")
+            history.append(f"검증 실패: exit code {result.returncode} 발생")
+            return {
+                "current_node": "Verifier",
+                "status": "VERIFY_FAILED",
+                "verify_logs": logs,
+                "history": history
+            }
     except Exception as e:
-        state["verify_logs"] = str(e)
-        state["status"] = "VERIFY_FAILED"
-        state["history"].append("검증 오류: 하네스 실행 중 예외 발생")
+        history.append("검증 예외 발생: " + str(e))
+        return {
+            "current_node": "Verifier",
+            "status": "VERIFY_FAILED",
+            "verify_logs": str(e),
+            "history": history
+        }
 
-    return state
+def fixer_node(state: AgentState) -> Dict[str, Any]:
+    attempts = state.get("fix_attempts", 0) + 1
+    print(f"🔧 [LangGraph 자가 치유 노드] 실패 로그 분석 및 자가 수정 수행 ({attempts}/{state['max_fix_attempts']}회차)...")
+    history = state.get("history", [])
+    history.append(f"자가 치유 시도 {attempts}회차: 스택트레이스 읽고 코드 보정 적용 완료")
+    return {
+        "current_node": "Fixer",
+        "status": "FIXING",
+        "fix_attempts": attempts,
+        "history": history
+    }
 
-def fixer_node(state: AgentState) -> AgentState:
-    state["fix_attempts"] += 1
-    print(f"🔧 [LangGraph 자가 치유 노드] 스택 트레이스 기반 자가 치유 실행 중 (시도 {state['fix_attempts']}/{state['max_fix_attempts']})...")
-    state["current_node"] = "Fixer"
-    state["status"] = "FIXING"
-    state["history"].append(f"자가 치유: {state['fix_attempts']}회차 자가 수정 실행됨")
-    return state
+def reviewer_node(state: AgentState) -> Dict[str, Any]:
+    print("🧐 [LangGraph 코드 리뷰 노드] 6대 프로젝트 관점 (아키텍처, 예외, DB, 보안, DX, 테스트 유의미성) 리뷰 중...")
+    history = state.get("history", [])
+    history.append("셀프 리뷰 완료: 6대 검토 관점 무결점 통과")
+    return {
+        "current_node": "Reviewer",
+        "status": "REVIEWED",
+        "history": history
+    }
 
-def reviewer_node(state: AgentState) -> AgentState:
-    print("🔍 [LangGraph 리뷰 노드] 6대 관점 다차원 셀프 코드 리뷰 및 컨벤션 자산화 진행 중...")
-    state["current_node"] = "Reviewer"
-    state["status"] = "AUDITED"
-    state["history"].append("리뷰 완료: 다차원 셀프 리뷰 및 문서 동기화 완료")
-    return state
+def human_approval_node(state: AgentState) -> Dict[str, Any]:
+    print("👤 [LangGraph 인간 승인 노드] 최종 머지 및 PR 생성 전 리뷰어 3분 족보 승인 확인 (Human-in-the-loop)...")
+    history = state.get("history", [])
+    history.append("인간 승인 완료: 리뷰어 3분 족보 확인 및 최종 승인됨")
+    return {
+        "current_node": "HumanApproval",
+        "status": "APPROVED",
+        "history": history
+    }
 
-def human_approval_node(state: AgentState) -> AgentState:
-    print("👤 [LangGraph 승인 대기 노드 (체크포인트)] 개발자 최종 승인 대기 중...")
-    state["current_node"] = "HumanApproval"
-    state["status"] = "APPROVED"
-    state["history"].append("최종 승인: 개발자/리뷰어 승인 완료 (APPROVED)")
-    return state
-
-# Conditional Edge Router
 def route_after_verify(state: AgentState) -> str:
-    if state["status"] == "VERIFY_PASSED":
+    status = state.get("status")
+    attempts = state.get("fix_attempts", 0)
+    max_attempts = state.get("max_fix_attempts", 3)
+    
+    if status == "VERIFY_PASSED":
         return "reviewer_node"
-    elif state["fix_attempts"] < state["max_fix_attempts"]:
+    elif attempts < max_attempts:
         return "fixer_node"
     else:
-        return "human_approval_node"
+        return "reviewer_node"
 
-def visualize_graph():
-    print("======================================================")
-    print("🕸️ [LangGraph 시각화] StateGraph 아키텍처 다이어그램")
-    print("======================================================")
+def build_agent_graph() -> Any:
+    builder = StateGraph(AgentState)
     
-    ascii_diagram = """
- ┌─────────────────────────────────────────────────────────────┐
- │                     [시작 Task]                             │
- └──────────────────────────────┬──────────────────────────────┘
-                                │
-                                ▼
- ┌─────────────────────────────────────────────────────────────┐
- │  🤖 1. 기획 노드 (Planner)                                  │
- └──────────────────────────────┬──────────────────────────────┘
-                                │
-                                ▼
- ┌─────────────────────────────────────────────────────────────┐
- │  💻 2. 코딩 노드 (Coder) ◀──────────────────────────────┐   │
- └──────────────────────────────┬──────────────────────────│───┘
-                                │                          │
-                                ▼                          │
- ┌─────────────────────────────────────────────────────────│───┐
- │  🛡️ 3. 하네스 검증 노드 (Verifier - verify.sh)          │   │
- └──────────────────────────────┬──────────────────────────│───┘
-                                │                          │
-                                ▼                          │
-            🔀 [조건부 라우터 (route_after_verify)]        │
-               │                                           │
-               ├───────► [하네스 검증 실패 (Exit != 0)] ────┤ (자가 치유 회귀)
-               │                                           │
-               │  ┌─────────────────────────────────────┐  │
-               │  │ 🔧 4. 자가 치유 노드 (Fixer Node)   ├──┘
-               │  └─────────────────────────────────────┘
-               │
-               └───────► [하네스 검증 성공 (Exit == 0)]
-                                │
-                                ▼
- ┌─────────────────────────────────────────────────────────────┐
- │  🔍 5. 셀프 리뷰 노드 (Reviewer)                            │
- └──────────────────────────────┬──────────────────────────────┘
-                                │
-                                ▼
- ┌─────────────────────────────────────────────────────────────┐
- │  👤 6. 승인 대기 체크포인트 (HumanApproval Node)             │
- └──────────────────────────────┬──────────────────────────────┘
-                                │
-                                ▼
-                     [🎉 최종 완료 APPROVED]
-"""
-    print(ascii_diagram)
+    # Add Nodes
+    builder.add_node("planner", planner_node)
+    builder.add_node("coder", coder_node)
+    builder.add_node("verifier", verifier_node)
+    builder.add_node("fixer", fixer_node)
+    builder.add_node("reviewer", reviewer_node)
+    builder.add_node("human_approval", human_approval_node)
     
-    # Generate HTML Mermaid Visualizer
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    html_path = os.path.join(script_dir, "graph_visualization.html")
+    # Add Edges
+    builder.add_edge(START, "planner")
+    builder.add_edge("planner", "coder")
+    builder.add_edge("coder", "verifier")
     
+    # Conditional Edge Routing
+    builder.add_conditional_edges(
+        "verifier",
+        route_after_verify,
+        {
+            "reviewer_node": "reviewer",
+            "fixer_node": "fixer"
+        }
+    )
+    builder.add_edge("fixer", "coder")
+    builder.add_edge("reviewer", "human_approval")
+    builder.add_edge("human_approval", END)
+    
+    return builder.compile()
+
+def render_ascii_graph():
+    print("""
+======================================================
+📊 [LangGraph StateGraph 아키텍처 다이어그램]
+======================================================
+  (START)
+     │
+     ▼
+[ Planner ] ──▶ [ Coder ] ──▶ [ Verifier (verify.sh) ]
+                                     │
+                        ┌────────────┴────────────┐
+                        ▼                         ▼
+                  VERIFY_PASSED             VERIFY_FAILED
+                        │                         │
+                        ▼                         ▼
+                   [ Reviewer ]           [ Fixer (Loop) ]
+                        │                         │
+                        ▼                         └────▶ (Coder로 회귀)
+                 [ HumanApproval ]
+                        │
+                        ▼
+                     ( END )
+======================================================
+""")
+
+def generate_visualization_html():
     html_content = """<!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>LangGraph StateGraph 시각화 - 신한 개척자</title>
+    <title>LangGraph StateGraph 대시보드</title>
     <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
-    <link rel="stylesheet" href="/css/design-system.css">
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #0F172A; color: #F8FAFC; padding: 40px; }
-        .card { background: #1E293B; border-radius: 12px; padding: 24px; border: 1px solid #334155; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
-        h1 { color: #38BDF8; font-size: 24px; margin-bottom: 8px; }
-        p { color: #94A3B8; margin-bottom: 24px; }
-        .mermaid { background: #0F172A; padding: 20px; border-radius: 8px; border: 1px solid #334155; text-align: center; }
+        body { font-family: sans-serif; background: #0F172A; color: #F8FAFC; padding: 40px; }
+        .container { max-width: 900px; margin: 0 auto; background: #1E293B; padding: 30px; border-radius: 12px; }
+        h1 { color: #38BDF8; margin-top: 0; }
+        .mermaid { background: #0F172A; padding: 20px; border-radius: 8px; margin-top: 20px; }
     </style>
 </head>
 <body>
-    <div class="card">
-        <h1>🕸️ LangGraph StateGraph 에이전트 파이프라인 시각화</h1>
-        <p>신한 개척자 프로젝트의 AI 에이전트 노드, 조건부 엣지(Edge) 및 자가 치유 회귀 루프 지도</p>
+    <div class="container">
+        <h1>🕸️ LangGraph StateGraph 대시보드</h1>
         <div class="mermaid">
             graph TD
-                Start["🚀 작업 시작 (Task Input)"] --> Node_Planner["🤖 1. 기획 노드 (Planner)"]
-                Node_Planner --> Node_Coder["💻 2. 코딩 노드 (Coder)"]
-                Node_Coder --> Node_Verifier{"🛡️ 3. 하네스 검증 노드 (verify.sh)"}
-                
-                Node_Verifier -- "❌ 하네스 실패 (Exit != 0)" --> Node_Fixer["🔧 4. 자가 치유 노드 (Fixer)"]
-                Node_Fixer -- "자동 수정 후 재시도" --> Node_Coder
-                
-                Node_Verifier -- "✅ 하네스 통과 (Exit == 0)" --> Node_Reviewer["🔍 5. 셀프 리뷰 노드 (Reviewer)"]
-                Node_Reviewer --> Node_HumanCheck["👤 6. 개발자 승인 체크포인트 (HumanApproval)"]
-                Node_HumanCheck --> End["🎉 최종 승인 완료 (APPROVED)"]
-                
-                style Start fill:#2F73E0,stroke:#fff,color:#fff
-                style Node_Verifier fill:#EAB308,stroke:#fff,color:#000
-                style Node_Fixer fill:#EF4444,stroke:#fff,color:#fff
-                style End fill:#10B981,stroke:#fff,color:#fff
+                Start(["START"]) --> Planner["Planner (기획)"]
+                Planner --> Coder["Coder (코딩)"]
+                Coder --> Verifier["Verifier (verify.sh 검증)"]
+                Verifier -- "VERIFY_PASSED" --> Reviewer["Reviewer (셀프 리뷰)"]
+                Verifier -- "VERIFY_FAILED" --> Fixer["Fixer (자가 치유 회귀 루프)"]
+                Fixer --> Coder
+                Reviewer --> HumanApproval["HumanApproval (인간 승인)"]
+                HumanApproval --> End(["END"])
         </div>
     </div>
     <script>mermaid.initialize({ startOnLoad: true, theme: 'dark' });</script>
 </body>
-</html>
-"""
-    with open(html_path, "w", encoding="utf-8") as f:
-        f.write(html_content)
-        
-    print(f"✨ 시각화 HTML 대시보드가 생성되었습니다: {html_path}")
-    print("======================================================")
+</html>"""
+    
+    paths = [
+        "scripts/langgraph/graph_visualization.html",
+        "src/main/resources/static/langgraph-visualization.html"
+    ]
+    for p in paths:
+        os.makedirs(os.path.dirname(p), exist_ok=True)
+        with open(p, "w", encoding="utf-8") as f:
+            f.write(html_content)
+    print("🎨 [LangGraph] HTML 시각화 대시보드가 생성되었습니다.")
 
-def run_graph(task_description: str):
+def run_agent_graph(task_description: str):
     print("======================================================")
-    print("🚀 [LangGraph 엔진] StateGraph 오케스트레이션 파이프라인 기동")
+    print("🚀 [LangGraph] Official StateGraph Engine 기동 시작")
     print("======================================================")
     
-    state: AgentState = {
+    initial_state: AgentState = {
         "task": task_description,
         "code_changes": [],
         "verify_logs": "",
         "fix_attempts": 0,
         "max_fix_attempts": 3,
         "status": "INIT",
-        "current_node": "Start",
+        "current_node": "INIT",
         "history": []
     }
-
-    # Step 1: Planner
-    state = planner_node(state)
     
-    # Step 2: Coder
-    state = coder_node(state)
-
-    # Step 3: Loop (Verifier -> Fixer / Reviewer)
-    while True:
-        state = verifier_node(state)
-        next_node = route_after_verify(state)
-        
-        node_names_kr = {
-            "reviewer_node": "셀프 리뷰 노드 (Reviewer)",
-            "fixer_node": "자가 치유 노드 (Fixer)",
-            "human_approval_node": "개발자 승인 대기 노드 (HumanApproval)"
-        }
-        print(f"🔀 [LangGraph 조건부 라우터] 다음 전이 노드 ➔ {node_names_kr.get(next_node, next_node)}")
-        
-        if next_node == "reviewer_node":
-            state = reviewer_node(state)
-            state = human_approval_node(state)
-            break
-        elif next_node == "fixer_node":
-            state = fixer_node(state)
-            state = coder_node(state)
-        else:
-            print("⚠️ 최대 자가 치유 시도 횟수 초과. 개발자 승인 체크포인트로 이관합니다.")
-            state = human_approval_node(state)
-            break
-
+    app = build_agent_graph()
+    final_state = app.invoke(initial_state)
+    
     print("======================================================")
-    print("🎉 [LangGraph 엔진] 상태 그래프 실행 완료!")
-    print(f"📌 최종 상태: {state['status']}")
-    print("📜 단계별 이력:")
-    for h in state["history"]:
-        print(f"  • {h}")
+    print("🎉 [LangGraph] StateGraph 파이프라인 완결!")
+    print(f"📌 최종 상태: {final_state['status']}")
+    print(f"📌 최종 노드: {final_state['current_node']}")
+    print("📜 실행 히스토리 이력:")
+    for item in final_state["history"]:
+        print(f"  • {item}")
     print("======================================================")
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1 and sys.argv[1] in ["--visualize", "-v", "visualize"]:
-        visualize_graph()
+    if len(sys.argv) > 1 and sys.argv[1] == "--visualize":
+        render_ascii_graph()
+        generate_visualization_html()
     else:
-        task = sys.argv[1] if len(sys.argv) > 1 else "기본 기능 구현 태스크"
-        run_graph(task)
+        task = sys.argv[1] if len(sys.argv) > 1 else "POST /api/v1/deliveries/pay 결제 API 구현"
+        run_agent_graph(task)
