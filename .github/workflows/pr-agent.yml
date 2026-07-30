@@ -25,10 +25,12 @@ jobs:
       - name: PR Agent Action
         uses: Codium-ai/pr-agent@main
         env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GOOGLE_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           OPENAI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          OPENAI_BASE_URL: "https://generativelanguage.googleapis.com/v1beta/openai/"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          CONFIG.MODEL: "gpt-4o-mini"
+          CONFIG.MODEL: "gemini/gemini-2.0-flash"
+          CONFIG.CUSTOM_MODEL_MAX_TOKENS: "32000"
           GITHUB_ACTION_CONFIG.AUTO_REVIEW: "true"
           GITHUB_ACTION_CONFIG.AUTO_IMPROVE: "true"
           GITHUB_ACTION_CONFIG.ENABLE_HEARTBEAT: "false"
