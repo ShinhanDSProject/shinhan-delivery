@@ -11,13 +11,11 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 /** 공지사항 정보 엔티티 클래스입니다. */
 @Entity
 @Table(name = "notice")
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder

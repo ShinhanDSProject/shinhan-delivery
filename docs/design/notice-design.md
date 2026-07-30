@@ -91,10 +91,10 @@ erDiagram
 
 ## 4. 작업 분할 목록 (WBS)
 
-- [ ] `V13__create_notice_table.sql` Flyway 마이그레이션 작성 (테이블 생성 & 인덱스 & 초기 데이터 시딩)
-- [ ] `Notice` Entity & `NoticeRepository` (`findByCategoryOrderByIsPinnedDescCreatedAtDesc`, `findAllByOrderByIsPinnedDescCreatedAtDesc`)
-- [ ] `NoticeResponse`, `NoticeDetailResponse` DTO 작성
-- [ ] `ErrorCode.NOTICE_NOT_FOUND`(N002) 추가 및 `NoticeNotFoundException` 구현
-- [ ] `NoticeService`: `getNotices(category, pageable)`, `getNoticeDetail(noticeId)` 구현
-- [ ] `NoticeController`: `GET /api/v1/notices`, `GET /api/v1/notices/{id}` 컨트롤러 엔드포인트 구현 (Swagger 어노테이션 적용)
-- [ ] 단위 테스트 (`NoticeServiceTest`, `NoticeControllerTest`, `NoticeRepositoryTest`)
+- [x] `V13__create_notice_table.sql` Flyway 마이그레이션 작성 (테이블 생성 & 인덱스 & 초기 데이터 시딩)
+- [x] `Notice` Entity & `NoticeRepository` (`findByCategoryOrderByIsPinnedDescCreatedAtDesc`, `findAllByOrderByIsPinnedDescCreatedAtDesc`)
+- [x] `NoticeResponse`, `NoticeDetailResponse` DTO 작성
+- [x] `ErrorCode.NOTICE_NOT_FOUND`(N002) 추가 및 `NoticeNotFoundException` 구현
+- [x] `NoticeService`: `getNotices(category, pageable)`, `getNoticeDetail(noticeId)` 구현
+- [x] `NoticeController`: `GET /api/v1/notices`, `GET /api/v1/notices/{id}` 컨트롤러 엔드포인트 구현 (Swagger 어노테이션 적용)
+- [x] 단위 테스트 (`NoticeServiceTest`, `NoticeControllerTest`, `NoticeRepositoryTest`)
