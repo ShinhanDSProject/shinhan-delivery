@@ -6,6 +6,7 @@
 ---
 
 ## 📑 목차 (Table of Contents)
+- [🛠️ 프로젝트 기술 스택 (Tech Stack)](#-프로젝트-기술-스택-tech-stack)
 - [🚀 빠른 시작 (Quick Start)](#-빠른-시작-quick-start)
 - [🎓 초급 개발자 단계별 학습 로드맵 (Step-by-Step Learning Roadmap)](#-초급-개발자-단계별-학습-로드맵-step-by-step-learning-roadmap)
   - [Step 1. 온보딩 & 팀 개발 문화 체득](#step-1-온보딩--팀-개발-문화-체득-onboarding)
@@ -19,6 +20,20 @@
   - [📜 아키텍처 의사결정 기록 (ADR)](#-아키텍처-의사결정-기록-adr)
   - [📦 도메인별 기능 명세 & 설계서](#-도메인별-기능-명세--설계서)
   - [📋 양식 & 트러블슈팅 템플릿](#-양식--트러블슈팅-템플릿)
+
+---
+
+## 🛠️ 프로젝트 기술 스택 (Tech Stack)
+
+| 구분 | 기술 스택 | 주요 역할 및 설명 |
+| :--- | :--- | :--- |
+| **Backend Core** | Java 17, Spring Boot 3.x | 백엔드 핵심 코어 프레임워크 및 런타임 |
+| **Security & Auth** | Spring Security, Stateless JWT | JWT 기반 무상태 인증/인가 및 역할 분기 (`CUSTOMER`/`COURIER`/`ADMIN`) |
+| **Database & Migration** | MariaDB, Flyway | 관계형 데이터베이스 및 무중단 Online DDL 마이그레이션 관리 |
+| **Frontend & Template** | HTML5, Vanilla CSS, Vanilla JS, Thymeleaf | 반응형 UI 구성 및 서버 사이드 템플릿 엔진 |
+| **Realtime Messaging** | WebSocket (STOMP) | 배송 위치 실시간 브로드캐스트 및 상태 트래킹 |
+| **Testing & Quality Gate** | JUnit 5, Mockito, ArchUnit, JaCoCo | 단위/통합 테스트, 아키텍처 규칙 검증 및 커버리지 게이트 (60%+) |
+| **DevOps & Code Style** | Spotless, Gradle, GitHub Actions | 코드 포맷팅 자동화, 빌드 도구 및 CI/CD 자동화 파이프라인 |
 
 ---
 
