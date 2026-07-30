@@ -100,11 +100,11 @@ public class MemberService {
   public void updatePassword(Long memberId, MemberPasswordUpdateRequest request) {
     Member member = findMemberOrThrow(memberId);
 
-    if (!passwordEncoder.matches(request.getCurrentPassword(), member.getPassword())) {
-      throw new BusinessException(ErrorCode.CURRENT_PASSWORD_MISMATCH);
-    }
     if (!request.getNewPassword().equals(request.getConfirmNewPassword())) {
       throw new BusinessException(ErrorCode.PASSWORD_CONFIRMATION_MISMATCH);
+    }
+    if (!passwordEncoder.matches(request.getCurrentPassword(), member.getPassword())) {
+      throw new BusinessException(ErrorCode.CURRENT_PASSWORD_MISMATCH);
     }
     if (passwordEncoder.matches(request.getNewPassword(), member.getPassword())) {
       throw new BusinessException(ErrorCode.PASSWORD_REUSE_NOT_ALLOWED);
