@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>홈 - 신한 개척자</title>
+    <link rel="stylesheet" href="/css/design-system.css">
+    <style>
+        :root {
+            --primary: var(--color-blue-100);
+            --primary-hover: var(--color-blue-500);
+            --text-dark: var(--color-black-200);
+            --text-muted: var(--color-grey-300);
+            --surface: var(--color-grey-30);
+            --border: var(--color-grey-50);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: var(--font-family-base);
+        }
+
+        body {
+            min-height: 100vh;
+            color: var(--text-dark);
+        }
+
+        .page {
+            max-width: 480px;
+            margin: 0 auto;
+            min-height: 100vh;
+            background: #FAFBFD;
+            display: flex;
+            flex-direction: column;
+            padding: 24px 20px 96px;
+        }
+
+        header.top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+        }
+
+        .greeting p {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--color-grey-500);
+            letter-spacing: -1px;
+            margin-bottom: 4px;
+        }
+
+        .greeting h1 {
+            font-size: 35px;
+            font-weight: 800;
+            color: var(--color-black-100);
+        }
+
+        .top-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .icon-button {
+            position: relative;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            color: #334155;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .icon-button svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .unread-badge {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #ef4444;
+            display: none;
+        }
+
+        .avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: #BFC1C5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+        }
+
+        .avatar svg {
+            width: 40px;
+            height: 40px;
+        }
+
+        section {
+            margin-bottom: 28px;
+        }
+
+        section h2 {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--color-grey-500);
+            margin-bottom: 12px;
+        }
+
+        .delivery-card {
+            background: var(--color-blue-500);
+            color: #fff;
+            border-radius: 30px;
+            padding: 26px;
+            margin-bottom: 12px;
+        }
+
+        .delivery-card .status-badge {
+            display: inline-block;
+            background: #fff;
+            color: #111827;
+            padding: 6px 14px;
+            border-radius: 999px;
+            font-size: 15px;
+            font-weight: 600;
+            letter-spacing: -0.75px;
+            text-align: center;
+            margin-bottom: 12px;
+        }
+
+        .delivery-card .route {
+            font-size: 30px;
+            font-weight: 700;
+            letter-spacing: -1.5px;
+            margin-bottom: 4px;
+        }
+
+        .delivery-card .eta {
+            font-size: 15px;
+            font-weight: 600;
+            letter-spacing: -0.75px;
+            margin-bottom: 16px;
+        }
+
+        .delivery-card .actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .delivery-card .actions button {
+            flex: 1;
+            height: 44px;
+            border: 0;
+            border-radius: 12px;
+            background: #fff;
+            color: #111827;
+            font-size: 15px;
+            font-weight: 600;
+            letter-spacing: -0.75px;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .waiting-card {
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0px 4px 24px -8px rgba(0, 0, 0, 0.07);
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .waiting-card .title {
+            font-size: 22px;
+            font-weight: 800;
+            color: #1A202C;
+            margin-bottom: 12px;
+        }
+
+        .waiting-card .route {
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+        }
+
+        .waiting-card .loading-dots {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .waiting-card .loading-dots span {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--color-blue-30);
+            animation: dot-pulse 1.2s ease-in-out infinite;
+        }
+
+        .waiting-card .loading-dots span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .waiting-card .loading-dots span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes dot-pulse {
+            0%, 100% { opacity: 0.2; }
+            50% { opacity: 1; }
+        }
+
+        .quick-request-card {
+            display: flex;
+            align-items: center;
+            gap: 35px;
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0px 4px 24px -8px rgba(0, 0, 0, 0.07);
+            cursor: pointer;
+            width: 100%;
+            text-align: left;
+        }
+
+        .quick-request-card .plus {
+            width: 50px;
+            height: 50px;
+            min-width: 50px;
+            border-radius: 10px;
+            background: var(--color-blue-50);
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .quick-request-card .plus svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .quick-request-card .title {
+            font-size: 25px;
+            font-weight: 700;
+        }
+
+        .quick-request-card .desc {
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--color-grey-500);
+            margin-top: 4px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 32px 16px;
+            color: var(--text-muted);
+            font-size: 14px;
+            background: var(--surface);
+            border-radius: 16px;
+            border: 1px dashed var(--border);
+        }
+
+        nav.bottom-tab-bar {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 480px;
+            background: #fff;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 16px 32px calc(16px + env(safe-area-inset-bottom));
+        }
+
+        nav.bottom-tab-bar button {
+            border: 0;
+            background: transparent;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        nav.bottom-tab-bar button svg {
+            width: 30px;
+            height: 30px;
+        }
+
+        nav.bottom-tab-bar .point-icon {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--primary);
+            line-height: 1;
+        }
+
+        nav.bottom-tab-bar button.active {
+            color: var(--primary);
+        }
+    </style>
+</head>
+<body>
+<main class="page">
+    <header class="top">
+        <div class="greeting">
+            <p id="greetingTime">Good morning</p>
+            <h1 id="greetingName">고객님</h1>
+        </div>
+        <div class="top-actions">
+            <button class="icon-button" type="button" aria-label="알림센터로 이동" onclick="location.href='/notifications.html'">
+                <span class="unread-badge" id="unreadBadge" aria-hidden="true"></span>
+                <svg viewBox="0 0 24 24" fill="none"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M13.7 21a2 2 0 0 1-3.4 0" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+            </button>
+            <div class="avatar" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.8"/><path d="M4 20c1.5-4 5-6 8-6s6.5 2 8 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+            </div>
+        </div>
+    </header>
+
+    <section id="activeDeliverySection" hidden>
+        <h2>진행 중인 배송</h2>
+        <div id="activeDeliveryList"></div>
+    </section>
+
+    <section id="emptyDeliverySection" hidden>
+        <div class="empty-state">진행 중인 배송이 없어요.<br>새 배송을 신청해 보세요.</div>
+    </section>
+
+    <section>
+        <h2>빠른 배송 신청</h2>
+        <button class="quick-request-card" type="button" onclick="notReady()">
+            <span class="plus"><svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>
+            <span>
+                <span class="title" style="display:block;">새 배송 신청 예약</span>
+                <span class="desc">문앞 픽업 요청하세요</span>
+            </span>
+        </button>
+    </section>
+
+    <section id="matchingSection" hidden>
+        <h2>배송 매칭 현황</h2>
+        <div id="matchingList"></div>
+    </section>
+</main>
+
+<nav class="bottom-tab-bar" aria-label="하단 메뉴">
+    <button type="button" aria-label="포인트" onclick="notReady()">
+        <span class="point-icon" aria-hidden="true">P</span>
+    </button>
+    <button type="button" class="active" aria-label="홈" aria-current="page">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M4 11 12 4l8 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 10v9a1 1 0 0 0 1 1h4v-6h2v6h4a1 1 0 0 0 1-1v-9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <button type="button" aria-label="메뉴" onclick="notReady()">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+    </button>
+</nav>
+
+<script>
+    function notReady() {
+        const existing = document.getElementById('toast');
+        if (existing) existing.remove();
+
+        const toast = document.createElement('div');
+        toast.id = 'toast';
+        toast.textContent = '아직 준비 중인 기능입니다.';
+        toast.style.cssText =
+            'position:fixed;left:50%;bottom:90px;transform:translateX(-50%);' +
+            'background:#1e293b;color:#fff;padding:10px 20px;border-radius:999px;' +
+            'font-size:13px;z-index:100;';
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 2000);
+    }
+
+    function authHeader() {
+        const token = localStorage.getItem('accessToken');
+        const tokenType = localStorage.getItem('tokenType') || 'Bearer';
+        if (!token) {
+            return null;
+        }
+        return `${tokenType} ${token}`;
+    }
+
+    function greetingByHour() {
+        const hour = new Date().getHours();
+        if (hour < 12) return 'Good morning';
+        if (hour < 18) return 'Good afternoon';
+        return 'Good evening';
+    }
+
+    function shortLocation(address) {
+        const tokens = address.split(' ');
+        const district = tokens.find((token) => token.endsWith('구') || token.endsWith('군'));
+        return district || tokens[1] || address;
+    }
+
+    function formatRoute(deliveryRequest) {
+        return `${shortLocation(deliveryRequest.pickupAddress)} → ${shortLocation(deliveryRequest.dropoffAddress)}`;
+    }
+
+    // TODO: 백엔드에 실제 예상도착/매칭시간 필드가 추가되면 이 임시 추정치를 대체한다.
+    function placeholderEtaLabel() {
+        const eta = new Date(Date.now() + 90 * 60 * 1000);
+        const hours24 = eta.getHours();
+        const period = hours24 < 12 ? '오전' : '오후';
+        const hours12 = ((hours24 + 11) % 12) + 1;
+        const minutes = String(eta.getMinutes()).padStart(2, '0');
+        return `예상 도착: ${period} ${hours12}:${minutes}`;
+    }
+
+    function placeholderMatchingWaitLabel() {
+        return '예상 매칭 시간: 약 1시간';
+    }
+
+    function renderActiveDeliveries(deliveries) {
+        const matched = deliveries.filter((d) => d.status === 'MATCHED');
+        const requested = deliveries.filter((d) => d.status === 'REQUESTED');
+
+        const activeSection = document.getElementById('activeDeliverySection');
+        const activeList = document.getElementById('activeDeliveryList');
+        const emptySection = document.getElementById('emptyDeliverySection');
+        const matchingSection = document.getElementById('matchingSection');
+        const matchingList = document.getElementById('matchingList');
+
+        activeList.innerHTML = '';
+        matchingList.innerHTML = '';
+
+        if (matched.length === 0 && requested.length === 0) {
+            emptySection.hidden = false;
+            activeSection.hidden = true;
+            matchingSection.hidden = true;
+            return;
+        }
+
+        emptySection.hidden = true;
+
+        if (matched.length > 0) {
+            activeSection.hidden = false;
+            matched.forEach((delivery) => {
+                const card = document.createElement('div');
+                card.className = 'delivery-card';
+                card.innerHTML = `
+                    <span class="status-badge">배송 중</span>
+                    <div class="route">${formatRoute(delivery)}</div>
+                    <div class="eta">${placeholderEtaLabel()}</div>
+                    <div class="actions">
+                        <button type="button">실시간 위치 확인</button>
+                        <button type="button">배송 상세내역</button>
+                    </div>
+                `;
+                card.querySelectorAll('button').forEach((btn) => btn.addEventListener('click', notReady));
+                activeList.appendChild(card);
+            });
+        } else {
+            activeSection.hidden = true;
+        }
+
+        if (requested.length > 0) {
+            matchingSection.hidden = false;
+            requested.forEach((delivery) => {
+                const card = document.createElement('div');
+                card.className = 'waiting-card';
+                card.innerHTML = `
+                    <div class="title">배달원을 찾고 있어요...</div>
+                    <div class="route">${placeholderMatchingWaitLabel()}</div>
+                    <div class="loading-dots"><span></span><span></span><span></span></div>
+                `;
+                matchingList.appendChild(card);
+            });
+        } else {
+            matchingSection.hidden = true;
+        }
+    }
+
+    async function loadHome() {
+        const header = authHeader();
+        if (!header) {
+            location.replace('/login.html');
+            return;
+        }
+
+        document.getElementById('greetingTime').textContent = greetingByHour();
+
+        try {
+            const meResponse = await fetch('/api/v1/members/me', {
+                headers: { Authorization: header }
+            });
+            if (meResponse.status === 401 || meResponse.status === 403) {
+                location.replace('/login.html');
+                return;
+            }
+            const me = await meResponse.json();
+            document.getElementById('greetingName').textContent = `${me.name} 님`;
+
+            const deliveriesResponse = await fetch('/api/v1/delivery-requests');
+            const deliveries = await deliveriesResponse.json();
+            const myActiveDeliveries = deliveries.filter(
+                (d) => d.customerId === me.id && (d.status === 'REQUESTED' || d.status === 'MATCHED')
+            );
+            renderActiveDeliveries(myActiveDeliveries);
+
+            const notificationsResponse = await fetch('/api/v1/notifications?size=20', {
+                headers: { Authorization: header }
+            });
+            if (notificationsResponse.ok) {
+                const page = await notificationsResponse.json();
+                const hasUnread = (page.content || []).some((n) => !n.read);
+                document.getElementById('unreadBadge').style.display = hasUnread ? 'block' : 'none';
+            }
+        } catch (error) {
+            document.getElementById('emptyDeliverySection').hidden = false;
+        }
+    }
+
+    loadHome();
+</script>
+</body>
+</html>
