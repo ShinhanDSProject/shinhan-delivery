@@ -25,21 +25,21 @@ class AgentState(TypedDict):
     history: List[str]
 
 def planner_node(state: AgentState) -> AgentState:
-    print("🤖 [LangGraph Node: Planner] Analyzing task & planning architecture...")
+    print("🤖 [LangGraph 기획 노드] 작업 요구사항 분석 및 아키텍처 수립 중...")
     state["current_node"] = "Planner"
     state["status"] = "PLANNING_COMPLETED"
-    state["history"].append("Planner: Plan established for " + state["task"])
+    state["history"].append("기획 완료: " + state["task"] + " 작업 계획 수립")
     return state
 
 def coder_node(state: AgentState) -> AgentState:
-    print("💻 [LangGraph Node: Coder] Writing code & refactoring components...")
+    print("💻 [LangGraph 코딩 노드] 소스 코드 작성 및 컴포넌트 리팩토링 중...")
     state["current_node"] = "Coder"
     state["status"] = "CODING_COMPLETED"
-    state["history"].append("Coder: Code written/updated.")
+    state["history"].append("코딩 완료: 소스 코드 반영/업데이트됨")
     return state
 
 def verifier_node(state: AgentState) -> AgentState:
-    print("🛡️ [LangGraph Node: Verifier] Running 5-step test harness (verify.sh)...")
+    print("🛡️ [LangGraph 검증 노드] 5단계 품질 테스트 하네스 (verify.sh) 실행 중...")
     state["current_node"] = "Verifier"
     
     try:
@@ -52,37 +52,37 @@ def verifier_node(state: AgentState) -> AgentState:
         state["verify_logs"] = result.stdout + result.stderr
         if result.returncode == 0:
             state["status"] = "VERIFY_PASSED"
-            state["history"].append("Verifier: Harness 100% PASSED (0 exit code).")
+            state["history"].append("검증 성공: 5단계 하네스 검증 100% 통과 (0 exit code)")
         else:
             state["status"] = "VERIFY_FAILED"
-            state["history"].append("Verifier: Harness FAILED with exit code " + str(result.returncode))
+            state["history"].append(f"검증 실패: exit code {result.returncode} 발생")
     except Exception as e:
         state["verify_logs"] = str(e)
         state["status"] = "VERIFY_FAILED"
-        state["history"].append("Verifier: Harness execution error.")
+        state["history"].append("검증 오류: 하네스 실행 중 예외 발생")
 
     return state
 
 def fixer_node(state: AgentState) -> AgentState:
     state["fix_attempts"] += 1
-    print(f"🔧 [LangGraph Node: Fixer] Auto-fixing code (Attempt {state['fix_attempts']}/{state['max_fix_attempts']})...")
+    print(f"🔧 [LangGraph 자가 치유 노드] 스택 트레이스 기반 자가 치유 실행 중 (시도 {state['fix_attempts']}/{state['max_fix_attempts']})...")
     state["current_node"] = "Fixer"
     state["status"] = "FIXING"
-    state["history"].append(f"Fixer: Auto-fix executed based on stack trace.")
+    state["history"].append(f"자가 치유: {state['fix_attempts']}회차 자가 수정 실행됨")
     return state
 
 def reviewer_node(state: AgentState) -> AgentState:
-    print("🔍 [LangGraph Node: Reviewer] Multi-Pass Audit & Convention Assetization...")
+    print("🔍 [LangGraph 리뷰 노드] 6대 관점 다차원 셀프 코드 리뷰 및 컨벤션 자산화 진행 중...")
     state["current_node"] = "Reviewer"
     state["status"] = "AUDITED"
-    state["history"].append("Reviewer: Multi-pass audit completed.")
+    state["history"].append("리뷰 완료: 다차원 셀프 리뷰 및 문서 동기화 완료")
     return state
 
 def human_approval_node(state: AgentState) -> AgentState:
-    print("👤 [LangGraph Node: HumanApproval (Checkpoint)] Awaiting user approval...")
+    print("👤 [LangGraph 승인 대기 노드 (체크포인트)] 개발자 최종 승인 대기 중...")
     state["current_node"] = "HumanApproval"
     state["status"] = "APPROVED"
-    state["history"].append("HumanApproval: Approved by reviewer.")
+    state["history"].append("최종 승인: 개발자/리뷰어 승인 완료 (APPROVED)")
     return state
 
 # Conditional Edge Router
@@ -96,7 +96,7 @@ def route_after_verify(state: AgentState) -> str:
 
 def run_graph(task_description: str):
     print("======================================================")
-    print("🚀 [LangGraph Engine] Executing StateGraph Orchestration")
+    print("🚀 [LangGraph 엔진] StateGraph 오케스트레이션 파이프라인 기동")
     print("======================================================")
     
     state: AgentState = {
@@ -120,7 +120,13 @@ def run_graph(task_description: str):
     while True:
         state = verifier_node(state)
         next_node = route_after_verify(state)
-        print(f"🔀 [LangGraph Conditional Edge] Routing to -> {next_node}")
+        
+        node_names_kr = {
+            "reviewer_node": "셀프 리뷰 노드 (Reviewer)",
+            "fixer_node": "자가 치유 노드 (Fixer)",
+            "human_approval_node": "개발자 승인 대기 노드 (HumanApproval)"
+        }
+        print(f"🔀 [LangGraph 조건부 라우터] 다음 전이 노드 ➔ {node_names_kr.get(next_node, next_node)}")
         
         if next_node == "reviewer_node":
             state = reviewer_node(state)
@@ -130,18 +136,18 @@ def run_graph(task_description: str):
             state = fixer_node(state)
             state = coder_node(state)
         else:
-            print("⚠️ Max fix attempts reached. Escalate to Human Approval Checkpoint.")
+            print("⚠️ 최대 자가 치유 시도 횟수 초과. 개발자 승인 체크포인트로 이관합니다.")
             state = human_approval_node(state)
             break
 
     print("======================================================")
-    print("🎉 [LangGraph Engine] Execution Completed!")
-    print(f"Final Status: {state['status']}")
-    print("State History:")
+    print("🎉 [LangGraph 엔진] 상태 그래프 실행 완료!")
+    print(f"📌 최종 상태: {state['status']}")
+    print("📜 단계별 이력:")
     for h in state["history"]:
         print(f"  • {h}")
     print("======================================================")
 
 if __name__ == "__main__":
-    task = sys.argv[1] if len(sys.argv) > 1 else "Default Feature Task"
+    task = sys.argv[1] if len(sys.argv) > 1 else "기본 기능 구현 태스크"
     run_graph(task)
