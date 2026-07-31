@@ -9,11 +9,14 @@ import com.example.shinhangaecheokja.payment.dto.request.PointUseRequest;
 import com.example.shinhangaecheokja.payment.entity.PointWallet;
 import com.example.shinhangaecheokja.payment.exception.InsufficientPointException;
 import com.example.shinhangaecheokja.payment.repository.PaymentRepository;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -74,6 +77,7 @@ class PaymentConcurrencyTest {
     CountDownLatch doneLatch = new CountDownLatch(THREAD_COUNT);
     AtomicInteger successCount = new AtomicInteger();
     AtomicInteger insufficientCount = new AtomicInteger();
+    List<Throwable> unexpectedFailures = new CopyOnWriteArrayList<>();
 
     for (int i = 0; i < THREAD_COUNT; i++) {
       executorService.submit(
@@ -89,16 +93,35 @@ class PaymentConcurrencyTest {
               insufficientCount.incrementAndGet();
             } catch (InterruptedException e) {
               Thread.currentThread().interrupt();
+            } catch (Throwable t) {
+              // 락 대기 타임아웃, 커넥션 풀 고갈 등 예상치 못한 실패는 카운터 어디에도 잡히지 않으므로 따로 모아
+              // 검증 단계에서 원인을 그대로 드러낸다.
+              unexpectedFailures.add(t);
             } finally {
               doneLatch.countDown();
             }
           });
     }
 
-    readyLatch.await();
-    startLatch.countDown();
-    doneLatch.await(30, TimeUnit.SECONDS);
-    executorService.shutdown();
+    boolean completedInTime;
+    try {
+      readyLatch.await();
+      startLatch.countDown();
+      completedInTime = doneLatch.await(30, TimeUnit.SECONDS);
+    } finally {
+      // 위 대기 도중 이 스레드 자체가 인터럽트되어 예외가 던져지더라도, 워커 스레드들이 살아있는 채로
+      // @AfterEach의 DB 정리가 실행되지 않도록 종료 처리는 항상 수행한다.
+      executorService.shutdown();
+      if (!executorService.awaitTermination(10, TimeUnit.SECONDS)) {
+        executorService.shutdownNow();
+        executorService.awaitTermination(5, TimeUnit.SECONDS);
+      }
+    }
+
+    SoftAssertions softly = new SoftAssertions();
+    softly.assertThat(completedInTime).as("모든 스레드가 제한시간 내에 종료됨").isTrue();
+    softly.assertThat(unexpectedFailures).as("예상치 못한 예외 없음").isEmpty();
+    softly.assertAll();
 
     long finalBalance = paymentRepository.findById(walletId).orElseThrow().getBalance();
 

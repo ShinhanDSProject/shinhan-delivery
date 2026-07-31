@@ -16,6 +16,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -103,14 +104,25 @@ class DeliveryPickupConcurrencyTest {
           });
     }
 
-    readyLatch.await();
-    startLatch.countDown();
-    boolean completedInTime = doneLatch.await(30, TimeUnit.SECONDS);
-    executorService.shutdown();
-    executorService.awaitTermination(10, TimeUnit.SECONDS);
+    boolean completedInTime;
+    try {
+      readyLatch.await();
+      startLatch.countDown();
+      completedInTime = doneLatch.await(30, TimeUnit.SECONDS);
+    } finally {
+      // 위 대기 도중 이 스레드 자체가 인터럽트되어 예외가 던져지더라도, 워커 스레드들이 살아있는 채로
+      // @AfterEach의 DB 정리가 실행되지 않도록 종료 처리는 항상 수행한다.
+      executorService.shutdown();
+      if (!executorService.awaitTermination(10, TimeUnit.SECONDS)) {
+        executorService.shutdownNow();
+        executorService.awaitTermination(5, TimeUnit.SECONDS);
+      }
+    }
 
-    assertThat(completedInTime).isTrue();
-    assertThat(unexpectedFailures).isEmpty();
+    SoftAssertions softly = new SoftAssertions();
+    softly.assertThat(completedInTime).as("모든 스레드가 제한시간 내에 종료됨").isTrue();
+    softly.assertThat(unexpectedFailures).as("예상치 못한 예외 없음").isEmpty();
+    softly.assertAll();
 
     DeliveryRequest result = deliveryRequestRepository.findById(deliveryRequestId).orElseThrow();
 
