@@ -8,6 +8,8 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.example.shinhangaecheokja.common.exception.EntityNotFoundException;
+import com.example.shinhangaecheokja.common.exception.ErrorCode;
 import com.example.shinhangaecheokja.delivery.dto.request.DeliveryCompleteRequest;
 import com.example.shinhangaecheokja.delivery.dto.request.DeliveryCreateRequest;
 import com.example.shinhangaecheokja.delivery.dto.request.DeliveryEstimateRequest;
@@ -76,12 +78,10 @@ class DeliveryServiceTest {
     request.setWeight(10);
 
     when(memberService.getMember(999L))
-        .thenThrow(
-            new com.example.shinhangaecheokja.common.exception.EntityNotFoundException(
-                com.example.shinhangaecheokja.common.exception.ErrorCode.MEMBER_NOT_FOUND));
+        .thenThrow(new EntityNotFoundException(ErrorCode.MEMBER_NOT_FOUND));
 
     assertThatThrownBy(() -> deliveryService.requestDelivery(request))
-        .isInstanceOf(com.example.shinhangaecheokja.common.exception.EntityNotFoundException.class);
+        .isInstanceOf(EntityNotFoundException.class);
   }
 
   @Test
@@ -113,7 +113,7 @@ class DeliveryServiceTest {
     when(deliveryRequestRepository.findById(1L)).thenReturn(Optional.empty());
 
     assertThatThrownBy(() -> deliveryService.getDeliveryRequest(1L))
-        .isInstanceOf(com.example.shinhangaecheokja.common.exception.EntityNotFoundException.class);
+        .isInstanceOf(EntityNotFoundException.class);
   }
 
   @Test

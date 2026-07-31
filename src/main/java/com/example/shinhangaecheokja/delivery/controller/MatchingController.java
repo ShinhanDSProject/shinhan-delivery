@@ -4,6 +4,8 @@ import com.example.shinhangaecheokja.delivery.dto.request.MatchingCreateRequest;
 import com.example.shinhangaecheokja.delivery.dto.request.MatchingUpdateRequest;
 import com.example.shinhangaecheokja.delivery.dto.response.DeliveryResponse;
 import com.example.shinhangaecheokja.delivery.dto.response.MatchingResponse;
+import com.example.shinhangaecheokja.delivery.entity.DeliveryRequest;
+import com.example.shinhangaecheokja.delivery.entity.Matching;
 import com.example.shinhangaecheokja.delivery.service.MatchingService;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -32,13 +34,15 @@ public class MatchingController {
   @PostMapping
   public ResponseEntity<MatchingResponse> createMatching(
       @RequestBody @Valid MatchingCreateRequest request) {
-    return ResponseEntity.status(HttpStatus.CREATED).body(matchingService.createMatching(request));
+    Matching created = matchingService.createMatching(request);
+    return ResponseEntity.status(HttpStatus.CREATED).body(MatchingResponse.from(created));
   }
 
   /** 차량이 지금 수락할 수 있는 열린 콜(배송 요청) 목록을 조회한다. */
   @GetMapping("/calls")
   public ResponseEntity<List<DeliveryResponse>> getOpenCalls(@RequestParam Long vehicleId) {
-    return ResponseEntity.ok(matchingService.getOpenCalls(vehicleId));
+    List<DeliveryRequest> openCalls = matchingService.getOpenCalls(vehicleId);
+    return ResponseEntity.ok(openCalls.stream().map(DeliveryResponse::from).toList());
   }
 
   /** 매칭 단건을 조회한다. */

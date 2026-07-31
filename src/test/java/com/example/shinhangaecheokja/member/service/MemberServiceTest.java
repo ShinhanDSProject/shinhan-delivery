@@ -5,7 +5,10 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import com.example.shinhangaecheokja.common.exception.EntityNotFoundException;
 import com.example.shinhangaecheokja.member.dto.request.MemberCreateRequest;
+import com.example.shinhangaecheokja.member.dto.request.MemberProfileUpdateRequestDto;
+import com.example.shinhangaecheokja.member.dto.response.MemberProfileResponseDto;
 import com.example.shinhangaecheokja.member.dto.response.MemberResponse;
 import com.example.shinhangaecheokja.member.entity.Member;
 import com.example.shinhangaecheokja.member.entity.MemberRole;
@@ -40,10 +43,10 @@ class MemberServiceTest {
     when(memberRepository.save(any(Member.class)))
         .thenAnswer(invocation -> invocation.getArgument(0));
 
-    MemberResponse response = memberService.createMember(request);
+    Member response = memberService.createMember(request);
 
-    assertThat(response.email()).isEqualTo("user@example.com");
-    assertThat(response.role()).isEqualTo(MemberRole.CUSTOMER);
+    assertThat(response.getEmail()).isEqualTo("user@example.com");
+    assertThat(response.getRole()).isEqualTo(MemberRole.CUSTOMER);
   }
 
   @Test
@@ -61,7 +64,7 @@ class MemberServiceTest {
     when(memberRepository.findById(1L)).thenReturn(Optional.empty());
 
     assertThatThrownBy(() -> memberService.getMember(1L))
-        .isInstanceOf(com.example.shinhangaecheokja.common.exception.EntityNotFoundException.class);
+        .isInstanceOf(EntityNotFoundException.class);
   }
 
   @Test
@@ -87,8 +90,7 @@ class MemberServiceTest {
     member.setRole(MemberRole.CUSTOMER);
     when(memberRepository.findById(2L)).thenReturn(Optional.of(member));
 
-    com.example.shinhangaecheokja.member.dto.response.MemberProfileResponseDto response =
-        memberService.getMyProfile(2L);
+    MemberProfileResponseDto response = memberService.getMyProfile(2L);
 
     assertThat(response.email()).isEqualTo("my@example.com");
     assertThat(response.name()).isEqualTo("김철수");
@@ -104,12 +106,10 @@ class MemberServiceTest {
     member.setRole(MemberRole.CUSTOMER);
     when(memberRepository.findById(2L)).thenReturn(Optional.of(member));
 
-    com.example.shinhangaecheokja.member.dto.request.MemberProfileUpdateRequestDto request =
-        new com.example.shinhangaecheokja.member.dto.request.MemberProfileUpdateRequestDto(
-            "김영희", "010-1111-2222");
+    MemberProfileUpdateRequestDto request =
+        new MemberProfileUpdateRequestDto("김영희", "010-1111-2222");
 
-    com.example.shinhangaecheokja.member.dto.response.MemberProfileResponseDto response =
-        memberService.updateMyProfile(2L, request);
+    MemberProfileResponseDto response = memberService.updateMyProfile(2L, request);
 
     assertThat(response.name()).isEqualTo("김영희");
     assertThat(response.phoneNumber()).isEqualTo("010-1111-2222");

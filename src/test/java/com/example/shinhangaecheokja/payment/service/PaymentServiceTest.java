@@ -5,6 +5,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import com.example.shinhangaecheokja.common.exception.EntityNotFoundException;
+import com.example.shinhangaecheokja.common.exception.ErrorCode;
 import com.example.shinhangaecheokja.member.service.MemberService;
 import com.example.shinhangaecheokja.payment.dto.request.PointChargeRequest;
 import com.example.shinhangaecheokja.payment.dto.request.PointUseRequest;
@@ -35,10 +37,10 @@ class PaymentServiceTest {
     when(paymentRepository.save(any(PointWallet.class)))
         .thenAnswer(invocation -> invocation.getArgument(0));
 
-    PointWalletResponse response = paymentService.createWallet(request);
+    PointWallet response = paymentService.createWallet(request);
 
-    assertThat(response.memberId()).isEqualTo(1L);
-    assertThat(response.balance()).isZero();
+    assertThat(response.getMemberId()).isEqualTo(1L);
+    assertThat(response.getBalance()).isEqualTo(0L);
   }
 
   @Test
@@ -47,12 +49,10 @@ class PaymentServiceTest {
     request.setMemberId(999L);
 
     when(memberService.getMember(999L))
-        .thenThrow(
-            new com.example.shinhangaecheokja.common.exception.EntityNotFoundException(
-                com.example.shinhangaecheokja.common.exception.ErrorCode.MEMBER_NOT_FOUND));
+        .thenThrow(new EntityNotFoundException(ErrorCode.MEMBER_NOT_FOUND));
 
     assertThatThrownBy(() -> paymentService.createWallet(request))
-        .isInstanceOf(com.example.shinhangaecheokja.common.exception.EntityNotFoundException.class);
+        .isInstanceOf(EntityNotFoundException.class);
   }
 
   @Test
@@ -60,7 +60,7 @@ class PaymentServiceTest {
     when(paymentRepository.findById(1L)).thenReturn(Optional.empty());
 
     assertThatThrownBy(() -> paymentService.getWallet(1L))
-        .isInstanceOf(com.example.shinhangaecheokja.common.exception.EntityNotFoundException.class);
+        .isInstanceOf(EntityNotFoundException.class);
   }
 
   @Test

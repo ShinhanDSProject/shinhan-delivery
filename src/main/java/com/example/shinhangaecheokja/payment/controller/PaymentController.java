@@ -4,6 +4,7 @@ import com.example.shinhangaecheokja.payment.dto.request.PointChargeRequest;
 import com.example.shinhangaecheokja.payment.dto.request.PointUseRequest;
 import com.example.shinhangaecheokja.payment.dto.request.PointWalletCreateRequest;
 import com.example.shinhangaecheokja.payment.dto.response.PointWalletResponse;
+import com.example.shinhangaecheokja.payment.entity.PointWallet;
 import com.example.shinhangaecheokja.payment.service.PaymentService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +30,8 @@ public class PaymentController {
   @PostMapping
   public ResponseEntity<PointWalletResponse> createWallet(
       @RequestBody PointWalletCreateRequest request) {
-    return ResponseEntity.status(HttpStatus.CREATED).body(paymentService.createWallet(request));
+    PointWallet created = paymentService.createWallet(request);
+    return ResponseEntity.status(HttpStatus.CREATED).body(PointWalletResponse.from(created));
   }
 
   /** 포인트 지갑 단건을 조회한다. */

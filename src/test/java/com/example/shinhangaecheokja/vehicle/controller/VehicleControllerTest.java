@@ -8,8 +8,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.example.shinhangaecheokja.common.exception.EntityNotFoundException;
+import com.example.shinhangaecheokja.common.exception.ErrorCode;
 import com.example.shinhangaecheokja.vehicle.dto.request.VehicleCreateRequest;
-import com.example.shinhangaecheokja.vehicle.dto.response.VehicleResponse;
+import com.example.shinhangaecheokja.vehicle.entity.Vehicle;
 import com.example.shinhangaecheokja.vehicle.entity.VehicleStatus;
 import com.example.shinhangaecheokja.vehicle.entity.VehicleType;
 import com.example.shinhangaecheokja.vehicle.service.VehicleService;
@@ -37,10 +39,18 @@ class VehicleControllerTest {
     request.setMaxWeight(500);
     request.setMaxDistance(100);
 
-    when(vehicleService.registerVehicle(any()))
-        .thenReturn(
-            new VehicleResponse(
-                1L, 1L, VehicleType.CAR, 500, 100, 37.5, 127.0, VehicleStatus.AVAILABLE));
+    Vehicle vehicle =
+        Vehicle.builder()
+            .id(1L)
+            .ownerId(1L)
+            .type(VehicleType.CAR)
+            .maxWeight(500)
+            .maxDistance(100)
+            .latitude(37.5)
+            .longitude(127.0)
+            .status(VehicleStatus.AVAILABLE)
+            .build();
+    when(vehicleService.registerVehicle(any())).thenReturn(vehicle);
 
     mockMvc
         .perform(
@@ -88,9 +98,7 @@ class VehicleControllerTest {
   @Test
   void 존재하지_않는_차량을_조회하면_404를_반환한다() throws Exception {
     when(vehicleService.getVehicle(eq(999L)))
-        .thenThrow(
-            new com.example.shinhangaecheokja.common.exception.EntityNotFoundException(
-                com.example.shinhangaecheokja.common.exception.ErrorCode.VEHICLE_NOT_FOUND));
+        .thenThrow(new EntityNotFoundException(ErrorCode.VEHICLE_NOT_FOUND));
 
     mockMvc.perform(get("/api/v1/vehicles/999")).andExpect(status().isNotFound());
   }

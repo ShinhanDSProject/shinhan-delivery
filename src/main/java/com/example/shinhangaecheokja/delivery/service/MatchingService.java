@@ -4,7 +4,6 @@ import com.example.shinhangaecheokja.common.exception.EntityNotFoundException;
 import com.example.shinhangaecheokja.common.exception.ErrorCode;
 import com.example.shinhangaecheokja.delivery.dto.request.MatchingCreateRequest;
 import com.example.shinhangaecheokja.delivery.dto.request.MatchingUpdateRequest;
-import com.example.shinhangaecheokja.delivery.dto.response.DeliveryResponse;
 import com.example.shinhangaecheokja.delivery.dto.response.MatchingResponse;
 import com.example.shinhangaecheokja.delivery.entity.DeliveryRequest;
 import com.example.shinhangaecheokja.delivery.entity.DeliveryStatus;
@@ -19,7 +18,6 @@ import com.example.shinhangaecheokja.vehicle.dto.response.VehicleResponse;
 import com.example.shinhangaecheokja.vehicle.entity.VehicleStatus;
 import com.example.shinhangaecheokja.vehicle.exception.VehicleNotAvailableException;
 import com.example.shinhangaecheokja.vehicle.service.VehicleService;
-import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -35,11 +33,10 @@ public class MatchingService {
   private final VehicleService vehicleService;
 
   /**
-   * 차량이 배송 요청을 수락해 매칭을 생성한다(콜 수락 방식). 여러 차량이 동시에 같은 배송 요청을 수락하려 하면, 배송 요청 행에 비관적 락을 걸어 먼저 커밋한 차량
-   * 하나만 성공하도록 한다.
+   * 매칭을 생성한다. 배송 요청과 차량을 각각 findByIdForUpdate(비관적 락)로 조회해 조건(상태, 무게, 거리)을 검증하고, Matching 엔티티를 저장한다.
    */
   @Transactional
-  public MatchingResponse createMatching(MatchingCreateRequest request) {
+  public Matching createMatching(MatchingCreateRequest request) {
     DeliveryRequest deliveryRequest =
         findDeliveryRequestForUpdateOrThrow(request.getDeliveryRequestId());
     if (deliveryRequest.getStatus() != DeliveryStatus.REQUESTED) {
@@ -57,15 +54,11 @@ public class MatchingService {
           request.getVehicleId(), deliveryRequest.getWeight(), deliveryRequest.getDistance());
     }
 
-    Matching matching = new Matching();
-    matching.setDeliveryRequestId(request.getDeliveryRequestId());
-    matching.setVehicleId(request.getVehicleId());
-    matching.setStatus(MatchingStatus.MATCHED);
-    matching.setMatchedAt(LocalDateTime.now());
+    Matching matching = Matching.from(request);
 
     Matching saved = matchingRepository.save(matching);
     applyStatus(saved, deliveryRequest, MatchingStatus.MATCHED);
-    return MatchingResponse.from(saved);
+    return saved;
   }
 
   /**
@@ -73,17 +66,13 @@ public class MatchingService {
    * 어차피 수락할 수 없으므로 빈 목록을 반환한다.
    */
   @Transactional(readOnly = true)
-  public List<DeliveryResponse> getOpenCalls(Long vehicleId) {
+  public List<DeliveryRequest> getOpenCalls(Long vehicleId) {
     VehicleResponse vehicle = vehicleService.getVehicle(vehicleId);
     if (vehicle.status() != VehicleStatus.AVAILABLE) {
       return List.of();
     }
-    return deliveryRequestRepository
-        .findByStatusAndWeightLessThanEqualAndDistanceLessThanEqual(
-            DeliveryStatus.REQUESTED, vehicle.maxWeight(), vehicle.maxDistance())
-        .stream()
-        .map(DeliveryResponse::from)
-        .toList();
+    return deliveryRequestRepository.findByStatusAndWeightLessThanEqualAndDistanceLessThanEqual(
+        DeliveryStatus.REQUESTED, vehicle.maxWeight(), vehicle.maxDistance());
   }
 
   /** id로 매칭 단건을 조회한다. 없으면 EntityNotFoundException. */

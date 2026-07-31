@@ -67,21 +67,8 @@ public class DeliveryService {
     DeliveryEstimateResponse fee =
         calculateFee(distanceKm, request.getWeight(), request.getItemSize());
 
-    DeliveryRequest deliveryRequest = new DeliveryRequest();
-    deliveryRequest.setCustomerId(request.getCustomerId());
-    deliveryRequest.setPickupAddress(request.getPickupAddress());
-    deliveryRequest.setDropoffAddress(request.getDropoffAddress());
-    deliveryRequest.setWeight(request.getWeight());
-    deliveryRequest.setDistance(distanceKm);
-    deliveryRequest.setPickupLatitude(request.getPickupLatitude());
-    deliveryRequest.setPickupLongitude(request.getPickupLongitude());
-    deliveryRequest.setDropoffLatitude(request.getDropoffLatitude());
-    deliveryRequest.setDropoffLongitude(request.getDropoffLongitude());
-    deliveryRequest.setItemSize(request.getItemSize());
-    deliveryRequest.setStatus(DeliveryStatus.REQUESTED);
-    // calculateFee()가 매 단계 setScale(0, HALF_UP)을 거치므로 totalFee는 항상 정수다. longValueExact()를 쓰는
-    // 이유는, 만약 나중에 요금 정책이 바뀌어 이 불변조건이 깨지면 소수점을 조용히 버리지 않고 즉시 예외로 드러내기 위함이다.
-    deliveryRequest.setFeePoint(fee.totalFee().longValueExact());
+    DeliveryRequest deliveryRequest =
+        DeliveryRequest.of(request, distanceKm, fee.totalFee().longValueExact());
 
     DeliveryRequest saved = deliveryRequestRepository.save(deliveryRequest);
 

@@ -31,4 +31,9 @@ public class PointWallet {
 
   @Column(nullable = false)
   private long balance;
+
+  /** 잔액 0원인 신규 포인트 지갑 엔티티를 생성하는 정적 팩토리 메서드. */
+  public static PointWallet createEmpty(Long memberId) {
+    return PointWallet.builder().memberId(memberId).balance(0L).build();
+  }
 }

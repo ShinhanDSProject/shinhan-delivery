@@ -12,6 +12,7 @@ import com.example.shinhangaecheokja.member.dto.request.MemberUpdateRequest;
 import com.example.shinhangaecheokja.member.dto.response.MemberProfileResponseDto;
 import com.example.shinhangaecheokja.member.dto.response.MemberResponse;
 import com.example.shinhangaecheokja.member.dto.response.TokenResponse;
+import com.example.shinhangaecheokja.member.entity.Member;
 import com.example.shinhangaecheokja.member.service.MemberService;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -43,7 +44,8 @@ public class MemberController {
   @PostMapping
   public ResponseEntity<MemberResponse> createMember(
       @Valid @RequestBody MemberCreateRequest request) {
-    return ResponseEntity.status(HttpStatus.CREATED).body(memberService.createMember(request));
+    Member created = memberService.createMember(request);
+    return ResponseEntity.status(HttpStatus.CREATED).body(MemberResponse.from(created));
   }
 
   /** 회원 로그인(JWT 토큰 발급)을 처리한다. */
@@ -108,14 +110,16 @@ public class MemberController {
   @PutMapping("/{memberId}")
   public ResponseEntity<MemberResponse> updateMember(
       @PathVariable Long memberId, @RequestBody MemberUpdateRequest request) {
-    return ResponseEntity.ok(memberService.updateMember(memberId, request));
+    Member updated = memberService.updateMember(memberId, request);
+    return ResponseEntity.ok(MemberResponse.from(updated));
   }
 
   /** 회원의 역할(CUSTOMER/COURIER)을 변경한다. */
   @PatchMapping("/{memberId}/role")
   public ResponseEntity<MemberResponse> updateRole(
       @PathVariable Long memberId, @Valid @RequestBody MemberRoleUpdateRequest request) {
-    return ResponseEntity.ok(memberService.updateRole(memberId, request.getRole()));
+    Member updated = memberService.updateRole(memberId, request.getRole());
+    return ResponseEntity.ok(MemberResponse.from(updated));
   }
 
   /** 회원을 삭제한다. */
