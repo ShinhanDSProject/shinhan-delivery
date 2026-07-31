@@ -470,11 +470,14 @@
                     <div class="route">${formatRoute(delivery)}</div>
                     <div class="eta">${placeholderEtaLabel()}</div>
                     <div class="actions">
-                        <button type="button">실시간 위치 확인</button>
-                        <button type="button">배송 상세내역</button>
+                        <button type="button" data-action="track">실시간 위치 확인</button>
+                        <button type="button" data-action="detail">배송 상세내역</button>
                     </div>
                 `;
-                card.querySelectorAll('button').forEach((btn) => btn.addEventListener('click', notReady));
+                card.querySelector('[data-action="track"]').addEventListener('click', () => {
+                    location.href = `/realtime-tracking.html?id=${delivery.id}`;
+                });
+                card.querySelector('[data-action="detail"]').addEventListener('click', notReady);
                 activeList.appendChild(card);
             });
         } else {
