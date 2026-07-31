@@ -5,6 +5,8 @@ import com.example.shinhangaecheokja.delivery.entity.DeliveryStatus;
 import jakarta.persistence.LockModeType;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
@@ -21,4 +23,11 @@ public interface DeliveryRequestRepository extends JpaRepository<DeliveryRequest
   /** 주어진 상태이면서 무게·거리를 모두 그 값 이하로 감당 가능한 배송 요청 목록을 조회한다(차량의 콜 목록용). */
   List<DeliveryRequest> findByStatusAndWeightLessThanEqualAndDistanceLessThanEqual(
       DeliveryStatus status, double weight, double distance);
+
+  /** 로그인 회원 본인의 배송 요청을 최신순으로 페이징 조회한다(배송 내역 목록용). */
+  Page<DeliveryRequest> findByCustomerIdOrderByCreatedAtDesc(Long customerId, Pageable pageable);
+
+  /** 로그인 회원 본인의 특정 상태 배송 요청만 최신순으로 페이징 조회한다. */
+  Page<DeliveryRequest> findByCustomerIdAndStatusOrderByCreatedAtDesc(
+      Long customerId, DeliveryStatus status, Pageable pageable);
 }

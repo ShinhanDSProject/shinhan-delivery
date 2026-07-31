@@ -7,6 +7,7 @@ import com.example.shinhangaecheokja.delivery.dto.request.DeliveryCreateRequest;
 import com.example.shinhangaecheokja.delivery.dto.request.DeliveryEstimateRequest;
 import com.example.shinhangaecheokja.delivery.dto.request.DeliveryUpdateRequest;
 import com.example.shinhangaecheokja.delivery.dto.response.DeliveryEstimateResponse;
+import com.example.shinhangaecheokja.delivery.dto.response.DeliveryListResponseDto;
 import com.example.shinhangaecheokja.delivery.dto.response.DeliveryResponse;
 import com.example.shinhangaecheokja.delivery.dto.response.ProofPhotoResponse;
 import com.example.shinhangaecheokja.delivery.entity.DeliveryRequest;
@@ -24,9 +25,10 @@ import com.example.shinhangaecheokja.member.service.MemberService;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -151,10 +153,16 @@ public class DeliveryService {
     return DeliveryResponse.from(findDeliveryRequestOrThrow(deliveryRequestId));
   }
 
-  /** 전체 배송 요청 목록을 조회한다. */
+  /** 로그인 회원 본인의 배송 내역을 최신순으로 페이징 조회한다. status가 있으면 그 상태로 필터링한다(배송 내역 목록용). */
   @Transactional(readOnly = true)
-  public List<DeliveryResponse> getDeliveryRequests() {
-    return deliveryRequestRepository.findAll().stream().map(DeliveryResponse::from).toList();
+  public Page<DeliveryListResponseDto> getMyDeliveryRequests(
+      Long customerId, DeliveryStatus status, Pageable pageable) {
+    Page<DeliveryRequest> deliveryRequests =
+        status != null
+            ? deliveryRequestRepository.findByCustomerIdAndStatusOrderByCreatedAtDesc(
+                customerId, status, pageable)
+            : deliveryRequestRepository.findByCustomerIdOrderByCreatedAtDesc(customerId, pageable);
+    return deliveryRequests.map(DeliveryListResponseDto::from);
   }
 
   /**
