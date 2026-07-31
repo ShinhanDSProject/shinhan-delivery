@@ -66,10 +66,8 @@ public class DeliveryService {
     DeliveryEstimateResponse fee =
         calculateFee(distanceKm, request.getWeight(), request.getItemSize());
 
-    DeliveryRequest deliveryRequest =
-        DeliveryRequest.of(request, distanceKm, fee.totalFee().longValueExact());
-
-    return deliveryRequestRepository.save(deliveryRequest);
+    return deliveryRequestRepository.save(
+        DeliveryRequest.of(request, distanceKm, fee.totalFee().longValueExact()));
   }
 
   /** 배송 요청을 생성하지 않고 예상 요금만 계산한다({@link #requestDelivery}와 완전히 동일한 공식). */

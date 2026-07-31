@@ -30,9 +30,7 @@ public class VehicleService {
     memberService.getMember(request.getOwnerId());
     validateWeightAndDistance(request.getMaxWeight(), request.getMaxDistance());
 
-    Vehicle vehicle = Vehicle.from(request);
-
-    return vehicleRepository.save(vehicle);
+    return vehicleRepository.save(Vehicle.from(request));
   }
 
   /** id로 Vehicle 단건을 조회한다. 없으면 EntityNotFoundException. */
