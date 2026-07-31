@@ -58,5 +58,5 @@ gradlew.bat spotlessApply      # 컨벤션에 맞게 자동 포맷팅
 
 - 베이스 패키지: `com.example.shinhangaecheokja`.
 - `code-convention.md` §2 기준 목표 구조: `controller`(DTO만 다룸), `service`(비즈니스 로직·트랜잭션·예외 발생), `repository`(`~Repository extends JpaRepository<Entity, Long>`, Entity 1개당 1개), `entity`(`@Entity` + Lombok), `dto/{request,response}`, `exception`(커스텀 예외 + `GlobalExceptionHandler`), `config`.
-- 새 도메인 로직을 추가할 때는 "Controller → Service → Repository" 단방향 의존과 "Repository는 Service/Controller에 의존하지 않는다"는 규칙(컨벤션 §14)을 지키세요. 아직 이 규칙을 빌드 시점에 강제하는 ArchUnit 테스트는 없으니, 필요하면 컨벤션 §14의 예시를 참고해 추가하세요.
+- 새 도메인 로직을 추가할 때는 "Controller → Service → Repository" 단방향 의존과 "Repository는 Service/Controller에 의존하지 않는다"는 규칙(컨벤션 §14)을 지키세요. 이 규칙은 `src/test/java/com/example/shinhangaecheokja/common/LayeredArchitectureTest.java`의 ArchUnit 테스트로 빌드 시점에 이미 강제되고 있습니다.
 - 영속성: MariaDB(`org.mariadb.jdbc`) 대상 Spring Data JPA + Flyway. 스키마 변경은 항상 새 마이그레이션 파일(`src/main/resources/db/migration/V<n>__설명.sql`)로 추가하고, `spring.jpa.hibernate.ddl-auto`는 `validate`(또는 `none`)로 유지합니다 — Hibernate가 스키마를 직접 생성하게 하면 안 됩니다.
