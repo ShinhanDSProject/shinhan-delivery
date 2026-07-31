@@ -3,6 +3,7 @@ package com.example.shinhangaecheokja.delivery.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -17,6 +18,7 @@ import com.example.shinhangaecheokja.delivery.dto.response.ProofPhotoResponse;
 import com.example.shinhangaecheokja.delivery.entity.DeliveryRequest;
 import com.example.shinhangaecheokja.delivery.entity.DeliveryStatus;
 import com.example.shinhangaecheokja.delivery.entity.ItemSize;
+import com.example.shinhangaecheokja.delivery.event.DeliveryStatusChangedEvent;
 import com.example.shinhangaecheokja.delivery.exception.AlreadyMatchedException;
 import com.example.shinhangaecheokja.delivery.exception.InvalidDeliveryDistanceException;
 import com.example.shinhangaecheokja.delivery.exception.InvalidDeliveryTransitionException;
@@ -295,6 +297,12 @@ class DeliveryServiceTest {
     assertThat(response.status()).isEqualTo(DeliveryStatus.COMPLETED);
     assertThat(deliveryRequest.getProofPhotoUrl()).isEqualTo("https://example.com/proof.jpg");
     assertThat(deliveryRequest.getCompletedAt()).isNotNull();
+    verify(eventPublisher)
+        .publishEvent(
+            argThat(
+                (DeliveryStatusChangedEvent event) ->
+                    event.deliveryRequestId().equals(1L)
+                        && event.status() == DeliveryStatus.COMPLETED));
   }
 
   @Test
@@ -320,6 +328,12 @@ class DeliveryServiceTest {
 
     assertThat(response.status()).isEqualTo(DeliveryStatus.PICKED_UP);
     assertThat(deliveryRequest.getPickedUpAt()).isNotNull();
+    verify(eventPublisher)
+        .publishEvent(
+            argThat(
+                (DeliveryStatusChangedEvent event) ->
+                    event.deliveryRequestId().equals(1L)
+                        && event.status() == DeliveryStatus.PICKED_UP));
   }
 
   @Test
