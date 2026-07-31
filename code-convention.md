@@ -378,6 +378,24 @@ findAddressOrThrow(id, memberId).updateBy(request);
 
 ---
 
+## 10.4 불필요한 단발성 임시 변수 인라인화 (Inline Temporary Variable)
+
+- **원칙:** 메서드 생성/조회/수정 흐름에서 1회성으로 생성되어 즉시 `return`되거나 단 1회만 파라미터로 전달되어 소비되는 불필요한 단발성 임시 변수는 선언을 생략하고 즉시 **인라인(Inline)** 처리합니다.
+- **목적:**
+  1. 단발성 중간 임시 변수 생성을 억제하여 변수 스코프 오염을 줄입니다.
+  2. `return repository.save(Entity.from(request));` 처럼 객체 생성과 데이터 저장을 단일 선언적 표현식(Declarative Expression)으로 연결하여 코드 직관성과 읽기 편의성을 높입니다.
+
+```java
+// BAD: 1회만 참조되어 즉시 return되는 불필요한 단발성 임시 변수 선언
+Address address = Address.from(memberId, request);
+return addressRepository.save(address);
+
+// GOOD: 단일 선언적 표현식으로 즉시 인라인 처리
+return addressRepository.save(Address.from(memberId, request));
+```
+
+---
+
 
 ## 11. Controller 규칙
 

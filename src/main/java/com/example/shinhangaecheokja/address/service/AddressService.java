@@ -27,8 +27,7 @@ public class AddressService {
   /** 신규 자주 쓰는 주소를 생성한다 (Entity 리턴). */
   @Transactional
   public Address createAddress(Long memberId, AddressCreateRequest request) {
-    Address address = Address.from(memberId, request);
-    return addressRepository.save(address);
+    return addressRepository.save(Address.from(memberId, request));
   }
 
   /** 회원 본인 소유의 주소 정보를 수정한다 (Entity 리턴). */

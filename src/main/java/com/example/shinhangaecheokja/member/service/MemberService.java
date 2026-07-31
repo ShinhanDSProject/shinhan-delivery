@@ -37,9 +37,7 @@ public class MemberService {
     }
 
     String encodedPassword = passwordEncoder.encode(request.getPassword());
-    Member member = Member.from(request, encodedPassword);
-
-    return memberRepository.save(member);
+    return memberRepository.save(Member.from(request, encodedPassword));
   }
 
   /** 이메일과 비밀번호를 검증하여 JWT Access/Refresh 토큰을 발급한다. */
@@ -112,9 +110,7 @@ public class MemberService {
   /** 회원의 역할(CUSTOMER / COURIER)을 변경한다 (Member Entity 리턴). */
   @Transactional
   public Member updateRole(Long memberId, MemberRole role) {
-    Member member = findMemberOrThrow(memberId);
-    member.changeRole(role);
-    return member;
+    return findMemberOrThrow(memberId).changeRole(role);
   }
 
   /** id로 회원을 조회해 삭제한다. 없으면 EntityNotFoundException. */
