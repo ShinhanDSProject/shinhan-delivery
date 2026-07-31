@@ -22,6 +22,7 @@ import com.example.shinhangaecheokja.member.entity.MemberRole;
 import com.example.shinhangaecheokja.member.service.MemberService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -59,7 +60,8 @@ class MemberControllerTest {
   }
 
   @Test
-  void 회원_생성_요청을_받으면_생성된_회원을_반환한다() throws Exception {
+  @DisplayName("회원 생성 요청을 받으면 생성된 회원을 반환한다")
+  void createMemberSuccess() throws Exception {
     MemberCreateRequest request = new MemberCreateRequest();
     request.setEmail("user@example.com");
     request.setPassword("password123");
@@ -89,7 +91,8 @@ class MemberControllerTest {
   }
 
   @Test
-  void 존재하지_않는_회원을_조회하면_404를_반환한다() throws Exception {
+  @DisplayName("존재하지 않는 회원을 조회하면 404를 반환한다")
+  void getMemberNotFoundShouldReturn404() throws Exception {
     when(memberService.getMember(eq(999L)))
         .thenThrow(new EntityNotFoundException(ErrorCode.MEMBER_NOT_FOUND));
 
@@ -97,7 +100,8 @@ class MemberControllerTest {
   }
 
   @Test
-  void 유효하지_않은_이메일로_회원_생성_요청시_400을_반환한다() throws Exception {
+  @DisplayName("유효하지 않은 이메일로 회원 생성 요청시 400을 반환한다")
+  void createMemberInvalidEmailShouldReturn400() throws Exception {
     MemberCreateRequest request = new MemberCreateRequest();
     request.setEmail("invalid-email-format");
     request.setPassword("password123");
@@ -113,7 +117,8 @@ class MemberControllerTest {
   }
 
   @Test
-  void 비밀번호가_8자_미만이면_회원_생성_요청시_400을_반환한다() throws Exception {
+  @DisplayName("비밀번호가 8자 미만이면 회원 생성 요청시 400을 반환한다")
+  void createMemberShortPasswordShouldReturn400() throws Exception {
     MemberCreateRequest request = new MemberCreateRequest();
     request.setEmail("user@example.com");
     request.setPassword("short");
@@ -129,7 +134,8 @@ class MemberControllerTest {
   }
 
   @Test
-  void 필수_입력값이_누락되면_회원_생성_요청시_400을_반환한다() throws Exception {
+  @DisplayName("필수 입력값이 누락되면 회원 생성 요청시 400을 반환한다")
+  void createMemberMissingFieldShouldReturn400() throws Exception {
     MemberCreateRequest request = new MemberCreateRequest();
     // email, password, name, phoneNumber 누락
 
@@ -142,7 +148,8 @@ class MemberControllerTest {
   }
 
   @Test
-  void 인증된_사용자의_내_프로필을_정상_조회한다() throws Exception {
+  @DisplayName("인증된 사용자의 내 프로필을 정상 조회한다")
+  void getMyProfileSuccess() throws Exception {
     CustomUserDetails customUser = new CustomUserDetails(10L, "my@example.com", "pass", "CUSTOMER");
     UsernamePasswordAuthenticationToken auth =
         new UsernamePasswordAuthenticationToken(customUser, null, customUser.getAuthorities());
@@ -170,7 +177,8 @@ class MemberControllerTest {
   }
 
   @Test
-  void 인증된_사용자의_내_프로필을_성공적으로_수정한다() throws Exception {
+  @DisplayName("인증된 사용자의 내 프로필을 성공적으로 수정한다")
+  void updateMyProfileSuccess() throws Exception {
     CustomUserDetails customUser = new CustomUserDetails(10L, "my@example.com", "pass", "CUSTOMER");
     UsernamePasswordAuthenticationToken auth =
         new UsernamePasswordAuthenticationToken(customUser, null, customUser.getAuthorities());
@@ -202,7 +210,8 @@ class MemberControllerTest {
   }
 
   @Test
-  void 인증된_사용자가_비밀번호를_변경하면_204를_반환한다() throws Exception {
+  @DisplayName("인증된 사용자가 비밀번호를 변경하면 204를 반환한다")
+  void updatePasswordSuccess() throws Exception {
     CustomUserDetails customUser = new CustomUserDetails(10L, "my@example.com", "pass", "CUSTOMER");
     UsernamePasswordAuthenticationToken auth =
         new UsernamePasswordAuthenticationToken(customUser, null, customUser.getAuthorities());
@@ -222,7 +231,8 @@ class MemberControllerTest {
   }
 
   @Test
-  void 새_비밀번호가_복잡도_규칙을_지키지_않으면_400을_반환한다() throws Exception {
+  @DisplayName("새 비밀번호가 복잡도 규칙을 지키지 않으면 400을 반환한다")
+  void updatePasswordSimplePasswordShouldReturn400() throws Exception {
     CustomUserDetails customUser = new CustomUserDetails(10L, "my@example.com", "pass", "CUSTOMER");
     UsernamePasswordAuthenticationToken auth =
         new UsernamePasswordAuthenticationToken(customUser, null, customUser.getAuthorities());
@@ -240,7 +250,8 @@ class MemberControllerTest {
   }
 
   @Test
-  void 유효하지_않은_전화번호로_프로필_수정시_400을_반환한다() throws Exception {
+  @DisplayName("유효하지 않은 전화번호로 프로필 수정시 400을 반환한다")
+  void updateMyProfileInvalidPhoneShouldReturn400() throws Exception {
     CustomUserDetails customUser = new CustomUserDetails(10L, "my@example.com", "pass", "CUSTOMER");
     UsernamePasswordAuthenticationToken auth =
         new UsernamePasswordAuthenticationToken(customUser, null, customUser.getAuthorities());
@@ -259,7 +270,8 @@ class MemberControllerTest {
   }
 
   @Test
-  void 인증되지_않은_사용자가_내_프로필_조회시_401을_반환한다() throws Exception {
+  @DisplayName("인증되지 않은 사용자가 내 프로필 조회시 401을 반환한다")
+  void getMyProfileUnauthenticatedShouldReturn401() throws Exception {
     mockMvc.perform(get("/api/v1/members/me")).andExpect(status().isUnauthorized());
   }
 }

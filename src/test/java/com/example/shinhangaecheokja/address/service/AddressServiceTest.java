@@ -13,6 +13,7 @@ import com.example.shinhangaecheokja.address.repository.AddressRepository;
 import com.example.shinhangaecheokja.common.exception.EntityNotFoundException;
 import java.util.List;
 import java.util.Optional;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -26,7 +27,8 @@ class AddressServiceTest {
   @InjectMocks private AddressService addressService;
 
   @Test
-  void 특정_회원의_주소_목록을_조회한다() {
+  @DisplayName("특정 회원의 주소 목록을 조회한다")
+  void getAddressesByMemberIdSuccess() {
     Address addr1 =
         Address.builder()
             .id(1L)
@@ -45,7 +47,8 @@ class AddressServiceTest {
   }
 
   @Test
-  void 신규_주소를_생성한다() {
+  @DisplayName("신규 주소를 생성한다")
+  void createAddressNewAddressSuccess() {
     AddressCreateRequest request = new AddressCreateRequest("회사", "서울시 서초구", "202호", "경비실 맡김");
     Address saved =
         Address.builder()
@@ -66,7 +69,8 @@ class AddressServiceTest {
   }
 
   @Test
-  void 주소를_수정한다() {
+  @DisplayName("주소를 수정한다")
+  void updateAddressModifySuccess() {
     Address existing =
         Address.builder()
             .id(1L)
@@ -88,7 +92,8 @@ class AddressServiceTest {
   }
 
   @Test
-  void 주소를_삭제한다() {
+  @DisplayName("주소를 삭제한다")
+  void deleteAddressDeleteSuccess() {
     Address existing = Address.builder().id(1L).memberId(10L).alias("집").address("서울시 강남구").build();
     when(addressRepository.findByIdAndMemberId(1L, 10L)).thenReturn(Optional.of(existing));
 
@@ -98,7 +103,8 @@ class AddressServiceTest {
   }
 
   @Test
-  void 존재하지_않거나_권한없는_주소_수정시_EntityNotFoundException을_던진다() {
+  @DisplayName("존재하지 않거나 권한없는 주소 수정시 EntityNotFoundException을 던진다")
+  void updateAddressNotFoundOrUnauthorizedShouldThrowException() {
     AddressUpdateRequest request = new AddressUpdateRequest("우리집", "서울시 강남구 역삼동", "303호", "직접 전달");
     when(addressRepository.findByIdAndMemberId(999L, 10L)).thenReturn(Optional.empty());
 

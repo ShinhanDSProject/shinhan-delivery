@@ -52,8 +52,8 @@ class DeliveryPickupConcurrencyTest {
   }
 
   @Test
-  @DisplayName("동일 배송 요청의 픽업 완료를 동시에 여러 번 호출해도 단 1건만 성공한다")
-  void 동시_픽업_완료_요청은_비관적_락으로_직렬화되어_한_건만_성공한다() throws InterruptedException {
+  @DisplayName("동시 픽업 완료 요청은 비관적 락으로 직렬화되어 한 건만 성공한다")
+  void concurrentPickupConfirmShouldSerializeWithPessimisticLock() throws InterruptedException {
     Member customer = new Member();
     customer.setEmail("pickup-concurrency-test-" + System.nanoTime() + "@example.com");
     customer.setPassword("password");

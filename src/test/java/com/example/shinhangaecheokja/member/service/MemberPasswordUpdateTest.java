@@ -13,6 +13,7 @@ import com.example.shinhangaecheokja.member.entity.MemberRole;
 import com.example.shinhangaecheokja.member.repository.MemberRepository;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -47,7 +48,8 @@ class MemberPasswordUpdateTest {
   }
 
   @Test
-  void 현재_비밀번호가_맞으면_새_비밀번호를_암호화해_저장한다() {
+  @DisplayName("현재 비밀번호가 맞으면 새 비밀번호를 암호화해 저장한다")
+  void updatePasswordSuccess() {
     MemberPasswordUpdateRequest request =
         new MemberPasswordUpdateRequest("OldPassword1!", "NewPassword2@", "NewPassword2@");
 
@@ -58,7 +60,8 @@ class MemberPasswordUpdateTest {
   }
 
   @Test
-  void 현재_비밀번호가_틀리면_변경하지_않는다() {
+  @DisplayName("현재 비밀번호가 틀리면 변경하지 않는다")
+  void updatePasswordWrongCurrentPasswordShouldThrowException() {
     MemberPasswordUpdateRequest request =
         new MemberPasswordUpdateRequest("WrongPassword1!", "NewPassword2@", "NewPassword2@");
 
@@ -69,7 +72,8 @@ class MemberPasswordUpdateTest {
   }
 
   @Test
-  void 새_비밀번호와_확인이_다르면_변경하지_않는다() {
+  @DisplayName("새 비밀번호와 확인이 다르면 변경하지 않는다")
+  void updatePasswordMismatchNewPasswordShouldThrowException() {
     MemberPasswordUpdateRequest request =
         new MemberPasswordUpdateRequest("OldPassword1!", "NewPassword2@", "Different3#");
 
@@ -80,7 +84,8 @@ class MemberPasswordUpdateTest {
   }
 
   @Test
-  void 현재와_동일한_비밀번호는_다시_사용할_수_없다() {
+  @DisplayName("현재와 동일한 비밀번호는 다시 사용할 수 없다")
+  void updatePasswordSamePasswordReuseShouldThrowException() {
     MemberPasswordUpdateRequest request =
         new MemberPasswordUpdateRequest("OldPassword1!", "OldPassword1!", "OldPassword1!");
 

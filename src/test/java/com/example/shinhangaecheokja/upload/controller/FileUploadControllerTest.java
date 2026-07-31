@@ -10,6 +10,7 @@ import com.example.shinhangaecheokja.upload.dto.response.ImageUploadResponse;
 import com.example.shinhangaecheokja.upload.exception.FileTooLargeException;
 import com.example.shinhangaecheokja.upload.exception.InvalidFileTypeException;
 import com.example.shinhangaecheokja.upload.service.FileUploadService;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -25,7 +26,8 @@ class FileUploadControllerTest {
   @MockitoBean private FileUploadService fileUploadService;
 
   @Test
-  void 이미지_업로드에_성공하면_201과_imageUrl을_반환한다() throws Exception {
+  @DisplayName("이미지 업로드에 성공하면 201과 imageUrl을 반환한다")
+  void uploadImageSuccess() throws Exception {
     MockMultipartFile file =
         new MockMultipartFile("file", "photo.jpg", "image/jpeg", "bytes".getBytes());
     when(fileUploadService.upload(any())).thenReturn(new ImageUploadResponse("/uploads/abc.jpg"));
@@ -37,7 +39,8 @@ class FileUploadControllerTest {
   }
 
   @Test
-  void 허용되지_않는_확장자면_400을_반환한다() throws Exception {
+  @DisplayName("허용되지 않는 확장자면 400을 반환한다")
+  void uploadImageInvalidExtensionShouldReturn400() throws Exception {
     MockMultipartFile file =
         new MockMultipartFile("file", "malware.exe", "application/octet-stream", "x".getBytes());
     when(fileUploadService.upload(any())).thenThrow(new InvalidFileTypeException("exe"));
@@ -48,7 +51,8 @@ class FileUploadControllerTest {
   }
 
   @Test
-  void 파일이_너무_크면_400을_반환한다() throws Exception {
+  @DisplayName("파일이 너무 크면 400을 반환한다")
+  void uploadImageFileTooLargeShouldReturn400() throws Exception {
     MockMultipartFile file =
         new MockMultipartFile("file", "big.png", "image/png", "bytes".getBytes());
     when(fileUploadService.upload(any()))

@@ -264,11 +264,13 @@ public class DuplicateMemberException extends BusinessException {
 
 ## 9. 테스트 컨벤션
 
-- 테스트 메서드명: `given_when_then` 스타일 (한글 허용)
+- **테스트 메서드명:** 메서드명은 무조건 **`camelCase` 영문(English)**으로 작성합니다 (예: `registerVehicleShouldThrowExceptionWhenWeightIsZeroOrLess`, `createAddressSuccess`). 언더스코어(`_`)나 한글 메서드명 사용을 금지합니다.
+- **테스트 시나리오 설명 (`@DisplayName`):** 테스트 케이스에 대한 상세한 한글 설명은 JUnit 5 `@DisplayName("한글 시나리오 설명")` 어노테이션을 필수 부여하여 작성합니다.
 
 ```java
 @Test
-void 무게가_0이하면_InvalidWeightException을_던진다() {
+@DisplayName("무게가 0 이하이면 InvalidWeightException을 던진다")
+void registerVehicleShouldThrowExceptionWhenWeightIsZeroOrLess() {
     VehicleCreateRequest request = new VehicleCreateRequest(1L, VehicleType.CAR, -5, 10);
 
     assertThatThrownBy(() -> vehicleService.registerVehicle(request))
@@ -534,7 +536,7 @@ void 도메인은_다른_도메인의_repository를_직접_참조하지_않는�
 - [ ] Repository가 Entity 1개당 1개씩 대응되는가?
 - [ ] 다른 도메인의 Repository/Entity를 직접 참조하지 않고, 필요하면 그 도메인의 Service를 거쳤는가?
 - [ ] Enum 필드에 `@Enumerated(EnumType.STRING)`을 썼는가? (`ORDINAL` 금지)
-- [ ] 새로 추가한 서비스 로직에 단위 테스트가 있는가? (given_when_then 네이밍)
+- [ ] 새로 추가한 서비스 로직에 단위 테스트가 있는가? (영문 메서드명 + `@DisplayName` 사용)
 - [ ] ArchUnit 테스트(레이어 의존성 규칙)가 깨지지 않는가?
 - [ ] Spotless 포맷팅 검사를 통과하는가?
 - [ ] Entity 필드를 추가/변경했다면 대응하는 Flyway 마이그레이션 파일을 새로 추가했는가? (기존 마이그레이션 파일을 수정하지 않았는가?)

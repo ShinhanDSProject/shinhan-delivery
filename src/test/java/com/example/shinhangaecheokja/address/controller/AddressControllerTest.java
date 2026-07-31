@@ -20,6 +20,7 @@ import com.example.shinhangaecheokja.common.security.CustomUserDetails;
 import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -57,7 +58,8 @@ class AddressControllerTest {
   }
 
   @Test
-  void 인증된_사용자의_주소_목록을_조회한다() throws Exception {
+  @DisplayName("인증된 사용자의 주소 목록을 조회한다")
+  void getAddressesAuthenticatedShouldReturnAddresses() throws Exception {
     CustomUserDetails customUser =
         new CustomUserDetails(10L, "user@example.com", "pass", "CUSTOMER");
     UsernamePasswordAuthenticationToken auth =
@@ -83,7 +85,8 @@ class AddressControllerTest {
   }
 
   @Test
-  void 주소_생성_요청을_처리한다() throws Exception {
+  @DisplayName("주소 생성 요청을 처리한다")
+  void createAddressProcessRequest() throws Exception {
     CustomUserDetails customUser =
         new CustomUserDetails(10L, "user@example.com", "pass", "CUSTOMER");
     UsernamePasswordAuthenticationToken auth =
@@ -108,7 +111,8 @@ class AddressControllerTest {
   }
 
   @Test
-  void 주소_수정_요청을_처리한다() throws Exception {
+  @DisplayName("주소 수정 요청을 처리한다")
+  void updateAddressProcessRequest() throws Exception {
     CustomUserDetails customUser =
         new CustomUserDetails(10L, "user@example.com", "pass", "CUSTOMER");
     UsernamePasswordAuthenticationToken auth =
@@ -134,7 +138,8 @@ class AddressControllerTest {
   }
 
   @Test
-  void 주소_삭제_요청을_처리한다() throws Exception {
+  @DisplayName("주소 삭제 요청을 처리한다")
+  void deleteAddressProcessRequest() throws Exception {
     CustomUserDetails customUser =
         new CustomUserDetails(10L, "user@example.com", "pass", "CUSTOMER");
     UsernamePasswordAuthenticationToken auth =

@@ -6,6 +6,7 @@ import static org.mockito.Mockito.when;
 import com.example.shinhangaecheokja.category.entity.Category;
 import com.example.shinhangaecheokja.category.repository.CategoryRepository;
 import java.util.List;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -19,7 +20,8 @@ class CategoryServiceTest {
   @InjectMocks private CategoryService categoryService;
 
   @Test
-  void 저장된_카테고리_목록을_전부_반환한다() {
+  @DisplayName("저장된 카테고리 목록을 전부 반환한다")
+  void getCategoriesSuccess() {
     List<Category> categories =
         List.of(newCategory(1L, "전자기기/가전"), newCategory(2L, "식품/음료"), newCategory(3L, "의류/패션잡화"));
     when(categoryRepository.findAllByOrderByIdAsc()).thenReturn(categories);
@@ -33,7 +35,8 @@ class CategoryServiceTest {
   }
 
   @Test
-  void 저장된_카테고리가_없으면_빈_목록을_반환한다() {
+  @DisplayName("저장된 카테고리가 없으면 빈 목록을 반환한다")
+  void getCategoriesEmptyShouldReturnEmptyList() {
     when(categoryRepository.findAllByOrderByIdAsc()).thenReturn(List.of());
 
     List<Category> responses = categoryService.getCategories();

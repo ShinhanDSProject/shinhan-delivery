@@ -33,7 +33,7 @@ class NoticeServiceTest {
 
   @Test
   @DisplayName("카테고리가 없으면 전체 공지사항을 상단고정 및 최신순으로 조회한다")
-  void getNotices_WithoutCategory() {
+  void getNoticesWithoutCategory() {
     Pageable pageable = PageRequest.of(0, 10);
     Notice notice = createNotice(1L, "제목", "내용", "SYSTEM", true);
     when(noticeRepository.findAllByOrderByIsPinnedDescCreatedAtDesc(pageable))
@@ -48,7 +48,7 @@ class NoticeServiceTest {
 
   @Test
   @DisplayName("카테고리가 주어지면 해당 카테고리의 공지사항만 필터링하여 조회한다")
-  void getNotices_WithCategory() {
+  void getNoticesWithCategory() {
     Pageable pageable = PageRequest.of(0, 10);
     Notice notice = createNotice(2L, "이벤트 제목", "내용", "EVENT", false);
     when(noticeRepository.findByCategoryOrderByIsPinnedDescCreatedAtDesc("EVENT", pageable))
@@ -62,7 +62,7 @@ class NoticeServiceTest {
 
   @Test
   @DisplayName("존재하는 공지사항 ID로 상세 조회 시 상세 정보를 반환한다")
-  void getNoticeDetail_Success() {
+  void getNoticeDetailSuccess() {
     Notice notice = createNotice(1L, "상세 제목", "상세 본문 내용", "SYSTEM", true);
     when(noticeRepository.findById(1L)).thenReturn(Optional.of(notice));
 
@@ -75,7 +75,7 @@ class NoticeServiceTest {
 
   @Test
   @DisplayName("존재하지 않는 공지사항 ID로 상세 조회 시 NoticeNotFoundException 예외를 던진다")
-  void getNoticeDetail_NotFound() {
+  void getNoticeDetailNotFound() {
     when(noticeRepository.findById(999L)).thenReturn(Optional.empty());
 
     assertThatThrownBy(() -> noticeService.getNoticeDetail(999L))
