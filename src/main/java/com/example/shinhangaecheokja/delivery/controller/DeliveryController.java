@@ -71,6 +71,12 @@ public class DeliveryController {
     return ResponseEntity.noContent().build();
   }
 
+  /** 배송원의 픽업 완료를 처리한다. */
+  @PatchMapping("/{deliveryRequestId}/pickup")
+  public ResponseEntity<DeliveryResponse> confirmPickup(@PathVariable Long deliveryRequestId) {
+    return ResponseEntity.ok(deliveryService.confirmPickup(deliveryRequestId));
+  }
+
   /** 배송을 완료 처리하고 증거 사진 URL을 저장한다. */
   @PatchMapping("/{deliveryRequestId}/complete")
   public ResponseEntity<DeliveryResponse> completeDelivery(

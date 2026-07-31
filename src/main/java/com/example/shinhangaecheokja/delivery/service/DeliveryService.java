@@ -182,15 +182,28 @@ public class DeliveryService {
     deliveryRequestRepository.delete(deliveryRequest);
   }
 
+  /** 배송원의 픽업 완료를 처리한다. 배송원이 콜을 수락한(MATCHED) 배송 요청만 픽업 완료로 전이할 수 있다. */
+  @Transactional
+  public DeliveryResponse confirmPickup(Long deliveryRequestId) {
+    DeliveryRequest deliveryRequest = findDeliveryRequestOrThrow(deliveryRequestId);
+    if (deliveryRequest.getStatus() != DeliveryStatus.MATCHED) {
+      throw new InvalidDeliveryTransitionException(
+          deliveryRequest.getStatus(), DeliveryStatus.PICKED_UP);
+    }
+    deliveryRequest.setStatus(DeliveryStatus.PICKED_UP);
+    deliveryRequest.setPickedUpAt(LocalDateTime.now());
+    return DeliveryResponse.from(deliveryRequest);
+  }
+
   /**
-   * 배송을 완료 처리한다. 배송원이 콜을 수락한(MATCHED) 배송 요청만 완료할 수 있으며, 완료와 동시에 증거 사진 URL을 저장한다. 사진 파일 자체는 이 메서드 호출
+   * 배송을 완료 처리한다. 픽업을 완료한(PICKED_UP) 배송 요청만 완료할 수 있으며, 완료와 동시에 증거 사진 URL을 저장한다. 사진 파일 자체는 이 메서드 호출
    * 전에 {@code POST /api/v1/uploads/image}로 이미 업로드되어 있어야 한다.
    */
   @Transactional
   public DeliveryResponse completeDelivery(
       Long deliveryRequestId, DeliveryCompleteRequest request) {
     DeliveryRequest deliveryRequest = findDeliveryRequestOrThrow(deliveryRequestId);
-    if (deliveryRequest.getStatus() != DeliveryStatus.MATCHED) {
+    if (deliveryRequest.getStatus() != DeliveryStatus.PICKED_UP) {
       throw new InvalidDeliveryTransitionException(
           deliveryRequest.getStatus(), DeliveryStatus.COMPLETED);
     }
