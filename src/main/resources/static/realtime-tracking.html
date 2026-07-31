@@ -242,6 +242,18 @@
             color: var(--text-muted);
             font-size: 14px;
         }
+
+        .door-photo-button {
+            width: 100%;
+            padding: 14px;
+            border: 0;
+            border-radius: 12px;
+            background: var(--primary);
+            color: var(--color-white-100);
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -280,14 +292,22 @@
                     <span class="time" id="pickupTime">-</span>
                 </div>
             </div>
-            <div class="timeline-row active">
+            <div class="timeline-row active" id="movingRow">
                 <span class="dot-wrap pulse"><span class="dot active"></span></span>
                 <div class="info">
                     <span class="title">고객님께 이동 중</span>
                     <span class="time">배송중</span>
                 </div>
             </div>
+            <div class="timeline-row" id="completedRow" hidden>
+                <span class="dot-wrap"><span class="dot done"></span></span>
+                <div class="info">
+                    <span class="title">배송 완료</span>
+                    <span class="time">문앞에 도착했어요</span>
+                </div>
+            </div>
         </div>
+        <button class="door-photo-button" id="doorPhotoButton" type="button" hidden>문앞 사진 확인하기</button>
     </div>
 </main>
 
@@ -380,6 +400,23 @@
         return `${hours12}:${minutes} ${period}`;
     }
 
+    function showCompletedState(deliveryId) {
+        document.querySelector('.map-area').innerHTML =
+            '<div class="load-error">배송이 완료됐어요. 문앞에 남겨진 사진을 확인해보세요!</div>';
+        document.getElementById('etaTime').textContent = '배송 완료';
+        document.getElementById('callButton').remove();
+        document.getElementById('movingRow').classList.remove('active');
+        document.getElementById('movingRow').querySelector('.dot-wrap').classList.remove('pulse');
+        document.getElementById('movingRow').querySelector('.dot').classList.remove('active');
+        document.getElementById('movingRow').querySelector('.dot').classList.add('done');
+        document.getElementById('completedRow').hidden = false;
+        const doorPhotoButton = document.getElementById('doorPhotoButton');
+        doorPhotoButton.hidden = false;
+        doorPhotoButton.addEventListener('click', () => {
+            location.href = `/door-photo.html?id=${deliveryId}`;
+        });
+    }
+
     async function loadTracking(deliveryId) {
         const header = authHeader();
 
@@ -388,6 +425,11 @@
         });
         if (!deliveryResponse.ok) throw new Error('배송 정보를 불러오지 못했습니다.');
         const delivery = await deliveryResponse.json();
+
+        if (delivery.status === 'COMPLETED') {
+            showCompletedState(deliveryId);
+            return;
+        }
 
         const matchingsResponse = await fetch('/api/v1/matchings', { headers: { Authorization: header } });
         const matchings = matchingsResponse.ok ? await matchingsResponse.json() : [];
