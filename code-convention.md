@@ -249,7 +249,16 @@ public class DuplicateMemberException extends BusinessException {
 
 ---
 
-## 8. 포맷팅 규칙
+## 8. 명명 및 포맷팅 규칙
+
+### 8.1 식별자 명명 규칙 (Naming Conventions)
+
+- **메서드명 (비즈니스/테스트 포함 모든 메서드):** 무조건 **`lowerCamelCase`**로 작성합니다 (예: `getMember`, `registerVehicle`, `updateBy`, `createAddressSuccess`). 메서드명에 언더스코어(`_`)나 한글 사용을 엄격히 금지합니다.
+- **상수 (`static final` 필드 및 Enum 상수):** 무조건 **`UPPER_SNAKE_CASE`**로 작성합니다 (예: `MAX_RETRY_COUNT`, `DEFAULT_PAGE_SIZE`, `MEMBER_NOT_FOUND`).
+- **클래스 및 인터페이스명:** 무조건 **`UpperCamelCase` (PascalCase)**로 작성합니다 (예: `MemberService`, `DeliveryRequest`, `VehicleType`).
+- **변수 및 필드명:** 무조건 **`lowerCamelCase`**로 작성합니다 (예: `memberId`, `deliveryRequestRepository`).
+
+### 8.2 포맷팅 및 코드 스타일 규칙
 
 - 들여쓰기: 스페이스 2칸 (탭 금지)
 - 한 줄 최대 길이: 100자
