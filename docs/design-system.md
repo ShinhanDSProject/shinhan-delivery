@@ -41,17 +41,31 @@
 | 토큰명 | CSS 변수명 | HEX Code | 사용처 및 설명 |
 | :--- | :--- | :--- | :--- |
 | **blue-100** | `var(--color-blue-100)` | `#2F73E0` | **Primary Brand Color** (기본 주요 버튼 및 하이라이트) |
-| **blue-500** | `var(--color-blue-500)` | `#2C88FF` | Primary Hover / Active 배경색 |
-| **blue-50** | `var(--color-blue-50)` | `#EBF3FF` | Primary 연한 배경 및 선택 칩 |
-| **blue-30** | `var(--color-blue-30)` | `#4A90FF` | 차트 및 보조 강조 색상 |
+| **blue-500** | `var(--color-blue-500)` | `#2C88FF` | Primary Hover / Active 배경색 / 고객 프로필 보조 색상 / 메인 강조 색상 |
+| **blue-60** | `var(--color-blue-60)` | `#E5E7EB` | 화면 보조 색상 |
+| **blue-50** | `var(--color-blue-50)` | `#4A90FF` | 차트 및 보조 강조 색상 |
+| **blue-40** | `var(--color-blue-40)` | `#F1F5F9` | 취소 버튼 배경 (`.btn-cancel`) |
+| **blue-30** | `var(--color-blue-30)` | `#EBF3FF` | Primary 연한 배경 |
+| **blue-20** | `var(--color-blue-20)` | `#E2E8F0` | 회원가입 화면 버튼 연한 배경 / 버튼 외곽선 메인 |
+| **blue-10** | `var(--color-blue-10)` | `#F4F6FA` | 화면 배경 연한 색상 |
 | **yellow-100** | `var(--color-yellow-100)` | `#F7E600` | 카카오 로그인 버튼 (`.btn-kakao`) |
 | **green-100** | `var(--color-green-100)` | `#03C75A` | 네이버 로그인 버튼 (`.btn-naver`) |
-| **black-100** | `var(--color-black-100)` | `#000000` | 애플 로그인 버튼 (`.btn-apple`) |
+| **green-80** | `var(--color-green-80)` | `#10B981` | 완료 버튼 배경 ('.btn-sucess') |
+| **green-50** | `var(--color-green-50)` | `#D1FAE5` | 완료 버튼 텍스트 색상 ('.btn-sucess') |
+| **black-100** | `var(--color-black-100)` | `#000000` | 애플 로그인 버튼 (`.btn-apple`) / 메인 텍스트 색상 |
 | **black-200** | `var(--color-black-200)` | `#212121` | 기본 본문 텍스트 색상 |
-| **grey-30** | `var(--color-grey-30)` | `#EFEFEF` | 구글 로그인 버튼 (`.btn-google`) 및 배경 |
+| **black-50** | `var(--color-black-50)` | `#1A202C` | 회원가입 화면 메인 강조 색상 |
+| **grey-30** | `var(--color-grey-30)` | `#EFEFEF` | 구글 로그인 버튼 (`.btn-google`) 및 배경 / 버튼 외곽선 보조 색상 / 배송 프로필 강조 색상|
+| **grey-50** | `var(--color-grey-50)` | `#555555` | 로그인 화면 보조 텍스트 색상 |
+| **grey-60** | `var(--color-grey-60)` | `#BFC1C5` |  버튼 외곽선 메인 색상 / 고객 프로필 메인 색상 |
+| **grey-70** | `var(--color-grey-70)` | `#DBDBDB` | 고객 프로필 메인 색상 | 
+| **grey-80** | `var(--color-grey-80)` | `#94A3B8` | 회원가입 화면 보조 텍스트 색상 | 
+| **grey-100** | `var(--color-grey-100)` | `#4A5568` | 회원가입 화면 메인 텍스트 색상 / 배경 보조 색상 |
 | **red-100** | `var(--color-red-100)` | `#EF4444` | Danger / 경고 / 삭제 버튼 |
 | **red-30** | `var(--color-red-30)` | `#FEE2E2` | 취소 버튼 배경 (`.btn-cancel`) |
-| **orange-100** | `var(--color-orange-100)` | `#FA9200` | 보조 브랜드 포인트 색상 |
+| **red-50** | `var(--color-red-50)` | `#F8F8F8` | 주소 화면 보조 색상 |
+| **orange-100** | `var(--color-orange-100)` | `#FA9200` | 배송 보조 포인트 색상 |
+| **white-100** | `var(--color-white-100)` | `#FFFFFF` | 버튼 텍스트 색상 |
 
 ---
 
@@ -115,7 +129,7 @@
 
 ---
 
-## 8. Card & Badge Components (카드 및 배지)
+## 8. Card & Badge Components (카드 및 배치)
 
 ```html
 <div class="card-box">

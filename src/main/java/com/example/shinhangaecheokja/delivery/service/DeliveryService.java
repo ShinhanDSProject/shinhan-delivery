@@ -2,24 +2,31 @@ package com.example.shinhangaecheokja.delivery.service;
 
 import com.example.shinhangaecheokja.common.exception.EntityNotFoundException;
 import com.example.shinhangaecheokja.common.exception.ErrorCode;
+import com.example.shinhangaecheokja.delivery.dto.request.DeliveryCompleteRequest;
 import com.example.shinhangaecheokja.delivery.dto.request.DeliveryCreateRequest;
 import com.example.shinhangaecheokja.delivery.dto.request.DeliveryEstimateRequest;
 import com.example.shinhangaecheokja.delivery.dto.request.DeliveryUpdateRequest;
 import com.example.shinhangaecheokja.delivery.dto.response.DeliveryEstimateResponse;
 import com.example.shinhangaecheokja.delivery.dto.response.DeliveryResponse;
+import com.example.shinhangaecheokja.delivery.dto.response.ProofPhotoResponse;
 import com.example.shinhangaecheokja.delivery.entity.DeliveryRequest;
 import com.example.shinhangaecheokja.delivery.entity.DeliveryStatus;
 import com.example.shinhangaecheokja.delivery.entity.ItemSize;
+import com.example.shinhangaecheokja.delivery.event.DeliveryStatusChangedEvent;
 import com.example.shinhangaecheokja.delivery.exception.AlreadyMatchedException;
 import com.example.shinhangaecheokja.delivery.exception.InvalidDeliveryDistanceException;
+import com.example.shinhangaecheokja.delivery.exception.InvalidDeliveryTransitionException;
 import com.example.shinhangaecheokja.delivery.exception.InvalidDeliveryWeightException;
+import com.example.shinhangaecheokja.delivery.exception.ProofPhotoNotFoundException;
 import com.example.shinhangaecheokja.delivery.repository.DeliveryRequestRepository;
 import com.example.shinhangaecheokja.delivery.repository.MatchingRepository;
 import com.example.shinhangaecheokja.member.service.MemberService;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,6 +45,7 @@ public class DeliveryService {
   private final DeliveryRequestRepository deliveryRequestRepository;
   private final MemberService memberService;
   private final MatchingRepository matchingRepository;
+  private final ApplicationEventPublisher eventPublisher;
 
   /**
    * 고객 존재 여부를 검증한 뒤 배송을 요청한다. 요금은 {@link #estimateFee}와 동일한 공식으로 서버가 직접 계산한다(거리는 클라이언트가 준 값이 아니라
@@ -177,6 +185,54 @@ public class DeliveryService {
     deliveryRequestRepository.delete(deliveryRequest);
   }
 
+  /** 배송원의 픽업 완료를 처리한다. 배송원이 콜을 수락한(MATCHED) 배송 요청만 픽업 완료로 전이할 수 있다. */
+  @Transactional
+  public DeliveryResponse confirmPickup(Long deliveryRequestId) {
+    DeliveryRequest deliveryRequest = findDeliveryRequestForUpdateOrThrow(deliveryRequestId);
+    if (deliveryRequest.getStatus() != DeliveryStatus.MATCHED) {
+      throw new InvalidDeliveryTransitionException(
+          deliveryRequest.getStatus(), DeliveryStatus.PICKED_UP);
+    }
+    deliveryRequest.setStatus(DeliveryStatus.PICKED_UP);
+    LocalDateTime pickedUpAt = LocalDateTime.now();
+    deliveryRequest.setPickedUpAt(pickedUpAt);
+    eventPublisher.publishEvent(
+        new DeliveryStatusChangedEvent(deliveryRequestId, DeliveryStatus.PICKED_UP, pickedUpAt));
+    return DeliveryResponse.from(deliveryRequest);
+  }
+
+  /**
+   * 배송을 완료 처리한다. 픽업을 완료한(PICKED_UP) 배송 요청만 완료할 수 있으며, 완료와 동시에 증거 사진 URL을 저장한다. 사진 파일 자체는 이 메서드 호출
+   * 전에 {@code POST /api/v1/uploads/image}로 이미 업로드되어 있어야 한다.
+   */
+  @Transactional
+  public DeliveryResponse completeDelivery(
+      Long deliveryRequestId, DeliveryCompleteRequest request) {
+    DeliveryRequest deliveryRequest = findDeliveryRequestForUpdateOrThrow(deliveryRequestId);
+    if (deliveryRequest.getStatus() != DeliveryStatus.PICKED_UP) {
+      throw new InvalidDeliveryTransitionException(
+          deliveryRequest.getStatus(), DeliveryStatus.COMPLETED);
+    }
+    deliveryRequest.setStatus(DeliveryStatus.COMPLETED);
+    deliveryRequest.setProofPhotoUrl(request.getProofPhotoUrl());
+    LocalDateTime completedAt = LocalDateTime.now();
+    deliveryRequest.setCompletedAt(completedAt);
+    eventPublisher.publishEvent(
+        new DeliveryStatusChangedEvent(deliveryRequestId, DeliveryStatus.COMPLETED, completedAt));
+    return DeliveryResponse.from(deliveryRequest);
+  }
+
+  /** 완료된 배송 요청의 증거 사진을 조회한다. 완료되지 않았거나 사진이 없으면 ProofPhotoNotFoundException. */
+  @Transactional(readOnly = true)
+  public ProofPhotoResponse getProofPhoto(Long deliveryRequestId) {
+    DeliveryRequest deliveryRequest = findDeliveryRequestOrThrow(deliveryRequestId);
+    if (deliveryRequest.getStatus() != DeliveryStatus.COMPLETED
+        || deliveryRequest.getProofPhotoUrl() == null) {
+      throw new ProofPhotoNotFoundException(deliveryRequestId);
+    }
+    return ProofPhotoResponse.from(deliveryRequest);
+  }
+
   private void validateWeight(double weight) {
     if (weight <= 0) {
       throw new InvalidDeliveryWeightException(weight);
@@ -193,6 +249,13 @@ public class DeliveryService {
   private DeliveryRequest findDeliveryRequestOrThrow(Long deliveryRequestId) {
     return deliveryRequestRepository
         .findById(deliveryRequestId)
+        .orElseThrow(() -> new EntityNotFoundException(ErrorCode.DELIVERY_NOT_FOUND));
+  }
+
+  /** 픽업/완료 처리처럼 동시에 두 번 눌려도 하나만 성공해야 하는 상태 전이 전에, 비관적 쓰기 락으로 조회한다. */
+  private DeliveryRequest findDeliveryRequestForUpdateOrThrow(Long deliveryRequestId) {
+    return deliveryRequestRepository
+        .findByIdForUpdate(deliveryRequestId)
         .orElseThrow(() -> new EntityNotFoundException(ErrorCode.DELIVERY_NOT_FOUND));
   }
 }

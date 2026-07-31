@@ -3,31 +3,39 @@ package com.example.shinhangaecheokja.delivery.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.example.shinhangaecheokja.delivery.dto.request.DeliveryCompleteRequest;
 import com.example.shinhangaecheokja.delivery.dto.request.DeliveryCreateRequest;
 import com.example.shinhangaecheokja.delivery.dto.request.DeliveryEstimateRequest;
 import com.example.shinhangaecheokja.delivery.dto.request.DeliveryUpdateRequest;
 import com.example.shinhangaecheokja.delivery.dto.response.DeliveryEstimateResponse;
 import com.example.shinhangaecheokja.delivery.dto.response.DeliveryResponse;
+import com.example.shinhangaecheokja.delivery.dto.response.ProofPhotoResponse;
 import com.example.shinhangaecheokja.delivery.entity.DeliveryRequest;
 import com.example.shinhangaecheokja.delivery.entity.DeliveryStatus;
 import com.example.shinhangaecheokja.delivery.entity.ItemSize;
+import com.example.shinhangaecheokja.delivery.event.DeliveryStatusChangedEvent;
 import com.example.shinhangaecheokja.delivery.exception.AlreadyMatchedException;
 import com.example.shinhangaecheokja.delivery.exception.InvalidDeliveryDistanceException;
+import com.example.shinhangaecheokja.delivery.exception.InvalidDeliveryTransitionException;
 import com.example.shinhangaecheokja.delivery.exception.InvalidDeliveryWeightException;
+import com.example.shinhangaecheokja.delivery.exception.ProofPhotoNotFoundException;
 import com.example.shinhangaecheokja.delivery.repository.DeliveryRequestRepository;
 import com.example.shinhangaecheokja.delivery.repository.MatchingRepository;
 import com.example.shinhangaecheokja.member.service.MemberService;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 
 @ExtendWith(MockitoExtension.class)
 class DeliveryServiceTest {
@@ -35,6 +43,7 @@ class DeliveryServiceTest {
   @Mock private DeliveryRequestRepository deliveryRequestRepository;
   @Mock private MemberService memberService;
   @Mock private MatchingRepository matchingRepository;
+  @Mock private ApplicationEventPublisher eventPublisher;
   @InjectMocks private DeliveryService deliveryService;
 
   @Test
@@ -272,5 +281,103 @@ class DeliveryServiceTest {
     DeliveryResponse created = deliveryService.requestDelivery(createRequest);
 
     assertThat(created.feePoint()).isEqualTo(estimate.totalFee().longValueExact());
+  }
+
+  @Test
+  void PICKED_UP_상태면_완료_처리하고_증거사진_URL을_저장한다() {
+    DeliveryRequest deliveryRequest = new DeliveryRequest();
+    deliveryRequest.setStatus(DeliveryStatus.PICKED_UP);
+    when(deliveryRequestRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(deliveryRequest));
+
+    DeliveryCompleteRequest request = new DeliveryCompleteRequest();
+    request.setProofPhotoUrl("https://example.com/proof.jpg");
+
+    DeliveryResponse response = deliveryService.completeDelivery(1L, request);
+
+    assertThat(response.status()).isEqualTo(DeliveryStatus.COMPLETED);
+    assertThat(deliveryRequest.getProofPhotoUrl()).isEqualTo("https://example.com/proof.jpg");
+    assertThat(deliveryRequest.getCompletedAt()).isNotNull();
+    verify(eventPublisher)
+        .publishEvent(
+            argThat(
+                (DeliveryStatusChangedEvent event) ->
+                    event.deliveryRequestId().equals(1L)
+                        && event.status() == DeliveryStatus.COMPLETED));
+  }
+
+  @Test
+  void PICKED_UP이_아니면_완료_처리_시_InvalidDeliveryTransitionException을_던진다() {
+    DeliveryRequest deliveryRequest = new DeliveryRequest();
+    deliveryRequest.setStatus(DeliveryStatus.MATCHED);
+    when(deliveryRequestRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(deliveryRequest));
+
+    DeliveryCompleteRequest request = new DeliveryCompleteRequest();
+    request.setProofPhotoUrl("https://example.com/proof.jpg");
+
+    assertThatThrownBy(() -> deliveryService.completeDelivery(1L, request))
+        .isInstanceOf(InvalidDeliveryTransitionException.class);
+  }
+
+  @Test
+  void MATCHED_상태면_픽업_완료로_전이하고_픽업시각을_저장한다() {
+    DeliveryRequest deliveryRequest = new DeliveryRequest();
+    deliveryRequest.setStatus(DeliveryStatus.MATCHED);
+    when(deliveryRequestRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(deliveryRequest));
+
+    DeliveryResponse response = deliveryService.confirmPickup(1L);
+
+    assertThat(response.status()).isEqualTo(DeliveryStatus.PICKED_UP);
+    assertThat(deliveryRequest.getPickedUpAt()).isNotNull();
+    verify(eventPublisher)
+        .publishEvent(
+            argThat(
+                (DeliveryStatusChangedEvent event) ->
+                    event.deliveryRequestId().equals(1L)
+                        && event.status() == DeliveryStatus.PICKED_UP));
+  }
+
+  @Test
+  void MATCHED가_아니면_픽업_처리_시_InvalidDeliveryTransitionException을_던진다() {
+    DeliveryRequest deliveryRequest = new DeliveryRequest();
+    deliveryRequest.setStatus(DeliveryStatus.REQUESTED);
+    when(deliveryRequestRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(deliveryRequest));
+
+    assertThatThrownBy(() -> deliveryService.confirmPickup(1L))
+        .isInstanceOf(InvalidDeliveryTransitionException.class);
+  }
+
+  @Test
+  void 완료된_배송의_증거사진을_조회한다() {
+    LocalDateTime completedAt = LocalDateTime.of(2026, 7, 31, 10, 0);
+    DeliveryRequest deliveryRequest = new DeliveryRequest();
+    deliveryRequest.setStatus(DeliveryStatus.COMPLETED);
+    deliveryRequest.setProofPhotoUrl("https://example.com/proof.jpg");
+    deliveryRequest.setCompletedAt(completedAt);
+    when(deliveryRequestRepository.findById(1L)).thenReturn(Optional.of(deliveryRequest));
+
+    ProofPhotoResponse response = deliveryService.getProofPhoto(1L);
+
+    assertThat(response.proofPhotoUrl()).isEqualTo("https://example.com/proof.jpg");
+    assertThat(response.completedAt()).isEqualTo(completedAt);
+  }
+
+  @Test
+  void 완료되지_않은_배송의_증거사진_조회_시_ProofPhotoNotFoundException을_던진다() {
+    DeliveryRequest deliveryRequest = new DeliveryRequest();
+    deliveryRequest.setStatus(DeliveryStatus.MATCHED);
+    when(deliveryRequestRepository.findById(1L)).thenReturn(Optional.of(deliveryRequest));
+
+    assertThatThrownBy(() -> deliveryService.getProofPhoto(1L))
+        .isInstanceOf(ProofPhotoNotFoundException.class);
+  }
+
+  @Test
+  void 완료된_배송이어도_증거사진_URL이_없으면_ProofPhotoNotFoundException을_던진다() {
+    DeliveryRequest deliveryRequest = new DeliveryRequest();
+    deliveryRequest.setStatus(DeliveryStatus.COMPLETED);
+    when(deliveryRequestRepository.findById(1L)).thenReturn(Optional.of(deliveryRequest));
+
+    assertThatThrownBy(() -> deliveryService.getProofPhoto(1L))
+        .isInstanceOf(ProofPhotoNotFoundException.class);
   }
 }
