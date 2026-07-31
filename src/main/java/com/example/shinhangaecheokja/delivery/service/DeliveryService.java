@@ -22,6 +22,7 @@ import com.example.shinhangaecheokja.delivery.repository.MatchingRepository;
 import com.example.shinhangaecheokja.member.service.MemberService;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -195,6 +196,7 @@ public class DeliveryService {
     }
     deliveryRequest.setStatus(DeliveryStatus.COMPLETED);
     deliveryRequest.setProofPhotoUrl(request.getProofPhotoUrl());
+    deliveryRequest.setCompletedAt(LocalDateTime.now());
     return DeliveryResponse.from(deliveryRequest);
   }
 

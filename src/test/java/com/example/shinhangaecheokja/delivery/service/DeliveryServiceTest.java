@@ -26,6 +26,7 @@ import com.example.shinhangaecheokja.delivery.repository.DeliveryRequestReposito
 import com.example.shinhangaecheokja.delivery.repository.MatchingRepository;
 import com.example.shinhangaecheokja.member.service.MemberService;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -291,6 +292,7 @@ class DeliveryServiceTest {
 
     assertThat(response.status()).isEqualTo(DeliveryStatus.COMPLETED);
     assertThat(deliveryRequest.getProofPhotoUrl()).isEqualTo("https://example.com/proof.jpg");
+    assertThat(deliveryRequest.getCompletedAt()).isNotNull();
   }
 
   @Test
@@ -308,20 +310,33 @@ class DeliveryServiceTest {
 
   @Test
   void 완료된_배송의_증거사진을_조회한다() {
+    LocalDateTime completedAt = LocalDateTime.of(2026, 7, 31, 10, 0);
     DeliveryRequest deliveryRequest = new DeliveryRequest();
     deliveryRequest.setStatus(DeliveryStatus.COMPLETED);
     deliveryRequest.setProofPhotoUrl("https://example.com/proof.jpg");
+    deliveryRequest.setCompletedAt(completedAt);
     when(deliveryRequestRepository.findById(1L)).thenReturn(Optional.of(deliveryRequest));
 
     ProofPhotoResponse response = deliveryService.getProofPhoto(1L);
 
     assertThat(response.proofPhotoUrl()).isEqualTo("https://example.com/proof.jpg");
+    assertThat(response.completedAt()).isEqualTo(completedAt);
   }
 
   @Test
   void 완료되지_않은_배송의_증거사진_조회_시_ProofPhotoNotFoundException을_던진다() {
     DeliveryRequest deliveryRequest = new DeliveryRequest();
     deliveryRequest.setStatus(DeliveryStatus.MATCHED);
+    when(deliveryRequestRepository.findById(1L)).thenReturn(Optional.of(deliveryRequest));
+
+    assertThatThrownBy(() -> deliveryService.getProofPhoto(1L))
+        .isInstanceOf(ProofPhotoNotFoundException.class);
+  }
+
+  @Test
+  void 완료된_배송이어도_증거사진_URL이_없으면_ProofPhotoNotFoundException을_던진다() {
+    DeliveryRequest deliveryRequest = new DeliveryRequest();
+    deliveryRequest.setStatus(DeliveryStatus.COMPLETED);
     when(deliveryRequestRepository.findById(1L)).thenReturn(Optional.of(deliveryRequest));
 
     assertThatThrownBy(() -> deliveryService.getProofPhoto(1L))

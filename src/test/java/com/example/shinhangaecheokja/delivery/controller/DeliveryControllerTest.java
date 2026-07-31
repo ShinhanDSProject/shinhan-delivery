@@ -21,6 +21,7 @@ import com.example.shinhangaecheokja.delivery.exception.InvalidDeliveryTransitio
 import com.example.shinhangaecheokja.delivery.exception.ProofPhotoNotFoundException;
 import com.example.shinhangaecheokja.delivery.service.DeliveryService;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -241,6 +242,19 @@ class DeliveryControllerTest {
   }
 
   @Test
+  void 증거사진_URL이_255자를_초과하면_완료_처리_요청에_400을_반환한다() throws Exception {
+    DeliveryCompleteRequest request = new DeliveryCompleteRequest();
+    request.setProofPhotoUrl("a".repeat(256));
+
+    mockMvc
+        .perform(
+            patch("/api/v1/delivery-requests/1/complete")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
   void MATCHED가_아닌_배송을_완료_처리하면_409를_반환한다() throws Exception {
     DeliveryCompleteRequest request = new DeliveryCompleteRequest();
     request.setProofPhotoUrl("https://example.com/proof.jpg");
@@ -259,14 +273,16 @@ class DeliveryControllerTest {
   }
 
   @Test
-  void 증거사진_조회_요청을_받으면_사진_URL을_반환한다() throws Exception {
+  void 증거사진_조회_요청을_받으면_사진_URL과_완료시각을_반환한다() throws Exception {
+    LocalDateTime completedAt = LocalDateTime.of(2026, 7, 31, 10, 0);
     when(deliveryService.getProofPhoto(1L))
-        .thenReturn(new ProofPhotoResponse(1L, "https://example.com/proof.jpg"));
+        .thenReturn(new ProofPhotoResponse(1L, "https://example.com/proof.jpg", completedAt));
 
     mockMvc
         .perform(get("/api/v1/delivery-requests/1/proof-photo"))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.proofPhotoUrl").value("https://example.com/proof.jpg"));
+        .andExpect(jsonPath("$.proofPhotoUrl").value("https://example.com/proof.jpg"))
+        .andExpect(jsonPath("$.completedAt").exists());
   }
 
   @Test
