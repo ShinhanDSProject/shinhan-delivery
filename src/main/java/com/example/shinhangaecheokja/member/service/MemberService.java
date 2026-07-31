@@ -85,10 +85,7 @@ public class MemberService {
   @Transactional
   public MemberProfileResponseDto updateMyProfile(
       Long memberId, MemberProfileUpdateRequestDto request) {
-    Member member = findMemberOrThrow(memberId);
-    member.setName(request.getName());
-    member.setPhoneNumber(request.getPhoneNumber());
-    return MemberProfileResponseDto.from(member);
+    return MemberProfileResponseDto.from(findMemberOrThrow(memberId).updateProfileBy(request));
   }
 
   /** 현재 비밀번호를 확인한 뒤 새 비밀번호를 BCrypt로 암호화해 저장한다. */
@@ -112,10 +109,7 @@ public class MemberService {
   /** 회원의 이름·연락처를 수정한다 (Member Entity 리턴). 이메일/비밀번호/역할은 변경하지 않는다. */
   @Transactional
   public Member updateMember(Long memberId, MemberUpdateRequest request) {
-    Member member = findMemberOrThrow(memberId);
-    member.setName(request.getName());
-    member.setPhoneNumber(request.getPhoneNumber());
-    return member;
+    return findMemberOrThrow(memberId).updateBy(request);
   }
 
   /** 회원의 역할(CUSTOMER / COURIER)을 변경한다 (Member Entity 리턴). */

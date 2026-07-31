@@ -119,7 +119,7 @@ public class MatchingService {
       }
     }
 
-    matching.setStatus(newStatus);
+    matching.changeStatus(newStatus);
     applyStatus(matching, deliveryRequest, newStatus);
     return MatchingResponse.from(matching);
   }
@@ -134,7 +134,7 @@ public class MatchingService {
     if (matching.getStatus() == MatchingStatus.MATCHED) {
       vehicleService.markAvailable(matching.getVehicleId());
       findDeliveryRequestOrThrow(matching.getDeliveryRequestId())
-          .setStatus(DeliveryStatus.REQUESTED);
+          .changeStatus(DeliveryStatus.REQUESTED);
     }
     matchingRepository.delete(matching);
   }
@@ -158,7 +158,7 @@ public class MatchingService {
   /** Matching 상태 변화에 맞춰 DeliveryRequest·Vehicle 상태를 함께 갱신한다. */
   private void applyStatus(
       Matching matching, DeliveryRequest deliveryRequest, MatchingStatus status) {
-    deliveryRequest.setStatus(toDeliveryStatus(status));
+    deliveryRequest.changeStatus(toDeliveryStatus(status));
     if (status == MatchingStatus.MATCHED) {
       vehicleService.markBusy(matching.getVehicleId());
     } else {

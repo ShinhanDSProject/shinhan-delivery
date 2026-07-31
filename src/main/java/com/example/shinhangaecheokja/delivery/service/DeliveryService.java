@@ -151,9 +151,7 @@ public class DeliveryService {
     if (deliveryRequest.getStatus() != DeliveryStatus.REQUESTED) {
       throw new AlreadyMatchedException(deliveryRequestId, deliveryRequest.getStatus());
     }
-    deliveryRequest.setPickupAddress(request.getPickupAddress());
-    deliveryRequest.setDropoffAddress(request.getDropoffAddress());
-    return deliveryRequest;
+    return deliveryRequest.updateBy(request);
   }
 
   /**
@@ -177,9 +175,8 @@ public class DeliveryService {
       throw new InvalidDeliveryTransitionException(
           deliveryRequest.getStatus(), DeliveryStatus.PICKED_UP);
     }
-    deliveryRequest.setStatus(DeliveryStatus.PICKED_UP);
     LocalDateTime pickedUpAt = LocalDateTime.now();
-    deliveryRequest.setPickedUpAt(pickedUpAt);
+    deliveryRequest.pickUp(pickedUpAt);
     eventPublisher.publishEvent(
         new DeliveryStatusChangedEvent(deliveryRequestId, DeliveryStatus.PICKED_UP, pickedUpAt));
     return deliveryRequest;
@@ -196,10 +193,8 @@ public class DeliveryService {
       throw new InvalidDeliveryTransitionException(
           deliveryRequest.getStatus(), DeliveryStatus.COMPLETED);
     }
-    deliveryRequest.setStatus(DeliveryStatus.COMPLETED);
-    deliveryRequest.setProofPhotoUrl(request.getProofPhotoUrl());
     LocalDateTime completedAt = LocalDateTime.now();
-    deliveryRequest.setCompletedAt(completedAt);
+    deliveryRequest.complete(request, completedAt);
     eventPublisher.publishEvent(
         new DeliveryStatusChangedEvent(deliveryRequestId, DeliveryStatus.COMPLETED, completedAt));
     return deliveryRequest;

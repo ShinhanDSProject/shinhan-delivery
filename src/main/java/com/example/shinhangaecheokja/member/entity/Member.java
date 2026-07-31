@@ -3,6 +3,8 @@ package com.example.shinhangaecheokja.member.entity;
 import com.example.shinhangaecheokja.common.exception.BusinessException;
 import com.example.shinhangaecheokja.common.exception.ErrorCode;
 import com.example.shinhangaecheokja.member.dto.request.MemberCreateRequest;
+import com.example.shinhangaecheokja.member.dto.request.MemberProfileUpdateRequestDto;
+import com.example.shinhangaecheokja.member.dto.request.MemberUpdateRequest;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -48,7 +50,7 @@ public class Member {
   private MemberRole role;
 
   /** 회원의 역할(CUSTOMER/COURIER)을 변경한다. ADMIN 권한 승격은 직접 변경을 불허한다. */
-  public void changeRole(MemberRole newRole) {
+  public Member changeRole(MemberRole newRole) {
     if (newRole == null) {
       throw new IllegalArgumentException("변경할 역할은 필수 선택 항목입니다.");
     }
@@ -56,14 +58,30 @@ public class Member {
       throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
     }
     this.role = newRole;
+    return this;
   }
 
   /** 암호화된 새 비밀번호로 회원 비밀번호를 변경한다. */
-  public void changePassword(String encodedPassword) {
+  public Member changePassword(String encodedPassword) {
     if (encodedPassword == null || encodedPassword.isBlank()) {
       throw new IllegalArgumentException("암호화된 비밀번호는 필수입니다.");
     }
     this.password = encodedPassword;
+    return this;
+  }
+
+  /** MemberUpdateRequest DTO 기반으로 회원 이름·연락처를 수정하는 도메인 비즈니스 메서드. */
+  public Member updateBy(MemberUpdateRequest request) {
+    this.name = request.getName();
+    this.phoneNumber = request.getPhoneNumber();
+    return this;
+  }
+
+  /** MemberProfileUpdateRequestDto DTO 기반으로 회원 프로필 정보(2이름·연락처)를 수정하는 도메인 비즈니스 메서드. */
+  public Member updateProfileBy(MemberProfileUpdateRequestDto request) {
+    this.name = request.getName();
+    this.phoneNumber = request.getPhoneNumber();
+    return this;
   }
 
   /** MemberCreateRequest DTO 기반으로 Member 엔티티를 생성하는 정적 팩토리 메서드. */

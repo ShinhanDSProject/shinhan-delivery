@@ -63,13 +63,13 @@ public class VehicleService {
   /** Vehicle을 BUSY 상태로 전환한다. */
   @Transactional
   public void markBusy(Long vehicleId) {
-    findVehicleOrThrow(vehicleId).setStatus(VehicleStatus.BUSY);
+    findVehicleOrThrow(vehicleId).markAs(VehicleStatus.BUSY);
   }
 
   /** Vehicle을 AVAILABLE 상태로 전환한다. */
   @Transactional
   public void markAvailable(Long vehicleId) {
-    findVehicleOrThrow(vehicleId).setStatus(VehicleStatus.AVAILABLE);
+    findVehicleOrThrow(vehicleId).markAs(VehicleStatus.AVAILABLE);
   }
 
   /**
@@ -84,12 +84,7 @@ public class VehicleService {
     if (vehicle.getStatus() != VehicleStatus.AVAILABLE) {
       throw new VehicleNotAvailableException(vehicleId);
     }
-    vehicle.setType(request.getType());
-    vehicle.setMaxWeight(request.getMaxWeight());
-    vehicle.setMaxDistance(request.getMaxDistance());
-    vehicle.setLatitude(request.getLatitude());
-    vehicle.setLongitude(request.getLongitude());
-    return VehicleResponse.from(vehicle);
+    return VehicleResponse.from(vehicle.updateBy(request));
   }
 
   /** id로 Vehicle을 조회해 삭제한다. 없으면 EntityNotFoundException. */

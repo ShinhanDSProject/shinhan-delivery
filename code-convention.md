@@ -336,6 +336,38 @@ public record DeliveryCreateResponse(Long id, String status, long feePoint) {
 
 ---
 
+## 10.3 엔티티 도메인 메서드: DTO 수용 및 `this` 반환 (Fluent Update)
+
+- **원칙:** 엔티티의 상태 변경 메서드는 외부에서 필드를 개별로 주입받지 않고, **Request DTO 또는 의미 있는 도메인 단위 값을 통째로 수용**하며, `return this`를 통해 자기 자신을 반환합니다.
+- **목적:**
+  - Service 계층에서 인라인 체이닝 또는 단일 표현식으로 처리할 수 있어 코드 라인 수를 줄이고 가독성을 높입니다.
+  - `How`(필드를 일일이 꺼내 대입)를 Entity 내부로 완전히 캡슐화합니다.
+  - 반환값 사용은 선택 사항입니다 — `void`처럼 호출해도 JPA Dirty Checking은 정상 동작합니다.
+- **명명 규칙:**
+  - 단순 필드 일괄 수정: `updateBy(XxxUpdateRequest request)` 형식
+  - 도메인 의미 있는 상태 전이: `pickUp()`, `complete(request)`, `cancel()` 등 도메인 어휘 사용
+  - 단일 상태값 변경: `changeXxx(value)` 형식 (예: `changeRole(role)`, `changePassword(encoded)`)
+
+```java
+// Entity — updateBy + this 반환
+public Address updateBy(AddressUpdateRequest request) {
+    this.alias = request.getAlias();
+    this.address = request.getAddress();
+    this.detailAddress = request.getDetailAddress();
+    this.pickupGuide = request.getPickupGuide();
+    return this;
+}
+
+// Service — 단일 표현식으로 처리, 반환값 활용
+return findAddressOrThrow(id, memberId).updateBy(request);
+
+// Service — 반환값 미사용(void처럼), JPA Dirty Checking은 그대로 동작
+findAddressOrThrow(id, memberId).updateBy(request);
+```
+
+---
+
+
 ## 11. Controller 규칙
 
 - Controller는 DTO만 다루고, Service를 호출한 뒤 결과를 응답으로 변환하는 역할만 한다. 비즈니스 로직(if 분기, 계산)을 Controller에 넣지 않는다.

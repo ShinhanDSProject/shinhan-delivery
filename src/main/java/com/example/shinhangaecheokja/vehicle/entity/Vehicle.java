@@ -1,6 +1,7 @@
 package com.example.shinhangaecheokja.vehicle.entity;
 
 import com.example.shinhangaecheokja.vehicle.dto.request.VehicleCreateRequest;
+import com.example.shinhangaecheokja.vehicle.dto.request.VehicleUpdateRequest;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -63,5 +64,21 @@ public class Vehicle {
         .longitude(request.getLongitude())
         .status(VehicleStatus.AVAILABLE)
         .build();
+  }
+
+  /** VehicleUpdateRequest DTO 기반으로 Vehicle 정보를 수정하는 도메인 비즈니스 메서드. */
+  public Vehicle updateBy(VehicleUpdateRequest request) {
+    this.type = request.getType();
+    this.maxWeight = request.getMaxWeight();
+    this.maxDistance = request.getMaxDistance();
+    this.latitude = request.getLatitude();
+    this.longitude = request.getLongitude();
+    return this;
+  }
+
+  /** Vehicle의 운영 상태를 변경하는 도메인 비즈니스 메서드. */
+  public Vehicle markAs(VehicleStatus newStatus) {
+    this.status = newStatus;
+    return this;
   }
 }

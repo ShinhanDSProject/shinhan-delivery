@@ -1,6 +1,8 @@
 package com.example.shinhangaecheokja.delivery.entity;
 
+import com.example.shinhangaecheokja.delivery.dto.request.DeliveryCompleteRequest;
 import com.example.shinhangaecheokja.delivery.dto.request.DeliveryCreateRequest;
+import com.example.shinhangaecheokja.delivery.dto.request.DeliveryUpdateRequest;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -90,5 +92,33 @@ public class DeliveryRequest {
     deliveryRequest.setStatus(DeliveryStatus.REQUESTED);
     deliveryRequest.setFeePoint(feePoint);
     return deliveryRequest;
+  }
+
+  /** DeliveryUpdateRequest DTO 기반으로 픽업지·도착지를 수정하는 도메인 비즈니스 메서드. */
+  public DeliveryRequest updateBy(DeliveryUpdateRequest request) {
+    this.pickupAddress = request.getPickupAddress();
+    this.dropoffAddress = request.getDropoffAddress();
+    return this;
+  }
+
+  /** 픽업 완료 처리를 수행하는 도메인 비즈니스 메서드. PICKED_UP 상태로 전이하고 픽업 시각을 기록한다. */
+  public DeliveryRequest pickUp(LocalDateTime pickedUpAt) {
+    this.status = DeliveryStatus.PICKED_UP;
+    this.pickedUpAt = pickedUpAt;
+    return this;
+  }
+
+  /** 배송 완료 처리를 수행하는 도메인 비즈니스 메서드. COMPLETED 상태로 전이하고 증거 사진과 완료 시각을 기록한다. */
+  public DeliveryRequest complete(DeliveryCompleteRequest request, LocalDateTime completedAt) {
+    this.status = DeliveryStatus.COMPLETED;
+    this.proofPhotoUrl = request.getProofPhotoUrl();
+    this.completedAt = completedAt;
+    return this;
+  }
+
+  /** 배송 요청의 상태를 변경하는 도메인 비즈니스 메서드. */
+  public DeliveryRequest changeStatus(DeliveryStatus newStatus) {
+    this.status = newStatus;
+    return this;
   }
 }
