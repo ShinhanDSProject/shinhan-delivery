@@ -40,6 +40,8 @@ public enum ErrorCode {
   INVALID_DELIVERY_WEIGHT(HttpStatus.BAD_REQUEST, "D004", "유효하지 않은 배송 무게입니다."),
   INVALID_DELIVERY_DISTANCE(HttpStatus.BAD_REQUEST, "D005", "유효하지 않은 배송 거리입니다."),
   INVALID_MATCHING_TRANSITION(HttpStatus.CONFLICT, "D006", "허용되지 않는 매칭 상태 전이입니다."),
+  INVALID_DELIVERY_TRANSITION(HttpStatus.CONFLICT, "D007", "허용되지 않는 배송 상태 전이입니다."),
+  PROOF_PHOTO_NOT_FOUND(HttpStatus.NOT_FOUND, "D008", "완료 증거 사진을 찾을 수 없습니다."),
 
   // Vehicle Domain Errors (continued)
   VEHICLE_CAPACITY_MISMATCH(HttpStatus.BAD_REQUEST, "V002", "차량이 배송 조건을 감당할 수 없습니다."),

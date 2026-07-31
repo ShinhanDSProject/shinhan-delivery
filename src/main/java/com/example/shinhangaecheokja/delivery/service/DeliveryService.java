@@ -2,22 +2,27 @@ package com.example.shinhangaecheokja.delivery.service;
 
 import com.example.shinhangaecheokja.common.exception.EntityNotFoundException;
 import com.example.shinhangaecheokja.common.exception.ErrorCode;
+import com.example.shinhangaecheokja.delivery.dto.request.DeliveryCompleteRequest;
 import com.example.shinhangaecheokja.delivery.dto.request.DeliveryCreateRequest;
 import com.example.shinhangaecheokja.delivery.dto.request.DeliveryEstimateRequest;
 import com.example.shinhangaecheokja.delivery.dto.request.DeliveryUpdateRequest;
 import com.example.shinhangaecheokja.delivery.dto.response.DeliveryEstimateResponse;
 import com.example.shinhangaecheokja.delivery.dto.response.DeliveryResponse;
+import com.example.shinhangaecheokja.delivery.dto.response.ProofPhotoResponse;
 import com.example.shinhangaecheokja.delivery.entity.DeliveryRequest;
 import com.example.shinhangaecheokja.delivery.entity.DeliveryStatus;
 import com.example.shinhangaecheokja.delivery.entity.ItemSize;
 import com.example.shinhangaecheokja.delivery.exception.AlreadyMatchedException;
 import com.example.shinhangaecheokja.delivery.exception.InvalidDeliveryDistanceException;
+import com.example.shinhangaecheokja.delivery.exception.InvalidDeliveryTransitionException;
 import com.example.shinhangaecheokja.delivery.exception.InvalidDeliveryWeightException;
+import com.example.shinhangaecheokja.delivery.exception.ProofPhotoNotFoundException;
 import com.example.shinhangaecheokja.delivery.repository.DeliveryRequestRepository;
 import com.example.shinhangaecheokja.delivery.repository.MatchingRepository;
 import com.example.shinhangaecheokja.member.service.MemberService;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -175,6 +180,35 @@ public class DeliveryService {
       throw new AlreadyMatchedException(deliveryRequestId, deliveryRequest.getStatus());
     }
     deliveryRequestRepository.delete(deliveryRequest);
+  }
+
+  /**
+   * 배송을 완료 처리한다. 배송원이 콜을 수락한(MATCHED) 배송 요청만 완료할 수 있으며, 완료와 동시에 증거 사진 URL을 저장한다. 사진 파일 자체는 이 메서드 호출
+   * 전에 {@code POST /api/v1/uploads/image}로 이미 업로드되어 있어야 한다.
+   */
+  @Transactional
+  public DeliveryResponse completeDelivery(
+      Long deliveryRequestId, DeliveryCompleteRequest request) {
+    DeliveryRequest deliveryRequest = findDeliveryRequestOrThrow(deliveryRequestId);
+    if (deliveryRequest.getStatus() != DeliveryStatus.MATCHED) {
+      throw new InvalidDeliveryTransitionException(
+          deliveryRequest.getStatus(), DeliveryStatus.COMPLETED);
+    }
+    deliveryRequest.setStatus(DeliveryStatus.COMPLETED);
+    deliveryRequest.setProofPhotoUrl(request.getProofPhotoUrl());
+    deliveryRequest.setCompletedAt(LocalDateTime.now());
+    return DeliveryResponse.from(deliveryRequest);
+  }
+
+  /** 완료된 배송 요청의 증거 사진을 조회한다. 완료되지 않았거나 사진이 없으면 ProofPhotoNotFoundException. */
+  @Transactional(readOnly = true)
+  public ProofPhotoResponse getProofPhoto(Long deliveryRequestId) {
+    DeliveryRequest deliveryRequest = findDeliveryRequestOrThrow(deliveryRequestId);
+    if (deliveryRequest.getStatus() != DeliveryStatus.COMPLETED
+        || deliveryRequest.getProofPhotoUrl() == null) {
+      throw new ProofPhotoNotFoundException(deliveryRequestId);
+    }
+    return ProofPhotoResponse.from(deliveryRequest);
   }
 
   private void validateWeight(double weight) {
