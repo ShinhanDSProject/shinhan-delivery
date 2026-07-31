@@ -4,16 +4,21 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.example.shinhangaecheokja.delivery.dto.request.DeliveryCompleteRequest;
 import com.example.shinhangaecheokja.delivery.dto.request.DeliveryCreateRequest;
 import com.example.shinhangaecheokja.delivery.dto.request.DeliveryEstimateRequest;
 import com.example.shinhangaecheokja.delivery.dto.response.DeliveryEstimateResponse;
 import com.example.shinhangaecheokja.delivery.dto.response.DeliveryResponse;
+import com.example.shinhangaecheokja.delivery.dto.response.ProofPhotoResponse;
 import com.example.shinhangaecheokja.delivery.entity.DeliveryStatus;
 import com.example.shinhangaecheokja.delivery.entity.ItemSize;
+import com.example.shinhangaecheokja.delivery.exception.InvalidDeliveryTransitionException;
+import com.example.shinhangaecheokja.delivery.exception.ProofPhotoNotFoundException;
 import com.example.shinhangaecheokja.delivery.service.DeliveryService;
 import java.math.BigDecimal;
 import org.junit.jupiter.api.Test;
@@ -190,5 +195,86 @@ class DeliveryControllerTest {
                 com.example.shinhangaecheokja.common.exception.ErrorCode.DELIVERY_NOT_FOUND));
 
     mockMvc.perform(get("/api/v1/delivery-requests/999")).andExpect(status().isNotFound());
+  }
+
+  @Test
+  void 완료_처리_요청을_받으면_완료된_배송_요청을_반환한다() throws Exception {
+    DeliveryCompleteRequest request = new DeliveryCompleteRequest();
+    request.setProofPhotoUrl("https://example.com/proof.jpg");
+
+    when(deliveryService.completeDelivery(eq(1L), any()))
+        .thenReturn(
+            new DeliveryResponse(
+                1L,
+                1L,
+                "서울시 강남구",
+                "서울시 서초구",
+                10,
+                111.19,
+                DeliveryStatus.COMPLETED,
+                78776L,
+                37.0,
+                127.0,
+                38.0,
+                127.0,
+                ItemSize.MEDIUM));
+
+    mockMvc
+        .perform(
+            patch("/api/v1/delivery-requests/1/complete")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.status").value("COMPLETED"));
+  }
+
+  @Test
+  void 증거사진_URL이_없으면_완료_처리_요청에_400을_반환한다() throws Exception {
+    DeliveryCompleteRequest request = new DeliveryCompleteRequest();
+
+    mockMvc
+        .perform(
+            patch("/api/v1/delivery-requests/1/complete")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  void MATCHED가_아닌_배송을_완료_처리하면_409를_반환한다() throws Exception {
+    DeliveryCompleteRequest request = new DeliveryCompleteRequest();
+    request.setProofPhotoUrl("https://example.com/proof.jpg");
+
+    when(deliveryService.completeDelivery(eq(1L), any()))
+        .thenThrow(
+            new InvalidDeliveryTransitionException(
+                DeliveryStatus.REQUESTED, DeliveryStatus.COMPLETED));
+
+    mockMvc
+        .perform(
+            patch("/api/v1/delivery-requests/1/complete")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isConflict());
+  }
+
+  @Test
+  void 증거사진_조회_요청을_받으면_사진_URL을_반환한다() throws Exception {
+    when(deliveryService.getProofPhoto(1L))
+        .thenReturn(new ProofPhotoResponse(1L, "https://example.com/proof.jpg"));
+
+    mockMvc
+        .perform(get("/api/v1/delivery-requests/1/proof-photo"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.proofPhotoUrl").value("https://example.com/proof.jpg"));
+  }
+
+  @Test
+  void 완료되지_않은_배송의_증거사진을_조회하면_404를_반환한다() throws Exception {
+    when(deliveryService.getProofPhoto(1L)).thenThrow(new ProofPhotoNotFoundException(1L));
+
+    mockMvc
+        .perform(get("/api/v1/delivery-requests/1/proof-photo"))
+        .andExpect(status().isNotFound());
   }
 }

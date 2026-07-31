@@ -182,11 +182,12 @@ public class DeliveryService {
   }
 
   /**
-   * 배송을 완료 처리한다. 배송원이 콜을 수락한(MATCHED) 배송 요청만 완료할 수 있으며, 완료와 동시에 증거 사진 URL을 저장한다. 사진 파일 자체는 이
-   * 메서드 호출 전에 {@code POST /api/v1/uploads/image}로 이미 업로드되어 있어야 한다.
+   * 배송을 완료 처리한다. 배송원이 콜을 수락한(MATCHED) 배송 요청만 완료할 수 있으며, 완료와 동시에 증거 사진 URL을 저장한다. 사진 파일 자체는 이 메서드 호출
+   * 전에 {@code POST /api/v1/uploads/image}로 이미 업로드되어 있어야 한다.
    */
   @Transactional
-  public DeliveryResponse completeDelivery(Long deliveryRequestId, DeliveryCompleteRequest request) {
+  public DeliveryResponse completeDelivery(
+      Long deliveryRequestId, DeliveryCompleteRequest request) {
     DeliveryRequest deliveryRequest = findDeliveryRequestOrThrow(deliveryRequestId);
     if (deliveryRequest.getStatus() != DeliveryStatus.MATCHED) {
       throw new InvalidDeliveryTransitionException(
