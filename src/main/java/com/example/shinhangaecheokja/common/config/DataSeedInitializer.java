@@ -126,7 +126,7 @@ public class DataSeedInitializer implements CommandLineRunner {
     deliveryRequest.setDropoffLatitude(37.6);
     deliveryRequest.setDropoffLongitude(127.05);
     deliveryRequest.setItemSize(ItemSize.MEDIUM);
-    Long deliveryRequestId = deliveryService.requestDelivery(deliveryRequest).id();
+    Long deliveryRequestId = deliveryService.requestDelivery(deliveryRequest).getId();
 
     MatchingCreateRequest matchingRequest = new MatchingCreateRequest();
     matchingRequest.setDeliveryRequestId(deliveryRequestId);

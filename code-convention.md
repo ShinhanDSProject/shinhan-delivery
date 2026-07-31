@@ -13,6 +13,11 @@
 3. **에러는 예외(Exception)로 처리한다.** 커스텀 예외를 던지고, `@RestControllerAdvice`(전역 예외 처리기)에서 HTTP 응답으로 변환한다.
 4. Entity 및 모든 DTO/Java 클래스의 `Getter`, `Setter` 메서드는 직접 코드로 수동 작성하지 않고 **무조건 Lombok 라이브러리(`@Getter`, `@Setter`)를 100% 사용하여 개발**한다. 수동 `getXXX()`, `setXXX()` 메서드 작성은 엄격히 금지된다. 별도의 불변 객체(Value Object)나 `Result` 타입 같은 함수형 패턴은 쓰지 않는다.
 5. **신규 기능은 설계 문서를 먼저 작성한다.** 코드를 작성하기 전에 `docs/design/기능명-design.md`(User Story·성공 기준, ERD 또는 아키텍처 흐름도, API/메시지 명세, 작업 분할(WBS))를 먼저 작성해 설계를 정리한 뒤 구현에 들어간다. 별도 설계 리뷰 승인까지는 필수가 아니며, 문서화 자체가 목적이다 (`docs/design-phase-guide.md` 참고).
+6. **What과 How를 명확히 분리하고 단일 추상화 수준(SLAP)을 유지한다.** 
+   - **Service 계층:** "무엇을 수행하는가(What)"에 집중하여 비즈니스 유스케이스 흐름을 선언적(Declarative)으로 작성합니다. DB 조작 기술, 복잡한 산출식, 문자열 파싱 등 "어떻게 처리하는가(How)"에 해당하는 세부 구현은 Entity, Repository, Helper로 위임합니다.
+   - **Entity/Domain 계층:** 도메인 비즈니스 규칙과 상태 변이 로직을 캡슐화합니다.
+   - **Repository 계층:** 데이터 영속화 및 기술적 조회 세부 사항(How)을 전담합니다.
+   - **Controller 계층:** Presentation 단위 데이터 변환 및 HTTP 요청/응답 라우팅만 담당합니다.
 
 ---
 

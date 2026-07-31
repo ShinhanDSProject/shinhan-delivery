@@ -15,7 +15,6 @@ import com.example.shinhangaecheokja.delivery.dto.request.DeliveryCreateRequest;
 import com.example.shinhangaecheokja.delivery.dto.request.DeliveryEstimateRequest;
 import com.example.shinhangaecheokja.delivery.dto.request.DeliveryUpdateRequest;
 import com.example.shinhangaecheokja.delivery.dto.response.DeliveryEstimateResponse;
-import com.example.shinhangaecheokja.delivery.dto.response.DeliveryResponse;
 import com.example.shinhangaecheokja.delivery.dto.response.ProofPhotoResponse;
 import com.example.shinhangaecheokja.delivery.entity.DeliveryRequest;
 import com.example.shinhangaecheokja.delivery.entity.DeliveryStatus;
@@ -64,11 +63,11 @@ class DeliveryServiceTest {
     when(deliveryRequestRepository.save(any(DeliveryRequest.class)))
         .thenAnswer(invocation -> invocation.getArgument(0));
 
-    DeliveryResponse response = deliveryService.requestDelivery(request);
+    DeliveryRequest response = deliveryService.requestDelivery(request);
 
-    assertThat(response.customerId()).isEqualTo(1L);
-    assertThat(response.feePoint()).isEqualTo(78776L);
-    assertThat(response.status()).isEqualTo(DeliveryStatus.REQUESTED);
+    assertThat(response.getCustomerId()).isEqualTo(1L);
+    assertThat(response.getFeePoint()).isEqualTo(78776L);
+    assertThat(response.getStatus()).isEqualTo(DeliveryStatus.REQUESTED);
   }
 
   @Test
@@ -117,15 +116,15 @@ class DeliveryServiceTest {
   }
 
   @Test
-  void 존재하는_배송_요청을_조회하면_DeliveryResponse를_반환한다() {
+  void 존재하는_배송_요청을_조회하면_DeliveryRequest를_반환한다() {
     DeliveryRequest deliveryRequest = new DeliveryRequest();
     deliveryRequest.setCustomerId(1L);
     deliveryRequest.setStatus(DeliveryStatus.REQUESTED);
     when(deliveryRequestRepository.findById(1L)).thenReturn(Optional.of(deliveryRequest));
 
-    DeliveryResponse response = deliveryService.getDeliveryRequest(1L);
+    DeliveryRequest response = deliveryService.getDeliveryRequest(1L);
 
-    assertThat(response.customerId()).isEqualTo(1L);
+    assertThat(response.getCustomerId()).isEqualTo(1L);
   }
 
   @Test
@@ -140,10 +139,10 @@ class DeliveryServiceTest {
     request.setPickupAddress("서울시 송파구");
     request.setDropoffAddress("서울시 강동구");
 
-    DeliveryResponse response = deliveryService.updateDeliveryRequest(1L, request);
+    DeliveryRequest response = deliveryService.updateDeliveryRequest(1L, request);
 
-    assertThat(response.pickupAddress()).isEqualTo("서울시 송파구");
-    assertThat(response.dropoffAddress()).isEqualTo("서울시 강동구");
+    assertThat(response.getPickupAddress()).isEqualTo("서울시 송파구");
+    assertThat(response.getDropoffAddress()).isEqualTo("서울시 강동구");
   }
 
   @Test
@@ -278,9 +277,9 @@ class DeliveryServiceTest {
         .thenAnswer(invocation -> invocation.getArgument(0));
 
     DeliveryEstimateResponse estimate = deliveryService.estimateFee(estimateRequest);
-    DeliveryResponse created = deliveryService.requestDelivery(createRequest);
+    DeliveryRequest created = deliveryService.requestDelivery(createRequest);
 
-    assertThat(created.feePoint()).isEqualTo(estimate.totalFee().longValueExact());
+    assertThat(created.getFeePoint()).isEqualTo(estimate.totalFee().longValueExact());
   }
 
   @Test
@@ -292,9 +291,9 @@ class DeliveryServiceTest {
     DeliveryCompleteRequest request = new DeliveryCompleteRequest();
     request.setProofPhotoUrl("https://example.com/proof.jpg");
 
-    DeliveryResponse response = deliveryService.completeDelivery(1L, request);
+    DeliveryRequest response = deliveryService.completeDelivery(1L, request);
 
-    assertThat(response.status()).isEqualTo(DeliveryStatus.COMPLETED);
+    assertThat(response.getStatus()).isEqualTo(DeliveryStatus.COMPLETED);
     assertThat(deliveryRequest.getProofPhotoUrl()).isEqualTo("https://example.com/proof.jpg");
     assertThat(deliveryRequest.getCompletedAt()).isNotNull();
     verify(eventPublisher)
@@ -324,9 +323,9 @@ class DeliveryServiceTest {
     deliveryRequest.setStatus(DeliveryStatus.MATCHED);
     when(deliveryRequestRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(deliveryRequest));
 
-    DeliveryResponse response = deliveryService.confirmPickup(1L);
+    DeliveryRequest response = deliveryService.confirmPickup(1L);
 
-    assertThat(response.status()).isEqualTo(DeliveryStatus.PICKED_UP);
+    assertThat(response.getStatus()).isEqualTo(DeliveryStatus.PICKED_UP);
     assertThat(deliveryRequest.getPickedUpAt()).isNotNull();
     verify(eventPublisher)
         .publishEvent(

@@ -7,7 +7,6 @@ import com.example.shinhangaecheokja.delivery.dto.request.DeliveryCreateRequest;
 import com.example.shinhangaecheokja.delivery.dto.request.DeliveryEstimateRequest;
 import com.example.shinhangaecheokja.delivery.dto.request.DeliveryUpdateRequest;
 import com.example.shinhangaecheokja.delivery.dto.response.DeliveryEstimateResponse;
-import com.example.shinhangaecheokja.delivery.dto.response.DeliveryResponse;
 import com.example.shinhangaecheokja.delivery.dto.response.ProofPhotoResponse;
 import com.example.shinhangaecheokja.delivery.entity.DeliveryRequest;
 import com.example.shinhangaecheokja.delivery.entity.DeliveryStatus;
@@ -52,7 +51,7 @@ public class DeliveryService {
    * 좌표로 계산 — 요금 조작 방지). 매칭은 차량이 콜을 수락하면서 별도로 이루어진다.
    */
   @Transactional
-  public DeliveryResponse requestDelivery(DeliveryCreateRequest request) {
+  public DeliveryRequest requestDelivery(DeliveryCreateRequest request) {
     memberService.getMember(request.getCustomerId());
     validateWeight(request.getWeight());
 
@@ -70,9 +69,7 @@ public class DeliveryService {
     DeliveryRequest deliveryRequest =
         DeliveryRequest.of(request, distanceKm, fee.totalFee().longValueExact());
 
-    DeliveryRequest saved = deliveryRequestRepository.save(deliveryRequest);
-
-    return DeliveryResponse.from(saved);
+    return deliveryRequestRepository.save(deliveryRequest);
   }
 
   /** 배송 요청을 생성하지 않고 예상 요금만 계산한다({@link #requestDelivery}와 완전히 동일한 공식). */
@@ -131,24 +128,24 @@ public class DeliveryService {
     return EARTH_RADIUS_KM * c;
   }
 
-  /** id로 배송 요청 단건을 조회한다. 없으면 EntityNotFoundException. */
+  /** id로 배송 요청 단건을 조회한다 (DeliveryRequest Entity 리턴). 없으면 EntityNotFoundException. */
   @Transactional(readOnly = true)
-  public DeliveryResponse getDeliveryRequest(Long deliveryRequestId) {
-    return DeliveryResponse.from(findDeliveryRequestOrThrow(deliveryRequestId));
+  public DeliveryRequest getDeliveryRequest(Long deliveryRequestId) {
+    return findDeliveryRequestOrThrow(deliveryRequestId);
   }
 
-  /** 전체 배송 요청 목록을 조회한다. */
+  /** 전체 배송 요청 목록을 조회한다 (DeliveryRequest Entity 리턴). */
   @Transactional(readOnly = true)
-  public List<DeliveryResponse> getDeliveryRequests() {
-    return deliveryRequestRepository.findAll().stream().map(DeliveryResponse::from).toList();
+  public List<DeliveryRequest> getDeliveryRequests() {
+    return deliveryRequestRepository.findAll();
   }
 
   /**
    * 배송 요청의 픽업지·도착지를 수정한다. 고객·무게·거리·요금은 변경하지 않는다. 이미 콜을 수락한 차량이 있거나(MATCHED) 완료·취소된 배송 요청은 수정할 수
-   * 없다(REQUESTED 상태에서만 허용).
+   * 없다(REQUESTED 상태에서만 허용). (DeliveryRequest Entity 리턴)
    */
   @Transactional
-  public DeliveryResponse updateDeliveryRequest(
+  public DeliveryRequest updateDeliveryRequest(
       Long deliveryRequestId, DeliveryUpdateRequest request) {
     DeliveryRequest deliveryRequest = findDeliveryRequestOrThrow(deliveryRequestId);
     if (deliveryRequest.getStatus() != DeliveryStatus.REQUESTED) {
@@ -156,7 +153,7 @@ public class DeliveryService {
     }
     deliveryRequest.setPickupAddress(request.getPickupAddress());
     deliveryRequest.setDropoffAddress(request.getDropoffAddress());
-    return DeliveryResponse.from(deliveryRequest);
+    return deliveryRequest;
   }
 
   /**
@@ -172,9 +169,9 @@ public class DeliveryService {
     deliveryRequestRepository.delete(deliveryRequest);
   }
 
-  /** 배송원의 픽업 완료를 처리한다. 배송원이 콜을 수락한(MATCHED) 배송 요청만 픽업 완료로 전이할 수 있다. */
+  /** 배송원의 픽업 완료를 처리한다 (DeliveryRequest Entity 리턴). 배송원이 콜을 수락한(MATCHED) 배송 요청만 픽업 완료로 전이할 수 있다. */
   @Transactional
-  public DeliveryResponse confirmPickup(Long deliveryRequestId) {
+  public DeliveryRequest confirmPickup(Long deliveryRequestId) {
     DeliveryRequest deliveryRequest = findDeliveryRequestForUpdateOrThrow(deliveryRequestId);
     if (deliveryRequest.getStatus() != DeliveryStatus.MATCHED) {
       throw new InvalidDeliveryTransitionException(
@@ -185,16 +182,15 @@ public class DeliveryService {
     deliveryRequest.setPickedUpAt(pickedUpAt);
     eventPublisher.publishEvent(
         new DeliveryStatusChangedEvent(deliveryRequestId, DeliveryStatus.PICKED_UP, pickedUpAt));
-    return DeliveryResponse.from(deliveryRequest);
+    return deliveryRequest;
   }
 
   /**
-   * 배송을 완료 처리한다. 픽업을 완료한(PICKED_UP) 배송 요청만 완료할 수 있으며, 완료와 동시에 증거 사진 URL을 저장한다. 사진 파일 자체는 이 메서드 호출
-   * 전에 {@code POST /api/v1/uploads/image}로 이미 업로드되어 있어야 한다.
+   * 배송을 완료 처리한다 (DeliveryRequest Entity 리턴). 픽업을 완료한(PICKED_UP) 배송 요청만 완료할 수 있으며, 완료와 동시에 증거 사진
+   * URL을 저장한다. 사진 파일 자체는 이 메서드 호출 전에 {@code POST /api/v1/uploads/image}로 이미 업로드되어 있어야 한다.
    */
   @Transactional
-  public DeliveryResponse completeDelivery(
-      Long deliveryRequestId, DeliveryCompleteRequest request) {
+  public DeliveryRequest completeDelivery(Long deliveryRequestId, DeliveryCompleteRequest request) {
     DeliveryRequest deliveryRequest = findDeliveryRequestForUpdateOrThrow(deliveryRequestId);
     if (deliveryRequest.getStatus() != DeliveryStatus.PICKED_UP) {
       throw new InvalidDeliveryTransitionException(
@@ -206,7 +202,7 @@ public class DeliveryService {
     deliveryRequest.setCompletedAt(completedAt);
     eventPublisher.publishEvent(
         new DeliveryStatusChangedEvent(deliveryRequestId, DeliveryStatus.COMPLETED, completedAt));
-    return DeliveryResponse.from(deliveryRequest);
+    return deliveryRequest;
   }
 
   /** 완료된 배송 요청의 증거 사진을 조회한다. 완료되지 않았거나 사진이 없으면 ProofPhotoNotFoundException. */

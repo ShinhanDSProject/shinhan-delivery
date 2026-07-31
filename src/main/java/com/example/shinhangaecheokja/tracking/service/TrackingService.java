@@ -1,8 +1,8 @@
 package com.example.shinhangaecheokja.tracking.service;
 
 import com.example.shinhangaecheokja.common.exception.EntityNotFoundException;
-import com.example.shinhangaecheokja.delivery.dto.response.DeliveryResponse;
 import com.example.shinhangaecheokja.delivery.dto.response.MatchingResponse;
+import com.example.shinhangaecheokja.delivery.entity.DeliveryRequest;
 import com.example.shinhangaecheokja.delivery.service.DeliveryService;
 import com.example.shinhangaecheokja.delivery.service.MatchingService;
 import com.example.shinhangaecheokja.tracking.dto.request.LocationUpdateRequest;
@@ -28,8 +28,8 @@ public class TrackingService {
   /** 요청자가 해당 배송의 위치를 구독할 수 있는지 검증한다 — 배송 고객 본인이거나, 매칭된 차량의 소유주여야 한다. */
   @Transactional(readOnly = true)
   public void assertCanSubscribe(Long deliveryId, Long memberId) {
-    DeliveryResponse delivery = deliveryService.getDeliveryRequest(deliveryId);
-    if (delivery.customerId().equals(memberId)) {
+    DeliveryRequest delivery = deliveryService.getDeliveryRequest(deliveryId);
+    if (delivery.getCustomerId().equals(memberId)) {
       return;
     }
     if (isMatchedVehicleOwner(deliveryId, memberId)) {

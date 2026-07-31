@@ -15,8 +15,8 @@ import com.example.shinhangaecheokja.delivery.dto.request.DeliveryCompleteReques
 import com.example.shinhangaecheokja.delivery.dto.request.DeliveryCreateRequest;
 import com.example.shinhangaecheokja.delivery.dto.request.DeliveryEstimateRequest;
 import com.example.shinhangaecheokja.delivery.dto.response.DeliveryEstimateResponse;
-import com.example.shinhangaecheokja.delivery.dto.response.DeliveryResponse;
 import com.example.shinhangaecheokja.delivery.dto.response.ProofPhotoResponse;
+import com.example.shinhangaecheokja.delivery.entity.DeliveryRequest;
 import com.example.shinhangaecheokja.delivery.entity.DeliveryStatus;
 import com.example.shinhangaecheokja.delivery.entity.ItemSize;
 import com.example.shinhangaecheokja.delivery.exception.InvalidDeliveryTransitionException;
@@ -53,22 +53,14 @@ class DeliveryControllerTest {
     request.setDropoffLongitude(127.0);
     request.setItemSize(ItemSize.MEDIUM);
 
-    when(deliveryService.requestDelivery(any()))
-        .thenReturn(
-            new DeliveryResponse(
-                1L,
-                1L,
-                "서울시 강남구",
-                "서울시 서초구",
-                10,
-                111.19,
-                DeliveryStatus.REQUESTED,
-                78776L,
-                37.0,
-                127.0,
-                38.0,
-                127.0,
-                ItemSize.MEDIUM));
+    DeliveryRequest mockDeliveryRequest = new DeliveryRequest();
+    mockDeliveryRequest.setCustomerId(1L);
+    mockDeliveryRequest.setPickupAddress("서울시 강남구");
+    mockDeliveryRequest.setDropoffAddress("서울시 서초구");
+    mockDeliveryRequest.setStatus(DeliveryStatus.REQUESTED);
+    mockDeliveryRequest.setFeePoint(78776L);
+    mockDeliveryRequest.setItemSize(ItemSize.MEDIUM);
+    when(deliveryService.requestDelivery(any())).thenReturn(mockDeliveryRequest);
 
     mockMvc
         .perform(
@@ -203,22 +195,12 @@ class DeliveryControllerTest {
     DeliveryCompleteRequest request = new DeliveryCompleteRequest();
     request.setProofPhotoUrl("https://example.com/proof.jpg");
 
-    when(deliveryService.completeDelivery(eq(1L), any()))
-        .thenReturn(
-            new DeliveryResponse(
-                1L,
-                1L,
-                "서울시 강남구",
-                "서울시 서초구",
-                10,
-                111.19,
-                DeliveryStatus.COMPLETED,
-                78776L,
-                37.0,
-                127.0,
-                38.0,
-                127.0,
-                ItemSize.MEDIUM));
+    DeliveryRequest completedEntity = new DeliveryRequest();
+    completedEntity.setCustomerId(1L);
+    completedEntity.setStatus(DeliveryStatus.COMPLETED);
+    completedEntity.setFeePoint(78776L);
+    completedEntity.setItemSize(ItemSize.MEDIUM);
+    when(deliveryService.completeDelivery(eq(1L), any())).thenReturn(completedEntity);
 
     mockMvc
         .perform(
@@ -274,22 +256,12 @@ class DeliveryControllerTest {
 
   @Test
   void 픽업_완료_요청을_받으면_PICKED_UP_상태의_배송_요청을_반환한다() throws Exception {
-    when(deliveryService.confirmPickup(1L))
-        .thenReturn(
-            new DeliveryResponse(
-                1L,
-                1L,
-                "서울시 강남구",
-                "서울시 서초구",
-                10,
-                111.19,
-                DeliveryStatus.PICKED_UP,
-                78776L,
-                37.0,
-                127.0,
-                38.0,
-                127.0,
-                ItemSize.MEDIUM));
+    DeliveryRequest pickedUpEntity = new DeliveryRequest();
+    pickedUpEntity.setCustomerId(1L);
+    pickedUpEntity.setStatus(DeliveryStatus.PICKED_UP);
+    pickedUpEntity.setFeePoint(78776L);
+    pickedUpEntity.setItemSize(ItemSize.MEDIUM);
+    when(deliveryService.confirmPickup(1L)).thenReturn(pickedUpEntity);
 
     mockMvc
         .perform(patch("/api/v1/delivery-requests/1/pickup"))
