@@ -35,10 +35,10 @@ class PaymentServiceTest {
     when(paymentRepository.save(any(PointWallet.class)))
         .thenAnswer(invocation -> invocation.getArgument(0));
 
-    PointWalletResponse response = paymentService.createWallet(request);
+    PointWallet response = paymentService.createWallet(request);
 
-    assertThat(response.memberId()).isEqualTo(1L);
-    assertThat(response.balance()).isZero();
+    assertThat(response.getMemberId()).isEqualTo(1L);
+    assertThat(response.getBalance()).isEqualTo(0L);
   }
 
   @Test

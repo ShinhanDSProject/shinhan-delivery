@@ -50,4 +50,18 @@ public class Vehicle {
   @Enumerated(EnumType.STRING)
   @Column(nullable = false, length = 20)
   private VehicleStatus status;
+
+  /** VehicleCreateRequest DTO 기반으로 AVAILABLE 상태의 Vehicle 엔티티를 생성하는 정적 팩토리 메서드. */
+  public static Vehicle from(
+      com.example.shinhangaecheokja.vehicle.dto.request.VehicleCreateRequest request) {
+    return Vehicle.builder()
+        .ownerId(request.getOwnerId())
+        .type(request.getType())
+        .maxWeight(request.getMaxWeight())
+        .maxDistance(request.getMaxDistance())
+        .latitude(request.getLatitude())
+        .longitude(request.getLongitude())
+        .status(VehicleStatus.AVAILABLE)
+        .build();
+  }
 }

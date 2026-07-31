@@ -8,7 +8,6 @@ import static org.mockito.Mockito.when;
 
 import com.example.shinhangaecheokja.address.dto.request.AddressCreateRequest;
 import com.example.shinhangaecheokja.address.dto.request.AddressUpdateRequest;
-import com.example.shinhangaecheokja.address.dto.response.AddressResponse;
 import com.example.shinhangaecheokja.address.entity.Address;
 import com.example.shinhangaecheokja.address.repository.AddressRepository;
 import com.example.shinhangaecheokja.common.exception.EntityNotFoundException;
@@ -39,10 +38,10 @@ class AddressServiceTest {
             .build();
     when(addressRepository.findByMemberId(10L)).thenReturn(List.of(addr1));
 
-    List<AddressResponse> result = addressService.getAddresses(10L);
+    List<Address> result = addressService.getAddresses(10L);
 
     assertThat(result).hasSize(1);
-    assertThat(result.get(0).alias()).isEqualTo("집");
+    assertThat(result.get(0).getAlias()).isEqualTo("집");
   }
 
   @Test
@@ -60,10 +59,10 @@ class AddressServiceTest {
 
     when(addressRepository.save(any(Address.class))).thenReturn(saved);
 
-    AddressResponse response = addressService.createAddress(10L, request);
+    Address response = addressService.createAddress(10L, request);
 
-    assertThat(response.id()).isEqualTo(2L);
-    assertThat(response.alias()).isEqualTo("회사");
+    assertThat(response.getId()).isEqualTo(2L);
+    assertThat(response.getAlias()).isEqualTo("회사");
   }
 
   @Test
@@ -82,10 +81,10 @@ class AddressServiceTest {
 
     when(addressRepository.findByIdAndMemberId(1L, 10L)).thenReturn(Optional.of(existing));
 
-    AddressResponse response = addressService.updateAddress(1L, 10L, request);
+    Address response = addressService.updateAddress(1L, 10L, request);
 
-    assertThat(response.alias()).isEqualTo("우리집");
-    assertThat(response.detailAddress()).isEqualTo("303호");
+    assertThat(response.getAlias()).isEqualTo("우리집");
+    assertThat(response.getDetailAddress()).isEqualTo("303호");
   }
 
   @Test

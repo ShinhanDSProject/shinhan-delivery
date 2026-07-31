@@ -10,7 +10,6 @@ import static org.mockito.Mockito.when;
 
 import com.example.shinhangaecheokja.delivery.dto.request.MatchingCreateRequest;
 import com.example.shinhangaecheokja.delivery.dto.request.MatchingUpdateRequest;
-import com.example.shinhangaecheokja.delivery.dto.response.DeliveryResponse;
 import com.example.shinhangaecheokja.delivery.dto.response.MatchingResponse;
 import com.example.shinhangaecheokja.delivery.entity.DeliveryRequest;
 import com.example.shinhangaecheokja.delivery.entity.DeliveryStatus;
@@ -71,11 +70,11 @@ class MatchingServiceTest {
     when(matchingRepository.save(any(Matching.class)))
         .thenAnswer(invocation -> invocation.getArgument(0));
 
-    MatchingResponse response = matchingService.createMatching(request);
+    Matching response = matchingService.createMatching(request);
 
-    assertThat(response.deliveryRequestId()).isEqualTo(1L);
-    assertThat(response.vehicleId()).isEqualTo(2L);
-    assertThat(response.status()).isEqualTo(MatchingStatus.MATCHED);
+    assertThat(response.getDeliveryRequestId()).isEqualTo(1L);
+    assertThat(response.getVehicleId()).isEqualTo(2L);
+    assertThat(response.getStatus()).isEqualTo(MatchingStatus.MATCHED);
     assertThat(deliveryRequest.getStatus()).isEqualTo(DeliveryStatus.MATCHED);
     verify(vehicleService).markBusy(2L);
   }
@@ -166,10 +165,10 @@ class MatchingServiceTest {
             DeliveryStatus.REQUESTED, 500, 100))
         .thenReturn(List.of(deliveryRequest));
 
-    List<DeliveryResponse> calls = matchingService.getOpenCalls(2L);
+    List<DeliveryRequest> calls = matchingService.getOpenCalls(2L);
 
     assertThat(calls).hasSize(1);
-    assertThat(calls.get(0).id()).isEqualTo(1L);
+    assertThat(calls.get(0).getId()).isEqualTo(1L);
   }
 
   @Test
@@ -179,7 +178,7 @@ class MatchingServiceTest {
             new VehicleResponse(
                 2L, 1L, VehicleType.CAR, 500, 100, 37.5, 127.0, VehicleStatus.BUSY));
 
-    List<DeliveryResponse> calls = matchingService.getOpenCalls(2L);
+    List<DeliveryRequest> calls = matchingService.getOpenCalls(2L);
 
     assertThat(calls).isEmpty();
   }

@@ -63,4 +63,17 @@ public class Member {
     }
     this.password = encodedPassword;
   }
+
+  /** MemberCreateRequest DTO 기반으로 Member 엔티티를 생성하는 정적 팩토리 메서드. */
+  public static Member from(
+      com.example.shinhangaecheokja.member.dto.request.MemberCreateRequest request,
+      String encodedPassword) {
+    return Member.builder()
+        .email(request.getEmail())
+        .password(encodedPassword)
+        .name(request.getName())
+        .phoneNumber(request.getPhoneNumber())
+        .role(request.getRole())
+        .build();
+  }
 }

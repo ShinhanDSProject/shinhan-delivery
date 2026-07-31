@@ -306,6 +306,21 @@ public record DeliveryCreateResponse(Long id, String status, long feePoint) {
 
 ---
 
+## 10.1 객체 생성 규칙: 정적 팩토리 메서드 (Static Factory Method) 및 DTO 전달 수용
+
+- **원칙:** Service, Controller, DTO, Entity 등 모든 계층에서 `new` 키워드나 외부 `Builder` 수동 조립을 금지하며, **객체 내부에 명확한 의미를 가진 정적 팩토리 메서드(Static Factory Method)를 작성하여 생성**합니다.
+- **실용적 DTO 전달 허용:** 엔티티 생성 시 Request DTO의 파라미터를 개별적으로 일일이 나열하지 않고, **Request DTO 자체를 정적 팩토리 메서드의 인자로 전달받는 패턴(`Entity.from(request, ...)` 또는 `Entity.of(request, ...)` )을 적극 권장**합니다. 
+- **이유:**
+  1. Service 계층에서 파라미터 조립 코드를 제거하여 핵심 비즈니스 유스케이스 흐름을 극단적으로 단순화합니다.
+  2. Request DTO에 필드가 추가되어도 Service 메서드 시그니처 수정 없이 Entity 팩토리 내부 수정만으로 대응 가능합니다.
+  3. 같은 도메인 패키지 안에서의 참조이므로 레이어 아키텍처 오염을 일으키지 않습니다.
+- **표준 명명 규칙:**
+  1. `from(request)` / `from(id, request)`: Request DTO 기반으로 엔티티를 변환/생성할 때 사용 (예: `Address.from(memberId, request)`, `Member.from(request, encodedPassword)`)
+  2. `of(request, extraField1, ...)`: Request DTO 및 추가 계산값(거리, 요금 등)을 수용하여 생성할 때 사용 (예: `DeliveryRequest.of(request, distanceKm, feePoint)`)
+  3. `createDefault(...)` / `createEmpty(...)`: 초기 기본 상태(Status=AVAILABLE, Balance=0 등)를 자동 세팅하여 신규 객체를 생성할 때 사용 (예: `PointWallet.createEmpty(memberId)`)
+
+---
+
 ## 11. Controller 규칙
 
 - Controller는 DTO만 다루고, Service를 호출한 뒤 결과를 응답으로 변환하는 역할만 한다. 비즈니스 로직(if 분기, 계산)을 Controller에 넣지 않는다.

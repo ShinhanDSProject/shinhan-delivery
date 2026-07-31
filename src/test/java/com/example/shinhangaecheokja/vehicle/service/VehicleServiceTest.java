@@ -39,13 +39,19 @@ class VehicleServiceTest {
     request.setMaxDistance(100);
 
     when(vehicleRepository.save(any(Vehicle.class)))
-        .thenAnswer(invocation -> invocation.getArgument(0));
+        .thenAnswer(
+            invocation -> {
+              Vehicle vehicle = invocation.getArgument(0);
+              vehicle.setId(1L);
+              return vehicle;
+            });
 
-    VehicleResponse response = vehicleService.registerVehicle(request);
+    Vehicle response = vehicleService.registerVehicle(request);
 
-    assertThat(response.ownerId()).isEqualTo(1L);
-    assertThat(response.type()).isEqualTo(VehicleType.CAR);
-    assertThat(response.status()).isEqualTo(VehicleStatus.AVAILABLE);
+    assertThat(response.getId()).isEqualTo(1L);
+    assertThat(response.getOwnerId()).isEqualTo(1L);
+    assertThat(response.getType()).isEqualTo(VehicleType.CAR);
+    assertThat(response.getStatus()).isEqualTo(VehicleStatus.AVAILABLE);
   }
 
   @Test

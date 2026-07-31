@@ -3,6 +3,7 @@ package com.example.shinhangaecheokja.vehicle.controller;
 import com.example.shinhangaecheokja.vehicle.dto.request.VehicleCreateRequest;
 import com.example.shinhangaecheokja.vehicle.dto.request.VehicleUpdateRequest;
 import com.example.shinhangaecheokja.vehicle.dto.response.VehicleResponse;
+import com.example.shinhangaecheokja.vehicle.entity.Vehicle;
 import com.example.shinhangaecheokja.vehicle.service.VehicleService;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -30,7 +31,8 @@ public class VehicleController {
   @PostMapping
   public ResponseEntity<VehicleResponse> registerVehicle(
       @RequestBody @Valid VehicleCreateRequest request) {
-    return ResponseEntity.status(HttpStatus.CREATED).body(vehicleService.registerVehicle(request));
+    Vehicle created = vehicleService.registerVehicle(request);
+    return ResponseEntity.status(HttpStatus.CREATED).body(VehicleResponse.from(created));
   }
 
   /** 운송수단 단건을 조회한다. */

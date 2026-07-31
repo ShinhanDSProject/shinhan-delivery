@@ -40,10 +40,10 @@ class MemberServiceTest {
     when(memberRepository.save(any(Member.class)))
         .thenAnswer(invocation -> invocation.getArgument(0));
 
-    MemberResponse response = memberService.createMember(request);
+    Member response = memberService.createMember(request);
 
-    assertThat(response.email()).isEqualTo("user@example.com");
-    assertThat(response.role()).isEqualTo(MemberRole.CUSTOMER);
+    assertThat(response.getEmail()).isEqualTo("user@example.com");
+    assertThat(response.getRole()).isEqualTo(MemberRole.CUSTOMER);
   }
 
   @Test

@@ -37,4 +37,15 @@ public class Matching {
 
   @Column(name = "matched_at", nullable = false)
   private LocalDateTime matchedAt;
+
+  /** MatchingCreateRequest DTO 기반으로 MATCHED 상태의 Matching 엔티티를 생성하는 정적 팩토리 메서드. */
+  public static Matching from(
+      com.example.shinhangaecheokja.delivery.dto.request.MatchingCreateRequest request) {
+    Matching matching = new Matching();
+    matching.setDeliveryRequestId(request.getDeliveryRequestId());
+    matching.setVehicleId(request.getVehicleId());
+    matching.setStatus(MatchingStatus.MATCHED);
+    matching.setMatchedAt(LocalDateTime.now());
+    return matching;
+  }
 }

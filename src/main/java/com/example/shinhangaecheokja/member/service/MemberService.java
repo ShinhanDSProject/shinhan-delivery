@@ -31,21 +31,17 @@ public class MemberService {
   private final PasswordEncoder passwordEncoder;
   private final JwtProvider jwtProvider;
 
-  /** 이메일 중복을 검증하고 비밀번호를 암호화해 회원을 생성한다. */
+  /** 이메일 중복을 검증하고 비밀번호를 암호화해 회원을 생성한다 (Entity 리턴). */
   @Transactional
-  public MemberResponse createMember(MemberCreateRequest request) {
+  public Member createMember(MemberCreateRequest request) {
     if (memberRepository.existsByEmail(request.getEmail())) {
       throw new DuplicateMemberException(request.getEmail());
     }
 
-    Member member = new Member();
-    member.setEmail(request.getEmail());
-    member.setPassword(passwordEncoder.encode(request.getPassword()));
-    member.setName(request.getName());
-    member.setPhoneNumber(request.getPhoneNumber());
-    member.setRole(request.getRole());
+    String encodedPassword = passwordEncoder.encode(request.getPassword());
+    Member member = Member.from(request, encodedPassword);
 
-    return MemberResponse.from(memberRepository.save(member));
+    return memberRepository.save(member);
   }
 
   /** 이메일과 비밀번호를 검증하여 JWT Access/Refresh 토큰을 발급한다. */
@@ -113,21 +109,21 @@ public class MemberService {
     member.changePassword(passwordEncoder.encode(request.getNewPassword()));
   }
 
-  /** 회원의 이름·연락처를 수정한다. 이메일/비밀번호/역할은 변경하지 않는다. */
+  /** 회원의 이름·연락처를 수정한다 (Member Entity 리턴). 이메일/비밀번호/역할은 변경하지 않는다. */
   @Transactional
-  public MemberResponse updateMember(Long memberId, MemberUpdateRequest request) {
+  public Member updateMember(Long memberId, MemberUpdateRequest request) {
     Member member = findMemberOrThrow(memberId);
     member.setName(request.getName());
     member.setPhoneNumber(request.getPhoneNumber());
-    return MemberResponse.from(member);
+    return member;
   }
 
-  /** 회원의 역할(CUSTOMER / COURIER)을 변경한다. */
+  /** 회원의 역할(CUSTOMER / COURIER)을 변경한다 (Member Entity 리턴). */
   @Transactional
-  public MemberResponse updateRole(Long memberId, MemberRole role) {
+  public Member updateRole(Long memberId, MemberRole role) {
     Member member = findMemberOrThrow(memberId);
     member.changeRole(role);
-    return MemberResponse.from(member);
+    return member;
   }
 
   /** id로 회원을 조회해 삭제한다. 없으면 EntityNotFoundException. */

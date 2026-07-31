@@ -71,4 +71,25 @@ public class DeliveryRequest {
 
   @Column(name = "picked_up_at")
   private LocalDateTime pickedUpAt;
+
+  /** DeliveryCreateRequest DTO 수용 기반으로 REQUESTED 상태의 DeliveryRequest 엔티티를 생성하는 정적 팩토리 메서드. */
+  public static DeliveryRequest of(
+      com.example.shinhangaecheokja.delivery.dto.request.DeliveryCreateRequest request,
+      double distanceKm,
+      long feePoint) {
+    DeliveryRequest deliveryRequest = new DeliveryRequest();
+    deliveryRequest.setCustomerId(request.getCustomerId());
+    deliveryRequest.setPickupAddress(request.getPickupAddress());
+    deliveryRequest.setDropoffAddress(request.getDropoffAddress());
+    deliveryRequest.setWeight(request.getWeight());
+    deliveryRequest.setDistance(distanceKm);
+    deliveryRequest.setPickupLatitude(request.getPickupLatitude());
+    deliveryRequest.setPickupLongitude(request.getPickupLongitude());
+    deliveryRequest.setDropoffLatitude(request.getDropoffLatitude());
+    deliveryRequest.setDropoffLongitude(request.getDropoffLongitude());
+    deliveryRequest.setItemSize(request.getItemSize());
+    deliveryRequest.setStatus(DeliveryStatus.REQUESTED);
+    deliveryRequest.setFeePoint(feePoint);
+    return deliveryRequest;
+  }
 }

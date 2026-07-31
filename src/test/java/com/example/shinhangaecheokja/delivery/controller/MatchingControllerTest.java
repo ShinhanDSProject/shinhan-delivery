@@ -11,13 +11,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.example.shinhangaecheokja.delivery.dto.request.MatchingCreateRequest;
 import com.example.shinhangaecheokja.delivery.dto.request.MatchingUpdateRequest;
-import com.example.shinhangaecheokja.delivery.dto.response.DeliveryResponse;
-import com.example.shinhangaecheokja.delivery.dto.response.MatchingResponse;
+import com.example.shinhangaecheokja.delivery.entity.DeliveryRequest;
 import com.example.shinhangaecheokja.delivery.entity.DeliveryStatus;
-import com.example.shinhangaecheokja.delivery.entity.ItemSize;
-import com.example.shinhangaecheokja.delivery.entity.MatchingStatus;
+import com.example.shinhangaecheokja.delivery.entity.Matching;
 import com.example.shinhangaecheokja.delivery.service.MatchingService;
-import java.time.LocalDateTime;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,8 +38,10 @@ class MatchingControllerTest {
     request.setDeliveryRequestId(1L);
     request.setVehicleId(2L);
 
-    when(matchingService.createMatching(any()))
-        .thenReturn(new MatchingResponse(1L, 1L, 2L, MatchingStatus.MATCHED, LocalDateTime.now()));
+    Matching matching = Matching.from(request);
+    matching.setId(1L);
+
+    when(matchingService.createMatching(any())).thenReturn(matching);
 
     mockMvc
         .perform(
@@ -56,23 +55,17 @@ class MatchingControllerTest {
 
   @Test
   void 차량의_열린_콜_목록을_조회한다() throws Exception {
-    when(matchingService.getOpenCalls(2L))
-        .thenReturn(
-            List.of(
-                new DeliveryResponse(
-                    1L,
-                    1L,
-                    "서울시 강남구",
-                    "서울시 서초구",
-                    10,
-                    5,
-                    DeliveryStatus.REQUESTED,
-                    600L,
-                    37.5,
-                    127.0,
-                    37.6,
-                    127.1,
-                    ItemSize.MEDIUM)));
+    DeliveryRequest deliveryRequest = new DeliveryRequest();
+    deliveryRequest.setId(1L);
+    deliveryRequest.setCustomerId(1L);
+    deliveryRequest.setPickupAddress("서울시 강남구");
+    deliveryRequest.setDropoffAddress("서울시 서초구");
+    deliveryRequest.setWeight(10);
+    deliveryRequest.setDistance(5);
+    deliveryRequest.setStatus(DeliveryStatus.REQUESTED);
+    deliveryRequest.setFeePoint(600L);
+
+    when(matchingService.getOpenCalls(2L)).thenReturn(List.of(deliveryRequest));
 
     mockMvc
         .perform(get("/api/v1/matchings/calls").param("vehicleId", "2"))

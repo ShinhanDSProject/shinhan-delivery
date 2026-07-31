@@ -18,7 +18,7 @@ import com.example.shinhangaecheokja.member.dto.request.MemberCreateRequest;
 import com.example.shinhangaecheokja.member.dto.request.MemberPasswordUpdateRequest;
 import com.example.shinhangaecheokja.member.dto.request.MemberProfileUpdateRequestDto;
 import com.example.shinhangaecheokja.member.dto.response.MemberProfileResponseDto;
-import com.example.shinhangaecheokja.member.dto.response.MemberResponse;
+import com.example.shinhangaecheokja.member.entity.Member;
 import com.example.shinhangaecheokja.member.entity.MemberRole;
 import com.example.shinhangaecheokja.member.service.MemberService;
 import org.junit.jupiter.api.AfterEach;
@@ -68,10 +68,16 @@ class MemberControllerTest {
     request.setPhoneNumber("010-1234-5678");
     request.setRole(MemberRole.CUSTOMER);
 
-    when(memberService.createMember(any()))
-        .thenReturn(
-            new MemberResponse(
-                1L, "user@example.com", "홍길동", "010-1234-5678", MemberRole.CUSTOMER));
+    Member member =
+        Member.builder()
+            .id(1L)
+            .email("user@example.com")
+            .password("password123")
+            .name("홍길동")
+            .phoneNumber("010-1234-5678")
+            .role(MemberRole.CUSTOMER)
+            .build();
+    when(memberService.createMember(any())).thenReturn(member);
 
     mockMvc
         .perform(

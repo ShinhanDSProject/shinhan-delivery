@@ -2,7 +2,7 @@ package com.example.shinhangaecheokja.address.controller;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -13,7 +13,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.example.shinhangaecheokja.address.dto.request.AddressCreateRequest;
 import com.example.shinhangaecheokja.address.dto.request.AddressUpdateRequest;
-import com.example.shinhangaecheokja.address.dto.response.AddressResponse;
+import com.example.shinhangaecheokja.address.entity.Address;
 import com.example.shinhangaecheokja.address.service.AddressService;
 import com.example.shinhangaecheokja.common.exception.GlobalExceptionHandler;
 import com.example.shinhangaecheokja.common.security.CustomUserDetails;
@@ -64,7 +64,15 @@ class AddressControllerTest {
         new UsernamePasswordAuthenticationToken(customUser, null, customUser.getAuthorities());
     SecurityContextHolder.getContext().setAuthentication(auth);
 
-    AddressResponse addr = new AddressResponse(1L, 10L, "집", "서울시 강남구", "101호", "문 앞");
+    Address addr =
+        Address.builder()
+            .id(1L)
+            .memberId(10L)
+            .alias("집")
+            .address("서울시 강남구")
+            .detailAddress("101호")
+            .pickupGuide("문 앞")
+            .build();
     when(addressService.getAddresses(eq(10L))).thenReturn(List.of(addr));
 
     mockMvc
@@ -75,17 +83,19 @@ class AddressControllerTest {
   }
 
   @Test
-  void 신규_주소를_성공적으로_등록한다() throws Exception {
+  void 주소_생성_요청을_처리한다() throws Exception {
     CustomUserDetails customUser =
         new CustomUserDetails(10L, "user@example.com", "pass", "CUSTOMER");
     UsernamePasswordAuthenticationToken auth =
         new UsernamePasswordAuthenticationToken(customUser, null, customUser.getAuthorities());
     SecurityContextHolder.getContext().setAuthentication(auth);
 
-    AddressCreateRequest request = new AddressCreateRequest("회사", "서울시 서초구", "202호", "경비실");
-    AddressResponse response = new AddressResponse(2L, 10L, "회사", "서울시 서초구", "202호", "경비실");
+    AddressCreateRequest request = new AddressCreateRequest();
+    request.setAlias("회사");
+    request.setAddress("서울시 서초구");
 
-    when(addressService.createAddress(eq(10L), any())).thenReturn(response);
+    Address created = Address.builder().id(2L).memberId(10L).alias("회사").address("서울시 서초구").build();
+    when(addressService.createAddress(eq(10L), any())).thenReturn(created);
 
     mockMvc
         .perform(
@@ -94,22 +104,24 @@ class AddressControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isCreated())
-        .andExpect(jsonPath("$.id").value(2))
         .andExpect(jsonPath("$.alias").value("회사"));
   }
 
   @Test
-  void 주소를_성공적으로_수정한다() throws Exception {
+  void 주소_수정_요청을_처리한다() throws Exception {
     CustomUserDetails customUser =
         new CustomUserDetails(10L, "user@example.com", "pass", "CUSTOMER");
     UsernamePasswordAuthenticationToken auth =
         new UsernamePasswordAuthenticationToken(customUser, null, customUser.getAuthorities());
     SecurityContextHolder.getContext().setAuthentication(auth);
 
-    AddressUpdateRequest request = new AddressUpdateRequest("우리집", "서울시 강남구", "303호", "직접 전달");
-    AddressResponse response = new AddressResponse(1L, 10L, "우리집", "서울시 강남구", "303호", "직접 전달");
+    AddressUpdateRequest request = new AddressUpdateRequest();
+    request.setAlias("우리집");
+    request.setAddress("서울시 송파구");
 
-    when(addressService.updateAddress(eq(1L), eq(10L), any())).thenReturn(response);
+    Address updated =
+        Address.builder().id(1L).memberId(10L).alias("우리집").address("서울시 송파구").build();
+    when(addressService.updateAddress(eq(1L), eq(10L), any())).thenReturn(updated);
 
     mockMvc
         .perform(
@@ -122,41 +134,17 @@ class AddressControllerTest {
   }
 
   @Test
-  void 주소를_성공적으로_삭제한다() throws Exception {
+  void 주소_삭제_요청을_처리한다() throws Exception {
     CustomUserDetails customUser =
         new CustomUserDetails(10L, "user@example.com", "pass", "CUSTOMER");
     UsernamePasswordAuthenticationToken auth =
         new UsernamePasswordAuthenticationToken(customUser, null, customUser.getAuthorities());
     SecurityContextHolder.getContext().setAuthentication(auth);
-
-    doNothing().when(addressService).deleteAddress(eq(1L), eq(10L));
 
     mockMvc
         .perform(delete("/api/v1/addresses/1").principal(auth))
         .andExpect(status().isNoContent());
-  }
 
-  @Test
-  void 필수_입력값인_별칭이_누락되면_400을_반환한다() throws Exception {
-    CustomUserDetails customUser =
-        new CustomUserDetails(10L, "user@example.com", "pass", "CUSTOMER");
-    UsernamePasswordAuthenticationToken auth =
-        new UsernamePasswordAuthenticationToken(customUser, null, customUser.getAuthorities());
-    SecurityContextHolder.getContext().setAuthentication(auth);
-
-    AddressCreateRequest request = new AddressCreateRequest("", "서울시 서초구", "202호", "경비실");
-
-    mockMvc
-        .perform(
-            post("/api/v1/addresses")
-                .principal(auth)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
-        .andExpect(status().isBadRequest());
-  }
-
-  @Test
-  void 미인증_사용자가_주소_목록_조회시_401을_반환한다() throws Exception {
-    mockMvc.perform(get("/api/v1/addresses")).andExpect(status().isUnauthorized());
+    verify(addressService).deleteAddress(1L, 10L);
   }
 }

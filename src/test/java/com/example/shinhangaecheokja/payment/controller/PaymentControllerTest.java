@@ -9,7 +9,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.example.shinhangaecheokja.payment.dto.request.PointWalletCreateRequest;
-import com.example.shinhangaecheokja.payment.dto.response.PointWalletResponse;
+import com.example.shinhangaecheokja.payment.entity.PointWallet;
 import com.example.shinhangaecheokja.payment.service.PaymentService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +32,8 @@ class PaymentControllerTest {
     PointWalletCreateRequest request = new PointWalletCreateRequest();
     request.setMemberId(1L);
 
-    when(paymentService.createWallet(any())).thenReturn(new PointWalletResponse(1L, 1L, 0L));
+    PointWallet wallet = PointWallet.builder().id(1L).memberId(1L).balance(0L).build();
+    when(paymentService.createWallet(any())).thenReturn(wallet);
 
     mockMvc
         .perform(
