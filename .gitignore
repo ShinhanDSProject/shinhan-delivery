@@ -41,3 +41,6 @@ out/
 
 # Local file upload storage
 /uploads/
+
+# Local application logs
+/logs/
