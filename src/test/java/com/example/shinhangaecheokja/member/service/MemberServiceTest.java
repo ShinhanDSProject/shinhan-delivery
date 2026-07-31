@@ -13,6 +13,7 @@ import com.example.shinhangaecheokja.member.entity.MemberRole;
 import com.example.shinhangaecheokja.member.exception.DuplicateMemberException;
 import com.example.shinhangaecheokja.member.repository.MemberRepository;
 import java.util.Optional;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -28,7 +29,8 @@ class MemberServiceTest {
   @InjectMocks private MemberService memberService;
 
   @Test
-  void 이메일이_중복되지_않으면_회원을_생성한다() {
+  @DisplayName("이메일이 중복되지 않으면 회원을 생성한다")
+  void createMemberSuccess() {
     MemberCreateRequest request = new MemberCreateRequest();
     request.setEmail("user@example.com");
     request.setPassword("password123");
@@ -48,7 +50,8 @@ class MemberServiceTest {
   }
 
   @Test
-  void 이메일이_중복되면_DuplicateMemberException을_던진다() {
+  @DisplayName("이메일이 중복되면 DuplicateMemberException을 던진다")
+  void createMemberDuplicateEmailShouldThrowException() {
     MemberCreateRequest request = new MemberCreateRequest();
     request.setEmail("dup@example.com");
     when(memberRepository.existsByEmail("dup@example.com")).thenReturn(true);
@@ -58,7 +61,8 @@ class MemberServiceTest {
   }
 
   @Test
-  void 존재하지_않는_회원을_조회하면_EntityNotFoundException을_던진다() {
+  @DisplayName("존재하지 않는 회원을 조회하면 EntityNotFoundException을 던진다")
+  void getMemberNotFoundShouldThrowException() {
     when(memberRepository.findById(1L)).thenReturn(Optional.empty());
 
     assertThatThrownBy(() -> memberService.getMember(1L))
@@ -66,7 +70,8 @@ class MemberServiceTest {
   }
 
   @Test
-  void 존재하는_회원을_조회하면_Member를_반환한다() {
+  @DisplayName("존재하는 회원을 조회하면 Member를 반환한다")
+  void getMemberSuccess() {
     Member member = new Member();
     member.setEmail("user@example.com");
     member.setName("홍길동");
@@ -80,7 +85,8 @@ class MemberServiceTest {
   }
 
   @Test
-  void 로그인한_본인의_프로필을_조회한다() {
+  @DisplayName("로그인한 본인의 프로필을 조회한다")
+  void getMyProfileSuccess() {
     Member member = new Member();
     member.setEmail("my@example.com");
     member.setName("김철수");
@@ -96,7 +102,8 @@ class MemberServiceTest {
   }
 
   @Test
-  void 로그인한_본인의_프로필_이름과_연락처를_수정한다() {
+  @DisplayName("로그인한 본인의 프로필 이름과 연락처를 수정한다")
+  void updateMyProfileSuccess() {
     Member member = new Member();
     member.setEmail("my@example.com");
     member.setName("김철수");

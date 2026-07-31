@@ -24,6 +24,7 @@ import com.example.shinhangaecheokja.delivery.exception.ProofPhotoNotFoundExcept
 import com.example.shinhangaecheokja.delivery.service.DeliveryService;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -41,7 +42,8 @@ class DeliveryControllerTest {
   @MockitoBean private DeliveryService deliveryService;
 
   @Test
-  void 배송_요청을_받으면_생성된_배송_요청을_반환한다() throws Exception {
+  @DisplayName("배송 요청을 받으면 생성된 배송 요청을 반환한다")
+  void requestDeliverySuccess() throws Exception {
     DeliveryCreateRequest request = new DeliveryCreateRequest();
     request.setCustomerId(1L);
     request.setPickupAddress("서울시 강남구");
@@ -73,7 +75,8 @@ class DeliveryControllerTest {
   }
 
   @Test
-  void 위도가_범위를_벗어나면_400을_반환한다() throws Exception {
+  @DisplayName("위도가 범위를 벗어나면 400을 반환한다")
+  void createDeliveryLatitudeOutOfRangeShouldReturn400() throws Exception {
     DeliveryCreateRequest request = new DeliveryCreateRequest();
     request.setCustomerId(1L);
     request.setWeight(10);
@@ -89,7 +92,8 @@ class DeliveryControllerTest {
   }
 
   @Test
-  void 픽업_주소가_없으면_400을_반환한다() throws Exception {
+  @DisplayName("픽업 주소가 없으면 400을 반환한다")
+  void createDeliveryMissingPickupAddressShouldReturn400() throws Exception {
     DeliveryCreateRequest request = new DeliveryCreateRequest();
     request.setCustomerId(1L);
     request.setDropoffAddress("서울시 서초구");
@@ -104,7 +108,8 @@ class DeliveryControllerTest {
   }
 
   @Test
-  void 견적_요청을_받으면_산정된_요금을_반환한다() throws Exception {
+  @DisplayName("견적 요청을 받으면 산정된 요금을 반환한다")
+  void estimateFeeSuccess() throws Exception {
     DeliveryEstimateRequest request = new DeliveryEstimateRequest();
     request.setPickupLatitude(37.5665);
     request.setPickupLongitude(126.9780);
@@ -132,7 +137,8 @@ class DeliveryControllerTest {
   }
 
   @Test
-  void 견적_요청에_좌표가_없으면_400을_반환한다() throws Exception {
+  @DisplayName("견적 요청에 좌표가 없으면 400을 반환한다")
+  void estimateFeeMissingCoordinatesShouldReturn400() throws Exception {
     DeliveryEstimateRequest request = new DeliveryEstimateRequest();
     request.setDestinationLatitude(35.1796);
     request.setDestinationLongitude(129.0756);
@@ -148,7 +154,8 @@ class DeliveryControllerTest {
   }
 
   @Test
-  void 견적_요청의_무게가_0이하면_400을_반환한다() throws Exception {
+  @DisplayName("견적 요청의 무게가 0이하면 400을 반환한다")
+  void estimateFeeInvalidWeightShouldReturn400() throws Exception {
     DeliveryEstimateRequest request = new DeliveryEstimateRequest();
     request.setPickupLatitude(37.5665);
     request.setPickupLongitude(126.9780);
@@ -166,7 +173,8 @@ class DeliveryControllerTest {
   }
 
   @Test
-  void 견적_요청에_물품_크기가_없으면_400을_반환한다() throws Exception {
+  @DisplayName("견적 요청에 물품 크기가 없으면 400을 반환한다")
+  void estimateFeeMissingItemSizeShouldReturn400() throws Exception {
     DeliveryEstimateRequest request = new DeliveryEstimateRequest();
     request.setPickupLatitude(37.5665);
     request.setPickupLongitude(126.9780);
@@ -183,7 +191,8 @@ class DeliveryControllerTest {
   }
 
   @Test
-  void 존재하지_않는_배송_요청을_조회하면_404를_반환한다() throws Exception {
+  @DisplayName("존재하지 않는 배송 요청을 조회하면 404를 반환한다")
+  void getDeliveryNotFoundShouldReturn404() throws Exception {
     when(deliveryService.getDeliveryRequest(eq(999L)))
         .thenThrow(new EntityNotFoundException(ErrorCode.DELIVERY_NOT_FOUND));
 
@@ -191,7 +200,8 @@ class DeliveryControllerTest {
   }
 
   @Test
-  void 완료_처리_요청을_받으면_완료된_배송_요청을_반환한다() throws Exception {
+  @DisplayName("완료 처리 요청을 받으면 완료된 배송 요청을 반환한다")
+  void completeDeliveryProcessRequest() throws Exception {
     DeliveryCompleteRequest request = new DeliveryCompleteRequest();
     request.setProofPhotoUrl("https://example.com/proof.jpg");
 
@@ -212,7 +222,8 @@ class DeliveryControllerTest {
   }
 
   @Test
-  void 증거사진_URL이_없으면_완료_처리_요청에_400을_반환한다() throws Exception {
+  @DisplayName("증거사진 URL이 없으면 완료 처리 요청에 400을 반환한다")
+  void completeDeliveryNoPhotoUrlShouldReturn400() throws Exception {
     DeliveryCompleteRequest request = new DeliveryCompleteRequest();
 
     mockMvc
@@ -224,7 +235,8 @@ class DeliveryControllerTest {
   }
 
   @Test
-  void 증거사진_URL이_255자를_초과하면_완료_처리_요청에_400을_반환한다() throws Exception {
+  @DisplayName("증거사진 URL이 255자를 초과하면 완료 처리 요청에 400을 반환한다")
+  void completeDeliveryPhotoUrlTooLongShouldReturn400() throws Exception {
     DeliveryCompleteRequest request = new DeliveryCompleteRequest();
     request.setProofPhotoUrl("a".repeat(256));
 
@@ -237,7 +249,8 @@ class DeliveryControllerTest {
   }
 
   @Test
-  void MATCHED가_아닌_배송을_완료_처리하면_409를_반환한다() throws Exception {
+  @DisplayName("MATCHED가 아닌 배송을 완료 처리하면 409를 반환한다")
+  void completeDeliveryNotMatchedStatusShouldReturn409() throws Exception {
     DeliveryCompleteRequest request = new DeliveryCompleteRequest();
     request.setProofPhotoUrl("https://example.com/proof.jpg");
 
@@ -255,7 +268,8 @@ class DeliveryControllerTest {
   }
 
   @Test
-  void 픽업_완료_요청을_받으면_PICKED_UP_상태의_배송_요청을_반환한다() throws Exception {
+  @DisplayName("픽업 완료 요청을 받으면 PICKED_UP 상태의 배송 요청을 반환한다")
+  void confirmPickupProcessRequest() throws Exception {
     DeliveryRequest pickedUpEntity = new DeliveryRequest();
     pickedUpEntity.setCustomerId(1L);
     pickedUpEntity.setStatus(DeliveryStatus.PICKED_UP);
@@ -270,7 +284,8 @@ class DeliveryControllerTest {
   }
 
   @Test
-  void MATCHED가_아닌_배송을_픽업_처리하면_409를_반환한다() throws Exception {
+  @DisplayName("MATCHED가 아닌 배송을 픽업 처리하면 409를 반환한다")
+  void confirmPickupNotMatchedStatusShouldReturn409() throws Exception {
     when(deliveryService.confirmPickup(1L))
         .thenThrow(
             new InvalidDeliveryTransitionException(
@@ -280,7 +295,8 @@ class DeliveryControllerTest {
   }
 
   @Test
-  void 증거사진_조회_요청을_받으면_사진_URL과_완료시각을_반환한다() throws Exception {
+  @DisplayName("증거사진 조회 요청을 받으면 사진 URL과 완료시각을 반환한다")
+  void getProofPhotoProcessRequest() throws Exception {
     LocalDateTime completedAt = LocalDateTime.of(2026, 7, 31, 10, 0);
     when(deliveryService.getProofPhoto(1L))
         .thenReturn(new ProofPhotoResponse(1L, "https://example.com/proof.jpg", completedAt));
@@ -293,7 +309,8 @@ class DeliveryControllerTest {
   }
 
   @Test
-  void 완료되지_않은_배송의_증거사진을_조회하면_404를_반환한다() throws Exception {
+  @DisplayName("완료되지 않은 배송의 증거사진을 조회하면 404를 반환한다")
+  void getProofPhotoNotCompletedStatusShouldReturn404() throws Exception {
     when(deliveryService.getProofPhoto(1L)).thenThrow(new ProofPhotoNotFoundException(1L));
 
     mockMvc

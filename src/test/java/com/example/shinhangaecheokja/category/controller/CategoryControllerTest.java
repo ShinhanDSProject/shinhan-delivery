@@ -8,6 +8,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.example.shinhangaecheokja.category.entity.Category;
 import com.example.shinhangaecheokja.category.service.CategoryService;
 import java.util.List;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -22,7 +23,8 @@ class CategoryControllerTest {
   @MockitoBean private CategoryService categoryService;
 
   @Test
-  void 카테고리_목록을_조회하면_배열로_직접_반환한다() throws Exception {
+  @DisplayName("카테고리 목록을 조회하면 배열로 직접 반환한다")
+  void getCategoriesSuccess() throws Exception {
     Category c1 = new Category();
     c1.setId(1L);
     c1.setName("전자기기/가전");
@@ -43,7 +45,8 @@ class CategoryControllerTest {
   }
 
   @Test
-  void 카테고리가_없으면_빈_배열을_반환한다() throws Exception {
+  @DisplayName("카테고리가 없으면 빈 배열을 반환한다")
+  void getCategoriesEmptyShouldReturnEmptyList() throws Exception {
     when(categoryService.getCategories()).thenReturn(List.of());
 
     mockMvc

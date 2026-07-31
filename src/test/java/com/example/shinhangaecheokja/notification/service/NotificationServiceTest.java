@@ -13,6 +13,7 @@ import com.example.shinhangaecheokja.notification.exception.NotificationAccessDe
 import com.example.shinhangaecheokja.notification.repository.NotificationRepository;
 import java.time.LocalDateTime;
 import java.util.Optional;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -29,7 +30,8 @@ class NotificationServiceTest {
   @InjectMocks private NotificationService notificationService;
 
   @Test
-  void category가_없으면_전체_알림을_최신순으로_조회한다() {
+  @DisplayName("category가 없으면 전체 알림을 최신순으로 조회한다")
+  void getNotificationsWithoutCategoryShouldReturnAll() {
     Pageable pageable = PageRequest.of(0, 10);
     Notification notification = newNotification(1L, 1L, "DELIVERY", false);
     when(notificationRepository.findByMemberIdOrderByCreatedAtDesc(1L, pageable))
@@ -43,7 +45,8 @@ class NotificationServiceTest {
   }
 
   @Test
-  void category가_있으면_해당_카테고리만_조회한다() {
+  @DisplayName("category가 있으면 해당 카테고리만 조회한다")
+  void getNotificationsWithCategoryShouldFilterByCategory() {
     Pageable pageable = PageRequest.of(0, 10);
     Notification notification = newNotification(1L, 1L, "DELIVERY", false);
     when(notificationRepository.findByMemberIdAndCategoryOrderByCreatedAtDesc(
@@ -57,7 +60,8 @@ class NotificationServiceTest {
   }
 
   @Test
-  void 본인_알림을_읽음_처리한다() {
+  @DisplayName("본인 알림을 읽음 처리한다")
+  void markAsReadSuccess() {
     Notification notification = newNotification(1L, 1L, "DELIVERY", false);
     when(notificationRepository.findById(1L)).thenReturn(Optional.of(notification));
 
@@ -67,7 +71,8 @@ class NotificationServiceTest {
   }
 
   @Test
-  void 존재하지_않는_알림이면_EntityNotFoundException을_던진다() {
+  @DisplayName("존재하지 않는 알림이면 EntityNotFoundException을 던진다")
+  void markAsReadNotFoundShouldThrowException() {
     when(notificationRepository.findById(999L)).thenReturn(Optional.empty());
 
     assertThatThrownBy(() -> notificationService.markAsRead(999L, 1L))
@@ -75,7 +80,8 @@ class NotificationServiceTest {
   }
 
   @Test
-  void 본인_알림이_아니면_NotificationAccessDeniedException을_던진다() {
+  @DisplayName("본인 알림이 아니면 NotificationAccessDeniedException을 던진다")
+  void markAsReadAccessDeniedShouldThrowException() {
     Notification notification = newNotification(1L, 1L, "DELIVERY", false);
     when(notificationRepository.findById(1L)).thenReturn(Optional.of(notification));
 

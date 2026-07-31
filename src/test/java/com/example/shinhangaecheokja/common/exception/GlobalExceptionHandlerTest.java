@@ -17,7 +17,7 @@ class GlobalExceptionHandlerTest {
 
   @Test
   @DisplayName("비즈니스 예외(BusinessException) 발생 시 설정된 HTTP 상태와 ErrorCode 정보가 반환된다.")
-  void handleBusinessException_returnsCorrectStatusAndResponseBody() {
+  void handleBusinessExceptionReturnsCorrectStatusAndResponseBody() {
     // given
     BusinessException exception = new BusinessException(ErrorCode.MEMBER_NOT_FOUND);
 
@@ -35,7 +35,7 @@ class GlobalExceptionHandlerTest {
 
   @Test
   @DisplayName("409 Conflict BusinessException 발생 시 상태 409와 M002 에러 코드가 반환된다.")
-  void handleBusinessException_conflict_returns409() {
+  void handleBusinessExceptionConflictReturns409() {
     // given
     BusinessException exception = new BusinessException(ErrorCode.DUPLICATE_EMAIL);
 
@@ -52,7 +52,7 @@ class GlobalExceptionHandlerTest {
 
   @Test
   @DisplayName("AccessDeniedException 발생 시 403 상태와 C007 에러 코드가 반환된다.")
-  void handleAccessDeniedException_returns403() {
+  void handleAccessDeniedExceptionReturns403() {
     // given
     AccessDeniedException exception = new AccessDeniedException("접근 거부");
 
@@ -69,7 +69,7 @@ class GlobalExceptionHandlerTest {
 
   @Test
   @DisplayName("존재하지 않는 경로 요청 시(NoHandlerFoundException) 404 상태와 C004 에러 코드가 반환된다.")
-  void handleNoHandlerFoundException_returns404() {
+  void handleNoHandlerFoundExceptionReturns404() {
     // given
     NoHandlerFoundException exception = new NoHandlerFoundException("GET", "/api/unknown", null);
 
@@ -86,7 +86,7 @@ class GlobalExceptionHandlerTest {
 
   @Test
   @DisplayName("ConstraintViolationException 발생 시 400 상태와 C001 에러 코드가 반환된다.")
-  void handleConstraintViolationException_returns400() {
+  void handleConstraintViolationExceptionReturns400() {
     // given
     ConstraintViolationException exception =
         new ConstraintViolationException("유효하지 않은 입력값", Set.of());
@@ -105,7 +105,7 @@ class GlobalExceptionHandlerTest {
 
   @Test
   @DisplayName("알 수 없는 서버 내부 예외(Exception) 발생 시 500 상태와 C003 에러 응답이 반환된다.")
-  void handleException_returns500InternalServerError() {
+  void handleExceptionReturns500InternalServerError() {
     // given
     RuntimeException unhandled = new RuntimeException("DB Connection Timeout Failure");
 

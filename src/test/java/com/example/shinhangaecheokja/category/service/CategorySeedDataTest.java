@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.example.shinhangaecheokja.category.entity.Category;
 import java.util.List;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -15,7 +16,8 @@ class CategorySeedDataTest {
   @Autowired private CategoryService categoryService;
 
   @Test
-  void 마이그레이션이_카테고리_12종을_시딩한다() {
+  @DisplayName("마이그레이션이 카테고리 12종을 시딩한다")
+  void migrationShouldSeed12Categories() {
     List<Category> categories = categoryService.getCategories();
 
     assertThat(categories).hasSize(12);

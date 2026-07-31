@@ -54,8 +54,8 @@ class PaymentConcurrencyTest {
   }
 
   @Test
-  @DisplayName("동일 지갑에 100개의 동시 차감 요청이 들어와도 잔액이 음수가 되거나 유실되지 않는다")
-  void 동시_차감_요청은_비관적_락으로_직렬화되어_잔액_정합성을_보장한다() throws InterruptedException {
+  @DisplayName("동시 차감 요청은 비관적 락으로 직렬화되어 잔액 정합성을 보장한다")
+  void concurrentDeductPointShouldEnsureBalanceConsistency() throws InterruptedException {
     Member member = new Member();
     member.setEmail("concurrency-test-" + System.nanoTime() + "@example.com");
     member.setPassword("password");

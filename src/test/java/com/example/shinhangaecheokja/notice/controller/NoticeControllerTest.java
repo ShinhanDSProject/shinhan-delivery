@@ -28,7 +28,7 @@ class NoticeControllerTest {
 
   @Test
   @DisplayName("GET /api/v1/notices 요청 시 공지사항 목록 페이징 결과를 반환한다")
-  void getNotices_Success() throws Exception {
+  void getNoticesSuccess() throws Exception {
     Notice notice =
         Notice.builder()
             .id(1L)
@@ -52,7 +52,7 @@ class NoticeControllerTest {
 
   @Test
   @DisplayName("GET /api/v1/notices/{id} 요청 시 공지사항 상세 정보를 반환한다")
-  void getNoticeDetail_Success() throws Exception {
+  void getNoticeDetailSuccess() throws Exception {
     Notice detail =
         Notice.builder()
             .id(1L)
@@ -75,7 +75,7 @@ class NoticeControllerTest {
 
   @Test
   @DisplayName("존재하지 않는 공지사항 ID로 GET /api/v1/notices/{id} 요청 시 404 에러를 반환한다")
-  void getNoticeDetail_NotFound() throws Exception {
+  void getNoticeDetailNotFound() throws Exception {
     when(noticeService.getNoticeDetail(999L)).thenThrow(new NoticeNotFoundException());
 
     mockMvc

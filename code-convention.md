@@ -249,7 +249,16 @@ public class DuplicateMemberException extends BusinessException {
 
 ---
 
-## 8. 포맷팅 규칙
+## 8. 명명 및 포맷팅 규칙
+
+### 8.1 식별자 명명 규칙 (Naming Conventions)
+
+- **메서드명 (비즈니스/테스트 포함 모든 메서드):** 무조건 **`lowerCamelCase`**로 작성합니다 (예: `getMember`, `registerVehicle`, `updateBy`, `createAddressSuccess`). 메서드명에 언더스코어(`_`)나 한글 사용을 엄격히 금지합니다.
+- **상수 (`static final` 필드 및 Enum 상수):** 무조건 **`UPPER_SNAKE_CASE`**로 작성합니다 (예: `MAX_RETRY_COUNT`, `DEFAULT_PAGE_SIZE`, `MEMBER_NOT_FOUND`).
+- **클래스 및 인터페이스명:** 무조건 **`UpperCamelCase` (PascalCase)**로 작성합니다 (예: `MemberService`, `DeliveryRequest`, `VehicleType`).
+- **변수 및 필드명:** 무조건 **`lowerCamelCase`**로 작성합니다 (예: `memberId`, `deliveryRequestRepository`).
+
+### 8.2 포맷팅 및 코드 스타일 규칙
 
 - 들여쓰기: 스페이스 2칸 (탭 금지)
 - 한 줄 최대 길이: 100자
@@ -264,11 +273,13 @@ public class DuplicateMemberException extends BusinessException {
 
 ## 9. 테스트 컨벤션
 
-- 테스트 메서드명: `given_when_then` 스타일 (한글 허용)
+- **테스트 메서드명:** 메서드명은 무조건 **`camelCase` 영문(English)**으로 작성합니다 (예: `registerVehicleShouldThrowExceptionWhenWeightIsZeroOrLess`, `createAddressSuccess`). 언더스코어(`_`)나 한글 메서드명 사용을 금지합니다.
+- **테스트 시나리오 설명 (`@DisplayName`):** 테스트 케이스에 대한 상세한 한글 설명은 JUnit 5 `@DisplayName("한글 시나리오 설명")` 어노테이션을 필수 부여하여 작성합니다.
 
 ```java
 @Test
-void 무게가_0이하면_InvalidWeightException을_던진다() {
+@DisplayName("무게가 0 이하이면 InvalidWeightException을 던진다")
+void registerVehicleShouldThrowExceptionWhenWeightIsZeroOrLess() {
     VehicleCreateRequest request = new VehicleCreateRequest(1L, VehicleType.CAR, -5, 10);
 
     assertThatThrownBy(() -> vehicleService.registerVehicle(request))
@@ -534,7 +545,7 @@ void 도메인은_다른_도메인의_repository를_직접_참조하지_않는�
 - [ ] Repository가 Entity 1개당 1개씩 대응되는가?
 - [ ] 다른 도메인의 Repository/Entity를 직접 참조하지 않고, 필요하면 그 도메인의 Service를 거쳤는가?
 - [ ] Enum 필드에 `@Enumerated(EnumType.STRING)`을 썼는가? (`ORDINAL` 금지)
-- [ ] 새로 추가한 서비스 로직에 단위 테스트가 있는가? (given_when_then 네이밍)
+- [ ] 새로 추가한 서비스 로직에 단위 테스트가 있는가? (영문 메서드명 + `@DisplayName` 사용)
 - [ ] ArchUnit 테스트(레이어 의존성 규칙)가 깨지지 않는가?
 - [ ] Spotless 포맷팅 검사를 통과하는가?
 - [ ] Entity 필드를 추가/변경했다면 대응하는 Flyway 마이그레이션 파일을 새로 추가했는가? (기존 마이그레이션 파일을 수정하지 않았는가?)

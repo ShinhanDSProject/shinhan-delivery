@@ -118,8 +118,8 @@ class TrackingIntegrationTest {
   }
 
   @Test
-  @DisplayName("배송원이 발행한 위치를 매칭된 고객이 실시간으로 수신한다")
-  void 배송원_위치_발행시_고객이_브로드캐스트를_수신한다() throws Exception {
+  @DisplayName("배송원 위치 발행시 고객이 브로드캐스트를 수신한다")
+  void broadcastLocationSuccessShouldReceiveBroadcast() throws Exception {
     BlockingQueue<LocationBroadcastResponse> received = subscribeAsCustomer();
 
     StompSession courierSession = connect(courierId, "COURIER");
@@ -136,8 +136,8 @@ class TrackingIntegrationTest {
   }
 
   @Test
-  @DisplayName("배송과 무관한 회원의 구독·발행은 무시되고, 정상 배송원의 발행만 고객에게 전달된다")
-  void 권한없는_회원의_구독과_발행은_무시된다() throws Exception {
+  @DisplayName("권한없는 회원의 구독과 발행은 무시된다")
+  void broadcastLocationUnauthorizedShouldBeIgnored() throws Exception {
     BlockingQueue<LocationBroadcastResponse> customerReceived = subscribeAsCustomer();
 
     BlockingQueue<LocationBroadcastResponse> strangerReceived = new LinkedBlockingQueue<>();
