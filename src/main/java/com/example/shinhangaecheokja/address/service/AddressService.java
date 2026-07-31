@@ -2,7 +2,6 @@ package com.example.shinhangaecheokja.address.service;
 
 import com.example.shinhangaecheokja.address.dto.request.AddressCreateRequest;
 import com.example.shinhangaecheokja.address.dto.request.AddressUpdateRequest;
-import com.example.shinhangaecheokja.address.dto.response.AddressResponse;
 import com.example.shinhangaecheokja.address.entity.Address;
 import com.example.shinhangaecheokja.address.repository.AddressRepository;
 import com.example.shinhangaecheokja.common.exception.EntityNotFoundException;
@@ -19,36 +18,29 @@ public class AddressService {
 
   private final AddressRepository addressRepository;
 
-  /** 특정 회원의 자주 쓰는 주소 목록을 조회한다. */
+  /** 특정 회원의 자주 쓰는 주소 목록을 조회한다 (Entity 리턴). */
   @Transactional(readOnly = true)
-  public List<AddressResponse> getAddresses(Long memberId) {
-    return addressRepository.findByMemberId(memberId).stream().map(AddressResponse::from).toList();
+  public List<Address> getAddresses(Long memberId) {
+    return addressRepository.findByMemberId(memberId);
   }
 
-  /** 신규 자주 쓰는 주소를 생성한다. */
+  /** 신규 자주 쓰는 주소를 생성한다 (Entity 리턴). */
   @Transactional
-  public AddressResponse createAddress(Long memberId, AddressCreateRequest request) {
-    Address address =
-        Address.builder()
-            .memberId(memberId)
-            .alias(request.getAlias())
-            .address(request.getAddress())
-            .detailAddress(request.getDetailAddress())
-            .pickupGuide(request.getPickupGuide())
-            .build();
-    return AddressResponse.from(addressRepository.save(address));
+  public Address createAddress(Long memberId, AddressCreateRequest request) {
+    Address address = Address.from(memberId, request);
+    return addressRepository.save(address);
   }
 
-  /** 회원 본인 소유의 주소 정보를 수정한다. */
+  /** 회원 본인 소유의 주소 정보를 수정한다 (Entity 리턴). */
   @Transactional
-  public AddressResponse updateAddress(Long id, Long memberId, AddressUpdateRequest request) {
+  public Address updateAddress(Long id, Long memberId, AddressUpdateRequest request) {
     Address address = findAddressOrThrow(id, memberId);
     address.update(
         request.getAlias(),
         request.getAddress(),
         request.getDetailAddress(),
         request.getPickupGuide());
-    return AddressResponse.from(address);
+    return address;
   }
 
   /** 회원 본인 소유의 주소를 삭제한다. */

@@ -1,5 +1,6 @@
 package com.example.shinhangaecheokja.address.entity;
 
+import com.example.shinhangaecheokja.address.dto.request.AddressCreateRequest;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -38,6 +39,17 @@ public class Address {
 
   @Column(name = "pickup_guide", length = 255)
   private String pickupGuide;
+
+  /** AddressCreateRequest DTO 기반으로 Address 엔티티를 생성하는 정적 팩토리 메서드. */
+  public static Address from(Long memberId, AddressCreateRequest request) {
+    return Address.builder()
+        .memberId(memberId)
+        .alias(request.getAlias())
+        .address(request.getAddress())
+        .detailAddress(request.getDetailAddress())
+        .pickupGuide(request.getPickupGuide())
+        .build();
+  }
 
   /** 주소 정보를 수정하는 도메인 비즈니스 메서드. */
   public void update(String alias, String address, String detailAddress, String pickupGuide) {

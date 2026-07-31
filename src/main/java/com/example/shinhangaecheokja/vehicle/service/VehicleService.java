@@ -25,22 +25,15 @@ public class VehicleService {
   private final VehicleRepository vehicleRepository;
   private final MemberService memberService;
 
-  /** 소유자(Member) 존재 여부와 무게/거리 유효성을 검증한 뒤 Vehicle을 등록한다. */
+  /** 소유자(Member) 존재 여부와 무게/거리 유효성을 검증한 뒤 Vehicle을 등록한다 (Entity 리턴). */
   @Transactional
-  public VehicleResponse registerVehicle(VehicleCreateRequest request) {
+  public Vehicle registerVehicle(VehicleCreateRequest request) {
     memberService.getMember(request.getOwnerId());
     validateWeightAndDistance(request.getMaxWeight(), request.getMaxDistance());
 
-    Vehicle vehicle = new Vehicle();
-    vehicle.setOwnerId(request.getOwnerId());
-    vehicle.setType(request.getType());
-    vehicle.setMaxWeight(request.getMaxWeight());
-    vehicle.setMaxDistance(request.getMaxDistance());
-    vehicle.setLatitude(request.getLatitude());
-    vehicle.setLongitude(request.getLongitude());
-    vehicle.setStatus(VehicleStatus.AVAILABLE);
+    Vehicle vehicle = Vehicle.from(request);
 
-    return VehicleResponse.from(vehicleRepository.save(vehicle));
+    return vehicleRepository.save(vehicle);
   }
 
   /** id로 Vehicle 단건을 조회한다. 없으면 EntityNotFoundException. */

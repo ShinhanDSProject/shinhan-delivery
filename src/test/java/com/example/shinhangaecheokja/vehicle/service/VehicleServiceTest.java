@@ -5,6 +5,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import com.example.shinhangaecheokja.common.exception.EntityNotFoundException;
+import com.example.shinhangaecheokja.common.exception.ErrorCode;
 import com.example.shinhangaecheokja.member.service.MemberService;
 import com.example.shinhangaecheokja.vehicle.dto.request.VehicleCreateRequest;
 import com.example.shinhangaecheokja.vehicle.dto.request.VehicleUpdateRequest;
@@ -39,13 +41,19 @@ class VehicleServiceTest {
     request.setMaxDistance(100);
 
     when(vehicleRepository.save(any(Vehicle.class)))
-        .thenAnswer(invocation -> invocation.getArgument(0));
+        .thenAnswer(
+            invocation -> {
+              Vehicle vehicle = invocation.getArgument(0);
+              vehicle.setId(1L);
+              return vehicle;
+            });
 
-    VehicleResponse response = vehicleService.registerVehicle(request);
+    Vehicle response = vehicleService.registerVehicle(request);
 
-    assertThat(response.ownerId()).isEqualTo(1L);
-    assertThat(response.type()).isEqualTo(VehicleType.CAR);
-    assertThat(response.status()).isEqualTo(VehicleStatus.AVAILABLE);
+    assertThat(response.getId()).isEqualTo(1L);
+    assertThat(response.getOwnerId()).isEqualTo(1L);
+    assertThat(response.getType()).isEqualTo(VehicleType.CAR);
+    assertThat(response.getStatus()).isEqualTo(VehicleStatus.AVAILABLE);
   }
 
   @Test
@@ -57,12 +65,10 @@ class VehicleServiceTest {
     request.setMaxDistance(100);
 
     when(memberService.getMember(999L))
-        .thenThrow(
-            new com.example.shinhangaecheokja.common.exception.EntityNotFoundException(
-                com.example.shinhangaecheokja.common.exception.ErrorCode.MEMBER_NOT_FOUND));
+        .thenThrow(new EntityNotFoundException(ErrorCode.MEMBER_NOT_FOUND));
 
     assertThatThrownBy(() -> vehicleService.registerVehicle(request))
-        .isInstanceOf(com.example.shinhangaecheokja.common.exception.EntityNotFoundException.class);
+        .isInstanceOf(EntityNotFoundException.class);
   }
 
   @Test
@@ -94,7 +100,7 @@ class VehicleServiceTest {
     when(vehicleRepository.findById(1L)).thenReturn(Optional.empty());
 
     assertThatThrownBy(() -> vehicleService.getVehicle(1L))
-        .isInstanceOf(com.example.shinhangaecheokja.common.exception.EntityNotFoundException.class);
+        .isInstanceOf(EntityNotFoundException.class);
   }
 
   @Test
@@ -116,7 +122,7 @@ class VehicleServiceTest {
     when(vehicleRepository.findByIdForUpdate(1L)).thenReturn(Optional.empty());
 
     assertThatThrownBy(() -> vehicleService.getVehicleForUpdate(1L))
-        .isInstanceOf(com.example.shinhangaecheokja.common.exception.EntityNotFoundException.class);
+        .isInstanceOf(EntityNotFoundException.class);
   }
 
   @Test

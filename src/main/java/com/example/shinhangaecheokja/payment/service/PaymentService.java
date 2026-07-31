@@ -23,16 +23,14 @@ public class PaymentService {
   private final PaymentRepository paymentRepository;
   private final MemberService memberService;
 
-  /** 회원 존재 여부를 검증한 뒤 잔액 0인 포인트 지갑을 생성한다. */
+  /** 회원 존재 여부를 검증한 뒤 잔액 0인 포인트 지갑을 생성한다 (PointWallet Entity 리턴). */
   @Transactional
-  public PointWalletResponse createWallet(PointWalletCreateRequest request) {
+  public PointWallet createWallet(PointWalletCreateRequest request) {
     memberService.getMember(request.getMemberId());
 
-    PointWallet wallet = new PointWallet();
-    wallet.setMemberId(request.getMemberId());
-    wallet.setBalance(0L);
+    PointWallet wallet = PointWallet.createEmpty(request.getMemberId());
 
-    return PointWalletResponse.from(paymentRepository.save(wallet));
+    return paymentRepository.save(wallet);
   }
 
   /** id로 포인트 지갑 단건을 조회한다. 없으면 EntityNotFoundException. */

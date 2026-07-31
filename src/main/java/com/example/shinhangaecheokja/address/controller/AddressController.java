@@ -3,6 +3,7 @@ package com.example.shinhangaecheokja.address.controller;
 import com.example.shinhangaecheokja.address.dto.request.AddressCreateRequest;
 import com.example.shinhangaecheokja.address.dto.request.AddressUpdateRequest;
 import com.example.shinhangaecheokja.address.dto.response.AddressResponse;
+import com.example.shinhangaecheokja.address.entity.Address;
 import com.example.shinhangaecheokja.address.service.AddressService;
 import com.example.shinhangaecheokja.common.exception.BusinessException;
 import com.example.shinhangaecheokja.common.exception.ErrorCode;
@@ -35,17 +36,18 @@ public class AddressController {
   public ResponseEntity<List<AddressResponse>> getAddresses(
       @AuthenticationPrincipal CustomUserDetails userDetails) {
     Long memberId = extractMemberId(userDetails);
-    return ResponseEntity.ok(addressService.getAddresses(memberId));
+    List<Address> addresses = addressService.getAddresses(memberId);
+    return ResponseEntity.ok(addresses.stream().map(AddressResponse::from).toList());
   }
 
-  /** 인증된 본인의 신규 자주 쓰는 주소를 생성한다. */
+  /** 신규 자주 쓰는 주소를 생성한다. */
   @PostMapping
   public ResponseEntity<AddressResponse> createAddress(
-      @AuthenticationPrincipal CustomUserDetails userDetails,
-      @Valid @RequestBody AddressCreateRequest request) {
-    Long memberId = extractMemberId(userDetails);
-    return ResponseEntity.status(HttpStatus.CREATED)
-        .body(addressService.createAddress(memberId, request));
+      @AuthenticationPrincipal CustomUserDetails principal,
+      @RequestBody @Valid AddressCreateRequest request) {
+    Long memberId = principal.getId();
+    Address created = addressService.createAddress(memberId, request);
+    return ResponseEntity.status(HttpStatus.CREATED).body(AddressResponse.from(created));
   }
 
   /** 인증된 본인의 자주 쓰는 주소를 수정한다. */
@@ -55,7 +57,8 @@ public class AddressController {
       @AuthenticationPrincipal CustomUserDetails userDetails,
       @Valid @RequestBody AddressUpdateRequest request) {
     Long memberId = extractMemberId(userDetails);
-    return ResponseEntity.ok(addressService.updateAddress(id, memberId, request));
+    Address updated = addressService.updateAddress(id, memberId, request);
+    return ResponseEntity.ok(AddressResponse.from(updated));
   }
 
   /** 인증된 본인의 자주 쓰는 주소를 삭제한다. */

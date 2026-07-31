@@ -10,7 +10,6 @@ import com.example.shinhangaecheokja.common.exception.EntityNotFoundException;
 import com.example.shinhangaecheokja.common.security.JwtProvider;
 import com.example.shinhangaecheokja.member.dto.request.LoginRequest;
 import com.example.shinhangaecheokja.member.dto.request.MemberCreateRequest;
-import com.example.shinhangaecheokja.member.dto.response.MemberResponse;
 import com.example.shinhangaecheokja.member.dto.response.TokenResponse;
 import com.example.shinhangaecheokja.member.entity.Member;
 import com.example.shinhangaecheokja.member.entity.MemberRole;
@@ -72,10 +71,9 @@ class MemberSecurityTest {
             });
 
     // when
-    MemberResponse response = memberService.createMember(request);
+    Member response = memberService.createMember(request);
 
-    // then
-    assertThat(response.id()).isEqualTo(2L);
+    assertThat(response.getId()).isEqualTo(2L);
     assertThat(passwordEncoder.matches("rawPassword123", testMember.getPassword())).isTrue();
   }
 

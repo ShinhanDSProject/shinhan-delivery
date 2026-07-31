@@ -1,5 +1,8 @@
 package com.example.shinhangaecheokja.member.entity;
 
+import com.example.shinhangaecheokja.common.exception.BusinessException;
+import com.example.shinhangaecheokja.common.exception.ErrorCode;
+import com.example.shinhangaecheokja.member.dto.request.MemberCreateRequest;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -28,10 +31,10 @@ public class Member {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column(nullable = false, unique = true, length = 254)
+  @Column(nullable = false, unique = true, length = 100)
   private String email;
 
-  @Column(nullable = false, length = 100)
+  @Column(nullable = false, length = 255)
   private String password;
 
   @Column(nullable = false, length = 50)
@@ -50,8 +53,7 @@ public class Member {
       throw new IllegalArgumentException("변경할 역할은 필수 선택 항목입니다.");
     }
     if (newRole == MemberRole.ADMIN) {
-      throw new com.example.shinhangaecheokja.common.exception.BusinessException(
-          com.example.shinhangaecheokja.common.exception.ErrorCode.INVALID_INPUT_VALUE);
+      throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
     }
     this.role = newRole;
   }
@@ -62,5 +64,16 @@ public class Member {
       throw new IllegalArgumentException("암호화된 비밀번호는 필수입니다.");
     }
     this.password = encodedPassword;
+  }
+
+  /** MemberCreateRequest DTO 기반으로 Member 엔티티를 생성하는 정적 팩토리 메서드. */
+  public static Member from(MemberCreateRequest request, String encodedPassword) {
+    return Member.builder()
+        .email(request.getEmail())
+        .password(encodedPassword)
+        .name(request.getName())
+        .phoneNumber(request.getPhoneNumber())
+        .role(request.getRole())
+        .build();
   }
 }

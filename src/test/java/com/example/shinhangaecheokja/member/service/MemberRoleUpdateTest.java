@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.example.shinhangaecheokja.common.exception.BusinessException;
 import com.example.shinhangaecheokja.member.dto.request.MemberCreateRequest;
-import com.example.shinhangaecheokja.member.dto.response.MemberResponse;
+import com.example.shinhangaecheokja.member.entity.Member;
 import com.example.shinhangaecheokja.member.entity.MemberRole;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -30,14 +30,14 @@ class MemberRoleUpdateTest {
     createRequest.setPhoneNumber("010-1234-5678");
     createRequest.setRole(MemberRole.CUSTOMER);
 
-    MemberResponse created = memberService.createMember(createRequest);
-    assertThat(created.role()).isEqualTo(MemberRole.CUSTOMER);
+    Member created = memberService.createMember(createRequest);
+    assertThat(created.getRole()).isEqualTo(MemberRole.CUSTOMER);
 
     // when
-    MemberResponse updated = memberService.updateRole(created.id(), MemberRole.COURIER);
+    Member updated = memberService.updateRole(created.getId(), MemberRole.COURIER);
 
     // then
-    assertThat(updated.role()).isEqualTo(MemberRole.COURIER);
+    assertThat(updated.getRole()).isEqualTo(MemberRole.COURIER);
   }
 
   @Test
@@ -51,10 +51,10 @@ class MemberRoleUpdateTest {
     createRequest.setPhoneNumber("010-1234-5678");
     createRequest.setRole(MemberRole.CUSTOMER);
 
-    MemberResponse created = memberService.createMember(createRequest);
+    Member created = memberService.createMember(createRequest);
 
     // when & then
-    assertThatThrownBy(() -> memberService.updateRole(created.id(), MemberRole.ADMIN))
+    assertThatThrownBy(() -> memberService.updateRole(created.getId(), MemberRole.ADMIN))
         .isInstanceOf(BusinessException.class);
   }
 }
