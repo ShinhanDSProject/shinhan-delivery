@@ -8,6 +8,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.example.shinhangaecheokja.common.exception.EntityNotFoundException;
+import com.example.shinhangaecheokja.common.exception.ErrorCode;
 import com.example.shinhangaecheokja.payment.dto.request.PointWalletCreateRequest;
 import com.example.shinhangaecheokja.payment.entity.PointWallet;
 import com.example.shinhangaecheokja.payment.service.PaymentService;
@@ -48,9 +50,7 @@ class PaymentControllerTest {
   @Test
   void 존재하지_않는_지갑을_조회하면_404를_반환한다() throws Exception {
     when(paymentService.getWallet(eq(999L)))
-        .thenThrow(
-            new com.example.shinhangaecheokja.common.exception.EntityNotFoundException(
-                com.example.shinhangaecheokja.common.exception.ErrorCode.POINT_WALLET_NOT_FOUND));
+        .thenThrow(new EntityNotFoundException(ErrorCode.POINT_WALLET_NOT_FOUND));
 
     mockMvc.perform(get("/api/v1/point-wallets/999")).andExpect(status().isNotFound());
   }

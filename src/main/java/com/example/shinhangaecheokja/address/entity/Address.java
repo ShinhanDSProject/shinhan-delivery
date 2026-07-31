@@ -1,5 +1,6 @@
 package com.example.shinhangaecheokja.address.entity;
 
+import com.example.shinhangaecheokja.address.dto.request.AddressCreateRequest;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -40,9 +41,7 @@ public class Address {
   private String pickupGuide;
 
   /** AddressCreateRequest DTO 기반으로 Address 엔티티를 생성하는 정적 팩토리 메서드. */
-  public static Address from(
-      Long memberId,
-      com.example.shinhangaecheokja.address.dto.request.AddressCreateRequest request) {
+  public static Address from(Long memberId, AddressCreateRequest request) {
     return Address.builder()
         .memberId(memberId)
         .alias(request.getAlias())

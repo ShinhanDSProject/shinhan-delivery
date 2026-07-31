@@ -1,5 +1,6 @@
 package com.example.shinhangaecheokja.vehicle.entity;
 
+import com.example.shinhangaecheokja.vehicle.dto.request.VehicleCreateRequest;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -52,8 +53,7 @@ public class Vehicle {
   private VehicleStatus status;
 
   /** VehicleCreateRequest DTO 기반으로 AVAILABLE 상태의 Vehicle 엔티티를 생성하는 정적 팩토리 메서드. */
-  public static Vehicle from(
-      com.example.shinhangaecheokja.vehicle.dto.request.VehicleCreateRequest request) {
+  public static Vehicle from(VehicleCreateRequest request) {
     return Vehicle.builder()
         .ownerId(request.getOwnerId())
         .type(request.getType())

@@ -321,6 +321,16 @@ public record DeliveryCreateResponse(Long id, String status, long feePoint) {
 
 ---
 
+## 10.2 코드 내 전체 패키지명(FQCN) 직접 작성 금지
+
+- **원칙:** 코드 본문(클래스 선언, 메서드 시그니처, 변수 타입, 예외 생성 등)에 `com.example.shinhangaecheokja.xxx`와 같은 인라인 패키지 전체 경로(Fully-Qualified Class Name)를 직접 작성하는 것을 엄격히 금지합니다.
+- **지침:**
+  1. 모든 외부/타 패키지 클래스는 파일 상단의 `import` 구문으로 선언하여 사용합니다.
+  2. 동일한 클래스명이 존재하여 충돌하는 특수한 경우를 제외하고는 코드 본문에 패키지명을 나열하지 않습니다.
+  3. 이를 통해 코드 가독성을 확보하고 패키지 리팩토링 시 변경 요소를 최소화합니다.
+
+---
+
 ## 11. Controller 규칙
 
 - Controller는 DTO만 다루고, Service를 호출한 뒤 결과를 응답으로 변환하는 역할만 한다. 비즈니스 로직(if 분기, 계산)을 Controller에 넣지 않는다.

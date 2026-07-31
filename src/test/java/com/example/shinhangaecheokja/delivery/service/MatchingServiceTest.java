@@ -8,6 +8,8 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.example.shinhangaecheokja.common.exception.EntityNotFoundException;
+import com.example.shinhangaecheokja.common.exception.ErrorCode;
 import com.example.shinhangaecheokja.delivery.dto.request.MatchingCreateRequest;
 import com.example.shinhangaecheokja.delivery.dto.request.MatchingUpdateRequest;
 import com.example.shinhangaecheokja.delivery.dto.response.MatchingResponse;
@@ -88,7 +90,7 @@ class MatchingServiceTest {
     when(deliveryRequestRepository.findByIdForUpdate(999L)).thenReturn(Optional.empty());
 
     assertThatThrownBy(() -> matchingService.createMatching(request))
-        .isInstanceOf(com.example.shinhangaecheokja.common.exception.EntityNotFoundException.class);
+        .isInstanceOf(EntityNotFoundException.class);
   }
 
   @Test
@@ -100,12 +102,10 @@ class MatchingServiceTest {
     when(deliveryRequestRepository.findByIdForUpdate(1L))
         .thenReturn(Optional.of(deliveryRequest(1L)));
     when(vehicleService.getVehicleForUpdate(999L))
-        .thenThrow(
-            new com.example.shinhangaecheokja.common.exception.EntityNotFoundException(
-                com.example.shinhangaecheokja.common.exception.ErrorCode.VEHICLE_NOT_FOUND));
+        .thenThrow(new EntityNotFoundException(ErrorCode.VEHICLE_NOT_FOUND));
 
     assertThatThrownBy(() -> matchingService.createMatching(request))
-        .isInstanceOf(com.example.shinhangaecheokja.common.exception.EntityNotFoundException.class);
+        .isInstanceOf(EntityNotFoundException.class);
   }
 
   @Test
@@ -186,12 +186,10 @@ class MatchingServiceTest {
   @Test
   void 존재하지_않는_차량으로_열린_콜을_조회하면_EntityNotFoundException을_던진다() {
     when(vehicleService.getVehicle(999L))
-        .thenThrow(
-            new com.example.shinhangaecheokja.common.exception.EntityNotFoundException(
-                com.example.shinhangaecheokja.common.exception.ErrorCode.VEHICLE_NOT_FOUND));
+        .thenThrow(new EntityNotFoundException(ErrorCode.VEHICLE_NOT_FOUND));
 
     assertThatThrownBy(() -> matchingService.getOpenCalls(999L))
-        .isInstanceOf(com.example.shinhangaecheokja.common.exception.EntityNotFoundException.class);
+        .isInstanceOf(EntityNotFoundException.class);
   }
 
   @Test
@@ -199,7 +197,7 @@ class MatchingServiceTest {
     when(matchingRepository.findById(1L)).thenReturn(Optional.empty());
 
     assertThatThrownBy(() -> matchingService.getMatching(1L))
-        .isInstanceOf(com.example.shinhangaecheokja.common.exception.EntityNotFoundException.class);
+        .isInstanceOf(EntityNotFoundException.class);
   }
 
   @Test

@@ -1,5 +1,6 @@
 package com.example.shinhangaecheokja.delivery.entity;
 
+import com.example.shinhangaecheokja.delivery.dto.request.DeliveryCreateRequest;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -74,9 +75,7 @@ public class DeliveryRequest {
 
   /** DeliveryCreateRequest DTO 수용 기반으로 REQUESTED 상태의 DeliveryRequest 엔티티를 생성하는 정적 팩토리 메서드. */
   public static DeliveryRequest of(
-      com.example.shinhangaecheokja.delivery.dto.request.DeliveryCreateRequest request,
-      double distanceKm,
-      long feePoint) {
+      DeliveryCreateRequest request, double distanceKm, long feePoint) {
     DeliveryRequest deliveryRequest = new DeliveryRequest();
     deliveryRequest.setCustomerId(request.getCustomerId());
     deliveryRequest.setPickupAddress(request.getPickupAddress());

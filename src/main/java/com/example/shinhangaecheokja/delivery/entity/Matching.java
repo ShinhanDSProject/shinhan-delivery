@@ -1,5 +1,6 @@
 package com.example.shinhangaecheokja.delivery.entity;
 
+import com.example.shinhangaecheokja.delivery.dto.request.MatchingCreateRequest;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -39,8 +40,7 @@ public class Matching {
   private LocalDateTime matchedAt;
 
   /** MatchingCreateRequest DTO 기반으로 MATCHED 상태의 Matching 엔티티를 생성하는 정적 팩토리 메서드. */
-  public static Matching from(
-      com.example.shinhangaecheokja.delivery.dto.request.MatchingCreateRequest request) {
+  public static Matching from(MatchingCreateRequest request) {
     Matching matching = new Matching();
     matching.setDeliveryRequestId(request.getDeliveryRequestId());
     matching.setVehicleId(request.getVehicleId());

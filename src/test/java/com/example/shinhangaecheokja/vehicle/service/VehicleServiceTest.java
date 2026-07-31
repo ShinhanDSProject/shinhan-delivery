@@ -5,6 +5,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import com.example.shinhangaecheokja.common.exception.EntityNotFoundException;
+import com.example.shinhangaecheokja.common.exception.ErrorCode;
 import com.example.shinhangaecheokja.member.service.MemberService;
 import com.example.shinhangaecheokja.vehicle.dto.request.VehicleCreateRequest;
 import com.example.shinhangaecheokja.vehicle.dto.request.VehicleUpdateRequest;
@@ -63,12 +65,10 @@ class VehicleServiceTest {
     request.setMaxDistance(100);
 
     when(memberService.getMember(999L))
-        .thenThrow(
-            new com.example.shinhangaecheokja.common.exception.EntityNotFoundException(
-                com.example.shinhangaecheokja.common.exception.ErrorCode.MEMBER_NOT_FOUND));
+        .thenThrow(new EntityNotFoundException(ErrorCode.MEMBER_NOT_FOUND));
 
     assertThatThrownBy(() -> vehicleService.registerVehicle(request))
-        .isInstanceOf(com.example.shinhangaecheokja.common.exception.EntityNotFoundException.class);
+        .isInstanceOf(EntityNotFoundException.class);
   }
 
   @Test
@@ -100,7 +100,7 @@ class VehicleServiceTest {
     when(vehicleRepository.findById(1L)).thenReturn(Optional.empty());
 
     assertThatThrownBy(() -> vehicleService.getVehicle(1L))
-        .isInstanceOf(com.example.shinhangaecheokja.common.exception.EntityNotFoundException.class);
+        .isInstanceOf(EntityNotFoundException.class);
   }
 
   @Test
@@ -122,7 +122,7 @@ class VehicleServiceTest {
     when(vehicleRepository.findByIdForUpdate(1L)).thenReturn(Optional.empty());
 
     assertThatThrownBy(() -> vehicleService.getVehicleForUpdate(1L))
-        .isInstanceOf(com.example.shinhangaecheokja.common.exception.EntityNotFoundException.class);
+        .isInstanceOf(EntityNotFoundException.class);
   }
 
   @Test
