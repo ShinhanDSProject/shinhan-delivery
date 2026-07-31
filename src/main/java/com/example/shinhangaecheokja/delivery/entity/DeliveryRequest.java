@@ -61,4 +61,7 @@ public class DeliveryRequest {
   @Enumerated(EnumType.STRING)
   @Column(name = "item_size", nullable = false, length = 20)
   private ItemSize itemSize = ItemSize.MEDIUM;
+
+  @Column(name = "proof_photo_url", length = 255)
+  private String proofPhotoUrl;
 }
