@@ -57,30 +57,33 @@ public class Vehicle {
 
   /** VehicleCreateRequest DTO 기반으로 AVAILABLE 상태의 Vehicle 엔티티를 생성하는 정적 팩토리 메서드. */
   public static Vehicle from(VehicleCreateRequest request) {
-    validateInvariants(request.getMaxWeight(), request.getMaxDistance());
-    return Vehicle.builder()
-        .ownerId(request.getOwnerId())
-        .type(request.getType())
-        .maxWeight(request.getMaxWeight())
-        .maxDistance(request.getMaxDistance())
-        .latitude(request.getLatitude())
-        .longitude(request.getLongitude())
-        .status(VehicleStatus.AVAILABLE)
-        .build();
+    Vehicle vehicle =
+        Vehicle.builder()
+            .ownerId(request.getOwnerId())
+            .type(request.getType())
+            .maxWeight(request.getMaxWeight())
+            .maxDistance(request.getMaxDistance())
+            .latitude(request.getLatitude())
+            .longitude(request.getLongitude())
+            .status(VehicleStatus.AVAILABLE)
+            .build();
+    vehicle.validateInvariants();
+    return vehicle;
   }
 
   /** VehicleUpdateRequest DTO 기반으로 Vehicle 정보를 수정하는 도메인 비즈니스 메서드. */
   public Vehicle updateBy(VehicleUpdateRequest request) {
-    validateInvariants(request.getMaxWeight(), request.getMaxDistance());
     this.type = request.getType();
     this.maxWeight = request.getMaxWeight();
     this.maxDistance = request.getMaxDistance();
     this.latitude = request.getLatitude();
     this.longitude = request.getLongitude();
+    validateInvariants();
     return this;
   }
 
-  private static void validateInvariants(double maxWeight, double maxDistance) {
+  /** 이 차량 스펙(최대 적재 중량·운행 거리)이 도메인 불변성을 만족하는지 스스로 검증한다. */
+  private void validateInvariants() {
     if (maxWeight <= 0) {
       throw new InvalidWeightException(maxWeight);
     }
