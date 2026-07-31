@@ -12,6 +12,7 @@ import com.example.shinhangaecheokja.delivery.dto.response.ProofPhotoResponse;
 import com.example.shinhangaecheokja.delivery.entity.DeliveryRequest;
 import com.example.shinhangaecheokja.delivery.entity.DeliveryStatus;
 import com.example.shinhangaecheokja.delivery.entity.ItemSize;
+import com.example.shinhangaecheokja.delivery.event.DeliveryStatusChangedEvent;
 import com.example.shinhangaecheokja.delivery.exception.AlreadyMatchedException;
 import com.example.shinhangaecheokja.delivery.exception.InvalidDeliveryDistanceException;
 import com.example.shinhangaecheokja.delivery.exception.InvalidDeliveryTransitionException;
@@ -25,6 +26,7 @@ import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,6 +45,7 @@ public class DeliveryService {
   private final DeliveryRequestRepository deliveryRequestRepository;
   private final MemberService memberService;
   private final MatchingRepository matchingRepository;
+  private final ApplicationEventPublisher eventPublisher;
 
   /**
    * 고객 존재 여부를 검증한 뒤 배송을 요청한다. 요금은 {@link #estimateFee}와 동일한 공식으로 서버가 직접 계산한다(거리는 클라이언트가 준 값이 아니라
@@ -191,7 +194,10 @@ public class DeliveryService {
           deliveryRequest.getStatus(), DeliveryStatus.PICKED_UP);
     }
     deliveryRequest.setStatus(DeliveryStatus.PICKED_UP);
-    deliveryRequest.setPickedUpAt(LocalDateTime.now());
+    LocalDateTime pickedUpAt = LocalDateTime.now();
+    deliveryRequest.setPickedUpAt(pickedUpAt);
+    eventPublisher.publishEvent(
+        new DeliveryStatusChangedEvent(deliveryRequestId, DeliveryStatus.PICKED_UP, pickedUpAt));
     return DeliveryResponse.from(deliveryRequest);
   }
 
@@ -209,7 +215,10 @@ public class DeliveryService {
     }
     deliveryRequest.setStatus(DeliveryStatus.COMPLETED);
     deliveryRequest.setProofPhotoUrl(request.getProofPhotoUrl());
-    deliveryRequest.setCompletedAt(LocalDateTime.now());
+    LocalDateTime completedAt = LocalDateTime.now();
+    deliveryRequest.setCompletedAt(completedAt);
+    eventPublisher.publishEvent(
+        new DeliveryStatusChangedEvent(deliveryRequestId, DeliveryStatus.COMPLETED, completedAt));
     return DeliveryResponse.from(deliveryRequest);
   }
 

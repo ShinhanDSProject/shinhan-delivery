@@ -33,6 +33,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 
 @ExtendWith(MockitoExtension.class)
 class DeliveryServiceTest {
@@ -40,6 +41,7 @@ class DeliveryServiceTest {
   @Mock private DeliveryRequestRepository deliveryRequestRepository;
   @Mock private MemberService memberService;
   @Mock private MatchingRepository matchingRepository;
+  @Mock private ApplicationEventPublisher eventPublisher;
   @InjectMocks private DeliveryService deliveryService;
 
   @Test
