@@ -27,11 +27,12 @@
 
 | 구분 | 기술 스택 | 주요 역할 및 설명 |
 | :--- | :--- | :--- |
-| **Backend Core** | Java 17, Spring Boot 3.x | 백엔드 핵심 코어 프레임워크 및 런타임 |
+| **Backend Core** | Java 17, Spring Boot 4.1.0 | 백엔드 핵심 코어 프레임워크 및 런타임 |
 | **Security & Auth** | Spring Security, Stateless JWT | JWT 기반 무상태 인증/인가 및 역할 분기 (`CUSTOMER`/`COURIER`/`ADMIN`) |
 | **Database & Migration** | MariaDB, Flyway | 관계형 데이터베이스 및 무중단 Online DDL 마이그레이션 관리 |
 | **Frontend & Template** | HTML5, Vanilla CSS, Vanilla JS, Thymeleaf | 반응형 UI 구성 및 서버 사이드 템플릿 엔진 |
 | **Realtime Messaging** | WebSocket (STOMP) | 배송 위치 실시간 브로드캐스트 및 상태 트래킹 |
+| **API Documentation** | Swagger (springdoc-openapi) | 컨트롤러/DTO 어노테이션 기반 REST API 명세 자동화 |
 | **Testing & Quality Gate** | JUnit 5, Mockito, ArchUnit, JaCoCo | 단위/통합 테스트, 아키텍처 규칙 검증 및 커버리지 게이트 (60%+) |
 | **DevOps & Code Style** | Spotless, Gradle, GitHub Actions | 코드 포맷팅 자동화, 빌드 도구 및 CI/CD 자동화 파이프라인 |
 
@@ -61,7 +62,7 @@ DATA_SEED_ENABLED=true
 💡 *실행 중 에러가 발생하거나 DB 연결 실패 시 [**로컬 개발 트러블슈팅 가이드 (docs/troubleshooting.md)**](./docs/troubleshooting.md)를 참고해 주세요.*
 
 ### 3. 로컬 CI 검증 및 원클릭 PR 제출 하네스 (./pr)
-개발 완료 또는 소스 수정 후 터미널에 아래 명령어를 실행하면 **Flyway 린트, Spotless 포맷팅, ArchUnit 아키텍처 검증, JaCoCo 커버리지 게이트(60%+), 전체 90+개 테스트**를 검증하고 커밋/PR까지 일괄 처리합니다.
+개발 완료 또는 소스 수정 후 터미널에 아래 명령어를 실행하면 **Flyway 린트, Spotless 포맷팅, ArchUnit 아키텍처 검증, JaCoCo 커버리지 게이트(60%+), 전체 175+개 테스트**를 검증하고 커밋/PR까지 일괄 처리합니다.
 ```bash
 ./pr
 # 또는 로컬 검증만 실행할 경우: ./scripts/verify.sh
