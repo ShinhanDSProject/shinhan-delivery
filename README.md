@@ -162,6 +162,7 @@ graph TD
   - 🔄 [**Agile & Scrum**](./docs/methodologies/agile-scrum.md) | [**Kanban (칸반)**](./docs/methodologies/kanban.md) | [**Extreme Programming (XP)**](./docs/methodologies/xp.md)
   - 🤖 [**LLM 주도 개발**](./docs/methodologies/llm-driven-development.md) | [**Spec/Plan 주도 개발**](./docs/methodologies/spec-driven-development.md)
   - 🛡️ [**다층 방어 보안 개발**](./docs/methodologies/defense-in-depth.md) | [**마이그레이션 주도 DB 개발**](./docs/methodologies/migration-driven-development.md)
+* [**LangChain vs LangGraph 딥다이브 가이드북 (docs/langchain-langgraph-deepdive.md)**](./docs/langchain-langgraph-deepdive.md) - 랭체인과 랭그래프의 구조적 차이, 에이전트 오케스트레이션 및 채용 관점 딥다이브 🤖
 * [**프로젝트 착수 전 6대 사전 리스크 감사 & 거버넌스 가이드 (docs/pre-launch-risk-and-governance-guide.md)**](./docs/pre-launch-risk-and-governance-guide.md) - 개발자/리더/PM 관점 6대 리스크 방어 수칙 🛡️
 * [**공통 디자인 시스템 가이드 (docs/design-system.md)**](./docs/design-system.md) - UI 토큰, 공통 컴포넌트, Thymeleaf Fragment 및 스타일 가이드 🎨
 * [**그래프 엔지니어링 & 에이전트 오케스트레이션 가이드 (docs/graph-engineering-architecture.md)**](./docs/graph-engineering-architecture.md) - LangGraph, GraphRAG 및 지식 그래프 아키텍처 가이드북 🕸️
