@@ -49,7 +49,7 @@ class VehicleServiceTest {
               return vehicle;
             });
 
-    Vehicle response = vehicleService.registerVehicle(request);
+    Vehicle response = vehicleService.create(request);
 
     assertThat(response.getId()).isEqualTo(1L);
     assertThat(response.getOwnerId()).isEqualTo(1L);
@@ -66,10 +66,10 @@ class VehicleServiceTest {
     request.setMaxWeight(500);
     request.setMaxDistance(100);
 
-    when(memberService.getMember(999L))
+    when(memberService.getById(999L))
         .thenThrow(new EntityNotFoundException(ErrorCode.MEMBER_NOT_FOUND));
 
-    assertThatThrownBy(() -> vehicleService.registerVehicle(request))
+    assertThatThrownBy(() -> vehicleService.create(request))
         .isInstanceOf(EntityNotFoundException.class);
   }
 
@@ -82,7 +82,7 @@ class VehicleServiceTest {
     request.setMaxWeight(-5);
     request.setMaxDistance(100);
 
-    assertThatThrownBy(() -> vehicleService.registerVehicle(request))
+    assertThatThrownBy(() -> vehicleService.create(request))
         .isInstanceOf(InvalidWeightException.class);
   }
 
@@ -95,7 +95,7 @@ class VehicleServiceTest {
     request.setMaxWeight(500);
     request.setMaxDistance(0);
 
-    assertThatThrownBy(() -> vehicleService.registerVehicle(request))
+    assertThatThrownBy(() -> vehicleService.create(request))
         .isInstanceOf(OverMaxDistanceException.class);
   }
 
@@ -104,7 +104,7 @@ class VehicleServiceTest {
   void getVehicleNotFoundShouldThrowException() {
     when(vehicleRepository.findById(1L)).thenReturn(Optional.empty());
 
-    assertThatThrownBy(() -> vehicleService.getVehicle(1L))
+    assertThatThrownBy(() -> vehicleService.getById(1L))
         .isInstanceOf(EntityNotFoundException.class);
   }
 
@@ -118,7 +118,7 @@ class VehicleServiceTest {
     vehicle.setMaxDistance(20);
     when(vehicleRepository.findById(1L)).thenReturn(Optional.of(vehicle));
 
-    Vehicle response = vehicleService.getVehicle(1L);
+    Vehicle response = vehicleService.getById(1L);
 
     assertThat(response.getType()).isEqualTo(VehicleType.DRONE);
   }
@@ -162,7 +162,7 @@ class VehicleServiceTest {
     request.setMaxWeight(10);
     request.setMaxDistance(20);
 
-    Vehicle response = vehicleService.updateVehicle(1L, request);
+    Vehicle response = vehicleService.update(1L, request);
 
     assertThat(response.getType()).isEqualTo(VehicleType.DRONE);
     assertThat(response.getMaxWeight()).isEqualTo(10);
@@ -180,7 +180,7 @@ class VehicleServiceTest {
     request.setMaxWeight(10);
     request.setMaxDistance(20);
 
-    assertThatThrownBy(() -> vehicleService.updateVehicle(1L, request))
+    assertThatThrownBy(() -> vehicleService.update(1L, request))
         .isInstanceOf(VehicleNotAvailableException.class);
   }
 

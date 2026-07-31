@@ -35,7 +35,7 @@ public class MatchingService {
    * 매칭을 생성한다. 배송 요청과 차량을 각각 findByIdForUpdate(비관적 락)로 조회해 조건(상태, 무게, 거리)을 검증하고, Matching 엔티티를 저장한다.
    */
   @Transactional
-  public Matching createMatching(MatchingCreateRequest request) {
+  public Matching create(MatchingCreateRequest request) {
     DeliveryRequest deliveryRequest =
         findDeliveryRequestForUpdateOrThrow(request.getDeliveryRequestId());
     if (deliveryRequest.getStatus() != DeliveryStatus.REQUESTED) {
@@ -53,9 +53,7 @@ public class MatchingService {
           request.getVehicleId(), deliveryRequest.getWeight(), deliveryRequest.getDistance());
     }
 
-    Matching matching = Matching.from(request);
-
-    Matching saved = matchingRepository.save(matching);
+    Matching saved = matchingRepository.save(Matching.from(request));
     applyStatus(saved, deliveryRequest, MatchingStatus.MATCHED);
     return saved;
   }
@@ -66,7 +64,7 @@ public class MatchingService {
    */
   @Transactional(readOnly = true)
   public List<DeliveryRequest> getOpenCalls(Long vehicleId) {
-    Vehicle vehicle = vehicleService.getVehicle(vehicleId);
+    Vehicle vehicle = vehicleService.getById(vehicleId);
     if (vehicle.getStatus() != VehicleStatus.AVAILABLE) {
       return List.of();
     }
@@ -76,13 +74,13 @@ public class MatchingService {
 
   /** id로 매칭 단건을 조회한다. 없으면 EntityNotFoundException. */
   @Transactional(readOnly = true)
-  public Matching getMatching(Long matchingId) {
+  public Matching getById(Long matchingId) {
     return findMatchingOrThrow(matchingId);
   }
 
   /** 전체 매칭 목록을 조회한다. */
   @Transactional(readOnly = true)
-  public List<Matching> getMatchings() {
+  public List<Matching> list() {
     return matchingRepository.findAll();
   }
 
@@ -96,7 +94,7 @@ public class MatchingService {
 
   /** 매칭 상태를 변경하고, 연결된 배송 요청·차량 상태도 함께 동기화한다. */
   @Transactional
-  public Matching updateMatching(Long matchingId, MatchingUpdateRequest request) {
+  public Matching update(Long matchingId, MatchingUpdateRequest request) {
     Matching matching = findMatchingOrThrow(matchingId);
     MatchingStatus previousStatus = matching.getStatus();
     MatchingStatus newStatus = request.getStatus();
@@ -127,7 +125,7 @@ public class MatchingService {
    * 상태로 되돌린다 — 이미 COMPLETED/CANCELLED된 매칭은 배송 요청 상태가 이미 그에 맞게 반영되어 있으므로 REQUESTED로 되돌리지 않는다.
    */
   @Transactional
-  public void deleteMatching(Long matchingId) {
+  public void delete(Long matchingId) {
     Matching matching = findMatchingOrThrow(matchingId);
     if (matching.getStatus() == MatchingStatus.MATCHED) {
       vehicleService.markAvailable(matching.getVehicleId());

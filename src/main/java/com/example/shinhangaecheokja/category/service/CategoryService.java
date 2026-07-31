@@ -16,7 +16,7 @@ public class CategoryService {
 
   /** 전체 카테고리 목록을 id 오름차순으로 조회한다. */
   @Transactional(readOnly = true)
-  public List<Category> getCategories() {
+  public List<Category> list() {
     return categoryRepository.findAllByOrderByIdAsc();
   }
 }

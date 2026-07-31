@@ -21,7 +21,7 @@ public class CategoryController {
   @GetMapping
   public ResponseEntity<List<CategoryResponse>> getCategories() {
     List<CategoryResponse> responses =
-        categoryService.getCategories().stream().map(CategoryResponse::from).toList();
+        categoryService.list().stream().map(CategoryResponse::from).toList();
     return ResponseEntity.ok(responses);
   }
 }

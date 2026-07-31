@@ -75,7 +75,7 @@ class AddressControllerTest {
             .detailAddress("101호")
             .pickupGuide("문 앞")
             .build();
-    when(addressService.getAddresses(eq(10L))).thenReturn(List.of(addr));
+    when(addressService.list(eq(10L))).thenReturn(List.of(addr));
 
     mockMvc
         .perform(get("/api/v1/addresses").principal(auth))
@@ -98,7 +98,7 @@ class AddressControllerTest {
     request.setAddress("서울시 서초구");
 
     Address created = Address.builder().id(2L).memberId(10L).alias("회사").address("서울시 서초구").build();
-    when(addressService.createAddress(eq(10L), any())).thenReturn(created);
+    when(addressService.create(eq(10L), any())).thenReturn(created);
 
     mockMvc
         .perform(
@@ -125,7 +125,7 @@ class AddressControllerTest {
 
     Address updated =
         Address.builder().id(1L).memberId(10L).alias("우리집").address("서울시 송파구").build();
-    when(addressService.updateAddress(eq(1L), eq(10L), any())).thenReturn(updated);
+    when(addressService.update(eq(10L), eq(1L), any())).thenReturn(updated);
 
     mockMvc
         .perform(
@@ -150,6 +150,6 @@ class AddressControllerTest {
         .perform(delete("/api/v1/addresses/1").principal(auth))
         .andExpect(status().isNoContent());
 
-    verify(addressService).deleteAddress(1L, 10L);
+    verify(addressService).delete(10L, 1L);
   }
 }

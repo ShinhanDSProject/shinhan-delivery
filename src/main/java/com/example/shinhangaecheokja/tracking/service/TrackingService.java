@@ -27,12 +27,12 @@ public class TrackingService {
 
   /** 요청자가 해당 배송의 위치를 구독할 수 있는지 검증한다 — 배송 고객 본인이거나, 매칭된 차량의 소유주여야 한다. */
   @Transactional(readOnly = true)
-  public void assertCanSubscribe(Long deliveryId, Long memberId) {
+  public void assertCanSubscribe(Long memberId, Long deliveryId) {
     DeliveryRequest delivery = deliveryService.getDeliveryRequest(deliveryId);
     if (delivery.getCustomerId().equals(memberId)) {
       return;
     }
-    if (isMatchedVehicleOwner(deliveryId, memberId)) {
+    if (isMatchedVehicleOwner(memberId, deliveryId)) {
       return;
     }
     throw new UnauthorizedTrackingAccessException(deliveryId, memberId);
@@ -43,12 +43,12 @@ public class TrackingService {
    * 하고 요청자는 매칭된 차량의 소유주여야 한다.
    */
   @Transactional(readOnly = true)
-  public void broadcastLocation(Long deliveryId, LocationUpdateRequest request, Long memberId) {
+  public void broadcastLocation(Long memberId, Long deliveryId, LocationUpdateRequest request) {
     if (!deliveryId.equals(request.getDeliveryId())) {
       throw new UnauthorizedTrackingAccessException(deliveryId, memberId);
     }
     Matching matching = matchingService.getMatchingByDeliveryRequestId(deliveryId);
-    if (!isOwner(matching.getVehicleId(), memberId)) {
+    if (!isOwner(memberId, matching.getVehicleId())) {
       throw new UnauthorizedTrackingAccessException(deliveryId, memberId);
     }
 
@@ -63,17 +63,17 @@ public class TrackingService {
   }
 
   /** 매칭 전(EntityNotFoundException)이면 아직 소유주가 없는 것으로 본다. */
-  private boolean isMatchedVehicleOwner(Long deliveryId, Long memberId) {
+  private boolean isMatchedVehicleOwner(Long memberId, Long deliveryId) {
     try {
       Matching matching = matchingService.getMatchingByDeliveryRequestId(deliveryId);
-      return isOwner(matching.getVehicleId(), memberId);
+      return isOwner(memberId, matching.getVehicleId());
     } catch (EntityNotFoundException e) {
       return false;
     }
   }
 
-  private boolean isOwner(Long vehicleId, Long memberId) {
-    Vehicle vehicle = vehicleService.getVehicle(vehicleId);
+  private boolean isOwner(Long memberId, Long vehicleId) {
+    Vehicle vehicle = vehicleService.getById(vehicleId);
     return vehicle.getOwnerId().equals(memberId);
   }
 }

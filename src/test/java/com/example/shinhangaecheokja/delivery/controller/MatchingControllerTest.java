@@ -45,7 +45,7 @@ class MatchingControllerTest {
     Matching matching = Matching.from(request);
     matching.setId(1L);
 
-    when(matchingService.createMatching(any())).thenReturn(matching);
+    when(matchingService.create(any())).thenReturn(matching);
 
     mockMvc
         .perform(
@@ -82,7 +82,7 @@ class MatchingControllerTest {
   @Test
   @DisplayName("존재하지 않는 매칭을 조회하면 404를 반환한다")
   void getMatchingNotFoundShouldReturn404() throws Exception {
-    when(matchingService.getMatching(eq(999L)))
+    when(matchingService.getById(eq(999L)))
         .thenThrow(new EntityNotFoundException(ErrorCode.DELIVERY_NOT_FOUND));
 
     mockMvc.perform(get("/api/v1/matchings/999")).andExpect(status().isNotFound());

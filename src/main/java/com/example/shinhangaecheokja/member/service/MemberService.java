@@ -31,7 +31,7 @@ public class MemberService {
 
   /** 이메일 중복을 검증하고 비밀번호를 암호화해 회원을 생성한다 (Entity 리턴). */
   @Transactional
-  public Member createMember(MemberCreateRequest request) {
+  public Member create(MemberCreateRequest request) {
     if (memberRepository.existsByEmail(request.getEmail())) {
       throw new DuplicateMemberException(request.getEmail());
     }
@@ -61,13 +61,13 @@ public class MemberService {
 
   /** id로 회원 단건을 조회한다. 없으면 EntityNotFoundException. */
   @Transactional(readOnly = true)
-  public Member getMember(Long memberId) {
+  public Member getById(Long memberId) {
     return findMemberOrThrow(memberId);
   }
 
   /** 전체 회원 목록을 조회한다. */
   @Transactional(readOnly = true)
-  public List<Member> getMembers() {
+  public List<Member> list() {
     return memberRepository.findAll();
   }
 
@@ -103,7 +103,7 @@ public class MemberService {
 
   /** 회원의 이름·연락처를 수정한다 (Member Entity 리턴). 이메일/비밀번호/역할은 변경하지 않는다. */
   @Transactional
-  public Member updateMember(Long memberId, MemberUpdateRequest request) {
+  public Member update(Long memberId, MemberUpdateRequest request) {
     return findMemberOrThrow(memberId).updateBy(request);
   }
 
@@ -115,7 +115,7 @@ public class MemberService {
 
   /** id로 회원을 조회해 삭제한다. 없으면 EntityNotFoundException. */
   @Transactional
-  public void deleteMember(Long memberId) {
+  public void delete(Long memberId) {
     Member member = findMemberOrThrow(memberId);
     memberRepository.delete(member);
   }

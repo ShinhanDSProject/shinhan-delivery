@@ -40,10 +40,10 @@ class AddressServiceTest {
             .build();
     when(addressRepository.findByMemberId(10L)).thenReturn(List.of(addr1));
 
-    List<Address> result = addressService.getAddresses(10L);
+    List<Address> responses = addressService.list(10L);
 
-    assertThat(result).hasSize(1);
-    assertThat(result.get(0).getAlias()).isEqualTo("집");
+    assertThat(responses).hasSize(1);
+    assertThat(responses.get(0).getAlias()).isEqualTo("집");
   }
 
   @Test
@@ -62,7 +62,7 @@ class AddressServiceTest {
 
     when(addressRepository.save(any(Address.class))).thenReturn(saved);
 
-    Address response = addressService.createAddress(10L, request);
+    Address response = addressService.create(10L, request);
 
     assertThat(response.getId()).isEqualTo(2L);
     assertThat(response.getAlias()).isEqualTo("회사");
@@ -85,7 +85,7 @@ class AddressServiceTest {
 
     when(addressRepository.findByIdAndMemberId(1L, 10L)).thenReturn(Optional.of(existing));
 
-    Address response = addressService.updateAddress(1L, 10L, request);
+    Address response = addressService.update(10L, 1L, request);
 
     assertThat(response.getAlias()).isEqualTo("우리집");
     assertThat(response.getDetailAddress()).isEqualTo("303호");
@@ -97,7 +97,7 @@ class AddressServiceTest {
     Address existing = Address.builder().id(1L).memberId(10L).alias("집").address("서울시 강남구").build();
     when(addressRepository.findByIdAndMemberId(1L, 10L)).thenReturn(Optional.of(existing));
 
-    addressService.deleteAddress(1L, 10L);
+    addressService.delete(10L, 1L);
 
     verify(addressRepository).delete(existing);
   }
@@ -108,7 +108,7 @@ class AddressServiceTest {
     AddressUpdateRequest request = new AddressUpdateRequest("우리집", "서울시 강남구 역삼동", "303호", "직접 전달");
     when(addressRepository.findByIdAndMemberId(999L, 10L)).thenReturn(Optional.empty());
 
-    assertThatThrownBy(() -> addressService.updateAddress(999L, 10L, request))
+    assertThatThrownBy(() -> addressService.update(10L, 999L, request))
         .isInstanceOf(EntityNotFoundException.class);
   }
 }

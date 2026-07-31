@@ -78,7 +78,7 @@ class MemberControllerTest {
             .phoneNumber("010-1234-5678")
             .role(MemberRole.CUSTOMER)
             .build();
-    when(memberService.createMember(any())).thenReturn(member);
+    when(memberService.create(any())).thenReturn(member);
 
     mockMvc
         .perform(
@@ -93,7 +93,7 @@ class MemberControllerTest {
   @Test
   @DisplayName("존재하지 않는 회원을 조회하면 404를 반환한다")
   void getMemberNotFoundShouldReturn404() throws Exception {
-    when(memberService.getMember(eq(999L)))
+    when(memberService.getById(eq(999L)))
         .thenThrow(new EntityNotFoundException(ErrorCode.MEMBER_NOT_FOUND));
 
     mockMvc.perform(get("/api/v1/members/999")).andExpect(status().isNotFound());

@@ -52,7 +52,7 @@ public class DeliveryService {
    */
   @Transactional
   public DeliveryRequest requestDelivery(DeliveryCreateRequest request) {
-    memberService.getMember(request.getCustomerId());
+    memberService.getById(request.getCustomerId());
     validateWeight(request.getWeight());
 
     double distanceKm =

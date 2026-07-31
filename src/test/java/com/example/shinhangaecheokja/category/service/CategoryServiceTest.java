@@ -26,7 +26,7 @@ class CategoryServiceTest {
         List.of(newCategory(1L, "전자기기/가전"), newCategory(2L, "식품/음료"), newCategory(3L, "의류/패션잡화"));
     when(categoryRepository.findAllByOrderByIdAsc()).thenReturn(categories);
 
-    List<Category> responses = categoryService.getCategories();
+    List<Category> responses = categoryService.list();
 
     assertThat(responses).hasSize(3);
     assertThat(responses)
@@ -39,7 +39,7 @@ class CategoryServiceTest {
   void getCategoriesEmptyShouldReturnEmptyList() {
     when(categoryRepository.findAllByOrderByIdAsc()).thenReturn(List.of());
 
-    List<Category> responses = categoryService.getCategories();
+    List<Category> responses = categoryService.list();
 
     assertThat(responses).isEmpty();
   }

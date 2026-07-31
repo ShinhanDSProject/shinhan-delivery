@@ -21,7 +21,7 @@ public class NotificationService {
 
   /** 로그인 회원 본인의 알림만 최신순으로 페이징 조회한다. category가 있으면 그 카테고리로 필터링한다. */
   @Transactional(readOnly = true)
-  public Page<Notification> getNotifications(Long memberId, String category, Pageable pageable) {
+  public Page<Notification> list(Long memberId, String category, Pageable pageable) {
     return StringUtils.hasText(category)
         ? notificationRepository.findByMemberIdAndCategoryOrderByCreatedAtDesc(
             memberId, category, pageable)
@@ -30,7 +30,7 @@ public class NotificationService {
 
   /** 알림을 읽음 처리한다. 없으면 EntityNotFoundException, 본인 알림이 아니면 NotificationAccessDeniedException. */
   @Transactional
-  public Notification markAsRead(Long notificationId, Long memberId) {
+  public Notification markAsRead(Long memberId, Long notificationId) {
     Notification notification =
         notificationRepository
             .findById(notificationId)

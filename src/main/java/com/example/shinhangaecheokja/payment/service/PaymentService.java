@@ -24,23 +24,21 @@ public class PaymentService {
 
   /** 회원 존재 여부를 검증한 뒤 잔액 0인 포인트 지갑을 생성한다 (PointWallet Entity 리턴). */
   @Transactional
-  public PointWallet createWallet(PointWalletCreateRequest request) {
-    memberService.getMember(request.getMemberId());
+  public PointWallet create(PointWalletCreateRequest request) {
+    memberService.getById(request.getMemberId());
 
-    PointWallet wallet = PointWallet.createEmpty(request.getMemberId());
-
-    return paymentRepository.save(wallet);
+    return paymentRepository.save(PointWallet.createEmpty(request.getMemberId()));
   }
 
   /** id로 포인트 지갑 단건을 조회한다. 없으면 EntityNotFoundException. */
   @Transactional(readOnly = true)
-  public PointWallet getWallet(Long walletId) {
+  public PointWallet getById(Long walletId) {
     return findWalletOrThrow(walletId);
   }
 
   /** 전체 포인트 지갑 목록을 조회한다. */
   @Transactional(readOnly = true)
-  public List<PointWallet> getWallets() {
+  public List<PointWallet> list() {
     return paymentRepository.findAll();
   }
 
@@ -71,7 +69,7 @@ public class PaymentService {
 
   /** id로 포인트 지갑을 조회해 삭제한다. 없으면 EntityNotFoundException. */
   @Transactional
-  public void deleteWallet(Long walletId) {
+  public void delete(Long walletId) {
     PointWallet wallet = findWalletOrThrow(walletId);
     paymentRepository.delete(wallet);
   }

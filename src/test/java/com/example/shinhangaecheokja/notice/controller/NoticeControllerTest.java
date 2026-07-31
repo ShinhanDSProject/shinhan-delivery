@@ -39,7 +39,7 @@ class NoticeControllerTest {
             .createdAt(LocalDateTime.now())
             .updatedAt(LocalDateTime.now())
             .build();
-    when(noticeService.getNotices(any(), any())).thenReturn(new PageImpl<>(List.of(notice)));
+    when(noticeService.list(any(), any())).thenReturn(new PageImpl<>(List.of(notice)));
 
     mockMvc
         .perform(get("/api/v1/notices"))
@@ -63,7 +63,7 @@ class NoticeControllerTest {
             .createdAt(LocalDateTime.now())
             .updatedAt(LocalDateTime.now())
             .build();
-    when(noticeService.getNoticeDetail(1L)).thenReturn(detail);
+    when(noticeService.getById(1L)).thenReturn(detail);
 
     mockMvc
         .perform(get("/api/v1/notices/1"))
@@ -76,7 +76,7 @@ class NoticeControllerTest {
   @Test
   @DisplayName("존재하지 않는 공지사항 ID로 GET /api/v1/notices/{id} 요청 시 404 에러를 반환한다")
   void getNoticeDetailNotFound() throws Exception {
-    when(noticeService.getNoticeDetail(999L)).thenThrow(new NoticeNotFoundException());
+    when(noticeService.getById(999L)).thenThrow(new NoticeNotFoundException());
 
     mockMvc
         .perform(get("/api/v1/notices/999"))
