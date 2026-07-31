@@ -7,8 +7,6 @@ import com.example.shinhangaecheokja.vehicle.dto.request.VehicleCreateRequest;
 import com.example.shinhangaecheokja.vehicle.dto.request.VehicleUpdateRequest;
 import com.example.shinhangaecheokja.vehicle.entity.Vehicle;
 import com.example.shinhangaecheokja.vehicle.entity.VehicleStatus;
-import com.example.shinhangaecheokja.vehicle.exception.InvalidWeightException;
-import com.example.shinhangaecheokja.vehicle.exception.OverMaxDistanceException;
 import com.example.shinhangaecheokja.vehicle.exception.VehicleNotAvailableException;
 import com.example.shinhangaecheokja.vehicle.repository.VehicleRepository;
 import java.util.List;
@@ -28,8 +26,6 @@ public class VehicleService {
   @Transactional
   public Vehicle create(VehicleCreateRequest request) {
     memberService.getById(request.getOwnerId());
-    validateWeightAndDistance(request.getMaxWeight(), request.getMaxDistance());
-
     return vehicleRepository.save(Vehicle.from(request));
   }
 
@@ -74,8 +70,6 @@ public class VehicleService {
    */
   @Transactional
   public Vehicle update(Long vehicleId, VehicleUpdateRequest request) {
-    validateWeightAndDistance(request.getMaxWeight(), request.getMaxDistance());
-
     Vehicle vehicle = findVehicleOrThrow(vehicleId);
     if (vehicle.getStatus() != VehicleStatus.AVAILABLE) {
       throw new VehicleNotAvailableException(vehicleId);
@@ -88,15 +82,6 @@ public class VehicleService {
   public void delete(Long vehicleId) {
     Vehicle vehicle = findVehicleOrThrow(vehicleId);
     vehicleRepository.delete(vehicle);
-  }
-
-  private void validateWeightAndDistance(double maxWeight, double maxDistance) {
-    if (maxWeight <= 0) {
-      throw new InvalidWeightException(maxWeight);
-    }
-    if (maxDistance <= 0) {
-      throw new OverMaxDistanceException(maxDistance);
-    }
   }
 
   private Vehicle findVehicleOrThrow(Long vehicleId) {

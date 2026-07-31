@@ -2,6 +2,8 @@ package com.example.shinhangaecheokja.vehicle.entity;
 
 import com.example.shinhangaecheokja.vehicle.dto.request.VehicleCreateRequest;
 import com.example.shinhangaecheokja.vehicle.dto.request.VehicleUpdateRequest;
+import com.example.shinhangaecheokja.vehicle.exception.InvalidWeightException;
+import com.example.shinhangaecheokja.vehicle.exception.OverMaxDistanceException;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -55,6 +57,7 @@ public class Vehicle {
 
   /** VehicleCreateRequest DTO 기반으로 AVAILABLE 상태의 Vehicle 엔티티를 생성하는 정적 팩토리 메서드. */
   public static Vehicle from(VehicleCreateRequest request) {
+    validateInvariants(request.getMaxWeight(), request.getMaxDistance());
     return Vehicle.builder()
         .ownerId(request.getOwnerId())
         .type(request.getType())
@@ -68,12 +71,22 @@ public class Vehicle {
 
   /** VehicleUpdateRequest DTO 기반으로 Vehicle 정보를 수정하는 도메인 비즈니스 메서드. */
   public Vehicle updateBy(VehicleUpdateRequest request) {
+    validateInvariants(request.getMaxWeight(), request.getMaxDistance());
     this.type = request.getType();
     this.maxWeight = request.getMaxWeight();
     this.maxDistance = request.getMaxDistance();
     this.latitude = request.getLatitude();
     this.longitude = request.getLongitude();
     return this;
+  }
+
+  private static void validateInvariants(double maxWeight, double maxDistance) {
+    if (maxWeight <= 0) {
+      throw new InvalidWeightException(maxWeight);
+    }
+    if (maxDistance <= 0) {
+      throw new OverMaxDistanceException(maxDistance);
+    }
   }
 
   /** Vehicle의 운영 상태를 변경하는 도메인 비즈니스 메서드. */

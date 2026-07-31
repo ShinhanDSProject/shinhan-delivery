@@ -431,6 +431,21 @@ return addressRepository.save(Address.from(memberId, request));
 
 ---
 
+## 10.5 검증 책임 분리 규칙 (Validation Responsibility Separation Standard)
+
+- **원칙:** 입력값 유효성 검증과 도메인 불변성 검증을 각 레이어의 본래 책임에 맞게 명확히 분리하며, Service 계층에 수동 필드 검증 코드가 흩어지는 것을 차단합니다.
+- **목적:** Service 계층은 유스케이스 흐름 오케스트레이션에만 집중시키고, 입력 파라미터의 형태 검증은 DTO Bean Validation 어노테이션이, 도메인 생성 및 상태 변경 시의 비즈니스 불변 규칙 검증은 Entity 내부에서 전담하도록 아키텍처 결합도를 낮춥니다.
+- **레이어별 검증 분리 표준:**
+  1. **1차 입력값 검증 (DTO Layer):**
+     - HTTP 요청 파라미터의 필수 여부, 범위, 형식 검증(예: 음수 방지, 필수값 등)은 **DTO 필드에 Bean Validation 어노테이션 (`@NotNull`, `@NotBlank`, `@DecimalMin`, `@Positive` 등)**을 선언하여 Controller 레벨 `@Valid`로 1차 처리합니다.
+     - Service 계층에 `validateWeight(weight)`와 같은 필드 레벨 수동 `if` 검증 프라이빗 메서드를 작성하는 것을 금지합니다.
+  2. **2차 도메인 불변성 검증 (Domain Entity Layer):**
+     - 도메인 객체 생성 및 상태 변경 시 지켜져야 하는 핵심 불변성 규칙(Domain Invariants)은 **Entity의 정적 팩토리 메서드 (`Entity.of(...)`) 또는 도메인 비즈니스 메서드** 내부에서 검증하여 도메인 캡슐화를 사수합니다.
+  3. **Service 계층의 역할 (Usecase Orchestration):**
+     - Service 계층은 복수 도메인 서비스 조율, 도메인 생성 위임, 저장소(`Repository`) 호출, 이벤트 발행 등 유스케이스의 실행 흐름 오케스트레이션에만 집중합니다.
+
+---
+
 
 ## 11. Controller 규칙
 

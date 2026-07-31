@@ -27,6 +27,7 @@ import com.example.shinhangaecheokja.delivery.exception.InvalidDeliveryWeightExc
 import com.example.shinhangaecheokja.delivery.exception.ProofPhotoNotFoundException;
 import com.example.shinhangaecheokja.delivery.repository.DeliveryRequestRepository;
 import com.example.shinhangaecheokja.delivery.repository.MatchingRepository;
+import com.example.shinhangaecheokja.member.entity.Member;
 import com.example.shinhangaecheokja.member.service.MemberService;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -92,6 +93,9 @@ class DeliveryServiceTest {
     DeliveryCreateRequest request = new DeliveryCreateRequest();
     request.setCustomerId(1L);
     request.setWeight(-5);
+    request.setItemSize(ItemSize.MEDIUM);
+
+    when(memberService.getById(1L)).thenReturn(new Member());
 
     assertThatThrownBy(() -> deliveryService.requestDelivery(request))
         .isInstanceOf(InvalidDeliveryWeightException.class);
@@ -107,6 +111,9 @@ class DeliveryServiceTest {
     request.setPickupLongitude(127.0);
     request.setDropoffLatitude(37.0);
     request.setDropoffLongitude(127.0);
+    request.setItemSize(ItemSize.MEDIUM);
+
+    when(memberService.getById(1L)).thenReturn(new Member());
 
     assertThatThrownBy(() -> deliveryService.requestDelivery(request))
         .isInstanceOf(InvalidDeliveryDistanceException.class);
