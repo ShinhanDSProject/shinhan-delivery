@@ -138,8 +138,8 @@ public class DataSeedInitializer implements CommandLineRunner {
   private void createNotifications(Long memberId) {
     createNotification(
         memberId, "배송원이 매칭됐어요", "박배송님이 배송을 수락했어요. 실시간 위치를 확인해보세요.", "MATCHING", false);
-    createNotification(memberId, "배송이 시작됐어요", "물품을 픽업하고 이동을 시작했어요.", "DELIVERY", false);
-    createNotification(memberId, "포인트가 충전됐어요", "50,000P가 충전됐어요.", "POINT", true);
+    createNotification(memberId, "배송원이 픽업하러 가고 있어요", "박배송님이 픽업 장소로 이동 중이에요.", "DELIVERY", false);
+    createNotification(memberId, "포인트가 충전됐어요", "500,000P가 충전됐어요.", "POINT", true);
   }
 
   private void createNotification(
