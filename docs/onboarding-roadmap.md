@@ -54,9 +54,9 @@
 
 ### 1단계: 분석 및 설계 브랜치 생성
 * 작업할 기능의 요구사항을 쪼개어 이해합니다.
-* 로컬의 `develop` 브랜치를 최신으로 가져온 뒤, `design/기능이름` 브랜치를 새로 만듭니다.
+* 로컬의 `main` 브랜치를 최신으로 가져온 뒤, `design/기능이름` 브랜치를 새로 만듭니다.
   ```bash
-  git checkout develop && git pull origin develop
+  git checkout main && git pull origin main
   git checkout -b design/my-feature-name
   ```
 
@@ -66,9 +66,9 @@
 * 팀원들과 리뷰를 진행하며 피드백에 따라 설계를 수정한 후, 승인이 나면 `Squash and Merge`로 병합(Merge)합니다.
 
 ### 3단계: 구현 브랜치 생성
-* 이제 본격적으로 코딩할 차례입니다! 병합된 설계 문서가 있는 최신 `develop` 브랜치에서 `feat/기능이름` 브랜치를 만듭니다.
+* 이제 본격적으로 코딩할 차례입니다! 병합된 설계 문서가 있는 최신 `main` 브랜치에서 `feat/기능이름` 브랜치를 만듭니다.
   ```bash
-  git checkout develop && git pull origin develop
+  git checkout main && git pull origin main
   git checkout -b feat/my-feature-name
   ```
 

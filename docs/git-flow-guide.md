@@ -6,14 +6,14 @@
 
 ## 1. 브랜치 전략 (Branch Strategy)
 
-프로젝트는 크게 5가지 유형의 브랜치로 나누어 관리합니다.
+프로젝트는 `main` 단일 브랜치 전략을 사용합니다. 모든 작업 브랜치는 `main`에서 분기하고, `main`을 대상으로 PR을 생성합니다.
+
+> ℹ️ 과거에는 `develop` 통합 브랜치를 별도로 두는 Git Flow를 시도했으나, 실제 PR이 지속적으로 `main`에 직접 병합되며 `develop`이 방치·정체되는 문제가 발생해(이슈 #200) `main` 단일 브랜치 전략으로 공식 전환했습니다.
 
 | 브랜치 유형 | 설명 | 이름 규칙 | 대상 상위 브랜치 |
 | :--- | :--- | :--- | :--- |
-| **`main`** | 제품으로 출시될 수 있는 가장 안정적인 배포용 브랜치 | `main` | - |
-| **`develop`** | 다음 버전을 위한 기능들이 모이는 핵심 개발 브랜치 | `develop` | `main` |
-| **`feature`** | 신규 기능 개발 또는 버그 수정을 진행하는 작업 브랜치 | `feature/<이슈번호>-<요약>` 또는 `feat/<요약>` | `develop` |
-| **`release`** | 배포를 준비하며 버그 수정 및 최종 QA를 수행하는 브랜치 | `release/<버전>` (예: `release/1.0.0`) | `develop` |
+| **`main`** | 제품으로 출시될 수 있는 가장 안정적인 배포용 브랜치이자 모든 작업의 기준 브랜치 | `main` | - |
+| **`feature`** | 신규 기능 개발 또는 버그 수정을 진행하는 작업 브랜치 | `feature/<이슈번호>-<요약>` 또는 `feat/<요약>` | `main` |
 | **`hotfix`** | 배포된 실서버(`main`)에 발생한 긴급 장애를 패치하는 브랜치 | `hotfix/<이슈번호>-<요약>` | `main` |
 
 ---
@@ -25,39 +25,35 @@
 ```mermaid
 gitGraph
     commit id: "Init"
-    branch develop
-    checkout develop
     commit id: "v0.1.0"
     branch feature/login
     checkout feature/login
     commit id: "feat: UI"
     commit id: "feat: API"
-    checkout develop
-    merge feature/login id: "Merge PR"
     checkout main
-    merge develop id: "Release v1.0.0"
+    merge feature/login id: "Merge PR"
 ```
 
 1. **로컬 최신화**
-   * 작업을 시작하기 전, `develop` 브랜치를 원격 저장소(`origin`) 기준으로 최신화합니다.
+   * 작업을 시작하기 전, `main` 브랜치를 원격 저장소(`origin`) 기준으로 최신화합니다.
      ```bash
-     git checkout develop
-     git pull origin develop
+     git checkout main
+     git pull origin main
      ```
 2. **작업 브랜치 생성**
-   * `develop` 브랜치로부터 작업 성격에 맞게 브랜치를 분기합니다.
+   * `main` 브랜치로부터 작업 성격에 맞게 브랜치를 분기합니다.
      ```bash
      git checkout -b feature/123-user-login
      ```
 3. **코드 개발 및 로컬 커밋**
    * 작업 단위별로 잘게 나누어 커밋 컨벤션에 맞춰 커밋합니다.
 4. **원격 저장소 푸시 및 Pull Request(PR) 생성**
-   * 작업을 마치면 원격에 푸시한 뒤, GitHub에서 **`develop` 브랜치를 대상**으로 PR을 생성합니다.
+   * 작업을 마치면 원격에 푸시한 뒤, GitHub에서 **`main` 브랜치를 대상**으로 PR을 생성합니다.
      ```bash
      git push -u origin feature/123-user-login
      ```
 5. **코드 리뷰 및 머지(Merge)**
-   * 팀원들의 코드 리뷰를 거친 뒤 승인(Approve)을 받으면 `develop` 브랜치로 머지합니다.
+   * 팀원들의 코드 리뷰를 거친 뒤 승인(Approve)을 받으면 `main` 브랜치로 머지합니다.
    * 머지 후 로컬 작업 브랜치는 삭제합니다.
 
 ---

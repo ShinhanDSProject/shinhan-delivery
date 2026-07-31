@@ -20,7 +20,7 @@
 - `@Transactional`은 `Service` 계층에만 붙입니다. Controller는 DTO만 다루고 Entity를 직접 반환하지 않습니다.
 - 포맷팅은 Spotless + google-java-format으로 강제됩니다(2칸 들여쓰기, wildcard import 금지) — 스타일 취향이 아니라 규칙이므로, 커밋 전에 `spotlessApply`를 실행하세요.
 - 개발자가 채팅창에 `/plan <이슈번호>`(예: `/plan 108`)를 입력하면 백그라운드에서 `python3 scripts/langgraph/issue_plan_graph.py <이슈번호>`를 자동 구동하여 GitHub Issue 수집 및 GraphRAG 탐색 후 `implementation_plan.md`를 생성하고 개발자 승인을 기다려야 합니다.
-- 커밋 메시지: `type: 설명`(Conventional Commits 기반, 한글 설명), `type`은 `feat|fix|refactor|test|docs|chore` 중 하나(컨벤션 §16). 브랜치명: `feat/도메인-내용`, `develop`을 대상으로 PR합니다(`hotfix`는 `main` 예외).
+- 커밋 메시지: `type: 설명`(Conventional Commits 기반, 한글 설명), `type`은 `feat|fix|refactor|test|docs|chore` 중 하나(컨벤션 §16). 브랜치명: `feat/도메인-내용`, `main`을 대상으로 PR합니다(`main` 단일 브랜치 전략, 이슈 #200).
 
 ## 명령어
 

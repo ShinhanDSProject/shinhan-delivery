@@ -553,15 +553,15 @@ void 도메인은_다른_도메인의_repository를_직접_참조하지_않는�
 
 ### 16.1 브랜치 전략
 
+`main` 단일 브랜치 전략을 사용한다(과거 `develop` 통합 브랜치를 시도했으나 실제 PR이 계속 `main`에 직접 병합되며 방치되어, 이슈 #200을 계기로 `main` 단일 브랜치 전략으로 공식 전환했다).
+
 | 브랜치 유형 | 용도 | 이름 규칙 | 대상 상위 브랜치 |
 |---|---|---|---|
-| `main` | 배포 가능한 가장 안정적인 브랜치 | `main` | - |
-| `develop` | 다음 버전을 위한 기능이 모이는 통합 브랜치 | `develop` | `main` |
-| `feature` | 신규 기능/버그 수정 작업 브랜치 | `feat/도메인-내용` (예: `feat/delivery-fee-calculation`) | `develop` |
-| `release` | 배포 준비 및 최종 QA | `release/<버전>` | `develop` |
+| `main` | 배포 가능한 가장 안정적인 브랜치이자 모든 작업의 기준 브랜치 | `main` | - |
+| `feature` | 신규 기능/버그 수정 작업 브랜치 | `feat/도메인-내용` (예: `feat/delivery-fee-calculation`) | `main` |
 | `hotfix` | 배포된 `main`의 긴급 장애 패치 | `hotfix/<이슈번호>-<요약>` | `main` |
 
-- 작업 시작 전 `develop`을 최신화한 뒤 그 위에서 브랜치를 분기한다. `hotfix`만 예외적으로 `main`에서 분기해 `main`으로 PR한다.
+- 작업 시작 전 `main`을 최신화한 뒤 그 위에서 브랜치를 분기한다.
 - 머지 후 로컬 작업 브랜치는 삭제한다.
 
 ### 16.2 커밋 메시지
@@ -602,7 +602,7 @@ void 도메인은_다른_도메인의_repository를_직접_참조하지_않는�
 - [ ] ArchUnit 테스트(레이어 의존성 규칙)가 깨지지 않는가?
 - [ ] Spotless 포맷팅 검사를 통과하는가?
 - [ ] Entity 필드를 추가/변경했다면 대응하는 Flyway 마이그레이션 파일을 새로 추가했는가? (기존 마이그레이션 파일을 수정하지 않았는가?)
-- [ ] `develop`을 대상으로 브랜치를 분기·PR 했는가? (`hotfix`는 `main` 예외)
+- [ ] `main`을 대상으로 브랜치를 분기·PR 했는가?
 - [ ] 리뷰어를 지정하고, PR 템플릿의 요약/변경사항/리뷰 포인트/테스트 결과를 모두 작성했는가?
 - [ ] UI 개발 시 `/css/design-system.css` 토큰 및 `templates/fragments/components.html` Thymeleaf 프래그먼트를 100% 준수하였는가?
 

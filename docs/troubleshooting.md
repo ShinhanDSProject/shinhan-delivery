@@ -22,7 +22,7 @@ Migration checksum mismatch for migration version X.X
   DROP DATABASE shinhan_gaecheokja;
   CREATE DATABASE shinhan_gaecheokja;
   ```
-* **주의 사항:** 이미 협업 브랜치(main/develop)에 병합되어 배포된 마이그레이션 파일은 절대 직접 수정하지 마세요. 변경 사항은 반드시 새로운 버전 번호(예: `V8__add_new_column.sql`)를 붙여 새 파일로 작성해야 합니다.
+* **주의 사항:** 이미 협업 브랜치(`main`)에 병합되어 배포된 마이그레이션 파일은 절대 직접 수정하지 마세요. 변경 사항은 반드시 새로운 버전 번호(예: `V8__add_new_column.sql`)를 붙여 새 파일로 작성해야 합니다.
 
 ---
 
