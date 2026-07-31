@@ -71,4 +71,7 @@ public class DeliveryRequest {
 
   @Column(name = "picked_up_at")
   private LocalDateTime pickedUpAt;
+
+  @Column(name = "created_at")
+  private LocalDateTime createdAt;
 }
