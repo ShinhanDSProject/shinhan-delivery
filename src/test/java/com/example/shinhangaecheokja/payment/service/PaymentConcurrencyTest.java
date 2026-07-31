@@ -16,6 +16,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -106,10 +107,15 @@ class PaymentConcurrencyTest {
     startLatch.countDown();
     boolean completedInTime = doneLatch.await(30, TimeUnit.SECONDS);
     executorService.shutdown();
-    executorService.awaitTermination(10, TimeUnit.SECONDS);
+    if (!executorService.awaitTermination(10, TimeUnit.SECONDS)) {
+      executorService.shutdownNow();
+      executorService.awaitTermination(5, TimeUnit.SECONDS);
+    }
 
-    assertThat(completedInTime).isTrue();
-    assertThat(unexpectedFailures).isEmpty();
+    SoftAssertions softly = new SoftAssertions();
+    softly.assertThat(completedInTime).as("모든 스레드가 제한시간 내에 종료됨").isTrue();
+    softly.assertThat(unexpectedFailures).as("예상치 못한 예외 없음").isEmpty();
+    softly.assertAll();
 
     long finalBalance = paymentRepository.findById(walletId).orElseThrow().getBalance();
 
