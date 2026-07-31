@@ -103,13 +103,19 @@ class PaymentConcurrencyTest {
           });
     }
 
-    readyLatch.await();
-    startLatch.countDown();
-    boolean completedInTime = doneLatch.await(30, TimeUnit.SECONDS);
-    executorService.shutdown();
-    if (!executorService.awaitTermination(10, TimeUnit.SECONDS)) {
-      executorService.shutdownNow();
-      executorService.awaitTermination(5, TimeUnit.SECONDS);
+    boolean completedInTime;
+    try {
+      readyLatch.await();
+      startLatch.countDown();
+      completedInTime = doneLatch.await(30, TimeUnit.SECONDS);
+    } finally {
+      // 위 대기 도중 이 스레드 자체가 인터럽트되어 예외가 던져지더라도, 워커 스레드들이 살아있는 채로
+      // @AfterEach의 DB 정리가 실행되지 않도록 종료 처리는 항상 수행한다.
+      executorService.shutdown();
+      if (!executorService.awaitTermination(10, TimeUnit.SECONDS)) {
+        executorService.shutdownNow();
+        executorService.awaitTermination(5, TimeUnit.SECONDS);
+      }
     }
 
     SoftAssertions softly = new SoftAssertions();
