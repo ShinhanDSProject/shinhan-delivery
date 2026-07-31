@@ -4,6 +4,7 @@ package com.example.shinhangaecheokja.delivery.entity;
 public enum DeliveryStatus {
   REQUESTED,
   MATCHED,
+  PICKED_UP,
   COMPLETED,
   CANCELLED
 }
