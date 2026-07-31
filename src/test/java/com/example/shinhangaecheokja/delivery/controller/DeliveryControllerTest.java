@@ -12,6 +12,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.example.shinhangaecheokja.delivery.dto.request.DeliveryCompleteRequest;
 import com.example.shinhangaecheokja.delivery.dto.request.DeliveryCreateRequest;
 import com.example.shinhangaecheokja.delivery.dto.request.DeliveryEstimateRequest;
+import com.example.shinhangaecheokja.delivery.dto.response.DeliveryDetailResponseDto;
 import com.example.shinhangaecheokja.delivery.dto.response.DeliveryEstimateResponse;
 import com.example.shinhangaecheokja.delivery.dto.response.DeliveryResponse;
 import com.example.shinhangaecheokja.delivery.dto.response.ProofPhotoResponse;
@@ -186,6 +187,34 @@ class DeliveryControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  void 배송_요청_상세를_조회하면_배송원_이름과_증거사진을_포함해_반환한다() throws Exception {
+    when(deliveryService.getDeliveryRequestDetail(eq(1L)))
+        .thenReturn(
+            new DeliveryDetailResponseDto(
+                1L,
+                1L,
+                "서울시 강남구",
+                "서울시 서초구",
+                10,
+                111.19,
+                DeliveryStatus.COMPLETED,
+                78776L,
+                37.0,
+                127.0,
+                38.0,
+                127.0,
+                ItemSize.MEDIUM,
+                "박배송",
+                "https://example.com/proof.jpg"));
+
+    mockMvc
+        .perform(get("/api/v1/delivery-requests/1"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.courierName").value("박배송"))
+        .andExpect(jsonPath("$.proofPhotoUrl").value("https://example.com/proof.jpg"));
   }
 
   @Test

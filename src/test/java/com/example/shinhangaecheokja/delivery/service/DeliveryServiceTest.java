@@ -12,12 +12,15 @@ import com.example.shinhangaecheokja.delivery.dto.request.DeliveryCompleteReques
 import com.example.shinhangaecheokja.delivery.dto.request.DeliveryCreateRequest;
 import com.example.shinhangaecheokja.delivery.dto.request.DeliveryEstimateRequest;
 import com.example.shinhangaecheokja.delivery.dto.request.DeliveryUpdateRequest;
+import com.example.shinhangaecheokja.delivery.dto.response.DeliveryDetailResponseDto;
 import com.example.shinhangaecheokja.delivery.dto.response.DeliveryEstimateResponse;
+import com.example.shinhangaecheokja.delivery.dto.response.DeliveryListResponseDto;
 import com.example.shinhangaecheokja.delivery.dto.response.DeliveryResponse;
 import com.example.shinhangaecheokja.delivery.dto.response.ProofPhotoResponse;
 import com.example.shinhangaecheokja.delivery.entity.DeliveryRequest;
 import com.example.shinhangaecheokja.delivery.entity.DeliveryStatus;
 import com.example.shinhangaecheokja.delivery.entity.ItemSize;
+import com.example.shinhangaecheokja.delivery.entity.Matching;
 import com.example.shinhangaecheokja.delivery.event.DeliveryStatusChangedEvent;
 import com.example.shinhangaecheokja.delivery.exception.AlreadyMatchedException;
 import com.example.shinhangaecheokja.delivery.exception.InvalidDeliveryDistanceException;
@@ -26,7 +29,13 @@ import com.example.shinhangaecheokja.delivery.exception.InvalidDeliveryWeightExc
 import com.example.shinhangaecheokja.delivery.exception.ProofPhotoNotFoundException;
 import com.example.shinhangaecheokja.delivery.repository.DeliveryRequestRepository;
 import com.example.shinhangaecheokja.delivery.repository.MatchingRepository;
+import com.example.shinhangaecheokja.member.dto.response.MemberResponse;
+import com.example.shinhangaecheokja.member.entity.MemberRole;
 import com.example.shinhangaecheokja.member.service.MemberService;
+import com.example.shinhangaecheokja.vehicle.dto.response.VehicleResponse;
+import com.example.shinhangaecheokja.vehicle.entity.VehicleStatus;
+import com.example.shinhangaecheokja.vehicle.entity.VehicleType;
+import com.example.shinhangaecheokja.vehicle.service.VehicleService;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -36,6 +45,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 @ExtendWith(MockitoExtension.class)
 class DeliveryServiceTest {
@@ -44,6 +57,7 @@ class DeliveryServiceTest {
   @Mock private MemberService memberService;
   @Mock private MatchingRepository matchingRepository;
   @Mock private ApplicationEventPublisher eventPublisher;
+  @Mock private VehicleService vehicleService;
   @InjectMocks private DeliveryService deliveryService;
 
   @Test
@@ -379,5 +393,73 @@ class DeliveryServiceTest {
 
     assertThatThrownBy(() -> deliveryService.getProofPhoto(1L))
         .isInstanceOf(ProofPhotoNotFoundException.class);
+  }
+
+  @Test
+  void status가_없으면_회원의_전체_배송_내역을_최신순으로_조회한다() {
+    Pageable pageable = PageRequest.of(0, 10);
+    DeliveryRequest deliveryRequest = new DeliveryRequest();
+    deliveryRequest.setStatus(DeliveryStatus.COMPLETED);
+    deliveryRequest.setPickupAddress("서울시 강남구");
+    deliveryRequest.setDropoffAddress("서울시 서초구");
+    when(deliveryRequestRepository.findByCustomerIdOrderByCreatedAtDesc(1L, pageable))
+        .thenReturn(new PageImpl<>(java.util.List.of(deliveryRequest)));
+
+    Page<DeliveryListResponseDto> result =
+        deliveryService.getMyDeliveryRequests(1L, null, pageable);
+
+    assertThat(result.getContent()).hasSize(1);
+    assertThat(result.getContent().get(0).status()).isEqualTo(DeliveryStatus.COMPLETED);
+    verify(deliveryRequestRepository, never())
+        .findByCustomerIdAndStatusOrderByCreatedAtDesc(any(), any(), any());
+  }
+
+  @Test
+  void status가_있으면_그_상태로만_필터링해_조회한다() {
+    Pageable pageable = PageRequest.of(0, 10);
+    when(deliveryRequestRepository.findByCustomerIdAndStatusOrderByCreatedAtDesc(
+            1L, DeliveryStatus.CANCELLED, pageable))
+        .thenReturn(new PageImpl<>(java.util.List.of()));
+
+    Page<DeliveryListResponseDto> result =
+        deliveryService.getMyDeliveryRequests(1L, DeliveryStatus.CANCELLED, pageable);
+
+    assertThat(result.getContent()).isEmpty();
+    verify(deliveryRequestRepository, never()).findByCustomerIdOrderByCreatedAtDesc(any(), any());
+  }
+
+  @Test
+  void 매칭된_배송원이_있으면_상세조회에_배송원_이름이_담긴다() {
+    DeliveryRequest deliveryRequest = new DeliveryRequest();
+    deliveryRequest.setStatus(DeliveryStatus.MATCHED);
+    when(deliveryRequestRepository.findById(1L)).thenReturn(Optional.of(deliveryRequest));
+
+    Matching matching = new Matching();
+    matching.setVehicleId(10L);
+    when(matchingRepository.findByDeliveryRequestId(1L)).thenReturn(Optional.of(matching));
+
+    VehicleResponse vehicle =
+        new VehicleResponse(10L, 20L, VehicleType.MOTORCYCLE, 50, 50, 0, 0, VehicleStatus.BUSY);
+    when(vehicleService.getVehicle(10L)).thenReturn(vehicle);
+
+    MemberResponse courier =
+        new MemberResponse(20L, "courier@test.com", "박배송", "010-0000-0000", MemberRole.COURIER);
+    when(memberService.getMember(20L)).thenReturn(courier);
+
+    DeliveryDetailResponseDto response = deliveryService.getDeliveryRequestDetail(1L);
+
+    assertThat(response.courierName()).isEqualTo("박배송");
+  }
+
+  @Test
+  void 매칭된_배송원이_없으면_상세조회의_배송원_이름은_null이다() {
+    DeliveryRequest deliveryRequest = new DeliveryRequest();
+    deliveryRequest.setStatus(DeliveryStatus.REQUESTED);
+    when(deliveryRequestRepository.findById(1L)).thenReturn(Optional.of(deliveryRequest));
+    when(matchingRepository.findByDeliveryRequestId(1L)).thenReturn(Optional.empty());
+
+    DeliveryDetailResponseDto response = deliveryService.getDeliveryRequestDetail(1L);
+
+    assertThat(response.courierName()).isNull();
   }
 }
