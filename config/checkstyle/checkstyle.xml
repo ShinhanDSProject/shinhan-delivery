@@ -49,5 +49,12 @@
       <property name="format" value="^[a-z]+(\.[a-z][a-z0-9]*)*$"/>
     </module>
 
+    <!-- 5. 코드 본문 FQCN(풀 패키지 경로) 직접 기입 방지 (package/import 구문 제외) -->
+    <module name="RegexpSinglelineJava">
+      <property name="format" value="^(?!\s*(package|import)\s+).*com\.example\.shinhangaecheokja\.[a-zA-Z0-9_]+\."/>
+      <property name="message" value="코드 본문에 FQCN(풀 패키지 경로)이 직접 노출되었습니다. import 구문으로 상단에 추가하여 사용하세요."/>
+      <property name="ignoreComments" value="true"/>
+    </module>
+
   </module>
 </module>
