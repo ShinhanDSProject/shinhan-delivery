@@ -6,6 +6,7 @@ import com.example.shinhangaecheokja.delivery.dto.request.DeliveryCompleteReques
 import com.example.shinhangaecheokja.delivery.dto.request.DeliveryCreateRequest;
 import com.example.shinhangaecheokja.delivery.dto.request.DeliveryEstimateRequest;
 import com.example.shinhangaecheokja.delivery.dto.request.DeliveryUpdateRequest;
+import com.example.shinhangaecheokja.delivery.dto.response.DeliveryDetailResponseDto;
 import com.example.shinhangaecheokja.delivery.dto.response.DeliveryEstimateResponse;
 import com.example.shinhangaecheokja.delivery.dto.response.DeliveryListResponseDto;
 import com.example.shinhangaecheokja.delivery.dto.response.DeliveryResponse;
@@ -21,7 +22,9 @@ import com.example.shinhangaecheokja.delivery.exception.InvalidDeliveryWeightExc
 import com.example.shinhangaecheokja.delivery.exception.ProofPhotoNotFoundException;
 import com.example.shinhangaecheokja.delivery.repository.DeliveryRequestRepository;
 import com.example.shinhangaecheokja.delivery.repository.MatchingRepository;
+import com.example.shinhangaecheokja.member.dto.response.MemberResponse;
 import com.example.shinhangaecheokja.member.service.MemberService;
+import com.example.shinhangaecheokja.vehicle.service.VehicleService;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
@@ -48,6 +51,7 @@ public class DeliveryService {
   private final MemberService memberService;
   private final MatchingRepository matchingRepository;
   private final ApplicationEventPublisher eventPublisher;
+  private final VehicleService vehicleService;
 
   /**
    * 고객 존재 여부를 검증한 뒤 배송을 요청한다. 요금은 {@link #estimateFee}와 동일한 공식으로 서버가 직접 계산한다(거리는 클라이언트가 준 값이 아니라
@@ -151,6 +155,23 @@ public class DeliveryService {
   @Transactional(readOnly = true)
   public DeliveryResponse getDeliveryRequest(Long deliveryRequestId) {
     return DeliveryResponse.from(findDeliveryRequestOrThrow(deliveryRequestId));
+  }
+
+  /** id로 배송 요청 상세를 조회한다. 매칭된 배송원이 있으면 이름도 함께 담는다(배송 상세 화면용). 없으면 EntityNotFoundException. */
+  @Transactional(readOnly = true)
+  public DeliveryDetailResponseDto getDeliveryRequestDetail(Long deliveryRequestId) {
+    DeliveryRequest deliveryRequest = findDeliveryRequestOrThrow(deliveryRequestId);
+    return DeliveryDetailResponseDto.from(deliveryRequest, findCourierName(deliveryRequestId));
+  }
+
+  /** 매칭된 배송원의 이름을 조회한다. 아직 매칭 전이면 null. */
+  private String findCourierName(Long deliveryRequestId) {
+    return matchingRepository
+        .findByDeliveryRequestId(deliveryRequestId)
+        .map(matching -> vehicleService.getVehicle(matching.getVehicleId()))
+        .map(vehicle -> memberService.getMember(vehicle.ownerId()))
+        .map(MemberResponse::name)
+        .orElse(null);
   }
 
   /** 로그인 회원 본인의 배송 내역을 최신순으로 페이징 조회한다. status가 있으면 그 상태로 필터링한다(배송 내역 목록용). */

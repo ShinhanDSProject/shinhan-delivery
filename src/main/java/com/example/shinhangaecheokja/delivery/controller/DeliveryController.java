@@ -5,6 +5,7 @@ import com.example.shinhangaecheokja.delivery.dto.request.DeliveryCompleteReques
 import com.example.shinhangaecheokja.delivery.dto.request.DeliveryCreateRequest;
 import com.example.shinhangaecheokja.delivery.dto.request.DeliveryEstimateRequest;
 import com.example.shinhangaecheokja.delivery.dto.request.DeliveryUpdateRequest;
+import com.example.shinhangaecheokja.delivery.dto.response.DeliveryDetailResponseDto;
 import com.example.shinhangaecheokja.delivery.dto.response.DeliveryEstimateResponse;
 import com.example.shinhangaecheokja.delivery.dto.response.DeliveryListResponseDto;
 import com.example.shinhangaecheokja.delivery.dto.response.DeliveryResponse;
@@ -53,10 +54,11 @@ public class DeliveryController {
     return ResponseEntity.ok(deliveryService.estimateFee(request));
   }
 
-  /** 배송 요청 단건을 조회한다. */
+  /** 배송 요청 상세를 조회한다(배송원 이름·증거사진 포함). */
   @GetMapping("/{deliveryRequestId}")
-  public ResponseEntity<DeliveryResponse> getDeliveryRequest(@PathVariable Long deliveryRequestId) {
-    return ResponseEntity.ok(deliveryService.getDeliveryRequest(deliveryRequestId));
+  public ResponseEntity<DeliveryDetailResponseDto> getDeliveryRequest(
+      @PathVariable Long deliveryRequestId) {
+    return ResponseEntity.ok(deliveryService.getDeliveryRequestDetail(deliveryRequestId));
   }
 
   /** 로그인 회원 본인의 배송 내역을 최신순으로 페이징 조회한다. status로 선택적 필터링이 가능하다. */

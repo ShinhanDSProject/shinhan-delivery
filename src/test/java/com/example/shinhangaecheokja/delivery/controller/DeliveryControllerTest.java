@@ -190,7 +190,7 @@ class DeliveryControllerTest {
 
   @Test
   void 존재하지_않는_배송_요청을_조회하면_404를_반환한다() throws Exception {
-    when(deliveryService.getDeliveryRequest(eq(999L)))
+    when(deliveryService.getDeliveryRequestDetail(eq(999L)))
         .thenThrow(
             new com.example.shinhangaecheokja.common.exception.EntityNotFoundException(
                 com.example.shinhangaecheokja.common.exception.ErrorCode.DELIVERY_NOT_FOUND));
