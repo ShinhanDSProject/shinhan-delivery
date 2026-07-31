@@ -67,12 +67,12 @@ else
     exit 1
 fi
 
-# Step 5: Spotless 포맷팅 검사
-echo -e "\n${YELLOW}📌 [5/6] Spotless 코드 포맷팅 스타일 검사...${RESET}"
-if $GRADLE_CMD spotlessCheck --quiet; then
-    echo -e "${GREEN}  ✓ 코드 포맷팅(Spotless) 검사 통과${RESET}"
+# Step 5: Spotless & Checkstyle 코드 정적 분석 린팅 검사
+echo -e "\n${YELLOW}📌 [5/6] Checkstyle 정적 분석 및 Spotless 코드 포맷팅 검사...${RESET}"
+if $GRADLE_CMD checkstyleMain checkstyleTest spotlessCheck --quiet; then
+    echo -e "${GREEN}  ✓ Checkstyle 정적 분석 및 코드 포맷팅(Spotless) 검사 통과${RESET}"
 else
-    echo -e "${RED}  ❌ [피드백] 코드 포맷팅 규칙 위반! '${GRADLE_CMD} spotlessApply' 명령어를 실행하여 포맷팅을 정리를 하세요.${RESET}"
+    echo -e "${RED}  ❌ [피드백] Checkstyle 정적 분석 또는 Spotless 포맷팅 위반! 코드 컨벤션을 준수하도록 정제하세요.${RESET}"
     exit 1
 fi
 

@@ -4,6 +4,7 @@ plugins {
     id 'io.spring.dependency-management' version '1.1.7'
     id 'com.diffplug.spotless' version '6.25.0'
     id 'jacoco'
+    id 'checkstyle'
 }
 
 group = 'com.example'
@@ -95,9 +96,16 @@ spotless {
     }
 }
 
+checkstyle {
+    toolVersion = '10.12.5'
+    configFile = file("${rootDir}/config/checkstyle/checkstyle.xml")
+    ignoreFailures = false
+    maxWarnings = 0
+}
+
 tasks.register('verify') {
     group = 'verification'
     description = 'Spotless 포맷팅 검사 및 전체 테스트를 원스톱 검증하는 하네스 타겟입니다.'
-    dependsOn 'spotlessCheck', 'test'
+    dependsOn 'spotlessCheck', 'checkstyleMain', 'checkstyleTest', 'test'
 }
 
