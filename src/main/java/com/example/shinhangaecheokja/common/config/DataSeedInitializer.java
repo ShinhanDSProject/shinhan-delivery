@@ -1,14 +1,22 @@
 package com.example.shinhangaecheokja.common.config;
 
+import com.example.shinhangaecheokja.delivery.dto.request.DeliveryCreateRequest;
+import com.example.shinhangaecheokja.delivery.dto.request.MatchingCreateRequest;
+import com.example.shinhangaecheokja.delivery.entity.ItemSize;
+import com.example.shinhangaecheokja.delivery.service.DeliveryService;
+import com.example.shinhangaecheokja.delivery.service.MatchingService;
 import com.example.shinhangaecheokja.member.entity.Member;
 import com.example.shinhangaecheokja.member.entity.MemberRole;
 import com.example.shinhangaecheokja.member.repository.MemberRepository;
+import com.example.shinhangaecheokja.notification.entity.Notification;
+import com.example.shinhangaecheokja.notification.repository.NotificationRepository;
 import com.example.shinhangaecheokja.payment.entity.PointWallet;
 import com.example.shinhangaecheokja.payment.repository.PaymentRepository;
 import com.example.shinhangaecheokja.vehicle.entity.Vehicle;
 import com.example.shinhangaecheokja.vehicle.entity.VehicleStatus;
 import com.example.shinhangaecheokja.vehicle.entity.VehicleType;
 import com.example.shinhangaecheokja.vehicle.repository.VehicleRepository;
+import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
@@ -18,8 +26,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * 로컬 개발 편의를 위해 초기에 더미 데이터(회원, 지갑, 차량 등)를 자동으로 적재해 주는 컴포넌트. application.yaml의 app.data-seed.enabled
- * 속성이 true인 경우에만 빈으로 등록되어 기동됩니다.
+ * 로컬 개발 편의를 위해 초기에 더미 데이터(회원, 지갑, 차량, 매칭된 배송 요청 등)를 자동으로 적재해 주는 컴포넌트. application.yaml의
+ * app.data-seed.enabled 속성이 true인 경우에만 빈으로 등록되어 기동됩니다.
  */
 @Slf4j
 @Component
@@ -31,6 +39,9 @@ public class DataSeedInitializer implements CommandLineRunner {
   private final VehicleRepository vehicleRepository;
   private final PaymentRepository paymentRepository;
   private final PasswordEncoder passwordEncoder;
+  private final DeliveryService deliveryService;
+  private final MatchingService matchingService;
+  private final NotificationRepository notificationRepository;
 
   @Override
   @Transactional
@@ -60,8 +71,14 @@ public class DataSeedInitializer implements CommandLineRunner {
     createPointWallet(courier2.getId(), 0L);
 
     // 3. 배송원 차량 등록 (1.5톤 트럭 1대, 오토바이 1대)
-    createVehicle(courier1.getId(), VehicleType.CAR, 1500.0, 300.0);
+    Vehicle truck = createVehicle(courier1.getId(), VehicleType.CAR, 1500.0, 300.0);
     createVehicle(courier2.getId(), VehicleType.MOTORCYCLE, 50.0, 50.0);
+
+    // 4. 실시간 추적 화면(FE-020/021) 로컬 테스트용 매칭된 배송 요청 1건 (트럭 콜 수락 상태)
+    createMatchedDelivery(client.getId(), truck.getId());
+
+    // 5. 알림센터 UI 로컬 테스트용 카테고리별 알림 (읽음/안읽음 혼합). 공지사항은 V13 마이그레이션이 이미 시딩하므로 여기서는 다루지 않는다.
+    createNotifications(client.getId());
 
     log.info("Local data seeding completed successfully!");
   }
@@ -95,5 +112,45 @@ public class DataSeedInitializer implements CommandLineRunner {
             .status(VehicleStatus.AVAILABLE)
             .build();
     return vehicleRepository.save(vehicle);
+  }
+
+  /** 배송 요청을 생성하고 곧바로 차량이 콜을 수락하게 해, MATCHED 상태의 배송 요청을 만든다. */
+  private void createMatchedDelivery(Long customerId, Long vehicleId) {
+    DeliveryCreateRequest deliveryRequest = new DeliveryCreateRequest();
+    deliveryRequest.setCustomerId(customerId);
+    deliveryRequest.setPickupAddress("서울시 강남구 테헤란로 123");
+    deliveryRequest.setDropoffAddress("서울시 서초구 서초대로 456");
+    deliveryRequest.setWeight(10);
+    deliveryRequest.setPickupLatitude(37.5);
+    deliveryRequest.setPickupLongitude(127.0);
+    deliveryRequest.setDropoffLatitude(37.6);
+    deliveryRequest.setDropoffLongitude(127.05);
+    deliveryRequest.setItemSize(ItemSize.MEDIUM);
+    Long deliveryRequestId = deliveryService.requestDelivery(deliveryRequest).id();
+
+    MatchingCreateRequest matchingRequest = new MatchingCreateRequest();
+    matchingRequest.setDeliveryRequestId(deliveryRequestId);
+    matchingRequest.setVehicleId(vehicleId);
+    matchingService.createMatching(matchingRequest);
+  }
+
+  /** 알림센터 UI(홈 화면 배지, 목록·필터)를 로컬에서 바로 확인할 수 있도록 카테고리별 알림을 만든다. */
+  private void createNotifications(Long memberId) {
+    createNotification(
+        memberId, "배송원이 매칭됐어요", "박배송님이 배송을 수락했어요. 실시간 위치를 확인해보세요.", "MATCHING", false);
+    createNotification(memberId, "배송원이 픽업하러 가고 있어요", "박배송님이 픽업 장소로 이동 중이에요.", "DELIVERY", false);
+    createNotification(memberId, "포인트가 충전됐어요", "500,000P가 충전됐어요.", "POINT", true);
+  }
+
+  private void createNotification(
+      Long memberId, String title, String message, String category, boolean isRead) {
+    Notification notification = new Notification();
+    notification.setMemberId(memberId);
+    notification.setTitle(title);
+    notification.setMessage(message);
+    notification.setCategory(category);
+    notification.setRead(isRead);
+    notification.setCreatedAt(LocalDateTime.now());
+    notificationRepository.save(notification);
   }
 }
