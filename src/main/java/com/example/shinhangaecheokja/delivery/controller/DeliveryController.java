@@ -1,10 +1,12 @@
 package com.example.shinhangaecheokja.delivery.controller;
 
+import com.example.shinhangaecheokja.delivery.dto.request.DeliveryCompleteRequest;
 import com.example.shinhangaecheokja.delivery.dto.request.DeliveryCreateRequest;
 import com.example.shinhangaecheokja.delivery.dto.request.DeliveryEstimateRequest;
 import com.example.shinhangaecheokja.delivery.dto.request.DeliveryUpdateRequest;
 import com.example.shinhangaecheokja.delivery.dto.response.DeliveryEstimateResponse;
 import com.example.shinhangaecheokja.delivery.dto.response.DeliveryResponse;
+import com.example.shinhangaecheokja.delivery.dto.response.ProofPhotoResponse;
 import com.example.shinhangaecheokja.delivery.service.DeliveryService;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -13,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -66,5 +69,18 @@ public class DeliveryController {
   public ResponseEntity<Void> deleteDeliveryRequest(@PathVariable Long deliveryRequestId) {
     deliveryService.deleteDeliveryRequest(deliveryRequestId);
     return ResponseEntity.noContent().build();
+  }
+
+  /** 배송을 완료 처리하고 증거 사진 URL을 저장한다. */
+  @PatchMapping("/{deliveryRequestId}/complete")
+  public ResponseEntity<DeliveryResponse> completeDelivery(
+      @PathVariable Long deliveryRequestId, @RequestBody @Valid DeliveryCompleteRequest request) {
+    return ResponseEntity.ok(deliveryService.completeDelivery(deliveryRequestId, request));
+  }
+
+  /** 배송 완료 증거 사진을 조회한다. */
+  @GetMapping("/{deliveryRequestId}/proof-photo")
+  public ResponseEntity<ProofPhotoResponse> getProofPhoto(@PathVariable Long deliveryRequestId) {
+    return ResponseEntity.ok(deliveryService.getProofPhoto(deliveryRequestId));
   }
 }
