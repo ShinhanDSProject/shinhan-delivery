@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>실시간 위치 확인 - 신한 개척자</title>
+    <link rel="stylesheet" href="/css/design-system.css">
+    <script src="/js/utils/geo.js"></script>
+    <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=bc0d2e17087637bd52851cb9a43d19df&libraries=services&autoload=false"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@7.0.0/bundles/stomp.umd.min.js"></script>
+    <style>
+        :root {
+            --primary: var(--color-blue-30);
+            --text-dark: var(--color-black-200);
+            --text-muted: #4A5568;
+            --border: #E2E8F0;
+            --green: #10B981;
+            --accent-soft: #EBF3FF;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: var(--font-family-base);
+        }
+
+        html, body {
+            height: 100%;
+        }
+
+        body {
+            color: var(--text-dark);
+        }
+
+        .page {
+            max-width: 480px;
+            margin: 0 auto;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        header.top {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 20px;
+        }
+
+        .back-button {
+            width: 32px;
+            height: 32px;
+            min-width: 32px;
+            border-radius: 999px;
+            border: 0;
+            background: rgba(0, 0, 0, 0.02);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .back-button img {
+            width: 20px;
+            height: 20px;
+        }
+
+        header.top h1 {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .map-area {
+            position: relative;
+            flex: 1;
+            min-height: 260px;
+            background: #E2E8F0;
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+
+        .status-badge {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 16px;
+            background: #fff;
+            border: 1px solid var(--primary);
+            border-radius: 30px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+            white-space: nowrap;
+            z-index: 5;
+        }
+
+        .status-badge .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--green);
+        }
+
+        .status-badge span.text {
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .bottom-sheet {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            padding: 24px;
+            background: #fff;
+            border-top: 1px solid var(--border);
+            box-shadow: 0 -10px 24px rgba(0, 0, 0, 0.06);
+            border-radius: 24px 24px 0 0;
+        }
+
+        .eta-section {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .eta-section .eta-time {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        .eta-section .eta-note {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .call-button {
+            width: 44px;
+            height: 44px;
+            min-width: 44px;
+            border-radius: 999px;
+            border: 0;
+            background: var(--accent-soft);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .call-button img {
+            width: 20px;
+            height: 20px;
+        }
+
+        .divider {
+            height: 1px;
+            background: var(--border);
+        }
+
+        .timeline {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .timeline-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .timeline-row .dot-wrap {
+            width: 20px;
+            height: 20px;
+            min-width: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .timeline-row .dot-wrap.pulse {
+            background: var(--accent-soft);
+            border-radius: 999px;
+        }
+
+        .timeline-row .dot-wrap .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .timeline-row .dot-wrap .dot.done {
+            background: var(--green);
+        }
+
+        .timeline-row .dot-wrap .dot.active {
+            background: var(--primary);
+        }
+
+        .timeline-row .info {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .timeline-row .title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .timeline-row.active .title {
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .timeline-row .time {
+            font-size: 12px;
+            color: #94A3B8;
+        }
+
+        .timeline-row.active .time {
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .load-error {
+            padding: 24px 20px;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+<main class="page">
+    <header class="top">
+        <button class="back-button" type="button" aria-label="홈으로 이동" onclick="location.href='/home.html'">
+            <img src="/images/tracking-icons/arrow-left.svg" alt="">
+        </button>
+        <h1>실시간 위치 확인</h1>
+    </header>
+
+    <div class="map-area">
+        <div id="map"></div>
+        <div class="status-badge">
+            <span class="dot"></span>
+            <span class="text" id="statusText">고객님께 열심히 달려가고 있어요!</span>
+        </div>
+    </div>
+
+    <div class="bottom-sheet">
+        <div class="eta-section">
+            <div>
+                <div class="eta-time" id="etaTime">도착 예정 시간 확인 중...</div>
+                <div class="eta-note">도로 사정에 따라 변동될 수 있습니다.</div>
+            </div>
+            <a class="call-button" id="callButton" href="#" aria-label="배송원에게 전화하기">
+                <img src="/images/tracking-icons/phone.svg" alt="">
+            </a>
+        </div>
+        <div class="divider"></div>
+        <div class="timeline" id="timeline">
+            <div class="timeline-row">
+                <span class="dot-wrap"><span class="dot done"></span></span>
+                <div class="info">
+                    <span class="title">물품 픽업 완료</span>
+                    <span class="time" id="pickupTime">-</span>
+                </div>
+            </div>
+            <div class="timeline-row active">
+                <span class="dot-wrap pulse"><span class="dot active"></span></span>
+                <div class="info">
+                    <span class="title">고객님께 이동 중</span>
+                    <span class="time">배송중</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+    // 배송원 평균 이동 속도(km/h) 가정치. 백엔드에 실제 ETA 계산 API가 없어 거리 기반으로 추정한다.
+    // TODO: 실측 데이터나 경로 API 기반 ETA가 생기면 이 값을 대체한다.
+    const ASSUMED_SPEED_KMH = 25;
+
+    function authHeader() {
+        const token = localStorage.getItem('accessToken');
+        const tokenType = localStorage.getItem('tokenType') || 'Bearer';
+        if (!token) return null;
+        return `${tokenType} ${token}`;
+    }
+
+    function formatTime(date) {
+        const hours24 = date.getHours();
+        const period = hours24 < 12 ? '오전' : '오후';
+        const hours12 = ((hours24 + 11) % 12) + 1;
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        return `${period} ${hours12}:${minutes} 도착 예정`;
+    }
+
+    function updateEta(currentLat, currentLng, dropoffLat, dropoffLng) {
+        const km = haversineKm(currentLat, currentLng, dropoffLat, dropoffLng);
+        const minutes = Math.max(1, Math.round((km / ASSUMED_SPEED_KMH) * 60));
+        const eta = new Date(Date.now() + minutes * 60 * 1000);
+        document.getElementById('etaTime').textContent = formatTime(eta);
+    }
+
+    let map;
+    let courierMarker;
+    let dropoff;
+
+    function initMap(courierLat, courierLng, dropoffLat, dropoffLng) {
+        const container = document.getElementById('map');
+        map = new kakao.maps.Map(container, {
+            center: new kakao.maps.LatLng(courierLat, courierLng),
+            level: 5
+        });
+
+        courierMarker = new kakao.maps.Marker({
+            position: new kakao.maps.LatLng(courierLat, courierLng),
+            map
+        });
+
+        new kakao.maps.Marker({
+            position: new kakao.maps.LatLng(dropoffLat, dropoffLng),
+            map
+        });
+    }
+
+    function moveCourierMarker(lat, lng) {
+        const position = new kakao.maps.LatLng(lat, lng);
+        courierMarker.setPosition(position);
+        map.panTo(position);
+    }
+
+    function subscribeLocation(deliveryId) {
+        const token = localStorage.getItem('accessToken');
+        const tokenType = localStorage.getItem('tokenType') || 'Bearer';
+        const protocol = location.protocol === 'https:' ? 'wss' : 'ws';
+
+        const client = new StompJs.Client({
+            brokerURL: `${protocol}://${location.host}/ws`,
+            connectHeaders: { Authorization: `${tokenType} ${token}` },
+            reconnectDelay: 4000
+        });
+
+        client.onConnect = () => {
+            client.subscribe(`/topic/delivery/${deliveryId}/location`, (message) => {
+                const body = JSON.parse(message.body);
+                moveCourierMarker(body.latitude, body.longitude);
+                if (dropoff) {
+                    updateEta(body.latitude, body.longitude, dropoff.lat, dropoff.lng);
+                }
+            });
+        };
+
+        client.activate();
+    }
+
+    function formatMatchedTime(matchedAt) {
+        if (!matchedAt) return '-';
+        const date = new Date(matchedAt);
+        const hours24 = date.getHours();
+        const period = hours24 < 12 ? 'AM' : 'PM';
+        const hours12 = ((hours24 + 11) % 12) + 1;
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        return `${hours12}:${minutes} ${period}`;
+    }
+
+    async function loadTracking(deliveryId) {
+        const header = authHeader();
+
+        const deliveryResponse = await fetch(`/api/v1/delivery-requests/${deliveryId}`, {
+            headers: { Authorization: header }
+        });
+        if (!deliveryResponse.ok) throw new Error('배송 정보를 불러오지 못했습니다.');
+        const delivery = await deliveryResponse.json();
+
+        const matchingsResponse = await fetch('/api/v1/matchings', { headers: { Authorization: header } });
+        const matchings = matchingsResponse.ok ? await matchingsResponse.json() : [];
+        const matching = matchings.find((m) => m.deliveryRequestId === Number(deliveryId));
+        if (!matching) throw new Error('아직 매칭된 배송원이 없어요.');
+
+        document.getElementById('pickupTime').textContent = formatMatchedTime(matching.matchedAt);
+
+        const vehicleResponse = await fetch(`/api/v1/vehicles/${matching.vehicleId}`, {
+            headers: { Authorization: header }
+        });
+        const vehicle = await vehicleResponse.json();
+
+        const memberResponse = await fetch(`/api/v1/members/${vehicle.ownerId}`, {
+            headers: { Authorization: header }
+        });
+        if (memberResponse.ok) {
+            const courier = await memberResponse.json();
+            document.getElementById('callButton').href = `tel:${courier.phoneNumber}`;
+        }
+
+        dropoff = { lat: delivery.dropoffLatitude, lng: delivery.dropoffLongitude };
+
+        kakao.maps.load(() => {
+            initMap(vehicle.latitude, vehicle.longitude, dropoff.lat, dropoff.lng);
+            updateEta(vehicle.latitude, vehicle.longitude, dropoff.lat, dropoff.lng);
+        });
+
+        subscribeLocation(deliveryId);
+    }
+
+    (function init() {
+        if (!authHeader()) {
+            location.replace('/login.html');
+            return;
+        }
+        const deliveryId = new URLSearchParams(location.search).get('id');
+        if (!deliveryId) {
+            location.replace('/home.html');
+            return;
+        }
+        loadTracking(deliveryId).catch((error) => {
+            document.querySelector('.map-area').innerHTML =
+                `<div class="load-error">${error.message}</div>`;
+        });
+    })();
+</script>
+</body>
+</html>
