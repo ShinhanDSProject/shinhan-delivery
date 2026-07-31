@@ -43,7 +43,7 @@ class MemberServiceTest {
     when(memberRepository.save(any(Member.class)))
         .thenAnswer(invocation -> invocation.getArgument(0));
 
-    Member response = memberService.createMember(request);
+    Member response = memberService.create(request);
 
     assertThat(response.getEmail()).isEqualTo("user@example.com");
     assertThat(response.getRole()).isEqualTo(MemberRole.CUSTOMER);
@@ -56,7 +56,7 @@ class MemberServiceTest {
     request.setEmail("dup@example.com");
     when(memberRepository.existsByEmail("dup@example.com")).thenReturn(true);
 
-    assertThatThrownBy(() -> memberService.createMember(request))
+    assertThatThrownBy(() -> memberService.create(request))
         .isInstanceOf(DuplicateMemberException.class);
   }
 
@@ -65,8 +65,7 @@ class MemberServiceTest {
   void getMemberNotFoundShouldThrowException() {
     when(memberRepository.findById(1L)).thenReturn(Optional.empty());
 
-    assertThatThrownBy(() -> memberService.getMember(1L))
-        .isInstanceOf(EntityNotFoundException.class);
+    assertThatThrownBy(() -> memberService.getById(1L)).isInstanceOf(EntityNotFoundException.class);
   }
 
   @Test
@@ -79,7 +78,7 @@ class MemberServiceTest {
     member.setRole(MemberRole.COURIER);
     when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
 
-    Member response = memberService.getMember(1L);
+    Member response = memberService.getById(1L);
 
     assertThat(response.getEmail()).isEqualTo("user@example.com");
   }

@@ -18,7 +18,7 @@ public class NoticeService {
   private final NoticeRepository noticeRepository;
 
   /** 공지사항 목록을 페이징하여 조회합니다. 카테고리가 지정된 경우 해당 카테고리만 필터링합니다. */
-  public Page<Notice> getNotices(String category, Pageable pageable) {
+  public Page<Notice> list(String category, Pageable pageable) {
     if (category != null && !category.isBlank()) {
       return noticeRepository.findByCategoryOrderByIsPinnedDescCreatedAtDesc(category, pageable);
     }
@@ -26,7 +26,7 @@ public class NoticeService {
   }
 
   /** 공지사항 단건 상세 정보를 조회합니다. */
-  public Notice getNoticeDetail(Long noticeId) {
+  public Notice getById(Long noticeId) {
     return noticeRepository.findById(noticeId).orElseThrow(NoticeNotFoundException::new);
   }
 }

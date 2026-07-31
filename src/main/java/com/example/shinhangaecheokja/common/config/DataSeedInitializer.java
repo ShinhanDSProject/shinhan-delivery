@@ -131,7 +131,7 @@ public class DataSeedInitializer implements CommandLineRunner {
     MatchingCreateRequest matchingRequest = new MatchingCreateRequest();
     matchingRequest.setDeliveryRequestId(deliveryRequestId);
     matchingRequest.setVehicleId(vehicleId);
-    matchingService.createMatching(matchingRequest);
+    matchingService.create(matchingRequest);
   }
 
   /** 알림센터 UI(홈 화면 배지, 목록·필터)를 로컬에서 바로 확인할 수 있도록 카테고리별 알림을 만든다. */

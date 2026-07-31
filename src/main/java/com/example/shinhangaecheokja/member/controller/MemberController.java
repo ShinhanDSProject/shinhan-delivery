@@ -44,7 +44,7 @@ public class MemberController {
   @PostMapping
   public ResponseEntity<MemberResponse> createMember(
       @Valid @RequestBody MemberCreateRequest request) {
-    Member created = memberService.createMember(request);
+    Member created = memberService.create(request);
     return ResponseEntity.status(HttpStatus.CREATED).body(MemberResponse.from(created));
   }
 
@@ -99,14 +99,14 @@ public class MemberController {
   /** 회원 단건을 조회한다. */
   @GetMapping("/{memberId}")
   public ResponseEntity<MemberResponse> getMember(@PathVariable Long memberId) {
-    return ResponseEntity.ok(MemberResponse.from(memberService.getMember(memberId)));
+    return ResponseEntity.ok(MemberResponse.from(memberService.getById(memberId)));
   }
 
   /** 회원 전체 목록을 조회한다. */
   @GetMapping
   public ResponseEntity<List<MemberResponse>> getMembers() {
     List<MemberResponse> responses =
-        memberService.getMembers().stream().map(MemberResponse::from).toList();
+        memberService.list().stream().map(MemberResponse::from).toList();
     return ResponseEntity.ok(responses);
   }
 
@@ -114,7 +114,7 @@ public class MemberController {
   @PutMapping("/{memberId}")
   public ResponseEntity<MemberResponse> updateMember(
       @PathVariable Long memberId, @RequestBody MemberUpdateRequest request) {
-    Member updated = memberService.updateMember(memberId, request);
+    Member updated = memberService.update(memberId, request);
     return ResponseEntity.ok(MemberResponse.from(updated));
   }
 
@@ -129,7 +129,7 @@ public class MemberController {
   /** 회원을 삭제한다. */
   @DeleteMapping("/{memberId}")
   public ResponseEntity<Void> deleteMember(@PathVariable Long memberId) {
-    memberService.deleteMember(memberId);
+    memberService.delete(memberId);
     return ResponseEntity.noContent().build();
   }
 }

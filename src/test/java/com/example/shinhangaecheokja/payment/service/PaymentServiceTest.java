@@ -38,7 +38,7 @@ class PaymentServiceTest {
     when(paymentRepository.save(any(PointWallet.class)))
         .thenAnswer(invocation -> invocation.getArgument(0));
 
-    PointWallet response = paymentService.createWallet(request);
+    PointWallet response = paymentService.create(request);
 
     assertThat(response.getMemberId()).isEqualTo(1L);
     assertThat(response.getBalance()).isEqualTo(0L);
@@ -50,10 +50,10 @@ class PaymentServiceTest {
     PointWalletCreateRequest request = new PointWalletCreateRequest();
     request.setMemberId(999L);
 
-    when(memberService.getMember(999L))
+    when(memberService.getById(999L))
         .thenThrow(new EntityNotFoundException(ErrorCode.MEMBER_NOT_FOUND));
 
-    assertThatThrownBy(() -> paymentService.createWallet(request))
+    assertThatThrownBy(() -> paymentService.create(request))
         .isInstanceOf(EntityNotFoundException.class);
   }
 
@@ -62,7 +62,7 @@ class PaymentServiceTest {
   void getWalletNotFoundShouldThrowException() {
     when(paymentRepository.findById(1L)).thenReturn(Optional.empty());
 
-    assertThatThrownBy(() -> paymentService.getWallet(1L))
+    assertThatThrownBy(() -> paymentService.getById(1L))
         .isInstanceOf(EntityNotFoundException.class);
   }
 
@@ -74,7 +74,7 @@ class PaymentServiceTest {
     wallet.setBalance(1000L);
     when(paymentRepository.findById(1L)).thenReturn(Optional.of(wallet));
 
-    PointWallet response = paymentService.getWallet(1L);
+    PointWallet response = paymentService.getById(1L);
 
     assertThat(response.getBalance()).isEqualTo(1000L);
   }

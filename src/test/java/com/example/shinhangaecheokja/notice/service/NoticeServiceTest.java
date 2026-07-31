@@ -39,7 +39,7 @@ class NoticeServiceTest {
     when(noticeRepository.findAllByOrderByIsPinnedDescCreatedAtDesc(pageable))
         .thenReturn(new PageImpl<>(List.of(notice)));
 
-    Page<Notice> responses = noticeService.getNotices(null, pageable);
+    Page<Notice> responses = noticeService.list(null, pageable);
 
     assertThat(responses.getContent()).hasSize(1);
     assertThat(responses.getContent().get(0).getTitle()).isEqualTo("제목");
@@ -54,7 +54,7 @@ class NoticeServiceTest {
     when(noticeRepository.findByCategoryOrderByIsPinnedDescCreatedAtDesc("EVENT", pageable))
         .thenReturn(new PageImpl<>(List.of(notice)));
 
-    Page<Notice> responses = noticeService.getNotices("EVENT", pageable);
+    Page<Notice> responses = noticeService.list("EVENT", pageable);
 
     assertThat(responses.getContent()).hasSize(1);
     assertThat(responses.getContent().get(0).getCategory()).isEqualTo("EVENT");
@@ -66,7 +66,7 @@ class NoticeServiceTest {
     Notice notice = createNotice(1L, "상세 제목", "상세 본문 내용", "SYSTEM", true);
     when(noticeRepository.findById(1L)).thenReturn(Optional.of(notice));
 
-    Notice response = noticeService.getNoticeDetail(1L);
+    Notice response = noticeService.getById(1L);
 
     assertThat(response.getId()).isEqualTo(1L);
     assertThat(response.getTitle()).isEqualTo("상세 제목");
@@ -78,7 +78,7 @@ class NoticeServiceTest {
   void getNoticeDetailNotFound() {
     when(noticeRepository.findById(999L)).thenReturn(Optional.empty());
 
-    assertThatThrownBy(() -> noticeService.getNoticeDetail(999L))
+    assertThatThrownBy(() -> noticeService.getById(999L))
         .isInstanceOf(NoticeNotFoundException.class);
   }
 

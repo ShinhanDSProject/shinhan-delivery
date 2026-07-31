@@ -116,7 +116,7 @@ class MatchingConcurrencyTest {
               MatchingCreateRequest request = new MatchingCreateRequest();
               request.setDeliveryRequestId(deliveryRequestId);
               request.setVehicleId(vehicleId);
-              matchingService.createMatching(request);
+              matchingService.create(request);
               successCount.incrementAndGet();
             } catch (AlreadyMatchedException e) {
               alreadyMatchedCount.incrementAndGet();

@@ -57,7 +57,7 @@ class NotificationControllerTest {
     notification.setRead(false);
     notification.setCreatedAt(LocalDateTime.now());
 
-    when(notificationService.getNotifications(eq(1L), isNull(), any()))
+    when(notificationService.list(eq(1L), isNull(), any()))
         .thenReturn(new PageImpl<>(List.of(notification)));
 
     mockMvc
@@ -91,7 +91,7 @@ class NotificationControllerTest {
   @DisplayName("본인 알림이 아니면 403을 반환한다")
   void markAsReadForbiddenShouldReturn403() throws Exception {
     String token = jwtProvider.createAccessToken(2L, "stranger@test.com", "CUSTOMER");
-    when(notificationService.markAsRead(1L, 2L))
+    when(notificationService.markAsRead(2L, 1L))
         .thenThrow(new NotificationAccessDeniedException(1L, 2L));
 
     mockMvc

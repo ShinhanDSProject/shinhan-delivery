@@ -52,7 +52,7 @@ class VehicleControllerTest {
             .longitude(127.0)
             .status(VehicleStatus.AVAILABLE)
             .build();
-    when(vehicleService.registerVehicle(any())).thenReturn(vehicle);
+    when(vehicleService.create(any())).thenReturn(vehicle);
 
     mockMvc
         .perform(
@@ -102,7 +102,7 @@ class VehicleControllerTest {
   @Test
   @DisplayName("존재하지 않는 차량을 조회하면 404를 반환한다")
   void getVehicleNotFoundShouldReturn404() throws Exception {
-    when(vehicleService.getVehicle(eq(999L)))
+    when(vehicleService.getById(eq(999L)))
         .thenThrow(new EntityNotFoundException(ErrorCode.VEHICLE_NOT_FOUND));
 
     mockMvc.perform(get("/api/v1/vehicles/999")).andExpect(status().isNotFound());

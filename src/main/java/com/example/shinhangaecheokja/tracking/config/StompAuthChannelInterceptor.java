@@ -68,7 +68,7 @@ public class StompAuthChannelInterceptor implements ChannelInterceptor {
             PATH_MATCHER
                 .extractUriTemplateVariables(SUBSCRIBE_DESTINATION_PATTERN, destination)
                 .get("deliveryId"));
-    trackingService.assertCanSubscribe(deliveryId, extractMemberId(accessor.getUser()));
+    trackingService.assertCanSubscribe(extractMemberId(accessor.getUser()), deliveryId);
   }
 
   private Long extractMemberId(Principal principal) {

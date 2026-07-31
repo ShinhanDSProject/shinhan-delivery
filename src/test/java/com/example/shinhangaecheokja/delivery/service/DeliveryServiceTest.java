@@ -79,7 +79,7 @@ class DeliveryServiceTest {
     request.setCustomerId(999L);
     request.setWeight(10);
 
-    when(memberService.getMember(999L))
+    when(memberService.getById(999L))
         .thenThrow(new EntityNotFoundException(ErrorCode.MEMBER_NOT_FOUND));
 
     assertThatThrownBy(() -> deliveryService.requestDelivery(request))

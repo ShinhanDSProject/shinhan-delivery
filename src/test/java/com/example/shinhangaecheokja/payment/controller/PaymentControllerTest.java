@@ -36,8 +36,11 @@ class PaymentControllerTest {
     PointWalletCreateRequest request = new PointWalletCreateRequest();
     request.setMemberId(1L);
 
-    PointWallet wallet = PointWallet.builder().id(1L).memberId(1L).balance(0L).build();
-    when(paymentService.createWallet(any())).thenReturn(wallet);
+    PointWallet wallet = new PointWallet();
+    wallet.setId(1L);
+    wallet.setMemberId(1L);
+    wallet.setBalance(0L);
+    when(paymentService.create(any())).thenReturn(wallet);
 
     mockMvc
         .perform(
@@ -46,13 +49,13 @@ class PaymentControllerTest {
                 .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.memberId").value(1L))
-        .andExpect(jsonPath("$.balance").value(0));
+        .andExpect(jsonPath("$.balance").value(0L));
   }
 
   @Test
   @DisplayName("존재하지 않는 지갑을 조회하면 404를 반환한다")
   void getWalletNotFoundShouldReturn404() throws Exception {
-    when(paymentService.getWallet(eq(999L)))
+    when(paymentService.getById(eq(999L)))
         .thenThrow(new EntityNotFoundException(ErrorCode.POINT_WALLET_NOT_FOUND));
 
     mockMvc.perform(get("/api/v1/point-wallets/999")).andExpect(status().isNotFound());

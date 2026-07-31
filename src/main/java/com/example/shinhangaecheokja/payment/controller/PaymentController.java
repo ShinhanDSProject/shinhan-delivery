@@ -30,21 +30,21 @@ public class PaymentController {
   @PostMapping
   public ResponseEntity<PointWalletResponse> createWallet(
       @RequestBody PointWalletCreateRequest request) {
-    PointWallet created = paymentService.createWallet(request);
+    PointWallet created = paymentService.create(request);
     return ResponseEntity.status(HttpStatus.CREATED).body(PointWalletResponse.from(created));
   }
 
   /** 포인트 지갑 단건을 조회한다. */
   @GetMapping("/{walletId}")
   public ResponseEntity<PointWalletResponse> getWallet(@PathVariable Long walletId) {
-    return ResponseEntity.ok(PointWalletResponse.from(paymentService.getWallet(walletId)));
+    return ResponseEntity.ok(PointWalletResponse.from(paymentService.getById(walletId)));
   }
 
   /** 포인트 지갑 전체 목록을 조회한다. */
   @GetMapping
   public ResponseEntity<List<PointWalletResponse>> getWallets() {
     List<PointWalletResponse> responses =
-        paymentService.getWallets().stream().map(PointWalletResponse::from).toList();
+        paymentService.list().stream().map(PointWalletResponse::from).toList();
     return ResponseEntity.ok(responses);
   }
 
@@ -67,7 +67,7 @@ public class PaymentController {
   /** 포인트 지갑을 삭제한다. */
   @DeleteMapping("/{walletId}")
   public ResponseEntity<Void> deleteWallet(@PathVariable Long walletId) {
-    paymentService.deleteWallet(walletId);
+    paymentService.delete(walletId);
     return ResponseEntity.noContent().build();
   }
 }

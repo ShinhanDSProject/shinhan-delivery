@@ -18,7 +18,7 @@ class CategorySeedDataTest {
   @Test
   @DisplayName("마이그레이션이 카테고리 12종을 시딩한다")
   void migrationShouldSeed12Categories() {
-    List<Category> categories = categoryService.getCategories();
+    List<Category> categories = categoryService.list();
 
     assertThat(categories).hasSize(12);
     assertThat(categories)

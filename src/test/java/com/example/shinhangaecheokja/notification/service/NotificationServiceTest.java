@@ -37,7 +37,7 @@ class NotificationServiceTest {
     when(notificationRepository.findByMemberIdOrderByCreatedAtDesc(1L, pageable))
         .thenReturn(new PageImpl<>(java.util.List.of(notification)));
 
-    var responses = notificationService.getNotifications(1L, null, pageable);
+    var responses = notificationService.list(1L, null, pageable);
 
     assertThat(responses.getContent()).hasSize(1);
     verify(notificationRepository, never())
@@ -53,7 +53,7 @@ class NotificationServiceTest {
             1L, "DELIVERY", pageable))
         .thenReturn(new PageImpl<>(java.util.List.of(notification)));
 
-    var responses = notificationService.getNotifications(1L, "DELIVERY", pageable);
+    var responses = notificationService.list(1L, "DELIVERY", pageable);
 
     assertThat(responses.getContent()).hasSize(1);
     assertThat(responses.getContent().get(0).getCategory()).isEqualTo("DELIVERY");
@@ -75,7 +75,7 @@ class NotificationServiceTest {
   void markAsReadNotFoundShouldThrowException() {
     when(notificationRepository.findById(999L)).thenReturn(Optional.empty());
 
-    assertThatThrownBy(() -> notificationService.markAsRead(999L, 1L))
+    assertThatThrownBy(() -> notificationService.markAsRead(1L, 999L))
         .isInstanceOf(EntityNotFoundException.class);
   }
 
@@ -85,7 +85,7 @@ class NotificationServiceTest {
     Notification notification = newNotification(1L, 1L, "DELIVERY", false);
     when(notificationRepository.findById(1L)).thenReturn(Optional.of(notification));
 
-    assertThatThrownBy(() -> notificationService.markAsRead(1L, 2L))
+    assertThatThrownBy(() -> notificationService.markAsRead(2L, 1L))
         .isInstanceOf(NotificationAccessDeniedException.class);
     assertThat(notification.isRead()).isFalse();
   }

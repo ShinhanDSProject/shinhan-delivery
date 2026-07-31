@@ -31,21 +31,21 @@ public class VehicleController {
   @PostMapping
   public ResponseEntity<VehicleResponse> registerVehicle(
       @RequestBody @Valid VehicleCreateRequest request) {
-    Vehicle created = vehicleService.registerVehicle(request);
+    Vehicle created = vehicleService.create(request);
     return ResponseEntity.status(HttpStatus.CREATED).body(VehicleResponse.from(created));
   }
 
   /** 운송수단 단건을 조회한다. */
   @GetMapping("/{vehicleId}")
   public ResponseEntity<VehicleResponse> getVehicle(@PathVariable Long vehicleId) {
-    return ResponseEntity.ok(VehicleResponse.from(vehicleService.getVehicle(vehicleId)));
+    return ResponseEntity.ok(VehicleResponse.from(vehicleService.getById(vehicleId)));
   }
 
   /** 운송수단 전체 목록을 조회한다. */
   @GetMapping
   public ResponseEntity<List<VehicleResponse>> getVehicles() {
     List<VehicleResponse> responses =
-        vehicleService.getVehicles().stream().map(VehicleResponse::from).toList();
+        vehicleService.list().stream().map(VehicleResponse::from).toList();
     return ResponseEntity.ok(responses);
   }
 
@@ -53,14 +53,14 @@ public class VehicleController {
   @PutMapping("/{vehicleId}")
   public ResponseEntity<VehicleResponse> updateVehicle(
       @PathVariable Long vehicleId, @RequestBody @Valid VehicleUpdateRequest request) {
-    Vehicle updated = vehicleService.updateVehicle(vehicleId, request);
+    Vehicle updated = vehicleService.update(vehicleId, request);
     return ResponseEntity.ok(VehicleResponse.from(updated));
   }
 
   /** 운송수단을 삭제한다. */
   @DeleteMapping("/{vehicleId}")
   public ResponseEntity<Void> deleteVehicle(@PathVariable Long vehicleId) {
-    vehicleService.deleteVehicle(vehicleId);
+    vehicleService.delete(vehicleId);
     return ResponseEntity.noContent().build();
   }
 }

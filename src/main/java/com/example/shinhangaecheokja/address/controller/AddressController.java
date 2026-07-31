@@ -31,13 +31,13 @@ public class AddressController {
 
   private final AddressService addressService;
 
-  /** 인증된 본인의 자주 쓰는 주소 목록을 조회한다. */
+  /** 로그인 회원의 자주 쓰는 주소 목록을 조회한다. */
   @GetMapping
   public ResponseEntity<List<AddressResponse>> getAddresses(
-      @AuthenticationPrincipal CustomUserDetails userDetails) {
-    Long memberId = extractMemberId(userDetails);
-    List<Address> addresses = addressService.getAddresses(memberId);
-    return ResponseEntity.ok(addresses.stream().map(AddressResponse::from).toList());
+      @AuthenticationPrincipal CustomUserDetails customUser) {
+    List<AddressResponse> responses =
+        addressService.list(customUser.getId()).stream().map(AddressResponse::from).toList();
+    return ResponseEntity.ok(responses);
   }
 
   /** 신규 자주 쓰는 주소를 생성한다. */
@@ -46,7 +46,7 @@ public class AddressController {
       @AuthenticationPrincipal CustomUserDetails principal,
       @RequestBody @Valid AddressCreateRequest request) {
     Long memberId = principal.getId();
-    Address created = addressService.createAddress(memberId, request);
+    Address created = addressService.create(memberId, request);
     return ResponseEntity.status(HttpStatus.CREATED).body(AddressResponse.from(created));
   }
 
@@ -57,7 +57,7 @@ public class AddressController {
       @AuthenticationPrincipal CustomUserDetails userDetails,
       @Valid @RequestBody AddressUpdateRequest request) {
     Long memberId = extractMemberId(userDetails);
-    Address updated = addressService.updateAddress(id, memberId, request);
+    Address updated = addressService.update(memberId, id, request);
     return ResponseEntity.ok(AddressResponse.from(updated));
   }
 
@@ -66,7 +66,7 @@ public class AddressController {
   public ResponseEntity<Void> deleteAddress(
       @PathVariable Long id, @AuthenticationPrincipal CustomUserDetails userDetails) {
     Long memberId = extractMemberId(userDetails);
-    addressService.deleteAddress(id, memberId);
+    addressService.delete(memberId, id);
     return ResponseEntity.noContent().build();
   }
 

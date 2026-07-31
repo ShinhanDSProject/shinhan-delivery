@@ -35,19 +35,20 @@ class CategoryControllerTest {
     c3.setId(3L);
     c3.setName("의류/패션잡화");
 
-    when(categoryService.getCategories()).thenReturn(List.of(c1, c2, c3));
+    when(categoryService.list()).thenReturn(List.of(c1, c2, c3));
 
     mockMvc
         .perform(get("/api/v1/categories"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.length()").value(3))
+        .andExpect(jsonPath("$[0].id").value(1))
         .andExpect(jsonPath("$[0].name").value("전자기기/가전"));
   }
 
   @Test
-  @DisplayName("카테고리가 없으면 빈 배열을 반환한다")
-  void getCategoriesEmptyShouldReturnEmptyList() throws Exception {
-    when(categoryService.getCategories()).thenReturn(List.of());
+  @DisplayName("저장된 카테고리가 없으면 빈 목록(200 OK)을 반환한다")
+  void getCategoriesEmptyShouldReturnEmptyArray() throws Exception {
+    when(categoryService.list()).thenReturn(List.of());
 
     mockMvc
         .perform(get("/api/v1/categories"))

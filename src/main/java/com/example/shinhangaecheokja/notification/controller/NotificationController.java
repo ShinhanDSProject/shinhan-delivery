@@ -34,7 +34,7 @@ public class NotificationController {
       @PageableDefault(size = 10) Pageable pageable) {
     Page<NotificationResponse> responses =
         notificationService
-            .getNotifications(principal.getId(), category, pageable)
+            .list(principal.getId(), category, pageable)
             .map(NotificationResponse::from);
     return ResponseEntity.ok(responses);
   }
@@ -44,6 +44,6 @@ public class NotificationController {
   public ResponseEntity<NotificationResponse> markAsRead(
       @AuthenticationPrincipal CustomUserDetails principal, @PathVariable Long id) {
     return ResponseEntity.ok(
-        NotificationResponse.from(notificationService.markAsRead(id, principal.getId())));
+        NotificationResponse.from(notificationService.markAsRead(principal.getId(), id)));
   }
 }

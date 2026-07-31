@@ -258,7 +258,42 @@ public class DuplicateMemberException extends BusinessException {
 - **클래스 및 인터페이스명:** 무조건 **`UpperCamelCase` (PascalCase)**로 작성합니다 (예: `MemberService`, `DeliveryRequest`, `VehicleType`).
 - **변수 및 필드명:** 무조건 **`lowerCamelCase`**로 작성합니다 (예: `memberId`, `deliveryRequestRepository`).
 
-### 8.2 포맷팅 및 코드 스타일 규칙
+### 8.2 단일 도메인 서비스 메서드명 명명 규칙 (Service Method Naming Standard)
+
+- **원칙:** 단일 도메인 서비스(`AddressService`, `MemberService`, `VehicleService`, `PaymentService`, `NoticeService` 등) 내부의 CRUD 및 조회 메서드는 서비스 클래스명에 이미 도메인이 포함되어 있으므로 **중복 명사를 제거하고 명확한 동사/조회 패턴(`create`, `getById`, `list`, `listByIds`, `update`, `delete`)을 적용**합니다.
+- **목적:** `addressService.getAddresses(...)` ❌ 대신 `addressService.list(...)` ⭕, `memberService.getMember(1L)` ❌ 대신 `memberService.getById(1L)` ⭕ 처럼 명명 직관성과 통일성을 사수합니다.
+- **표준 메서드 명명 매핑 규칙:**
+  1. **생성 (Create):** `create(...)`
+  2. **단건 ID 조회 (Read Single by ID):** `getById(...)` (예: `getById(Long id)`)
+  3. **다건/목록 조회 (Read List / Page):** `list(...)` (예: `list()`, `list(Pageable pageable)`, `list(Long memberId)`)
+  4. **ID 목록 조회 (Read List by IDs):** `listByIds(...)` (예: `listByIds(List<Long> ids)`)
+  5. **수정 (Update):** `update(...)`
+  6. **삭제 (Delete):** `delete(...)`
+  7. **도메인 특화 비즈니스 동작:** 의미 있는 도메인 어휘 선호 (`login`, `updatePassword`, `updateRole`, `chargePoint`, `usePoint` 등)
+  8. **다중 도메인 복합 서비스 (`DeliveryService` 등):** 문맥 구분이 필요하므로 특화 메서드명 유지 (`requestDelivery`, `estimateFee`, `confirmPickup`, `completeDelivery` 등)
+
+### 8.3 메서드 파라미터 계층 정렬 규칙 (Parameter Hierarchy Ordering Standard)
+
+- **원칙:** 메서드의 파라미터(인자) 순서는 **도메인 계층 구조(Domain Hierarchy)상 큰 개념(상위 도메인 / 소유자 ID)부터 작은 개념(하위 리소스 ID), 조건/필터, DTO/Payload 순으로 배치**합니다.
+- **목적:** "누가(Member) 어떤 리소스(Resource)를 무엇(Request)으로 변경하는가"의 비즈니스 문맥과 RESTful URL 경로(`/members/{memberId}/addresses/{addressId}`) 순서를 100% 동기화하여 위치 착오 버그를 방지합니다.
+- **표준 파라미터 배치 순서:**
+  1. **상위 도메인 식별자 (Parent / Aggregate Root / Owner ID):** 예) `memberId`
+  2. **하위 도메인 식별자 (Child Domain / Resource ID):** 예) `addressId`, `notificationId`
+  3. **조건 및 옵션 (Filter / Condition / Pageable):** 예) `category`, `pageable`
+  4. **수정/생성 데이터 패킷 (Request DTO / Command Payload):** 예) `request`
+- **적용 예시:**
+  ```java
+  // ⭕ 올바른 순서: memberId (상위) -> addressId (하위) -> request (DTO)
+  public Address update(Long memberId, Long id, AddressUpdateRequest request)
+  public void delete(Long memberId, Long id)
+  public Notification markAsRead(Long memberId, Long notificationId)
+
+  // ❌ 잘못된 순서 (하위 리소스 ID가 상위 소유자 ID보다 앞에 옴)
+  public Address update(Long id, Long memberId, AddressUpdateRequest request)
+  public Notification markAsRead(Long notificationId, Long memberId)
+  ```
+
+### 8.4 포맷팅 및 코드 스타일 규칙
 
 - 들여쓰기: 스페이스 2칸 (탭 금지)
 - 한 줄 최대 길이: 100자
