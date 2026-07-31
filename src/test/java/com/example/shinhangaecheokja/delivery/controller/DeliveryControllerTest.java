@@ -273,6 +273,41 @@ class DeliveryControllerTest {
   }
 
   @Test
+  void 픽업_완료_요청을_받으면_PICKED_UP_상태의_배송_요청을_반환한다() throws Exception {
+    when(deliveryService.confirmPickup(1L))
+        .thenReturn(
+            new DeliveryResponse(
+                1L,
+                1L,
+                "서울시 강남구",
+                "서울시 서초구",
+                10,
+                111.19,
+                DeliveryStatus.PICKED_UP,
+                78776L,
+                37.0,
+                127.0,
+                38.0,
+                127.0,
+                ItemSize.MEDIUM));
+
+    mockMvc
+        .perform(patch("/api/v1/delivery-requests/1/pickup"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.status").value("PICKED_UP"));
+  }
+
+  @Test
+  void MATCHED가_아닌_배송을_픽업_처리하면_409를_반환한다() throws Exception {
+    when(deliveryService.confirmPickup(1L))
+        .thenThrow(
+            new InvalidDeliveryTransitionException(
+                DeliveryStatus.REQUESTED, DeliveryStatus.PICKED_UP));
+
+    mockMvc.perform(patch("/api/v1/delivery-requests/1/pickup")).andExpect(status().isConflict());
+  }
+
+  @Test
   void 증거사진_조회_요청을_받으면_사진_URL과_완료시각을_반환한다() throws Exception {
     LocalDateTime completedAt = LocalDateTime.of(2026, 7, 31, 10, 0);
     when(deliveryService.getProofPhoto(1L))

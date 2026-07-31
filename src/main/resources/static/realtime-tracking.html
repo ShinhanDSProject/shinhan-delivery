@@ -370,7 +370,7 @@
         map.panTo(position);
     }
 
-    function subscribeLocation(deliveryId) {
+    function subscribeTracking(deliveryId) {
         const token = localStorage.getItem('accessToken');
         const tokenType = localStorage.getItem('tokenType') || 'Bearer';
         const protocol = location.protocol === 'https:' ? 'wss' : 'ws';
@@ -389,9 +389,21 @@
                     updateEta(body.latitude, body.longitude, dropoff.lat, dropoff.lng);
                 }
             });
+            client.subscribe(`/topic/delivery/${deliveryId}/status`, (message) => {
+                handleStatusChange(deliveryId, JSON.parse(message.body));
+            });
         };
 
         client.activate();
+    }
+
+    /** 배송원이 픽업/완료 처리를 하면 서버가 실시간으로 밀어주는 상태 변경을 반영한다 — 새로고침 불필요. */
+    function handleStatusChange(deliveryId, body) {
+        if (body.status === 'PICKED_UP') {
+            document.getElementById('pickupTime').textContent = formatMatchedTime(body.timestamp);
+        } else if (body.status === 'COMPLETED') {
+            showCompletedState(deliveryId);
+        }
     }
 
     function formatMatchedTime(matchedAt) {
@@ -462,7 +474,7 @@
         kakao.maps.load(() => {
             initMap(vehicle.latitude, vehicle.longitude, dropoff.lat, dropoff.lng);
             updateEta(vehicle.latitude, vehicle.longitude, dropoff.lat, dropoff.lng);
-            subscribeLocation(deliveryId);
+            subscribeTracking(deliveryId);
         });
     }
 

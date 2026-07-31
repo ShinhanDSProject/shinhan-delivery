@@ -15,6 +15,7 @@ public class AlreadyMatchedException extends BusinessException {
   private static String describe(DeliveryStatus status) {
     return switch (status) {
       case MATCHED -> "이미 매칭된";
+      case PICKED_UP -> "이미 픽업된";
       case COMPLETED -> "이미 완료된";
       case CANCELLED -> "이미 취소된";
       case REQUESTED -> "매칭 대기 중인";
