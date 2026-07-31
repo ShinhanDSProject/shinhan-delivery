@@ -12,10 +12,10 @@
         :root {
             --primary: var(--color-blue-30);
             --text-dark: var(--color-black-200);
-            --text-muted: #4A5568;
-            --border: #E2E8F0;
-            --green: #10B981;
-            --accent-soft: #EBF3FF;
+            --text-muted: var(--color-grey-300);
+            --border: var(--color-grey-50);
+            --green: var(--color-green-200);
+            --accent-soft: var(--color-blue-50);
         }
 
         * {
@@ -76,7 +76,7 @@
             position: relative;
             flex: 1;
             min-height: 260px;
-            background: #E2E8F0;
+            background: var(--border);
         }
 
         #map {
@@ -93,7 +93,7 @@
             align-items: center;
             gap: 6px;
             padding: 10px 16px;
-            background: #fff;
+            background: var(--color-white-100);
             border: 1px solid var(--primary);
             border-radius: 30px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
@@ -118,7 +118,7 @@
             flex-direction: column;
             gap: 20px;
             padding: 24px;
-            background: #fff;
+            background: var(--color-white-100);
             border-top: 1px solid var(--border);
             box-shadow: 0 -10px 24px rgba(0, 0, 0, 0.06);
             border-radius: 24px 24px 0 0;
@@ -232,7 +232,7 @@
 
         .timeline-row .time {
             font-size: 12px;
-            color: #94A3B8;
+            color: var(--color-grey-100);
         }
 
         .timeline-row.active .time {
@@ -462,9 +462,8 @@
         kakao.maps.load(() => {
             initMap(vehicle.latitude, vehicle.longitude, dropoff.lat, dropoff.lng);
             updateEta(vehicle.latitude, vehicle.longitude, dropoff.lat, dropoff.lng);
+            subscribeLocation(deliveryId);
         });
-
-        subscribeLocation(deliveryId);
     }
 
     (function init() {
@@ -478,8 +477,12 @@
             return;
         }
         loadTracking(deliveryId).catch((error) => {
-            document.querySelector('.map-area').innerHTML =
-                `<div class="load-error">${error.message}</div>`;
+            const mapArea = document.querySelector('.map-area');
+            mapArea.textContent = '';
+            const errorBox = document.createElement('div');
+            errorBox.className = 'load-error';
+            errorBox.textContent = error.message;
+            mapArea.appendChild(errorBox);
         });
     })();
 </script>
