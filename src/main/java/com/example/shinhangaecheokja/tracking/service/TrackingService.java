@@ -1,14 +1,14 @@
 package com.example.shinhangaecheokja.tracking.service;
 
 import com.example.shinhangaecheokja.common.exception.EntityNotFoundException;
-import com.example.shinhangaecheokja.delivery.dto.response.MatchingResponse;
 import com.example.shinhangaecheokja.delivery.entity.DeliveryRequest;
+import com.example.shinhangaecheokja.delivery.entity.Matching;
 import com.example.shinhangaecheokja.delivery.service.DeliveryService;
 import com.example.shinhangaecheokja.delivery.service.MatchingService;
 import com.example.shinhangaecheokja.tracking.dto.request.LocationUpdateRequest;
 import com.example.shinhangaecheokja.tracking.dto.response.LocationBroadcastResponse;
 import com.example.shinhangaecheokja.tracking.exception.UnauthorizedTrackingAccessException;
-import com.example.shinhangaecheokja.vehicle.dto.response.VehicleResponse;
+import com.example.shinhangaecheokja.vehicle.entity.Vehicle;
 import com.example.shinhangaecheokja.vehicle.service.VehicleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -47,15 +47,15 @@ public class TrackingService {
     if (!deliveryId.equals(request.getDeliveryId())) {
       throw new UnauthorizedTrackingAccessException(deliveryId, memberId);
     }
-    MatchingResponse matching = matchingService.getMatchingByDeliveryRequestId(deliveryId);
-    if (!isOwner(matching.vehicleId(), memberId)) {
+    Matching matching = matchingService.getMatchingByDeliveryRequestId(deliveryId);
+    if (!isOwner(matching.getVehicleId(), memberId)) {
       throw new UnauthorizedTrackingAccessException(deliveryId, memberId);
     }
 
     LocationBroadcastResponse broadcast =
         new LocationBroadcastResponse(
             deliveryId,
-            matching.vehicleId(),
+            matching.getVehicleId(),
             request.getLatitude(),
             request.getLongitude(),
             request.getTimestamp());
@@ -65,15 +65,15 @@ public class TrackingService {
   /** 매칭 전(EntityNotFoundException)이면 아직 소유주가 없는 것으로 본다. */
   private boolean isMatchedVehicleOwner(Long deliveryId, Long memberId) {
     try {
-      MatchingResponse matching = matchingService.getMatchingByDeliveryRequestId(deliveryId);
-      return isOwner(matching.vehicleId(), memberId);
+      Matching matching = matchingService.getMatchingByDeliveryRequestId(deliveryId);
+      return isOwner(matching.getVehicleId(), memberId);
     } catch (EntityNotFoundException e) {
       return false;
     }
   }
 
   private boolean isOwner(Long vehicleId, Long memberId) {
-    VehicleResponse vehicle = vehicleService.getVehicle(vehicleId);
-    return vehicle.ownerId().equals(memberId);
+    Vehicle vehicle = vehicleService.getVehicle(vehicleId);
+    return vehicle.getOwnerId().equals(memberId);
   }
 }

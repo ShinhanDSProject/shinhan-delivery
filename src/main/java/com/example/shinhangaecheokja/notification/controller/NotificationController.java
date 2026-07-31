@@ -32,14 +32,18 @@ public class NotificationController {
       @AuthenticationPrincipal CustomUserDetails principal,
       @RequestParam(required = false) String category,
       @PageableDefault(size = 10) Pageable pageable) {
-    return ResponseEntity.ok(
-        notificationService.getNotifications(principal.getId(), category, pageable));
+    Page<NotificationResponse> responses =
+        notificationService
+            .getNotifications(principal.getId(), category, pageable)
+            .map(NotificationResponse::from);
+    return ResponseEntity.ok(responses);
   }
 
   /** 알림을 읽음 처리한다. 본인 알림이 아니면 거절된다. */
   @PatchMapping("/{id}/read")
   public ResponseEntity<NotificationResponse> markAsRead(
       @AuthenticationPrincipal CustomUserDetails principal, @PathVariable Long id) {
-    return ResponseEntity.ok(notificationService.markAsRead(id, principal.getId()));
+    return ResponseEntity.ok(
+        NotificationResponse.from(notificationService.markAsRead(id, principal.getId())));
   }
 }

@@ -12,7 +12,6 @@ import com.example.shinhangaecheokja.common.exception.EntityNotFoundException;
 import com.example.shinhangaecheokja.common.exception.ErrorCode;
 import com.example.shinhangaecheokja.delivery.dto.request.MatchingCreateRequest;
 import com.example.shinhangaecheokja.delivery.dto.request.MatchingUpdateRequest;
-import com.example.shinhangaecheokja.delivery.dto.response.MatchingResponse;
 import com.example.shinhangaecheokja.delivery.entity.DeliveryRequest;
 import com.example.shinhangaecheokja.delivery.entity.DeliveryStatus;
 import com.example.shinhangaecheokja.delivery.entity.Matching;
@@ -22,7 +21,7 @@ import com.example.shinhangaecheokja.delivery.exception.InvalidMatchingTransitio
 import com.example.shinhangaecheokja.delivery.exception.VehicleCapacityMismatchException;
 import com.example.shinhangaecheokja.delivery.repository.DeliveryRequestRepository;
 import com.example.shinhangaecheokja.delivery.repository.MatchingRepository;
-import com.example.shinhangaecheokja.vehicle.dto.response.VehicleResponse;
+import com.example.shinhangaecheokja.vehicle.entity.Vehicle;
 import com.example.shinhangaecheokja.vehicle.entity.VehicleStatus;
 import com.example.shinhangaecheokja.vehicle.entity.VehicleType;
 import com.example.shinhangaecheokja.vehicle.exception.VehicleNotAvailableException;
@@ -43,9 +42,31 @@ class MatchingServiceTest {
   @Mock private VehicleService vehicleService;
   @InjectMocks private MatchingService matchingService;
 
-  private VehicleResponse availableVehicle(Long id) {
-    return new VehicleResponse(
-        id, 1L, VehicleType.CAR, 500, 100, 37.5, 127.0, VehicleStatus.AVAILABLE);
+  private Vehicle availableVehicle(Long id) {
+    Vehicle vehicle = new Vehicle();
+    vehicle.setId(id);
+    vehicle.setOwnerId(1L);
+    vehicle.setType(VehicleType.CAR);
+    vehicle.setMaxWeight(500);
+    vehicle.setMaxDistance(100);
+    vehicle.setLatitude(37.5);
+    vehicle.setLongitude(127.0);
+    vehicle.setStatus(VehicleStatus.AVAILABLE);
+    return vehicle;
+  }
+
+  private Vehicle vehicleWithStatusAndCapacity(
+      Long id, VehicleStatus status, double weight, double distance) {
+    Vehicle vehicle = new Vehicle();
+    vehicle.setId(id);
+    vehicle.setOwnerId(1L);
+    vehicle.setType(VehicleType.CAR);
+    vehicle.setMaxWeight(weight);
+    vehicle.setMaxDistance(distance);
+    vehicle.setLatitude(37.5);
+    vehicle.setLongitude(127.0);
+    vehicle.setStatus(status);
+    return vehicle;
   }
 
   private DeliveryRequest deliveryRequest(Long id) {
@@ -117,9 +138,7 @@ class MatchingServiceTest {
     when(deliveryRequestRepository.findByIdForUpdate(1L))
         .thenReturn(Optional.of(deliveryRequest(1L)));
     when(vehicleService.getVehicleForUpdate(2L))
-        .thenReturn(
-            new VehicleResponse(
-                2L, 1L, VehicleType.CAR, 500, 100, 37.5, 127.0, VehicleStatus.BUSY));
+        .thenReturn(vehicleWithStatusAndCapacity(2L, VehicleStatus.BUSY, 500, 100));
 
     assertThatThrownBy(() -> matchingService.createMatching(request))
         .isInstanceOf(VehicleNotAvailableException.class);
@@ -134,9 +153,7 @@ class MatchingServiceTest {
     when(deliveryRequestRepository.findByIdForUpdate(1L))
         .thenReturn(Optional.of(deliveryRequest(1L)));
     when(vehicleService.getVehicleForUpdate(2L))
-        .thenReturn(
-            new VehicleResponse(
-                2L, 1L, VehicleType.CAR, 5, 100, 37.5, 127.0, VehicleStatus.AVAILABLE));
+        .thenReturn(vehicleWithStatusAndCapacity(2L, VehicleStatus.AVAILABLE, 5, 100));
 
     assertThatThrownBy(() -> matchingService.createMatching(request))
         .isInstanceOf(VehicleCapacityMismatchException.class);
@@ -174,9 +191,7 @@ class MatchingServiceTest {
   @Test
   void 차량이_BUSY면_열린_콜_목록이_비어있다() {
     when(vehicleService.getVehicle(2L))
-        .thenReturn(
-            new VehicleResponse(
-                2L, 1L, VehicleType.CAR, 500, 100, 37.5, 127.0, VehicleStatus.BUSY));
+        .thenReturn(vehicleWithStatusAndCapacity(2L, VehicleStatus.BUSY, 500, 100));
 
     List<DeliveryRequest> calls = matchingService.getOpenCalls(2L);
 
@@ -201,16 +216,16 @@ class MatchingServiceTest {
   }
 
   @Test
-  void 존재하는_매칭을_조회하면_MatchingResponse를_반환한다() {
+  void 존재하는_매칭을_조회하면_Matching을_반환한다() {
     Matching matching = new Matching();
     matching.setDeliveryRequestId(1L);
     matching.setVehicleId(2L);
     matching.setStatus(MatchingStatus.MATCHED);
     when(matchingRepository.findById(1L)).thenReturn(Optional.of(matching));
 
-    MatchingResponse response = matchingService.getMatching(1L);
+    Matching response = matchingService.getMatching(1L);
 
-    assertThat(response.deliveryRequestId()).isEqualTo(1L);
+    assertThat(response.getDeliveryRequestId()).isEqualTo(1L);
   }
 
   @Test
@@ -226,9 +241,9 @@ class MatchingServiceTest {
     when(matchingRepository.findById(1L)).thenReturn(Optional.of(matching));
     when(deliveryRequestRepository.findById(1L)).thenReturn(Optional.of(deliveryRequest));
 
-    MatchingResponse response = matchingService.updateMatching(1L, request);
+    Matching response = matchingService.updateMatching(1L, request);
 
-    assertThat(response.status()).isEqualTo(MatchingStatus.COMPLETED);
+    assertThat(response.getStatus()).isEqualTo(MatchingStatus.COMPLETED);
     assertThat(deliveryRequest.getStatus()).isEqualTo(DeliveryStatus.COMPLETED);
     verify(vehicleService).markAvailable(2L);
     verify(vehicleService, never()).markBusy(eq(2L));
@@ -246,9 +261,7 @@ class MatchingServiceTest {
     when(matchingRepository.findById(1L)).thenReturn(Optional.of(matching));
     when(deliveryRequestRepository.findById(1L)).thenReturn(Optional.of(deliveryRequest(1L)));
     when(vehicleService.getVehicleForUpdate(2L))
-        .thenReturn(
-            new VehicleResponse(
-                2L, 1L, VehicleType.CAR, 500, 100, 37.5, 127.0, VehicleStatus.BUSY));
+        .thenReturn(vehicleWithStatusAndCapacity(2L, VehicleStatus.BUSY, 500, 100));
 
     assertThatThrownBy(() -> matchingService.updateMatching(1L, request))
         .isInstanceOf(VehicleNotAvailableException.class);
@@ -267,9 +280,7 @@ class MatchingServiceTest {
     when(matchingRepository.findById(1L)).thenReturn(Optional.of(matching));
     when(deliveryRequestRepository.findById(1L)).thenReturn(Optional.of(deliveryRequest(1L)));
     when(vehicleService.getVehicleForUpdate(2L))
-        .thenReturn(
-            new VehicleResponse(
-                2L, 1L, VehicleType.CAR, 5, 100, 37.5, 127.0, VehicleStatus.AVAILABLE));
+        .thenReturn(vehicleWithStatusAndCapacity(2L, VehicleStatus.AVAILABLE, 5, 100));
 
     assertThatThrownBy(() -> matchingService.updateMatching(1L, request))
         .isInstanceOf(VehicleCapacityMismatchException.class);
@@ -290,9 +301,9 @@ class MatchingServiceTest {
     when(vehicleService.getVehicleForUpdate(2L)).thenReturn(availableVehicle(2L));
     when(deliveryRequestRepository.findById(1L)).thenReturn(Optional.of(deliveryRequest));
 
-    MatchingResponse response = matchingService.updateMatching(1L, request);
+    Matching response = matchingService.updateMatching(1L, request);
 
-    assertThat(response.status()).isEqualTo(MatchingStatus.MATCHED);
+    assertThat(response.getStatus()).isEqualTo(MatchingStatus.MATCHED);
     verify(vehicleService).markBusy(2L);
   }
 

@@ -8,8 +8,6 @@ import static org.mockito.Mockito.when;
 import com.example.shinhangaecheokja.common.exception.EntityNotFoundException;
 import com.example.shinhangaecheokja.member.dto.request.MemberCreateRequest;
 import com.example.shinhangaecheokja.member.dto.request.MemberProfileUpdateRequestDto;
-import com.example.shinhangaecheokja.member.dto.response.MemberProfileResponseDto;
-import com.example.shinhangaecheokja.member.dto.response.MemberResponse;
 import com.example.shinhangaecheokja.member.entity.Member;
 import com.example.shinhangaecheokja.member.entity.MemberRole;
 import com.example.shinhangaecheokja.member.exception.DuplicateMemberException;
@@ -68,7 +66,7 @@ class MemberServiceTest {
   }
 
   @Test
-  void 존재하는_회원을_조회하면_MemberResponse를_반환한다() {
+  void 존재하는_회원을_조회하면_Member를_반환한다() {
     Member member = new Member();
     member.setEmail("user@example.com");
     member.setName("홍길동");
@@ -76,9 +74,9 @@ class MemberServiceTest {
     member.setRole(MemberRole.COURIER);
     when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
 
-    MemberResponse response = memberService.getMember(1L);
+    Member response = memberService.getMember(1L);
 
-    assertThat(response.email()).isEqualTo("user@example.com");
+    assertThat(response.getEmail()).isEqualTo("user@example.com");
   }
 
   @Test
@@ -90,11 +88,11 @@ class MemberServiceTest {
     member.setRole(MemberRole.CUSTOMER);
     when(memberRepository.findById(2L)).thenReturn(Optional.of(member));
 
-    MemberProfileResponseDto response = memberService.getMyProfile(2L);
+    Member response = memberService.getMyProfile(2L);
 
-    assertThat(response.email()).isEqualTo("my@example.com");
-    assertThat(response.name()).isEqualTo("김철수");
-    assertThat(response.phoneNumber()).isEqualTo("010-9876-5432");
+    assertThat(response.getEmail()).isEqualTo("my@example.com");
+    assertThat(response.getName()).isEqualTo("김철수");
+    assertThat(response.getPhoneNumber()).isEqualTo("010-9876-5432");
   }
 
   @Test
@@ -109,9 +107,9 @@ class MemberServiceTest {
     MemberProfileUpdateRequestDto request =
         new MemberProfileUpdateRequestDto("김영희", "010-1111-2222");
 
-    MemberProfileResponseDto response = memberService.updateMyProfile(2L, request);
+    Member response = memberService.updateMyProfile(2L, request);
 
-    assertThat(response.name()).isEqualTo("김영희");
-    assertThat(response.phoneNumber()).isEqualTo("010-1111-2222");
+    assertThat(response.getName()).isEqualTo("김영희");
+    assertThat(response.getPhoneNumber()).isEqualTo("010-1111-2222");
   }
 }

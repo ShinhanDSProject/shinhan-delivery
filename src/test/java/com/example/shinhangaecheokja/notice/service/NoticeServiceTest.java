@@ -7,8 +7,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.example.shinhangaecheokja.notice.dto.response.NoticeDetailResponse;
-import com.example.shinhangaecheokja.notice.dto.response.NoticeResponse;
 import com.example.shinhangaecheokja.notice.entity.Notice;
 import com.example.shinhangaecheokja.notice.exception.NoticeNotFoundException;
 import com.example.shinhangaecheokja.notice.repository.NoticeRepository;
@@ -41,10 +39,10 @@ class NoticeServiceTest {
     when(noticeRepository.findAllByOrderByIsPinnedDescCreatedAtDesc(pageable))
         .thenReturn(new PageImpl<>(List.of(notice)));
 
-    Page<NoticeResponse> responses = noticeService.getNotices(null, pageable);
+    Page<Notice> responses = noticeService.getNotices(null, pageable);
 
     assertThat(responses.getContent()).hasSize(1);
-    assertThat(responses.getContent().get(0).title()).isEqualTo("제목");
+    assertThat(responses.getContent().get(0).getTitle()).isEqualTo("제목");
     verify(noticeRepository, never()).findByCategoryOrderByIsPinnedDescCreatedAtDesc(any(), any());
   }
 
@@ -56,10 +54,10 @@ class NoticeServiceTest {
     when(noticeRepository.findByCategoryOrderByIsPinnedDescCreatedAtDesc("EVENT", pageable))
         .thenReturn(new PageImpl<>(List.of(notice)));
 
-    Page<NoticeResponse> responses = noticeService.getNotices("EVENT", pageable);
+    Page<Notice> responses = noticeService.getNotices("EVENT", pageable);
 
     assertThat(responses.getContent()).hasSize(1);
-    assertThat(responses.getContent().get(0).category()).isEqualTo("EVENT");
+    assertThat(responses.getContent().get(0).getCategory()).isEqualTo("EVENT");
   }
 
   @Test
@@ -68,11 +66,11 @@ class NoticeServiceTest {
     Notice notice = createNotice(1L, "상세 제목", "상세 본문 내용", "SYSTEM", true);
     when(noticeRepository.findById(1L)).thenReturn(Optional.of(notice));
 
-    NoticeDetailResponse response = noticeService.getNoticeDetail(1L);
+    Notice response = noticeService.getNoticeDetail(1L);
 
-    assertThat(response.id()).isEqualTo(1L);
-    assertThat(response.title()).isEqualTo("상세 제목");
-    assertThat(response.content()).isEqualTo("상세 본문 내용");
+    assertThat(response.getId()).isEqualTo(1L);
+    assertThat(response.getTitle()).isEqualTo("상세 제목");
+    assertThat(response.getContent()).isEqualTo("상세 본문 내용");
   }
 
   @Test

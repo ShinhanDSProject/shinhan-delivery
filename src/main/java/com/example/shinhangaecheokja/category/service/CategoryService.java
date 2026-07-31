@@ -1,6 +1,6 @@
 package com.example.shinhangaecheokja.category.service;
 
-import com.example.shinhangaecheokja.category.dto.response.CategoryResponse;
+import com.example.shinhangaecheokja.category.entity.Category;
 import com.example.shinhangaecheokja.category.repository.CategoryRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +16,7 @@ public class CategoryService {
 
   /** 전체 카테고리 목록을 id 오름차순으로 조회한다. */
   @Transactional(readOnly = true)
-  public List<CategoryResponse> getCategories() {
-    return categoryRepository.findAllByOrderByIdAsc().stream().map(CategoryResponse::from).toList();
+  public List<Category> getCategories() {
+    return categoryRepository.findAllByOrderByIdAsc();
   }
 }

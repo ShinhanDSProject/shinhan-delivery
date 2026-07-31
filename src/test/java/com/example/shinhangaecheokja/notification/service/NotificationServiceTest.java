@@ -8,7 +8,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.example.shinhangaecheokja.common.exception.EntityNotFoundException;
-import com.example.shinhangaecheokja.notification.dto.response.NotificationResponse;
 import com.example.shinhangaecheokja.notification.entity.Notification;
 import com.example.shinhangaecheokja.notification.exception.NotificationAccessDeniedException;
 import com.example.shinhangaecheokja.notification.repository.NotificationRepository;
@@ -54,7 +53,7 @@ class NotificationServiceTest {
     var responses = notificationService.getNotifications(1L, "DELIVERY", pageable);
 
     assertThat(responses.getContent()).hasSize(1);
-    assertThat(responses.getContent().get(0).category()).isEqualTo("DELIVERY");
+    assertThat(responses.getContent().get(0).getCategory()).isEqualTo("DELIVERY");
   }
 
   @Test
@@ -62,9 +61,9 @@ class NotificationServiceTest {
     Notification notification = newNotification(1L, 1L, "DELIVERY", false);
     when(notificationRepository.findById(1L)).thenReturn(Optional.of(notification));
 
-    NotificationResponse response = notificationService.markAsRead(1L, 1L);
+    Notification response = notificationService.markAsRead(1L, 1L);
 
-    assertThat(response.read()).isTrue();
+    assertThat(response.isRead()).isTrue();
   }
 
   @Test

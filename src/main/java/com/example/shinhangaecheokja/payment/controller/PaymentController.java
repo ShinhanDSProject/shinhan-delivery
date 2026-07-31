@@ -37,27 +37,31 @@ public class PaymentController {
   /** 포인트 지갑 단건을 조회한다. */
   @GetMapping("/{walletId}")
   public ResponseEntity<PointWalletResponse> getWallet(@PathVariable Long walletId) {
-    return ResponseEntity.ok(paymentService.getWallet(walletId));
+    return ResponseEntity.ok(PointWalletResponse.from(paymentService.getWallet(walletId)));
   }
 
   /** 포인트 지갑 전체 목록을 조회한다. */
   @GetMapping
   public ResponseEntity<List<PointWalletResponse>> getWallets() {
-    return ResponseEntity.ok(paymentService.getWallets());
+    List<PointWalletResponse> responses =
+        paymentService.getWallets().stream().map(PointWalletResponse::from).toList();
+    return ResponseEntity.ok(responses);
   }
 
   /** 포인트를 충전한다. */
   @PostMapping("/{walletId}/charge")
   public ResponseEntity<PointWalletResponse> chargePoint(
       @PathVariable Long walletId, @RequestBody PointChargeRequest request) {
-    return ResponseEntity.ok(paymentService.chargePoint(walletId, request));
+    PointWallet wallet = paymentService.chargePoint(walletId, request);
+    return ResponseEntity.ok(PointWalletResponse.from(wallet));
   }
 
   /** 포인트를 사용한다. */
   @PostMapping("/{walletId}/use")
   public ResponseEntity<PointWalletResponse> usePoint(
       @PathVariable Long walletId, @RequestBody PointUseRequest request) {
-    return ResponseEntity.ok(paymentService.usePoint(walletId, request));
+    PointWallet wallet = paymentService.usePoint(walletId, request);
+    return ResponseEntity.ok(PointWalletResponse.from(wallet));
   }
 
   /** 포인트 지갑을 삭제한다. */

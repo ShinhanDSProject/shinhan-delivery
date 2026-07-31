@@ -10,7 +10,6 @@ import com.example.shinhangaecheokja.common.exception.ErrorCode;
 import com.example.shinhangaecheokja.member.service.MemberService;
 import com.example.shinhangaecheokja.vehicle.dto.request.VehicleCreateRequest;
 import com.example.shinhangaecheokja.vehicle.dto.request.VehicleUpdateRequest;
-import com.example.shinhangaecheokja.vehicle.dto.response.VehicleResponse;
 import com.example.shinhangaecheokja.vehicle.entity.Vehicle;
 import com.example.shinhangaecheokja.vehicle.entity.VehicleStatus;
 import com.example.shinhangaecheokja.vehicle.entity.VehicleType;
@@ -104,7 +103,7 @@ class VehicleServiceTest {
   }
 
   @Test
-  void 존재하는_차량을_조회하면_VehicleResponse를_반환한다() {
+  void 존재하는_차량을_조회하면_Vehicle을_반환한다() {
     Vehicle vehicle = new Vehicle();
     vehicle.setOwnerId(1L);
     vehicle.setType(VehicleType.DRONE);
@@ -112,9 +111,9 @@ class VehicleServiceTest {
     vehicle.setMaxDistance(20);
     when(vehicleRepository.findById(1L)).thenReturn(Optional.of(vehicle));
 
-    VehicleResponse response = vehicleService.getVehicle(1L);
+    Vehicle response = vehicleService.getVehicle(1L);
 
-    assertThat(response.type()).isEqualTo(VehicleType.DRONE);
+    assertThat(response.getType()).isEqualTo(VehicleType.DRONE);
   }
 
   @Test
@@ -126,7 +125,7 @@ class VehicleServiceTest {
   }
 
   @Test
-  void 비관적_락으로_존재하는_차량을_조회하면_VehicleResponse를_반환한다() {
+  void 비관적_락으로_존재하는_차량을_조회하면_Vehicle을_반환한다() {
     Vehicle vehicle = new Vehicle();
     vehicle.setOwnerId(1L);
     vehicle.setType(VehicleType.DRONE);
@@ -134,9 +133,9 @@ class VehicleServiceTest {
     vehicle.setMaxDistance(20);
     when(vehicleRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(vehicle));
 
-    VehicleResponse response = vehicleService.getVehicleForUpdate(1L);
+    Vehicle response = vehicleService.getVehicleForUpdate(1L);
 
-    assertThat(response.type()).isEqualTo(VehicleType.DRONE);
+    assertThat(response.getType()).isEqualTo(VehicleType.DRONE);
   }
 
   @Test
@@ -153,10 +152,10 @@ class VehicleServiceTest {
     request.setMaxWeight(10);
     request.setMaxDistance(20);
 
-    VehicleResponse response = vehicleService.updateVehicle(1L, request);
+    Vehicle response = vehicleService.updateVehicle(1L, request);
 
-    assertThat(response.type()).isEqualTo(VehicleType.DRONE);
-    assertThat(response.maxWeight()).isEqualTo(10);
+    assertThat(response.getType()).isEqualTo(VehicleType.DRONE);
+    assertThat(response.getMaxWeight()).isEqualTo(10);
   }
 
   @Test

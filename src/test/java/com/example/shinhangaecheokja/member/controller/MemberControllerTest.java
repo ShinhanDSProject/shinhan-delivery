@@ -17,7 +17,6 @@ import com.example.shinhangaecheokja.common.security.CustomUserDetails;
 import com.example.shinhangaecheokja.member.dto.request.MemberCreateRequest;
 import com.example.shinhangaecheokja.member.dto.request.MemberPasswordUpdateRequest;
 import com.example.shinhangaecheokja.member.dto.request.MemberProfileUpdateRequestDto;
-import com.example.shinhangaecheokja.member.dto.response.MemberProfileResponseDto;
 import com.example.shinhangaecheokja.member.entity.Member;
 import com.example.shinhangaecheokja.member.entity.MemberRole;
 import com.example.shinhangaecheokja.member.service.MemberService;
@@ -149,11 +148,16 @@ class MemberControllerTest {
         new UsernamePasswordAuthenticationToken(customUser, null, customUser.getAuthorities());
     SecurityContextHolder.getContext().setAuthentication(auth);
 
-    MemberProfileResponseDto response =
-        new MemberProfileResponseDto(
-            10L, "my@example.com", "홍길동", "010-1234-5678", MemberRole.CUSTOMER);
+    Member member =
+        Member.builder()
+            .id(10L)
+            .email("my@example.com")
+            .name("홍길동")
+            .phoneNumber("010-1234-5678")
+            .role(MemberRole.CUSTOMER)
+            .build();
 
-    when(memberService.getMyProfile(eq(10L))).thenReturn(response);
+    when(memberService.getMyProfile(eq(10L))).thenReturn(member);
 
     mockMvc
         .perform(get("/api/v1/members/me").principal(auth))
@@ -174,11 +178,17 @@ class MemberControllerTest {
 
     MemberProfileUpdateRequestDto request =
         new MemberProfileUpdateRequestDto("김철수", "010-9876-5432");
-    MemberProfileResponseDto response =
-        new MemberProfileResponseDto(
-            10L, "my@example.com", "김철수", "010-9876-5432", MemberRole.CUSTOMER);
 
-    when(memberService.updateMyProfile(eq(10L), any())).thenReturn(response);
+    Member updatedMember =
+        Member.builder()
+            .id(10L)
+            .email("my@example.com")
+            .name("김철수")
+            .phoneNumber("010-9876-5432")
+            .role(MemberRole.CUSTOMER)
+            .build();
+
+    when(memberService.updateMyProfile(eq(10L), any())).thenReturn(updatedMember);
 
     mockMvc
         .perform(
