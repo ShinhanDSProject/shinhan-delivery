@@ -11,7 +11,6 @@ import com.example.shinhangaecheokja.member.service.MemberService;
 import com.example.shinhangaecheokja.payment.dto.request.PointChargeRequest;
 import com.example.shinhangaecheokja.payment.dto.request.PointUseRequest;
 import com.example.shinhangaecheokja.payment.dto.request.PointWalletCreateRequest;
-import com.example.shinhangaecheokja.payment.dto.response.PointWalletResponse;
 import com.example.shinhangaecheokja.payment.entity.PointWallet;
 import com.example.shinhangaecheokja.payment.exception.InsufficientPointException;
 import com.example.shinhangaecheokja.payment.repository.PaymentRepository;
@@ -64,15 +63,15 @@ class PaymentServiceTest {
   }
 
   @Test
-  void 존재하는_지갑을_조회하면_PointWalletResponse를_반환한다() {
+  void 존재하는_지갑을_조회하면_PointWallet을_반환한다() {
     PointWallet wallet = new PointWallet();
     wallet.setMemberId(1L);
     wallet.setBalance(1000L);
     when(paymentRepository.findById(1L)).thenReturn(Optional.of(wallet));
 
-    PointWalletResponse response = paymentService.getWallet(1L);
+    PointWallet response = paymentService.getWallet(1L);
 
-    assertThat(response.balance()).isEqualTo(1000L);
+    assertThat(response.getBalance()).isEqualTo(1000L);
   }
 
   @Test
@@ -85,9 +84,9 @@ class PaymentServiceTest {
     PointChargeRequest request = new PointChargeRequest();
     request.setAmount(500L);
 
-    PointWalletResponse response = paymentService.chargePoint(1L, request);
+    PointWallet response = paymentService.chargePoint(1L, request);
 
-    assertThat(response.balance()).isEqualTo(1500L);
+    assertThat(response.getBalance()).isEqualTo(1500L);
   }
 
   @Test
@@ -100,9 +99,9 @@ class PaymentServiceTest {
     PointUseRequest request = new PointUseRequest();
     request.setAmount(300L);
 
-    PointWalletResponse response = paymentService.usePoint(1L, request);
+    PointWallet response = paymentService.usePoint(1L, request);
 
-    assertThat(response.balance()).isEqualTo(700L);
+    assertThat(response.getBalance()).isEqualTo(700L);
   }
 
   @Test

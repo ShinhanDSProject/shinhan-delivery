@@ -13,6 +13,11 @@
 3. **에러는 예외(Exception)로 처리한다.** 커스텀 예외를 던지고, `@RestControllerAdvice`(전역 예외 처리기)에서 HTTP 응답으로 변환한다.
 4. Entity 및 모든 DTO/Java 클래스의 `Getter`, `Setter` 메서드는 직접 코드로 수동 작성하지 않고 **무조건 Lombok 라이브러리(`@Getter`, `@Setter`)를 100% 사용하여 개발**한다. 수동 `getXXX()`, `setXXX()` 메서드 작성은 엄격히 금지된다. 별도의 불변 객체(Value Object)나 `Result` 타입 같은 함수형 패턴은 쓰지 않는다.
 5. **신규 기능은 설계 문서를 먼저 작성한다.** 코드를 작성하기 전에 `docs/design/기능명-design.md`(User Story·성공 기준, ERD 또는 아키텍처 흐름도, API/메시지 명세, 작업 분할(WBS))를 먼저 작성해 설계를 정리한 뒤 구현에 들어간다. 별도 설계 리뷰 승인까지는 필수가 아니며, 문서화 자체가 목적이다 (`docs/design-phase-guide.md` 참고).
+6. **What과 How를 명확히 분리하고 단일 추상화 수준(SLAP)을 유지한다.** 
+   - **Service 계층:** "무엇을 수행하는가(What)"에 집중하여 비즈니스 유스케이스 흐름을 선언적(Declarative)으로 작성합니다. DB 조작 기술, 복잡한 산출식, 문자열 파싱 등 "어떻게 처리하는가(How)"에 해당하는 세부 구현은 Entity, Repository, Helper로 위임합니다.
+   - **Entity/Domain 계층:** 도메인 비즈니스 규칙과 상태 변이 로직을 캡슐화합니다.
+   - **Repository 계층:** 데이터 영속화 및 기술적 조회 세부 사항(How)을 전담합니다.
+   - **Controller 계층:** Presentation 단위 데이터 변환 및 HTTP 요청/응답 라우팅만 담당합니다.
 
 ---
 
@@ -330,6 +335,38 @@ public record DeliveryCreateResponse(Long id, String status, long feePoint) {
   3. 이를 통해 코드 가독성을 확보하고 패키지 리팩토링 시 변경 요소를 최소화합니다.
 
 ---
+
+## 10.3 엔티티 도메인 메서드: DTO 수용 및 `this` 반환 (Fluent Update)
+
+- **원칙:** 엔티티의 상태 변경 메서드는 외부에서 필드를 개별로 주입받지 않고, **Request DTO 또는 의미 있는 도메인 단위 값을 통째로 수용**하며, `return this`를 통해 자기 자신을 반환합니다.
+- **목적:**
+  - Service 계층에서 인라인 체이닝 또는 단일 표현식으로 처리할 수 있어 코드 라인 수를 줄이고 가독성을 높입니다.
+  - `How`(필드를 일일이 꺼내 대입)를 Entity 내부로 완전히 캡슐화합니다.
+  - 반환값 사용은 선택 사항입니다 — `void`처럼 호출해도 JPA Dirty Checking은 정상 동작합니다.
+- **명명 규칙:**
+  - 단순 필드 일괄 수정: `updateBy(XxxUpdateRequest request)` 형식
+  - 도메인 의미 있는 상태 전이: `pickUp()`, `complete(request)`, `cancel()` 등 도메인 어휘 사용
+  - 단일 상태값 변경: `changeXxx(value)` 형식 (예: `changeRole(role)`, `changePassword(encoded)`)
+
+```java
+// Entity — updateBy + this 반환
+public Address updateBy(AddressUpdateRequest request) {
+    this.alias = request.getAlias();
+    this.address = request.getAddress();
+    this.detailAddress = request.getDetailAddress();
+    this.pickupGuide = request.getPickupGuide();
+    return this;
+}
+
+// Service — 단일 표현식으로 처리, 반환값 활용
+return findAddressOrThrow(id, memberId).updateBy(request);
+
+// Service — 반환값 미사용(void처럼), JPA Dirty Checking은 그대로 동작
+findAddressOrThrow(id, memberId).updateBy(request);
+```
+
+---
+
 
 ## 11. Controller 규칙
 

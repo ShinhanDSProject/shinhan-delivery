@@ -48,20 +48,23 @@ public class MatchingController {
   /** 매칭 단건을 조회한다. */
   @GetMapping("/{matchingId}")
   public ResponseEntity<MatchingResponse> getMatching(@PathVariable Long matchingId) {
-    return ResponseEntity.ok(matchingService.getMatching(matchingId));
+    return ResponseEntity.ok(MatchingResponse.from(matchingService.getMatching(matchingId)));
   }
 
   /** 매칭 전체 목록을 조회한다. */
   @GetMapping
   public ResponseEntity<List<MatchingResponse>> getMatchings() {
-    return ResponseEntity.ok(matchingService.getMatchings());
+    List<MatchingResponse> responses =
+        matchingService.getMatchings().stream().map(MatchingResponse::from).toList();
+    return ResponseEntity.ok(responses);
   }
 
   /** 매칭 상태를 변경한다. */
   @PutMapping("/{matchingId}")
   public ResponseEntity<MatchingResponse> updateMatching(
       @PathVariable Long matchingId, @RequestBody @Valid MatchingUpdateRequest request) {
-    return ResponseEntity.ok(matchingService.updateMatching(matchingId, request));
+    Matching updated = matchingService.updateMatching(matchingId, request);
+    return ResponseEntity.ok(MatchingResponse.from(updated));
   }
 
   /** 매칭을 삭제한다. */

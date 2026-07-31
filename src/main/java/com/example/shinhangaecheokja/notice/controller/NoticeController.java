@@ -31,13 +31,15 @@ public class NoticeController {
   public ResponseEntity<Page<NoticeResponse>> getNotices(
       @RequestParam(required = false) String category,
       @PageableDefault(size = 10) Pageable pageable) {
-    return ResponseEntity.ok(noticeService.getNotices(category, pageable));
+    Page<NoticeResponse> responses =
+        noticeService.getNotices(category, pageable).map(NoticeResponse::from);
+    return ResponseEntity.ok(responses);
   }
 
   /** 공지사항 단건 상세 정보를 조회합니다. */
   @Operation(summary = "공지사항 상세 조회", description = "ID에 해당하는 공지사항의 상세 본문 정보를 조회합니다.")
   @GetMapping("/{id}")
   public ResponseEntity<NoticeDetailResponse> getNoticeDetail(@PathVariable Long id) {
-    return ResponseEntity.ok(noticeService.getNoticeDetail(id));
+    return ResponseEntity.ok(NoticeDetailResponse.from(noticeService.getNoticeDetail(id)));
   }
 }

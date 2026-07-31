@@ -4,7 +4,6 @@ import com.example.shinhangaecheokja.common.exception.EntityNotFoundException;
 import com.example.shinhangaecheokja.common.exception.ErrorCode;
 import com.example.shinhangaecheokja.delivery.dto.request.MatchingCreateRequest;
 import com.example.shinhangaecheokja.delivery.dto.request.MatchingUpdateRequest;
-import com.example.shinhangaecheokja.delivery.dto.response.MatchingResponse;
 import com.example.shinhangaecheokja.delivery.entity.DeliveryRequest;
 import com.example.shinhangaecheokja.delivery.entity.DeliveryStatus;
 import com.example.shinhangaecheokja.delivery.entity.Matching;
@@ -14,7 +13,7 @@ import com.example.shinhangaecheokja.delivery.exception.InvalidMatchingTransitio
 import com.example.shinhangaecheokja.delivery.exception.VehicleCapacityMismatchException;
 import com.example.shinhangaecheokja.delivery.repository.DeliveryRequestRepository;
 import com.example.shinhangaecheokja.delivery.repository.MatchingRepository;
-import com.example.shinhangaecheokja.vehicle.dto.response.VehicleResponse;
+import com.example.shinhangaecheokja.vehicle.entity.Vehicle;
 import com.example.shinhangaecheokja.vehicle.entity.VehicleStatus;
 import com.example.shinhangaecheokja.vehicle.exception.VehicleNotAvailableException;
 import com.example.shinhangaecheokja.vehicle.service.VehicleService;
@@ -44,12 +43,12 @@ public class MatchingService {
           request.getDeliveryRequestId(), deliveryRequest.getStatus());
     }
 
-    VehicleResponse vehicle = vehicleService.getVehicleForUpdate(request.getVehicleId());
-    if (vehicle.status() != VehicleStatus.AVAILABLE) {
+    Vehicle vehicle = vehicleService.getVehicleForUpdate(request.getVehicleId());
+    if (vehicle.getStatus() != VehicleStatus.AVAILABLE) {
       throw new VehicleNotAvailableException(request.getVehicleId());
     }
-    if (vehicle.maxWeight() < deliveryRequest.getWeight()
-        || vehicle.maxDistance() < deliveryRequest.getDistance()) {
+    if (vehicle.getMaxWeight() < deliveryRequest.getWeight()
+        || vehicle.getMaxDistance() < deliveryRequest.getDistance()) {
       throw new VehicleCapacityMismatchException(
           request.getVehicleId(), deliveryRequest.getWeight(), deliveryRequest.getDistance());
     }
@@ -67,38 +66,37 @@ public class MatchingService {
    */
   @Transactional(readOnly = true)
   public List<DeliveryRequest> getOpenCalls(Long vehicleId) {
-    VehicleResponse vehicle = vehicleService.getVehicle(vehicleId);
-    if (vehicle.status() != VehicleStatus.AVAILABLE) {
+    Vehicle vehicle = vehicleService.getVehicle(vehicleId);
+    if (vehicle.getStatus() != VehicleStatus.AVAILABLE) {
       return List.of();
     }
     return deliveryRequestRepository.findByStatusAndWeightLessThanEqualAndDistanceLessThanEqual(
-        DeliveryStatus.REQUESTED, vehicle.maxWeight(), vehicle.maxDistance());
+        DeliveryStatus.REQUESTED, vehicle.getMaxWeight(), vehicle.getMaxDistance());
   }
 
   /** id로 매칭 단건을 조회한다. 없으면 EntityNotFoundException. */
   @Transactional(readOnly = true)
-  public MatchingResponse getMatching(Long matchingId) {
-    return MatchingResponse.from(findMatchingOrThrow(matchingId));
+  public Matching getMatching(Long matchingId) {
+    return findMatchingOrThrow(matchingId);
   }
 
   /** 전체 매칭 목록을 조회한다. */
   @Transactional(readOnly = true)
-  public List<MatchingResponse> getMatchings() {
-    return matchingRepository.findAll().stream().map(MatchingResponse::from).toList();
+  public List<Matching> getMatchings() {
+    return matchingRepository.findAll();
   }
 
   /** 배송 요청 id로 매칭을 조회한다. 없으면 EntityNotFoundException. */
   @Transactional(readOnly = true)
-  public MatchingResponse getMatchingByDeliveryRequestId(Long deliveryRequestId) {
+  public Matching getMatchingByDeliveryRequestId(Long deliveryRequestId) {
     return matchingRepository
         .findByDeliveryRequestId(deliveryRequestId)
-        .map(MatchingResponse::from)
         .orElseThrow(() -> new EntityNotFoundException(ErrorCode.MATCHING_NOT_FOUND));
   }
 
   /** 매칭 상태를 변경하고, 연결된 배송 요청·차량 상태도 함께 동기화한다. */
   @Transactional
-  public MatchingResponse updateMatching(Long matchingId, MatchingUpdateRequest request) {
+  public Matching updateMatching(Long matchingId, MatchingUpdateRequest request) {
     Matching matching = findMatchingOrThrow(matchingId);
     MatchingStatus previousStatus = matching.getStatus();
     MatchingStatus newStatus = request.getStatus();
@@ -108,20 +106,20 @@ public class MatchingService {
     DeliveryRequest deliveryRequest = findDeliveryRequestOrThrow(matching.getDeliveryRequestId());
 
     if (newStatus == MatchingStatus.MATCHED && previousStatus != MatchingStatus.MATCHED) {
-      VehicleResponse vehicle = vehicleService.getVehicleForUpdate(matching.getVehicleId());
-      if (vehicle.status() != VehicleStatus.AVAILABLE) {
+      Vehicle vehicle = vehicleService.getVehicleForUpdate(matching.getVehicleId());
+      if (vehicle.getStatus() != VehicleStatus.AVAILABLE) {
         throw new VehicleNotAvailableException(matching.getVehicleId());
       }
-      if (vehicle.maxWeight() < deliveryRequest.getWeight()
-          || vehicle.maxDistance() < deliveryRequest.getDistance()) {
+      if (vehicle.getMaxWeight() < deliveryRequest.getWeight()
+          || vehicle.getMaxDistance() < deliveryRequest.getDistance()) {
         throw new VehicleCapacityMismatchException(
             matching.getVehicleId(), deliveryRequest.getWeight(), deliveryRequest.getDistance());
       }
     }
 
-    matching.setStatus(newStatus);
+    matching.changeStatus(newStatus);
     applyStatus(matching, deliveryRequest, newStatus);
-    return MatchingResponse.from(matching);
+    return matching;
   }
 
   /**
@@ -134,7 +132,7 @@ public class MatchingService {
     if (matching.getStatus() == MatchingStatus.MATCHED) {
       vehicleService.markAvailable(matching.getVehicleId());
       findDeliveryRequestOrThrow(matching.getDeliveryRequestId())
-          .setStatus(DeliveryStatus.REQUESTED);
+          .changeStatus(DeliveryStatus.REQUESTED);
     }
     matchingRepository.delete(matching);
   }
@@ -158,7 +156,7 @@ public class MatchingService {
   /** Matching 상태 변화에 맞춰 DeliveryRequest·Vehicle 상태를 함께 갱신한다. */
   private void applyStatus(
       Matching matching, DeliveryRequest deliveryRequest, MatchingStatus status) {
-    deliveryRequest.setStatus(toDeliveryStatus(status));
+    deliveryRequest.changeStatus(toDeliveryStatus(status));
     if (status == MatchingStatus.MATCHED) {
       vehicleService.markBusy(matching.getVehicleId());
     } else {

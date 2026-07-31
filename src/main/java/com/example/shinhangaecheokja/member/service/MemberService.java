@@ -9,8 +9,6 @@ import com.example.shinhangaecheokja.member.dto.request.MemberCreateRequest;
 import com.example.shinhangaecheokja.member.dto.request.MemberPasswordUpdateRequest;
 import com.example.shinhangaecheokja.member.dto.request.MemberProfileUpdateRequestDto;
 import com.example.shinhangaecheokja.member.dto.request.MemberUpdateRequest;
-import com.example.shinhangaecheokja.member.dto.response.MemberProfileResponseDto;
-import com.example.shinhangaecheokja.member.dto.response.MemberResponse;
 import com.example.shinhangaecheokja.member.dto.response.TokenResponse;
 import com.example.shinhangaecheokja.member.entity.Member;
 import com.example.shinhangaecheokja.member.entity.MemberRole;
@@ -65,30 +63,26 @@ public class MemberService {
 
   /** id로 회원 단건을 조회한다. 없으면 EntityNotFoundException. */
   @Transactional(readOnly = true)
-  public MemberResponse getMember(Long memberId) {
-    return MemberResponse.from(findMemberOrThrow(memberId));
+  public Member getMember(Long memberId) {
+    return findMemberOrThrow(memberId);
   }
 
   /** 전체 회원 목록을 조회한다. */
   @Transactional(readOnly = true)
-  public List<MemberResponse> getMembers() {
-    return memberRepository.findAll().stream().map(MemberResponse::from).toList();
+  public List<Member> getMembers() {
+    return memberRepository.findAll();
   }
 
   /** 로그인한 본인의 프로필 정보를 조회한다. */
   @Transactional(readOnly = true)
-  public MemberProfileResponseDto getMyProfile(Long memberId) {
-    return MemberProfileResponseDto.from(findMemberOrThrow(memberId));
+  public Member getMyProfile(Long memberId) {
+    return findMemberOrThrow(memberId);
   }
 
   /** 로그인한 본인의 프로필 정보(이름, 연락처)를 수정한다. */
   @Transactional
-  public MemberProfileResponseDto updateMyProfile(
-      Long memberId, MemberProfileUpdateRequestDto request) {
-    Member member = findMemberOrThrow(memberId);
-    member.setName(request.getName());
-    member.setPhoneNumber(request.getPhoneNumber());
-    return MemberProfileResponseDto.from(member);
+  public Member updateMyProfile(Long memberId, MemberProfileUpdateRequestDto request) {
+    return findMemberOrThrow(memberId).updateProfileBy(request);
   }
 
   /** 현재 비밀번호를 확인한 뒤 새 비밀번호를 BCrypt로 암호화해 저장한다. */
@@ -112,10 +106,7 @@ public class MemberService {
   /** 회원의 이름·연락처를 수정한다 (Member Entity 리턴). 이메일/비밀번호/역할은 변경하지 않는다. */
   @Transactional
   public Member updateMember(Long memberId, MemberUpdateRequest request) {
-    Member member = findMemberOrThrow(memberId);
-    member.setName(request.getName());
-    member.setPhoneNumber(request.getPhoneNumber());
-    return member;
+    return findMemberOrThrow(memberId).updateBy(request);
   }
 
   /** 회원의 역할(CUSTOMER / COURIER)을 변경한다 (Member Entity 리턴). */

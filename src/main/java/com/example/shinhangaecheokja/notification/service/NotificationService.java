@@ -2,7 +2,6 @@ package com.example.shinhangaecheokja.notification.service;
 
 import com.example.shinhangaecheokja.common.exception.EntityNotFoundException;
 import com.example.shinhangaecheokja.common.exception.ErrorCode;
-import com.example.shinhangaecheokja.notification.dto.response.NotificationResponse;
 import com.example.shinhangaecheokja.notification.entity.Notification;
 import com.example.shinhangaecheokja.notification.exception.NotificationAccessDeniedException;
 import com.example.shinhangaecheokja.notification.repository.NotificationRepository;
@@ -22,20 +21,16 @@ public class NotificationService {
 
   /** 로그인 회원 본인의 알림만 최신순으로 페이징 조회한다. category가 있으면 그 카테고리로 필터링한다. */
   @Transactional(readOnly = true)
-  public Page<NotificationResponse> getNotifications(
-      Long memberId, String category, Pageable pageable) {
-    Page<Notification> notifications =
-        StringUtils.hasText(category)
-            ? notificationRepository.findByMemberIdAndCategoryOrderByCreatedAtDesc(
-                memberId, category, pageable)
-            : notificationRepository.findByMemberIdOrderByCreatedAtDesc(memberId, pageable);
-
-    return notifications.map(NotificationResponse::from);
+  public Page<Notification> getNotifications(Long memberId, String category, Pageable pageable) {
+    return StringUtils.hasText(category)
+        ? notificationRepository.findByMemberIdAndCategoryOrderByCreatedAtDesc(
+            memberId, category, pageable)
+        : notificationRepository.findByMemberIdOrderByCreatedAtDesc(memberId, pageable);
   }
 
   /** 알림을 읽음 처리한다. 없으면 EntityNotFoundException, 본인 알림이 아니면 NotificationAccessDeniedException. */
   @Transactional
-  public NotificationResponse markAsRead(Long notificationId, Long memberId) {
+  public Notification markAsRead(Long notificationId, Long memberId) {
     Notification notification =
         notificationRepository
             .findById(notificationId)
@@ -46,6 +41,6 @@ public class NotificationService {
     }
 
     notification.setRead(true);
-    return NotificationResponse.from(notification);
+    return notification;
   }
 }

@@ -34,13 +34,7 @@ public class AddressService {
   /** 회원 본인 소유의 주소 정보를 수정한다 (Entity 리턴). */
   @Transactional
   public Address updateAddress(Long id, Long memberId, AddressUpdateRequest request) {
-    Address address = findAddressOrThrow(id, memberId);
-    address.update(
-        request.getAlias(),
-        request.getAddress(),
-        request.getDetailAddress(),
-        request.getPickupGuide());
-    return address;
+    return findAddressOrThrow(id, memberId).updateBy(request);
   }
 
   /** 회원 본인 소유의 주소를 삭제한다. */

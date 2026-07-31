@@ -1,7 +1,5 @@
 package com.example.shinhangaecheokja.notice.service;
 
-import com.example.shinhangaecheokja.notice.dto.response.NoticeDetailResponse;
-import com.example.shinhangaecheokja.notice.dto.response.NoticeResponse;
 import com.example.shinhangaecheokja.notice.entity.Notice;
 import com.example.shinhangaecheokja.notice.exception.NoticeNotFoundException;
 import com.example.shinhangaecheokja.notice.repository.NoticeRepository;
@@ -20,19 +18,15 @@ public class NoticeService {
   private final NoticeRepository noticeRepository;
 
   /** 공지사항 목록을 페이징하여 조회합니다. 카테고리가 지정된 경우 해당 카테고리만 필터링합니다. */
-  public Page<NoticeResponse> getNotices(String category, Pageable pageable) {
-    Page<Notice> notices;
+  public Page<Notice> getNotices(String category, Pageable pageable) {
     if (category != null && !category.isBlank()) {
-      notices = noticeRepository.findByCategoryOrderByIsPinnedDescCreatedAtDesc(category, pageable);
-    } else {
-      notices = noticeRepository.findAllByOrderByIsPinnedDescCreatedAtDesc(pageable);
+      return noticeRepository.findByCategoryOrderByIsPinnedDescCreatedAtDesc(category, pageable);
     }
-    return notices.map(NoticeResponse::from);
+    return noticeRepository.findAllByOrderByIsPinnedDescCreatedAtDesc(pageable);
   }
 
   /** 공지사항 단건 상세 정보를 조회합니다. */
-  public NoticeDetailResponse getNoticeDetail(Long noticeId) {
-    Notice notice = noticeRepository.findById(noticeId).orElseThrow(NoticeNotFoundException::new);
-    return NoticeDetailResponse.from(notice);
+  public Notice getNoticeDetail(Long noticeId) {
+    return noticeRepository.findById(noticeId).orElseThrow(NoticeNotFoundException::new);
   }
 }

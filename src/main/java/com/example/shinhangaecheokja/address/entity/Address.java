@@ -1,6 +1,7 @@
 package com.example.shinhangaecheokja.address.entity;
 
 import com.example.shinhangaecheokja.address.dto.request.AddressCreateRequest;
+import com.example.shinhangaecheokja.address.dto.request.AddressUpdateRequest;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -51,11 +52,12 @@ public class Address {
         .build();
   }
 
-  /** 주소 정보를 수정하는 도메인 비즈니스 메서드. */
-  public void update(String alias, String address, String detailAddress, String pickupGuide) {
-    this.alias = alias;
-    this.address = address;
-    this.detailAddress = detailAddress;
-    this.pickupGuide = pickupGuide;
+  /** AddressUpdateRequest DTO 기반으로 주소 정보를 수정하는 도메인 비즈니스 메서드. */
+  public Address updateBy(AddressUpdateRequest request) {
+    this.alias = request.getAlias();
+    this.address = request.getAddress();
+    this.detailAddress = request.getDetailAddress();
+    this.pickupGuide = request.getPickupGuide();
+    return this;
   }
 }

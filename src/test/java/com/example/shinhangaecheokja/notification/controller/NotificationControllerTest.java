@@ -10,7 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.example.shinhangaecheokja.common.security.JwtProvider;
-import com.example.shinhangaecheokja.notification.dto.response.NotificationResponse;
+import com.example.shinhangaecheokja.notification.entity.Notification;
 import com.example.shinhangaecheokja.notification.exception.NotificationAccessDeniedException;
 import com.example.shinhangaecheokja.notification.service.NotificationService;
 import java.time.LocalDateTime;
@@ -45,8 +45,15 @@ class NotificationControllerTest {
   @Test
   void 인증된_회원은_본인_알림_목록을_조회한다() throws Exception {
     String token = jwtProvider.createAccessToken(1L, "user@test.com", "CUSTOMER");
-    NotificationResponse notification =
-        new NotificationResponse(1L, "제목", "내용", "DELIVERY", false, LocalDateTime.now());
+    Notification notification = new Notification();
+    notification.setId(1L);
+    notification.setMemberId(1L);
+    notification.setTitle("제목");
+    notification.setMessage("내용");
+    notification.setCategory("DELIVERY");
+    notification.setRead(false);
+    notification.setCreatedAt(LocalDateTime.now());
+
     when(notificationService.getNotifications(eq(1L), isNull(), any()))
         .thenReturn(new PageImpl<>(List.of(notification)));
 
@@ -59,8 +66,15 @@ class NotificationControllerTest {
   @Test
   void 읽음_처리에_성공하면_read가_true인_알림을_반환한다() throws Exception {
     String token = jwtProvider.createAccessToken(1L, "user@test.com", "CUSTOMER");
-    NotificationResponse updated =
-        new NotificationResponse(1L, "제목", "내용", "DELIVERY", true, LocalDateTime.now());
+    Notification updated = new Notification();
+    updated.setId(1L);
+    updated.setMemberId(1L);
+    updated.setTitle("제목");
+    updated.setMessage("내용");
+    updated.setCategory("DELIVERY");
+    updated.setRead(true);
+    updated.setCreatedAt(LocalDateTime.now());
+
     when(notificationService.markAsRead(1L, 1L)).thenReturn(updated);
 
     mockMvc
