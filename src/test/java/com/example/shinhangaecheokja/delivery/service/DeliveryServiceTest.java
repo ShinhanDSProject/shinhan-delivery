@@ -287,7 +287,7 @@ class DeliveryServiceTest {
   void PICKED_UP_상태면_완료_처리하고_증거사진_URL을_저장한다() {
     DeliveryRequest deliveryRequest = new DeliveryRequest();
     deliveryRequest.setStatus(DeliveryStatus.PICKED_UP);
-    when(deliveryRequestRepository.findById(1L)).thenReturn(Optional.of(deliveryRequest));
+    when(deliveryRequestRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(deliveryRequest));
 
     DeliveryCompleteRequest request = new DeliveryCompleteRequest();
     request.setProofPhotoUrl("https://example.com/proof.jpg");
@@ -309,7 +309,7 @@ class DeliveryServiceTest {
   void PICKED_UP이_아니면_완료_처리_시_InvalidDeliveryTransitionException을_던진다() {
     DeliveryRequest deliveryRequest = new DeliveryRequest();
     deliveryRequest.setStatus(DeliveryStatus.MATCHED);
-    when(deliveryRequestRepository.findById(1L)).thenReturn(Optional.of(deliveryRequest));
+    when(deliveryRequestRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(deliveryRequest));
 
     DeliveryCompleteRequest request = new DeliveryCompleteRequest();
     request.setProofPhotoUrl("https://example.com/proof.jpg");
@@ -322,7 +322,7 @@ class DeliveryServiceTest {
   void MATCHED_상태면_픽업_완료로_전이하고_픽업시각을_저장한다() {
     DeliveryRequest deliveryRequest = new DeliveryRequest();
     deliveryRequest.setStatus(DeliveryStatus.MATCHED);
-    when(deliveryRequestRepository.findById(1L)).thenReturn(Optional.of(deliveryRequest));
+    when(deliveryRequestRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(deliveryRequest));
 
     DeliveryResponse response = deliveryService.confirmPickup(1L);
 
@@ -340,7 +340,7 @@ class DeliveryServiceTest {
   void MATCHED가_아니면_픽업_처리_시_InvalidDeliveryTransitionException을_던진다() {
     DeliveryRequest deliveryRequest = new DeliveryRequest();
     deliveryRequest.setStatus(DeliveryStatus.REQUESTED);
-    when(deliveryRequestRepository.findById(1L)).thenReturn(Optional.of(deliveryRequest));
+    when(deliveryRequestRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(deliveryRequest));
 
     assertThatThrownBy(() -> deliveryService.confirmPickup(1L))
         .isInstanceOf(InvalidDeliveryTransitionException.class);

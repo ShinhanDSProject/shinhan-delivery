@@ -188,7 +188,7 @@ public class DeliveryService {
   /** 배송원의 픽업 완료를 처리한다. 배송원이 콜을 수락한(MATCHED) 배송 요청만 픽업 완료로 전이할 수 있다. */
   @Transactional
   public DeliveryResponse confirmPickup(Long deliveryRequestId) {
-    DeliveryRequest deliveryRequest = findDeliveryRequestOrThrow(deliveryRequestId);
+    DeliveryRequest deliveryRequest = findDeliveryRequestForUpdateOrThrow(deliveryRequestId);
     if (deliveryRequest.getStatus() != DeliveryStatus.MATCHED) {
       throw new InvalidDeliveryTransitionException(
           deliveryRequest.getStatus(), DeliveryStatus.PICKED_UP);
@@ -208,7 +208,7 @@ public class DeliveryService {
   @Transactional
   public DeliveryResponse completeDelivery(
       Long deliveryRequestId, DeliveryCompleteRequest request) {
-    DeliveryRequest deliveryRequest = findDeliveryRequestOrThrow(deliveryRequestId);
+    DeliveryRequest deliveryRequest = findDeliveryRequestForUpdateOrThrow(deliveryRequestId);
     if (deliveryRequest.getStatus() != DeliveryStatus.PICKED_UP) {
       throw new InvalidDeliveryTransitionException(
           deliveryRequest.getStatus(), DeliveryStatus.COMPLETED);
@@ -249,6 +249,13 @@ public class DeliveryService {
   private DeliveryRequest findDeliveryRequestOrThrow(Long deliveryRequestId) {
     return deliveryRequestRepository
         .findById(deliveryRequestId)
+        .orElseThrow(() -> new EntityNotFoundException(ErrorCode.DELIVERY_NOT_FOUND));
+  }
+
+  /** 픽업/완료 처리처럼 동시에 두 번 눌려도 하나만 성공해야 하는 상태 전이 전에, 비관적 쓰기 락으로 조회한다. */
+  private DeliveryRequest findDeliveryRequestForUpdateOrThrow(Long deliveryRequestId) {
+    return deliveryRequestRepository
+        .findByIdForUpdate(deliveryRequestId)
         .orElseThrow(() -> new EntityNotFoundException(ErrorCode.DELIVERY_NOT_FOUND));
   }
 }
