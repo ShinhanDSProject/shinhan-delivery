@@ -6,8 +6,10 @@
 # 이 스크립트는 CI(GitHub Actions) 환경과 동일한 순서로 검증을 수행합니다.
 # 1. Flyway 마이그레이션 파일명 규격 검사
 # 2. Flyway 마이그레이션 DDL 규칙 (Online DDL) 검사
-# 3. Spotless 코드 포맷팅 스타일 검사
-# 4. Gradle 테스트, JaCoCo 커버리지 및 전체 빌드 검사
+# 3. UI 공통 디자인 시스템 규격 검사
+# 4. Java 코드 컨벤션 (식별자 명명 및 FQCN) 린팅 검사
+# 5. Spotless 코드 포맷팅 스타일 검사
+# 6. Gradle 테스트, JaCoCo 커버리지 및 전체 빌드 검사
 # ==============================================================================
 
 set -eo pipefail
@@ -48,7 +50,7 @@ else
 fi
 
 # Step 3: UI 디자인 시스템 린팅
-echo -e "\n${YELLOW}📌 [3/5] UI 공통 디자인 시스템 규격 검사...${RESET}"
+echo -e "\n${YELLOW}📌 [3/6] UI 공통 디자인 시스템 규격 검사...${RESET}"
 if bash scripts/lint-design-system.sh; then
     echo -e "${GREEN}  ✓ UI 공통 디자인 시스템 검사 통과${RESET}"
 else
@@ -56,8 +58,17 @@ else
     exit 1
 fi
 
-# Step 4: Spotless 포맷팅 검사
-echo -e "\n${YELLOW}📌 [4/5] Spotless 코드 포맷팅 스타일 검사...${RESET}"
+# Step 4: Java 코드 컨벤션 린팅
+echo -e "\n${YELLOW}📌 [4/6] Java 코드 컨벤션 규격 린팅 검사...${RESET}"
+if bash scripts/lint-code-convention.sh; then
+    echo -e "${GREEN}  ✓ Java 코드 컨벤션 검사 통과${RESET}"
+else
+    echo -e "${RED}  ❌ [피드백] Java 코드 컨벤션 위반! code-convention.md 지침을 준수하도록 코드를 수정하세요.${RESET}"
+    exit 1
+fi
+
+# Step 5: Spotless 포맷팅 검사
+echo -e "\n${YELLOW}📌 [5/6] Spotless 코드 포맷팅 스타일 검사...${RESET}"
 if $GRADLE_CMD spotlessCheck --quiet; then
     echo -e "${GREEN}  ✓ 코드 포맷팅(Spotless) 검사 통과${RESET}"
 else
@@ -65,8 +76,8 @@ else
     exit 1
 fi
 
-# Step 5: Gradle 테스트, JaCoCo 커버리지 & 빌드
-echo -e "\n${YELLOW}📌 [5/5] Gradle 테스트·커버리지 및 아키텍처/단위 검사...${RESET}"
+# Step 6: Gradle 테스트, JaCoCo 커버리지 & 빌드
+echo -e "\n${YELLOW}📌 [6/6] Gradle 테스트·커버리지 및 아키텍처/단위 검사...${RESET}"
 if $GRADLE_CMD test jacocoTestReport jacocoTestCoverageVerification; then
     echo -e "${GREEN}  ✓ 테스트, 커버리지 및 빌드 검사 통과${RESET}"
 else
