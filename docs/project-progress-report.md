@@ -17,7 +17,52 @@
 
 ---
 
-## 👥 2. 팀원별 상세 작업 성과 (Team Member Contributions)
+## 🔍 2. GitHub Issue & PR 기반 MVP 기능 정의 및 구현 현황
+
+기획된 전체 MVP 기능(Sprint 1 ~ 6)의 세부 모듈 목록과 현재 구현 완료 여부 매트릭스입니다.
+
+- **전체 MVP 기능 완목율:** **34 / 50개 이슈 완료 (74.5%)**
+
+### 📊 MVP 기능별 구현 매트릭스 (Feature Status Matrix)
+
+| 모듈 / 스프린트 | 기획된 MVP 기능 항목 | 주요 API / 화면 스펙 | 구현 상태 | 관련 이슈 |
+| :--- | :--- | :--- | :---: | :---: |
+| **Sprint 1<br/>(인증 & 온보딩)** | 스플래시 & 워크스루 화면 | `FE-001, FE-002` | 🟢 완료 | `#96` |
+| | 소셜/이메일 로그인 & 회원가입 UI | `FE-003 ~ FE-006` | 🟢 완료 | `#97` |
+| | 고객 회원가입 API | `POST /api/members` | 🟢 완료 | `#94` |
+| | 이메일 로그인 API | `POST /api/members/login` | 🟢 완료 | `#93` |
+| | 회원 역할 변경 API | `PATCH /api/members/role` | 🟢 완료 | `#95` |
+| **Sprint 2<br/>(홈 & 배송 신청)** | 고객 홈 대시보드 & 알림센터 UI | `FE-007, FE-008` | 🟢 완료 | `#103` |
+| | 주소 입력 & 카카오맵 지도 SDK 연동 UI | `FE-009 ~ FE-011` | 🟢 완료 | `#104` |
+| | 카테고리 선택 & 픽업가이드 UI | `FE-012 ~ FE-014` | 🟢 완료 | `#105` |
+| | 배송 요금 산정 API | `POST /api/deliveries/estimate` | 🟢 완료 | `#99` |
+| | 물품 카테고리 목록 조회 API | `GET /api/categories` | 🟢 완료 | `#100` |
+| | 공통 이미지 업로드 API | `POST /api/uploads/image` | 🟢 완료 | `#101` |
+| **Sprint 3<br/>(결제 & 매칭)** | 결제 PIN 키패드 & 결제 확인 UI | `FE-015 ~ FE-017` | ⏳ 개발 중 | `#110` |
+| | 매칭 대기 & 매칭 완료 UI | `FE-018, FE-019` | ⏳ 개발 중 | `#111` |
+| | 결제 PIN 검증 API | `POST /api/payments/verify-pin` | ⏳ 개발 중 | `#107` |
+| | 배송 결제 & 포인트 차감 API | `POST /api/deliveries/pay` | ⏳ 개발 중 | `#108` |
+| | 배송원 매칭 이벤트 로직 | Event Publisher / Listener | ⏳ 개발 중 | `#109` |
+| **Sprint 4<br/>(실시간 추적 & 내역)**| 실시간 추적 & 문앞 사진 확인 UI | `FE-020, FE-021` | 🟢 완료 | `#116` |
+| | 배송 내역 목록/취소 상세 UI | `FE-022 ~ FE-024` | ⏳ 개발 중 | `#117` |
+| | 포인트 지갑 & PG 충전 UI | `FE-025, FE-026` | ⏳ 개발 중 | `#118` |
+| | WebSocket 실시간 위치 추적 핸들러 | `/pub/tracking`, `/sub/status` | 🟢 완료 | `#113` |
+| | 배송 내역/상세 조회 API | `GET /api/deliveries` | 🟢 완료 | `#114` |
+| | 배송 완료 처리 & 문앞 사진 증거 API | `POST /api/deliveries/{id}/complete` | 🟢 완료 | `#184` |
+| | 포인트 충전 API | `POST /api/points/charge` | ⏳ 개발 중 | `#115` |
+| | 알림 목록 조회/읽음 API | `GET/PATCH /api/v1/notifications` | 🟢 완료 | `#102, #145` |
+| **Sprint 5<br/>(마이페이지 & 설정)** | 프로필 편집 & 주소 관리 UI | `FE-027 ~ FE-029` | 🟢 완료 | `#123` |
+| | 비밀번호 변경 & 공지사항 UI | `FE-030, FE-031` | 🟢 완료 | `#124` |
+| | 내 정보 조회 & 프로필 수정 API | `GET/PATCH /api/members/me` | 🟢 완료 | `#120` |
+| | 자주 쓰는 주소 관리 CRUD API | `/api/addresses` | 🟢 완료 | `#121` |
+| | 공지사항 목록 및 상세 조회 API | `GET /api/notices` | 🟢 완료 | `#122` |
+| **Sprint 6<br/>(전역 폴리싱 & QA)** | 전역 예외 처리 & Actuator 헬스체크 | `/actuator/health` | 🟢 완료 | `#126` |
+| | 에러 토스트 & 빈 상태 UI | Toast / Empty State | ⏳ 개발 중 | `#127` |
+| | 자가 치유 하네스 & 커버리지 상향 | JaCoCo 80%+ Ratchet | ⏳ 개발 중 | `#128` |
+
+---
+
+## 👥 3. 팀원별 상세 작업 성과 (Team Member Contributions)
 
 각 팀원이 주도적으로 담당하여 완료한 세부 개발 내역입니다.
 
@@ -70,51 +115,6 @@ graph TD
 
 ---
 
-## 🔍 3. GitHub Issue & PR 기반 MVP 기능 정의 및 구현 현황
-
-기획된 전체 MVP 기능(Sprint 1 ~ 6)의 세부 모듈 목록과 현재 구현 완료 여부 매트릭스입니다.
-
-- **전체 MVP 기능 완목율:** **34 / 50개 이슈 완료 (74.5%)**
-
-### 📊 MVP 기능별 구현 매트릭스 (Feature Status Matrix)
-
-| 모듈 / 스프린트 | 기획된 MVP 기능 항목 | 주요 API / 화면 스펙 | 구현 상태 | 관련 이슈 |
-| :--- | :--- | :--- | :---: | :---: |
-| **Sprint 1<br/>(인증 & 온보딩)** | 스플래시 & 워크스루 화면 | `FE-001, FE-002` | 🟢 완료 | `#96` |
-| | 소셜/이메일 로그인 & 회원가입 UI | `FE-003 ~ FE-006` | 🟢 완료 | `#97` |
-| | 고객 회원가입 API | `POST /api/members` | 🟢 완료 | `#94` |
-| | 이메일 로그인 API | `POST /api/members/login` | 🟢 완료 | `#93` |
-| | 회원 역할 변경 API | `PATCH /api/members/role` | 🟢 완료 | `#95` |
-| **Sprint 2<br/>(홈 & 배송 신청)** | 고객 홈 대시보드 & 알림센터 UI | `FE-007, FE-008` | 🟢 완료 | `#103` |
-| | 주소 입력 & 카카오맵 지도 SDK 연동 UI | `FE-009 ~ FE-011` | 🟢 완료 | `#104` |
-| | 카테고리 선택 & 픽업가이드 UI | `FE-012 ~ FE-014` | 🟢 완료 | `#105` |
-| | 배송 요금 산정 API | `POST /api/deliveries/estimate` | 🟢 완료 | `#99` |
-| | 물품 카테고리 목록 조회 API | `GET /api/categories` | 🟢 완료 | `#100` |
-| | 공통 이미지 업로드 API | `POST /api/uploads/image` | 🟢 완료 | `#101` |
-| **Sprint 3<br/>(결제 & 매칭)** | 결제 PIN 키패드 & 결제 확인 UI | `FE-015 ~ FE-017` | ⏳ 개발 중 | `#110` |
-| | 매칭 대기 & 매칭 완료 UI | `FE-018, FE-019` | ⏳ 개발 중 | `#111` |
-| | 결제 PIN 검증 API | `POST /api/payments/verify-pin` | ⏳ 개발 중 | `#107` |
-| | 배송 결제 & 포인트 차감 API | `POST /api/deliveries/pay` | ⏳ 개발 중 | `#108` |
-| | 배송원 매칭 이벤트 로직 | Event Publisher / Listener | ⏳ 개발 중 | `#109` |
-| **Sprint 4<br/>(실시간 추적 & 내역)**| 실시간 추적 & 문앞 사진 확인 UI | `FE-020, FE-021` | 🟢 완료 | `#116` |
-| | 배송 내역 목록/취소 상세 UI | `FE-022 ~ FE-024` | ⏳ 개발 중 | `#117` |
-| | 포인트 지갑 & PG 충전 UI | `FE-025, FE-026` | ⏳ 개발 중 | `#118` |
-| | WebSocket 실시간 위치 추적 핸들러 | `/pub/tracking`, `/sub/status` | 🟢 완료 | `#113` |
-| | 배송 내역/상세 조회 API | `GET /api/deliveries` | 🟢 완료 | `#114` |
-| | 배송 완료 처리 & 문앞 사진 증거 API | `POST /api/deliveries/{id}/complete` | 🟢 완료 | `#184` |
-| | 포인트 충전 API | `POST /api/points/charge` | ⏳ 개발 중 | `#115` |
-| | 알림 목록 조회/읽음 API | `GET/PATCH /api/v1/notifications` | 🟢 완료 | `#102, #145` |
-| **Sprint 5<br/>(마이페이지 & 설정)** | 프로필 편집 & 주소 관리 UI | `FE-027 ~ FE-029` | 🟢 완료 | `#123` |
-| | 비밀번호 변경 & 공지사항 UI | `FE-030, FE-031` | 🟢 완료 | `#124` |
-| | 내 정보 조회 & 프로필 수정 API | `GET/PATCH /api/members/me` | 🟢 완료 | `#120` |
-| | 자주 쓰는 주소 관리 CRUD API | `/api/addresses` | 🟢 완료 | `#121` |
-| | 공지사항 목록 및 상세 조회 API | `GET /api/notices` | 🟢 완료 | `#122` |
-| **Sprint 6<br/>(전역 폴리싱 & QA)** | 전역 예외 처리 & Actuator 헬스체크 | `/actuator/health` | 🟢 완료 | `#126` |
-| | 에러 토스트 & 빈 상태 UI | Toast / Empty State | ⏳ 개발 중 | `#127` |
-| | 자가 치유 하네스 & 커버리지 상향 | JaCoCo 80%+ Ratchet | ⏳ 개발 중 | `#128` |
-
----
-
 ## 💡 4. MVP 완성 및 4대 관점별 보완 방향성 (Strategy & Roadmap)
 
 MVP 기능을 신속히 마감하고 안정적인 서비스를 구축하기 위해 **4대 개발 요소 관점**에서 아래 보완 사항을 추진합니다.
@@ -138,7 +138,7 @@ graph LR
 - **MDC Trace ID 로그 시각화:** 구축된 MDC Trace ID를 Logback 파일 롤링 및 APM/Prometheus와 연동하여 에러 발생 시 1초 내 역추적 체계 완성.
 - **Actuator 헬스체크 연동:** `#74` Spring Boot Actuator (`/actuator/health`) 엔드포인트 연동으로 DB 커넥션 및 메모리 상태 주기적 관제.
 
-### 🧪 4. 테스트 (Testing & Quality Gate) 보완
+### 🧪 4. 테스트 (Testing & QA Gate) 보완
 - **E2E 통합 시나리오 테스트 구축 (`#72`):** 회원가입 ➔ 배송신청 ➔ PIN결제 ➔ 기사매칭 ➔ 배송완료로 이어지는 전 과정 Full Scenario 통합 테스트 작성.
 - **JaCoCo 커버리지 래칫 상향 (`#128`):** 현 60% 커버리지 게이트를 **80% 이상**으로 단계적 상향하여 리팩토링 안정성 확보.
 - **동시성 락(Lock) 검증 테스트 (`#71`):** 다수 기사가 동시 매칭 수락 및 결제 시 race condition이 발생하지 않음을 Multi-thread 테스트로 검증.
