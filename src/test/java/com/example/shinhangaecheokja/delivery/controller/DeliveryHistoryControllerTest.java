@@ -281,6 +281,7 @@ class DeliveryHistoryControllerTest {
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.customerId").value(1L));
 
+    verify(deliveryService).requestDelivery(eq(1L), any());
     verify(deliveryService, never()).requestDelivery(eq(999L), any());
   }
 }
