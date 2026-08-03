@@ -465,15 +465,9 @@
                     <span class="dropdown-arrow"></span>
                 </div>
                 <div class="dropdown-menu" id="dropdownMenuList">
-                    <div class="dropdown-item" data-value="오토바이"><span class="icon">🏍️</span> 오토바이</div>
-                    <div class="dropdown-item" data-value="자전거"><span class="icon">🚲</span> 자전거</div>
-                    <div class="dropdown-item" data-value="드론"><span class="icon">🛸</span> 드론</div>
-                    <div class="dropdown-item" data-value="소형차"><span class="icon">🚗</span> 소형차</div>
-                    <div class="dropdown-item" data-value="중형차"><span class="icon">🚘</span> 중형차</div>
-                    <div class="dropdown-item" data-value="대형차"><span class="icon">🚙</span> 대형차</div>
-                    <div class="dropdown-item" data-value="트럭"><span class="icon">🚚</span> 트럭</div>
-                    <div class="dropdown-item" data-value="도보"><span class="icon">🏃</span> 도보</div>
-                    <div class="dropdown-item" data-value="전동 킥보드/스쿠터"><span class="icon">🛴</span> 전동 킥보드/스쿠터</div>
+                    <div class="dropdown-item" data-value="MOTORCYCLE"><span class="icon">🏍️</span> 오토바이</div>
+                    <div class="dropdown-item" data-value="DRONE"><span class="icon">🛸</span> 드론</div>
+                    <div class="dropdown-item" data-value="CAR"><span class="icon">🚗</span> 자동차</div>
                 </div>
             </div>
         </div>
@@ -489,12 +483,12 @@
             <label>희망 배송 중량 <span class="text-required">*</span></label>
             <input type="hidden" id="preferredWeight" name="preferredWeight" required>
             <div class="weight-chips" id="weightChips">
-                <button type="button" class="weight-chip" data-weight="5kg">5kg 이하</button>
-                <button type="button" class="weight-chip" data-weight="10kg">10kg 이하</button>
-                <button type="button" class="weight-chip" data-weight="15kg">15kg 이하</button>
-                <button type="button" class="weight-chip" data-weight="20kg">20kg 이하</button>
-                <button type="button" class="weight-chip" data-weight="25kg">25kg 이하</button>
-                <button type="button" class="weight-chip" data-weight="30kg">30kg 이하</button>
+                <button type="button" class="weight-chip" data-weight="5">5kg 이하</button>
+                <button type="button" class="weight-chip" data-weight="10">10kg 이하</button>
+                <button type="button" class="weight-chip" data-weight="15">15kg 이하</button>
+                <button type="button" class="weight-chip" data-weight="20">20kg 이하</button>
+                <button type="button" class="weight-chip" data-weight="25">25kg 이하</button>
+                <button type="button" class="weight-chip" data-weight="30">30kg 이하</button>
             </div>
             <div id="weightError" class="status-badge error" style="display:none;">희망 배송 중량을 선택해주세요.</div>
         </div>
@@ -653,8 +647,6 @@
         }
 
         try {
-            // TODO: vehicle/activityRegion/preferredWeight는 아직 회원가입 API와 연결되어 있지 않다.
-            // 차량 등록은 회원가입과 별도로 POST /api/v1/vehicles 호출이 필요하다(ownerId 필요).
             const res = await fetch('/api/v1/members', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -663,7 +655,10 @@
                     email,
                     password,
                     phoneNumber,
-                    role: 'COURIER'
+                    role: 'COURIER',
+                    vehicleType: vehicle,
+                    activityRegion,
+                    preferredWeight: Number(preferredWeight)
                 })
             });
 

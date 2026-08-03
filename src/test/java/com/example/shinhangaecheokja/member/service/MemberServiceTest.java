@@ -3,8 +3,11 @@ package com.example.shinhangaecheokja.member.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import com.example.shinhangaecheokja.common.exception.BusinessException;
 import com.example.shinhangaecheokja.common.exception.EntityNotFoundException;
 import com.example.shinhangaecheokja.member.dto.request.MemberCreateRequest;
 import com.example.shinhangaecheokja.member.dto.request.MemberProfileUpdateRequestDto;
@@ -12,6 +15,9 @@ import com.example.shinhangaecheokja.member.entity.Member;
 import com.example.shinhangaecheokja.member.entity.MemberRole;
 import com.example.shinhangaecheokja.member.exception.DuplicateMemberException;
 import com.example.shinhangaecheokja.member.repository.MemberRepository;
+import com.example.shinhangaecheokja.vehicle.entity.Vehicle;
+import com.example.shinhangaecheokja.vehicle.entity.VehicleType;
+import com.example.shinhangaecheokja.vehicle.repository.VehicleRepository;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -26,6 +32,7 @@ class MemberServiceTest {
 
   @Mock private MemberRepository memberRepository;
   @Mock private PasswordEncoder passwordEncoder;
+  @Mock private VehicleRepository vehicleRepository;
   @InjectMocks private MemberService memberService;
 
   @Test
@@ -47,6 +54,53 @@ class MemberServiceTest {
 
     assertThat(response.getEmail()).isEqualTo("user@example.com");
     assertThat(response.getRole()).isEqualTo(MemberRole.CUSTOMER);
+    verifyNoInteractions(vehicleRepository);
+  }
+
+  @Test
+  @DisplayName("배송원 회원가입이면 차량을 함께 생성한다")
+  void createCourierMemberShouldCreateVehicle() {
+    MemberCreateRequest request = new MemberCreateRequest();
+    request.setEmail("courier@example.com");
+    request.setPassword("password123");
+    request.setName("박배송");
+    request.setPhoneNumber("010-3333-4444");
+    request.setRole(MemberRole.COURIER);
+    request.setVehicleType(VehicleType.MOTORCYCLE);
+    request.setActivityRegion("서울특별시 강남구");
+    request.setPreferredWeight(15.0);
+
+    when(memberRepository.existsByEmail("courier@example.com")).thenReturn(false);
+    when(passwordEncoder.encode("password123")).thenReturn("encoded-password");
+    when(memberRepository.save(any(Member.class)))
+        .thenAnswer(
+            invocation -> {
+              Member member = invocation.getArgument(0);
+              member.setId(10L);
+              return member;
+            });
+    when(vehicleRepository.save(any(Vehicle.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+    Member response = memberService.create(request);
+
+    assertThat(response.getId()).isEqualTo(10L);
+    verify(vehicleRepository).save(any(Vehicle.class));
+  }
+
+  @Test
+  @DisplayName("배송원 회원가입 필수 정보가 누락되면 예외를 던진다")
+  void createCourierMemberWithoutCourierProfileShouldThrowException() {
+    MemberCreateRequest request = new MemberCreateRequest();
+    request.setEmail("courier@example.com");
+    request.setPassword("password123");
+    request.setName("박배송");
+    request.setPhoneNumber("010-3333-4444");
+    request.setRole(MemberRole.COURIER);
+
+    when(memberRepository.existsByEmail("courier@example.com")).thenReturn(false);
+
+    assertThatThrownBy(() -> memberService.create(request)).isInstanceOf(BusinessException.class);
+    verifyNoInteractions(vehicleRepository);
   }
 
   @Test
