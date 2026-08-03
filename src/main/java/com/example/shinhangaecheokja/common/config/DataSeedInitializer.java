@@ -117,7 +117,6 @@ public class DataSeedInitializer implements CommandLineRunner {
   /** 배송 요청을 생성하고 곧바로 차량이 콜을 수락하게 해, MATCHED 상태의 배송 요청을 만든다. */
   private void createMatchedDelivery(Long customerId, Long vehicleId) {
     DeliveryCreateRequest deliveryRequest = new DeliveryCreateRequest();
-    deliveryRequest.setCustomerId(customerId);
     deliveryRequest.setPickupAddress("서울시 강남구 테헤란로 123");
     deliveryRequest.setDropoffAddress("서울시 서초구 서초대로 456");
     deliveryRequest.setWeight(10.0);
@@ -126,7 +125,7 @@ public class DataSeedInitializer implements CommandLineRunner {
     deliveryRequest.setDropoffLatitude(37.6);
     deliveryRequest.setDropoffLongitude(127.05);
     deliveryRequest.setItemSize(ItemSize.MEDIUM);
-    Long deliveryRequestId = deliveryService.requestDelivery(deliveryRequest).getId();
+    Long deliveryRequestId = deliveryService.requestDelivery(customerId, deliveryRequest).getId();
 
     MatchingCreateRequest matchingRequest = new MatchingCreateRequest();
     matchingRequest.setDeliveryRequestId(deliveryRequestId);

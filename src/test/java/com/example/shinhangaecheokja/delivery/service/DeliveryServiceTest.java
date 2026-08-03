@@ -67,7 +67,6 @@ class DeliveryServiceTest {
   @DisplayName("고객이 존재하면 REQUESTED 상태로 배송을 요청한다")
   void requestDeliverySuccess() {
     DeliveryCreateRequest request = new DeliveryCreateRequest();
-    request.setCustomerId(1L);
     request.setPickupAddress("서울시 강남구");
     request.setDropoffAddress("서울시 서초구");
     request.setWeight(10);
@@ -80,7 +79,7 @@ class DeliveryServiceTest {
     when(deliveryRequestRepository.save(any(DeliveryRequest.class)))
         .thenAnswer(invocation -> invocation.getArgument(0));
 
-    DeliveryRequest response = deliveryService.requestDelivery(request);
+    DeliveryRequest response = deliveryService.requestDelivery(1L, request);
 
     assertThat(response.getCustomerId()).isEqualTo(1L);
     assertThat(response.getFeePoint()).isEqualTo(78776L);
@@ -91,13 +90,12 @@ class DeliveryServiceTest {
   @DisplayName("존재하지 않는 고객이면 EntityNotFoundException을 던진다")
   void requestDeliveryCustomerNotFoundShouldThrowException() {
     DeliveryCreateRequest request = new DeliveryCreateRequest();
-    request.setCustomerId(999L);
     request.setWeight(10);
 
     when(memberService.getById(999L))
         .thenThrow(new EntityNotFoundException(ErrorCode.MEMBER_NOT_FOUND));
 
-    assertThatThrownBy(() -> deliveryService.requestDelivery(request))
+    assertThatThrownBy(() -> deliveryService.requestDelivery(999L, request))
         .isInstanceOf(EntityNotFoundException.class);
   }
 
@@ -105,13 +103,12 @@ class DeliveryServiceTest {
   @DisplayName("무게가 0이하면 InvalidDeliveryWeightException을 던진다")
   void requestDeliveryInvalidWeightShouldThrowException() {
     DeliveryCreateRequest request = new DeliveryCreateRequest();
-    request.setCustomerId(1L);
     request.setWeight(-5);
     request.setItemSize(ItemSize.MEDIUM);
 
     when(memberService.getById(1L)).thenReturn(new Member());
 
-    assertThatThrownBy(() -> deliveryService.requestDelivery(request))
+    assertThatThrownBy(() -> deliveryService.requestDelivery(1L, request))
         .isInstanceOf(InvalidDeliveryWeightException.class);
   }
 
@@ -119,7 +116,6 @@ class DeliveryServiceTest {
   @DisplayName("출발지와 도착지 좌표가 같으면 InvalidDeliveryDistanceException을 던진다")
   void requestDeliverySameCoordinatesShouldThrowException() {
     DeliveryCreateRequest request = new DeliveryCreateRequest();
-    request.setCustomerId(1L);
     request.setWeight(10);
     request.setPickupLatitude(37.0);
     request.setPickupLongitude(127.0);
@@ -129,7 +125,7 @@ class DeliveryServiceTest {
 
     when(memberService.getById(1L)).thenReturn(new Member());
 
-    assertThatThrownBy(() -> deliveryService.requestDelivery(request))
+    assertThatThrownBy(() -> deliveryService.requestDelivery(1L, request))
         .isInstanceOf(InvalidDeliveryDistanceException.class);
   }
 
@@ -301,7 +297,6 @@ class DeliveryServiceTest {
     estimateRequest.setItemSize(ItemSize.MEDIUM);
 
     DeliveryCreateRequest createRequest = new DeliveryCreateRequest();
-    createRequest.setCustomerId(1L);
     createRequest.setPickupAddress("서울시 강남구");
     createRequest.setDropoffAddress("서울시 서초구");
     createRequest.setWeight(10);
@@ -314,7 +309,7 @@ class DeliveryServiceTest {
         .thenAnswer(invocation -> invocation.getArgument(0));
 
     DeliveryEstimateResponse estimate = deliveryService.estimateFee(estimateRequest);
-    DeliveryRequest created = deliveryService.requestDelivery(createRequest);
+    DeliveryRequest created = deliveryService.requestDelivery(1L, createRequest);
 
     assertThat(created.getFeePoint()).isEqualTo(estimate.totalFee().longValueExact());
   }
