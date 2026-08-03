@@ -129,6 +129,7 @@ public class MemberService {
   @Transactional
   public void delete(Long memberId) {
     Member member = findMemberOrThrow(memberId);
+    vehicleRepository.findAllByOwnerId(memberId).forEach(vehicleRepository::delete);
     memberRepository.delete(member);
   }
 
