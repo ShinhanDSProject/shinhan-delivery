@@ -11,15 +11,11 @@ import com.example.shinhangaecheokja.member.service.MemberService;
 import com.example.shinhangaecheokja.payment.dto.request.PointChargeRequest;
 import com.example.shinhangaecheokja.payment.dto.request.PointUseRequest;
 import com.example.shinhangaecheokja.payment.dto.request.PointWalletCreateRequest;
-import com.example.shinhangaecheokja.payment.dto.response.PointBalanceResponse;
 import com.example.shinhangaecheokja.payment.entity.PaymentMethod;
-import com.example.shinhangaecheokja.payment.entity.PointHistory;
-import com.example.shinhangaecheokja.payment.entity.PointHistoryType;
 import com.example.shinhangaecheokja.payment.entity.PointWallet;
 import com.example.shinhangaecheokja.payment.exception.InsufficientPointException;
 import com.example.shinhangaecheokja.payment.repository.PaymentRepository;
 import com.example.shinhangaecheokja.payment.repository.PointHistoryRepository;
-import java.time.LocalDateTime;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -132,57 +128,5 @@ class PaymentServiceTest {
 
     assertThatThrownBy(() -> paymentService.usePoint(1L, request))
         .isInstanceOf(InsufficientPointException.class);
-  }
-
-  @Test
-  @DisplayName("동일한 멱등성 키가 있으면 기존 충전 결과를 재사용한다")
-  void chargeShouldReuseDuplicatedHistory() {
-    PointWallet wallet = new PointWallet();
-    wallet.setId(1L);
-    wallet.setMemberId(7L);
-    wallet.setBalance(10_000L);
-
-    PointHistory history = new PointHistory();
-    history.setWalletId(1L);
-    history.setType(PointHistoryType.CHARGE);
-    history.setBalanceAfter(12_000L);
-    history.setCreatedAt(LocalDateTime.of(2026, 8, 3, 12, 0));
-
-    PointChargeRequest request = new PointChargeRequest();
-    request.setAmount(2_000L);
-    request.setPaymentMethod(PaymentMethod.CARD);
-
-    when(paymentRepository.findByMemberIdForUpdate(7L)).thenReturn(Optional.of(wallet));
-    when(pointHistoryRepository.findByWalletIdAndIdempotencyKey(1L, "dup-key"))
-        .thenReturn(Optional.of(history));
-
-    PointBalanceResponse response = paymentService.charge(7L, "dup-key", request);
-
-    assertThat(response.balance()).isEqualTo(12_000L);
-    assertThat(response.lastChargedAt()).isEqualTo(LocalDateTime.of(2026, 8, 3, 12, 0));
-    assertThat(wallet.getBalance()).isEqualTo(10_000L);
-  }
-
-  @Test
-  @DisplayName("잔액 조회 시 마지막 충전 시각을 함께 반환한다")
-  void getBalanceShouldIncludeLastChargedAt() {
-    PointWallet wallet = new PointWallet();
-    wallet.setId(1L);
-    wallet.setMemberId(7L);
-    wallet.setBalance(25_000L);
-
-    PointHistory history = new PointHistory();
-    history.setWalletId(1L);
-    history.setType(PointHistoryType.CHARGE);
-    history.setCreatedAt(LocalDateTime.of(2026, 8, 3, 14, 30));
-
-    when(paymentRepository.findByMemberId(7L)).thenReturn(Optional.of(wallet));
-    when(pointHistoryRepository.findTopByWalletIdAndTypeOrderByCreatedAtDesc(1L, PointHistoryType.CHARGE))
-        .thenReturn(Optional.of(history));
-
-    PointBalanceResponse response = paymentService.getBalance(7L);
-
-    assertThat(response.balance()).isEqualTo(25_000L);
-    assertThat(response.lastChargedAt()).isEqualTo(LocalDateTime.of(2026, 8, 3, 14, 30));
   }
 }

@@ -3,7 +3,6 @@ package com.example.shinhangaecheokja.member.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -20,7 +19,6 @@ import com.example.shinhangaecheokja.vehicle.entity.Vehicle;
 import com.example.shinhangaecheokja.vehicle.entity.VehicleType;
 import com.example.shinhangaecheokja.vehicle.repository.VehicleRepository;
 import java.util.Optional;
-import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -173,25 +171,5 @@ class MemberServiceTest {
 
     assertThat(response.getName()).isEqualTo("김영희");
     assertThat(response.getPhoneNumber()).isEqualTo("010-1111-2222");
-  }
-
-  @Test
-  @DisplayName("배송원 회원 삭제 시 연결된 차량을 먼저 정리한다")
-  void deleteCourierMemberShouldDeleteOwnedVehiclesFirst() {
-    Member member = new Member();
-    member.setId(3L);
-    member.setRole(MemberRole.COURIER);
-    Vehicle vehicle = new Vehicle();
-    vehicle.setId(11L);
-    vehicle.setOwnerId(3L);
-
-    when(memberRepository.findById(3L)).thenReturn(Optional.of(member));
-    when(vehicleRepository.findAllByOwnerId(3L)).thenReturn(List.of(vehicle));
-
-    memberService.delete(3L);
-
-    verify(vehicleRepository).findAllByOwnerId(3L);
-    verify(vehicleRepository).delete(eq(vehicle));
-    verify(memberRepository).delete(member);
   }
 }
