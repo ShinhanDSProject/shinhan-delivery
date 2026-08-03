@@ -13,9 +13,7 @@ import com.example.shinhangaecheokja.delivery.entity.DeliveryStatus;
 import com.example.shinhangaecheokja.delivery.entity.ItemSize;
 import com.example.shinhangaecheokja.delivery.event.DeliveryStatusChangedEvent;
 import com.example.shinhangaecheokja.delivery.exception.AlreadyMatchedException;
-import com.example.shinhangaecheokja.delivery.exception.InvalidDeliveryDistanceException;
 import com.example.shinhangaecheokja.delivery.exception.InvalidDeliveryTransitionException;
-import com.example.shinhangaecheokja.delivery.exception.InvalidDeliveryWeightException;
 import com.example.shinhangaecheokja.delivery.exception.ProofPhotoNotFoundException;
 import com.example.shinhangaecheokja.delivery.repository.DeliveryRequestRepository;
 import com.example.shinhangaecheokja.delivery.repository.MatchingRepository;
@@ -53,7 +51,6 @@ public class DeliveryService {
   @Transactional
   public DeliveryRequest requestDelivery(DeliveryCreateRequest request) {
     memberService.getById(request.getCustomerId());
-    validateWeight(request.getWeight());
 
     double distanceKm =
         calculateHaversineDistance(
@@ -61,7 +58,6 @@ public class DeliveryService {
             request.getPickupLongitude(),
             request.getDropoffLatitude(),
             request.getDropoffLongitude());
-    validateDistance(distanceKm);
 
     DeliveryEstimateResponse fee =
         calculateFee(distanceKm, request.getWeight(), request.getItemSize());
@@ -207,19 +203,6 @@ public class DeliveryService {
       throw new ProofPhotoNotFoundException(deliveryRequestId);
     }
     return ProofPhotoResponse.from(deliveryRequest);
-  }
-
-  private void validateWeight(double weight) {
-    if (weight <= 0) {
-      throw new InvalidDeliveryWeightException(weight);
-    }
-  }
-
-  /** 출발지·도착지 좌표가 같으면(거리 0) 유효하지 않은 배송 요청으로 거절한다. */
-  private void validateDistance(double distanceKm) {
-    if (distanceKm <= 0) {
-      throw new InvalidDeliveryDistanceException(distanceKm);
-    }
   }
 
   private DeliveryRequest findDeliveryRequestOrThrow(Long deliveryRequestId) {

@@ -120,7 +120,7 @@ public class DataSeedInitializer implements CommandLineRunner {
     deliveryRequest.setCustomerId(customerId);
     deliveryRequest.setPickupAddress("서울시 강남구 테헤란로 123");
     deliveryRequest.setDropoffAddress("서울시 서초구 서초대로 456");
-    deliveryRequest.setWeight(10);
+    deliveryRequest.setWeight(10.0);
     deliveryRequest.setPickupLatitude(37.5);
     deliveryRequest.setPickupLongitude(127.0);
     deliveryRequest.setDropoffLatitude(37.6);
