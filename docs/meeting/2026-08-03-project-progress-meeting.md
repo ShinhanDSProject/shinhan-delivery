@@ -66,16 +66,18 @@ Spring Boot 4.1.0 & Thymeleaf 기반 스마트 퀵배송 & 온디맨드 매칭 �
 
 ---
 
-## 👥 3. 팀원별 담당 성과 및 기여 내역 공유
+## 👥 3. 팀원별 상세 성과 & 역량 성장 (Team Contributions & Learning)
 
-| 팀원 | 역할 및 핵심 기여 내용 |
-| :--- | :--- |
-| **Sungmin Jo** | • **팀 개발 환경 & CI/CD & 거버넌스 총괄**: 단일 원본(SSOT) 코딩 컨벤션(`code-convention.md`, `CLAUDE.md`, `AGENTS.md`) 정립, GitHub Issue PRD 템플릿 및 `/plan` 기획 파이프라인 구축 (`#159`, `#161`), GitHub Actions CI/CD 파이프라인 & 원클릭 PR 하네스 (`./scripts/verify.sh`, `./pr`) 구축<br/>• **Code Review 문화 & 족보 가이드 수립**: 리뷰어 3분 족보 가이드(`docs/pr-review-guide.md`) 및 표준 PR 템플릿(`.github/pull_request_template.md`) 구축으로 공감 코드 리뷰 문화 확립<br/>• **Flyway & 품질 게이트 연동**: Flyway 무중단 Online DDL 린팅 구축, Checkstyle & Spotless 코드 포맷터 연동 (`#196`), ArchUnit 검증 & JaCoCo 60%+ 커버리지 게이트 통제, 단일 `main` 브랜치 Flow 수립 (`#201`)<br/>• **아키텍처 리팩토링 & AI**: `DeliveryFeeCalculator` 요금 산정 헬퍼 분리 (`#208`), Service-Controller DTO/Entity 책임 분리 (`#194`, `#199`), LangGraph AI 오케스트레이션 파이프라인 (`#154`) |
-| **Yeeun** | • **UI/UX 실전 디자인**: Figma를 활용한 30+개 화면(온보딩, 메인, 배송신청, PIN 결제, 실시간 추적, 마이페이지 등) 와이어프레임 및 UX Flow 설계 |
-| **haejin** | • **디자인 시스템 표준화**: Yeeun 님의 Figma 스펙 기반 디자인 토큰(Primary/Secondary 색상, 버튼, 카드 모듈) 정립 및 `design-system.md` 동기화 |
-| **kms7522 (강민성)** | • **배송/매칭 코어 & 동시성 & API**: 매칭/결제 동시성 제어 (`#71`), 배송 요금 산정 API (`#99`), 배송 내역 조회 API (`#205`), 공통 이미지 업로드 API (`#101`), 알림 목록 API (`#102`, `#145`), 카테고리 API (`#100`), 실시간 WebSocket 브로드캐스트 (`#189`, `#207`) |
-| **jaeya1006-arch** | • **마이페이지 & 회원 UI**: 프로필 편집 & 주소 관리 UI (`#155`), 비밀번호 변경 & 공지사항 UI (`#160`), 홈-마이페이지 동선 연결 (`#167`) |
-| **mwzzang00-ctrl** | • **회원 API & 주소록/공지사항**: 내 정보 조회 & 프로필 수정 REST API (`#144`), 주소록 CRUD API (`#146`), 공지사항 조회 API (`#147`) |
+팀원별 주요 실전 작업 성과와 기술 역량 성장(Learning & Growth) 공유 항목입니다.
+
+| 팀원 | 역할 | 주요 실전 성과 | 기술 역량 성장 & 학습 내용 (Learning & Growth) |
+| :--- | :--- | :--- | :--- |
+| **김예은 (Yeeun)** | UI/UX 디자이너 & FE | • **Figma UI/UX Design 전체 화면 설계:** 온보딩, 배송 신청, 실시간 추적, 마이페이지 등 **30+개 화면 컴포넌트 & UX Flow 디자인** 완료 | • **Git & GitHub:** 팀 Git Flow 분기 및 마이크로 커밋 협업 방식 터득<br/>• **Database & API:** RDBMS 데이터 구조 및 포인트 충전 API 비즈니스 구조 학습 |
+| **김민석 (kms7522)** | 백엔드 & 동시성/실시간 | • **웹소켓/STOMP 실시간 푸시 & 보안:** `/status` 구독 채널 권한 검증 및 배송 상태 브로드캐스트<br/>• **핵심 REST API 완비:** 배송 요금 산정(`POST /api/deliveries/estimate`), 이미지 업로드, 알림 목록, 카테고리, 배송 내역 API | • **동시성 처리 (Concurrency):** 낙관적/비관적 락을 활용한 다중 배차/결제 Race Condition 방지 기법 터득<br/>• **하네스 엔지니어링:** `./scripts/verify.sh` 기반 품질 검증 자가 치유 피드백 루프 습득 |
+| **남윤재 (jaeya1006-arch)** | 프론트엔드 & 마이페이지 UI | • **마이페이지 & 설정 UI 구현:** Figma 연동 프로필 편집, 주소 관리, 비밀번호 변경, 공지사항 및 홈 대시보드 동선 연결 | • **Git & GitHub:** 브랜치 전략 및 PR 협업 절차 체득<br/>• **백엔드 구조 이해:** `Controller ➔ Service ➔ Repository` 레이어드 아키텍처 큰 흐름 이해<br/>• **Spring & Security:** 핵심 어노테이션 및 JWT 인증/인가 체계 학습 |
+| **전민욱 (mwzzang00-ctrl)** | 백엔드 & 회원/주소록 | • **회원 & 주소록 API 구현:** 내 정보 조회/수정 (`/api/members/me`), 자주 쓰는 주소록 CRUD (`/api/addresses`), 공지사항 API 개발 | • **도메인 흐름 이해:** 주소 관리, 회원가입, 로그인 코드 공부 및 JPA 처리 흐름 습득<br/>• **Git & GitHub:** 버전 관리 및 이슈 기반 팀 협업 터득 |
+| **Sungmin Jo** | 개발환경 & 거버넌스 & AI | • **팀 개발 환경 & CI/CD 총괄:** 단일 원본(SSOT) 코딩 컨벤션(`code-convention.md`, `CLAUDE.md`, `AGENTS.md`) 정립, GitHub Issue PRD 템플릿 & `/plan` 기획 파이프라인 (`#159`), GitHub Actions CI/CD & 원클릭 PR 하네스 (`./scripts/verify.sh`, `./pr`) 구축<br/>• **Code Review & 품질 통제:** 리뷰어 3분 족보 가이드(`docs/pr-review-guide.md`) 수립, Flyway DDL 린팅, Checkstyle/Spotless 포맷터, ArchUnit 검증 & JaCoCo 60%+ 커버리지 게이트 통제 | • **AI 오케스트레이션:** LangGraph 기반 이슈 자동화 파이프라인 구축 (`#154`) |
+| **haejin** | 디자인 시스템 표준화 | • **공통 디자인 시스템 구축:** Figma 스펙 기반 디자인 토큰(색상, 타이포그래피, 버튼) 및 `design-system.md` 표준화 | • **Thymeleaf 연동:** 전역 CSS 및 공통 프래그먼트 표준화 |
 
 ---
 
@@ -89,7 +91,7 @@ Spring Boot 4.1.0 & Thymeleaf 기반 스마트 퀵배송 & 온디맨드 매칭 �
 
 ### ⚙️ 나. 기능 개발 (Feature Development)
 - MVP 결제/매칭 오픈 이슈(`#107`~`#111`) 개발 마감 후 **피처 락(Feature Lock)** 수행.
-- Code Review 족보 가이드(5대 표준 구성 요소) 준수로 PR 리뷰 소요 시간 단축.
+- Code Review 족보 가이드(5대 표준 구성 요소) 준수로 PR 리뷰 시간 단축.
 - Security Context 기반 `customerId` 강제 매핑으로 신원 위조 보안 문제(`#204`) 해결.
 
 ### 📊 다. 모니터링 (Observability & Ops)

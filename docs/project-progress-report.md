@@ -71,65 +71,65 @@
 
 ---
 
-## 👥 3. 팀원별 상세 작업 성과 (Team Member Contributions)
+## 👥 3. 팀원별 상세 성과 & 역량 성장 (Team Contributions & Learning)
 
-각 팀원이 주도적으로 담당하여 완료한 세부 개발 내역입니다.
+각 팀원이 주도적으로 담당하여 완료한 세부 개발 내역 및 기술 성장 공유 항목입니다.
 
 ```mermaid
 graph TD
     subgraph "신한 개척자 개발팀 (Dev Team)"
-        YE["Yeeun<br/>(Figma UI/UX 실전 디자인)"]
+        YE["김예은 (Yeeun)<br/>(Figma UI/UX & 포인트 API 학습)"]
+        MS["김민석 (kms7522)<br/>(WebSocket/STOMP & 동시성 & 하네스)"]
+        YJ["남윤재 (jaeya1006-arch)<br/>(마이페이지 UI & Layered Architecture)"]
+        MW["전민욱 (mwzzang00-ctrl)<br/>(회원/주소 API & Git Flow)"]
+        SJ["Sungmin Jo<br/>(개발환경 & 품질 & CI/CD)"]
         HJ["haejin<br/>(디자인 시스템 토큰 & 문서화)"]
-        SJ["Sungmin Jo<br/>(개발환경 & 품질 & AI)"]
-        MS["kms7522 / 강민성<br/>(배송/매칭 Core & 동시성 & API)"]
-        JY["jaeya1006-arch<br/>(마이페이지 & 회원 UI)"]
-        MW["mwzzang00-ctrl<br/>(회원 API & 주소록/공지사항)"]
     end
 ```
 
-### 👨‍💻 Sungmin Jo (팀 개발 환경 구축 / 품질 거버넌스 / AI 오케스트레이션)
-- **팀 코딩 컨벤션 & 단일 원본(SSOT) 거버넌스 정립 (`#197`)**
-  - 개발 생산성을 높이고 코드 스타일을 일관되게 유지하기 위해 `code-convention.md`, `CLAUDE.md`, `AGENTS.md` 규격 정립.
-- **GitHub Issue PRD 템플릿 & 이슈 기획 자동화 파이프라인 수립 (`#159`, `#161`)**
-  - 표준 GitHub Issue Form PRD 템플릿 도입 및 `/plan <이슈번호>` 명령어로 이슈 기획서를 자동 작성·연동하는 파이프라인 구축.
-- **Code Review 문화 & 리뷰어 3분 족보 가이드 정립 (`docs/pr-review-guide.md`)**
-  - 리뷰어 3분 족보 가이드(5대 표준 구성 요소) 및 PR 템플릿(`.github/pull_request_template.md`) 구축으로 공감 코드 리뷰 문화 수립.
-- **GitHub Actions CI/CD & 원클릭 검증 하네스 구축 (`#181`, `#201`)**
-  - GitHub Actions CI/CD 빌드/테스트 파이프라인 연동 및 원클릭 검증·PR 제출 하네스(`./scripts/verify.sh`, `./pr`) 구축.
-- **Flyway 무중단 DDL & 품질 게이트 연동 (`#128`, `#188`, `#196`)**
-  - Flyway 무중단 Online DDL 린팅 규칙 연동, Checkstyle & Spotless 포맷터, ArchUnit 검증 & JaCoCo 60%+ 커버리지 게이트 통제.
-- **아키텍처 리팩토링 & AI 파이프라인 구축 (`#154`, `#194`, `#199`, `#208`)**
-  - `DeliveryFeeCalculator` 헬퍼 분리 (`#208`), Service-Controller DTO/Entity 책임 분리 (`#194`, `#199`) 및 LangGraph AI 파이프라인 수립 (`#154`).
+### 🎨 김예은 (Yeeun) | UI/UX 디자이너 & FE
+- **🎨 실전 개발 성과:**
+  - **Figma UI/UX Design 전체 화면 설계:** 온보딩, 배송 신청, 실시간 추적, 마이페이지 등 애플리케이션 **30+개 전역 화면 컴포넌트 & UX Flow 디자인 완료**.
+- **🌱 기술 역량 성장 & 학습 (Learning & Growth):**
+  - **Git & GitHub 협업:** 팀 Git Flow 분기 및 마이크로 커밋 협업 방식 터득.
+  - **Database & 포인트 충전 API 학습:** RDBMS 데이터 구조 이해 및 포인트 충전 비즈니스 API 구조 학습.
 
-### 🎨 Yeeun (UI/UX 디자이너 - 애플리케이션 화면 디자인)
-- **Figma 기반 실제 애플리케이션 UI/UX 디자인 완비**
-  - Figma를 활용해 스플래시, 워크스루, 소셜 로그인/회원가입, 메인 대시보드, 주소 입력/지도 SDK, 배송 카테고리 선택, 결제 PIN 키패드, 실시간 위치 추적, 마이페이지 등 **실제 애플리케이션의 30+개 화면 컴포넌트 및 레이아웃 와이어프레임을 디자인**.
-  - 사용자 중심 동선(UX Flow) 설계 및 일관된 시각적 아이덴티티(UI Identity) 정립.
+### 👨‍💻 김민석 (kms7522) | 백엔드 & 동시성/실시간 코어
+- **⚡ 실전 개발 성과:**
+  - **웹소켓/STOMP 기반 실시간 통신 및 보안:** `/status` 구독 채널 권한 검증 및 배송 상태 실시간 푸시 구축.
+  - **핵심 REST API 완비:** 배송 요금 산정(`POST /api/deliveries/estimate`), 이미지 업로드, 알림 목록, 카테고리, 배송 내역 API 구현.
+- **🌱 기술 역량 성장 & 학습 (Learning & Growth):**
+  - **동시성 제어 (Concurrency):** 낙관적 락(Optimistic Lock) & 비관적 락(Pessimistic Lock)을 활용한 다중 배차/결제 Race Condition 차단 기법 터득.
+  - **하네스 엔지니어링 (Harness Engineering):** `./scripts/verify.sh` 및 Flyway/Spotless/ArchUnit 품질 통제 자가 치유 피드백 루프 습득.
 
-### 👩‍🎨 haejin (디자인 시스템 규격 수립 & 퍼블리싱 지원)
-- **공통 디자인 시스템 문서화 및 토큰 구조화 (`design-system.md`)**
-  - Yeeun 님이 Figma로 디자인한 규격을 바탕으로 버튼, 카드, 색상 팔레트(Primary/Secondary), 타이포그래피 토큰을 정립.
-  - `static/css/design-system.css` 및 Thymeleaf 프래그먼트 컴포넌트 표준 동기화.
+### 👨‍💻 남윤재 (jaeya1006-arch) | 프론트엔드 & 마이페이지 UI
+- **🖥️ 실전 개발 성과:**
+  - **마이페이지 & 설정 UI 구현:** Figma 연동 프로필 편집, 주소 관리, 비밀번호 변경, 공지사항 및 홈 대시보드 동선 연결.
+- **🌱 기술 역량 성장 & 학습 (Learning & Growth):**
+  - **Git & GitHub 사용법 터득:** 브랜치 전략 및 PR 협업 절차 체득.
+  - **백엔드 아키텍처 흐름 이해:** `Controller ➔ Service ➔ Repository` 단방향 의존성 레이어드 구조 습득.
+  - **Spring 어노테이션 & JWT 학습:** 핵심 어노테이션(`@Controller`, `@Service`, `@Transactional` 등) 및 JWT 인증/인가 동작 원리 체득.
 
-### 👨‍💻 kms7522 / 강민성 (배송 & 매칭 코어 API / 동시성 제어 / 실시간 UI / 알림)
-- **배송원 매칭 & 포인트 결제 동시성 제어 (`#71`)**
-  - 동시 결제 및 배차 수락 시 발생할 수 있는 Race Condition 방지를 위한 JPA Lock 기반 동시성 제어 로직 구축.
-- **핵심 배송 및 공통 REST API 완비**
-  - **배송 요금 산정 API (`#99`):** `POST /api/deliveries/estimate` 출발/도착지 거리 및 물품 중량 기반 요금 수식 구현.
-  - **배송 내역 목록/상세 조회 API (`#205`):** `GET /api/deliveries` (페이징, 상태 필터링, 회원 Scoping 적용).
-  - **공통 이미지 업로드 API (`#101`):** `POST /api/uploads/image` 멀티파트 이미지 업로드 및 파일 스토리지 저장 처리.
-  - **알림 목록 조회/읽음 처리 API (`#102`, `#145`):** `GET/PATCH /api/v1/notifications` 배송 상태 변경 및 알림 조회.
-  - **물품 카테고리 목록 조회 API (`#100`):** `GET /api/categories` 퀵배송 카테고리 정보 제공.
-- **실시간 배송 트랙 & WebSocket 브로드캐스트 (`#184`, `#189`, `#207`)**
-  - STOMP 기반 배송 상태 실시간 푸시, `/status` 구독 채널 권한 검증 및 배송 완료 문앞 사진 증거 API 구현.
-- **Figma 연동 핵심 웹 UI 구현 (`#103`, `#104`, `#105`, `#165`, `#183`, `#187`)**
-  - 지도 SDK 주소 입력, 실시간 추적 & 문앞 사진 확인 UI, 대시보드, 알림 센터, 카테고리 선택 UI 구축.
+### 👨‍💻 전민욱 (mwzzang00-ctrl) | 백엔드 & 회원/주소록 API
+- **⚙️ 실전 개발 성과:**
+  - **회원 & 주소록/공지사항 REST API 구현:** 내 정보 조회/수정 (`/api/members/me`), 자주 쓰는 주소록 CRUD (`/api/addresses`), 공지사항 조회 API 개발.
+- **🌱 기술 역량 성장 & 학습 (Learning & Growth):**
+  - **도메인 코드 흐름 체득:** 주소 관리, 회원가입, 로그인 비즈니스 로직 및 JPA 데이터 처리 흐름 심층 이해.
+  - **Git & GitHub 터득:** 버전 관리 및 이슈 기반 팀 협업 지식 습득.
 
-### 👩‍💻 jaeya1006-arch (마이페이지 & 회원 관리 UI)
-- **Figma 연동 마이페이지 UI 구현 (`#155`, `#160`, `#167`)**: 프로필 편집, 주소 관리, 비밀번호 변경, 공지사항 UI 연동 개발.
+### 👨‍💻 Sungmin Jo | 팀 개발 환경 구축 / 품질 거버넌스 / AI 오케스트레이션
+- **🛠️ 실전 개발 성과:**
+  - **팀 코딩 컨벤션 & 단일 원본(SSOT) 거버넌스 정립 (`#197`):** 개발 생산성을 높이고 코드 스타일을 일관되게 유지하기 위해 `code-convention.md`, `CLAUDE.md`, `AGENTS.md` 규격 정립.
+  - **GitHub Issue PRD 템플릿 & 기획 자동화 수립 (`#159`, `#161`):** 표준 Issue Form PRD 템플릿 도입 및 `/plan <이슈번호>` 기획 자동화 구축.
+  - **Code Review 문화 & 리뷰어 3분 족보 가이드 정립 (`docs/pr-review-guide.md`):** 리뷰어 3분 족보 가이드 및 PR 템플릿(`.github/pull_request_template.md`) 구축.
+  - **GitHub Actions CI/CD & 원클릭 검증 하네스 구축 (`#181`, `#201`):** CI/CD 파이프라인 연동 및 원클릭 검증·PR 제출 하네스(`./scripts/verify.sh`, `./pr`) 구축.
+  - **Flyway 무중단 DDL & 품질 게이트 연동 (`#128`, `#188`, `#196`):** Flyway 무중단 Online DDL 린팅 규칙 연동, Checkstyle & Spotless 포맷터, ArchUnit 검증 & JaCoCo 60%+ 게이트 통제.
+- **🌱 기술 역량 성장 & 학습 (Learning & Growth):**
+  - **AI 오케스트레이션:** LangGraph 기반 이슈 자동화 파이프라인 구축 (`#154`).
 
-### 👨‍💻 mwzzang00-ctrl (회원 정보/주소록 API & 공지사항)
-- **내 정보 조회 및 프로필 수정 API (`#144`)**, **주소 관리 CRUD API (`#146`)**, **공지사항 조회 API (`#147`)** 개발.
+### 👩‍🎨 haejin | 디자인 시스템 표준화
+- **📐 실전 개발 성과:**
+  - **공통 디자인 시스템 구축:** Figma 스펙 기반 디자인 토큰(색상, 타이포그래피, 버튼) 및 `design-system.md` 표준화.
 
 ---
 
