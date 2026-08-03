@@ -3,6 +3,8 @@ package com.example.shinhangaecheokja.delivery.controller;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -206,9 +208,14 @@ class DeliveryHistoryControllerTest {
   void createDeliveryLatitudeOutOfRangeShouldReturn400() throws Exception {
     String token = jwtProvider.createAccessToken(1L, "user@test.com", "CUSTOMER");
     DeliveryCreateRequest request = new DeliveryCreateRequest();
+    request.setPickupAddress("서울시 강남구");
+    request.setDropoffAddress("서울시 서초구");
     request.setWeight(10);
     request.setPickupLatitude(200);
     request.setPickupLongitude(127.0);
+    request.setDropoffLatitude(38.0);
+    request.setDropoffLongitude(127.0);
+    request.setItemSize(ItemSize.MEDIUM);
 
     mockMvc
         .perform(
@@ -226,6 +233,11 @@ class DeliveryHistoryControllerTest {
     DeliveryCreateRequest request = new DeliveryCreateRequest();
     request.setDropoffAddress("서울시 서초구");
     request.setWeight(10);
+    request.setPickupLatitude(37.0);
+    request.setPickupLongitude(127.0);
+    request.setDropoffLatitude(38.0);
+    request.setDropoffLongitude(127.0);
+    request.setItemSize(ItemSize.MEDIUM);
 
     mockMvc
         .perform(
@@ -234,5 +246,41 @@ class DeliveryHistoryControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  @DisplayName("요청 바디에 customerId를 끼워 보내도 무시되고 로그인한 회원 id로 생성된다")
+  void requestDeliveryIgnoresSpoofedCustomerIdInRawJson() throws Exception {
+    String token = jwtProvider.createAccessToken(1L, "user@test.com", "CUSTOMER");
+    String rawJsonWithSpoofedCustomerId =
+        """
+        {
+          "customerId": 999,
+          "pickupAddress": "서울시 강남구",
+          "dropoffAddress": "서울시 서초구",
+          "weight": 10,
+          "pickupLatitude": 37.0,
+          "pickupLongitude": 127.0,
+          "dropoffLatitude": 38.0,
+          "dropoffLongitude": 127.0,
+          "itemSize": "MEDIUM"
+        }
+        """;
+
+    DeliveryRequest created = new DeliveryRequest();
+    created.setCustomerId(1L);
+    created.setStatus(DeliveryStatus.REQUESTED);
+    when(deliveryService.requestDelivery(eq(1L), any())).thenReturn(created);
+
+    mockMvc
+        .perform(
+            post("/api/v1/delivery-requests")
+                .header("Authorization", "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(rawJsonWithSpoofedCustomerId))
+        .andExpect(status().isCreated())
+        .andExpect(jsonPath("$.customerId").value(1L));
+
+    verify(deliveryService, never()).requestDelivery(eq(999L), any());
   }
 }
