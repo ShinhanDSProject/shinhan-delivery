@@ -1,5 +1,6 @@
 package com.example.shinhangaecheokja.common.security;
 
+import com.example.shinhangaecheokja.common.logging.MdcLoggingFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -39,7 +40,8 @@ public class SecurityConfig {
                     .anyRequest()
                     .permitAll()) // 기존 46개 테스트 호환을 위해 permitAll 적용 후 @PreAuthorize 권한제어
         .addFilterBefore(
-            new JwtAuthenticationFilter(jwtProvider), UsernamePasswordAuthenticationFilter.class);
+            new JwtAuthenticationFilter(jwtProvider), UsernamePasswordAuthenticationFilter.class)
+        .addFilterBefore(new MdcLoggingFilter(), JwtAuthenticationFilter.class);
 
     return http.build();
   }

@@ -222,7 +222,7 @@ public class DuplicateMemberException extends BusinessException {
 
 모든 예외 → HTTP 응답 변환은 **전역 예외 처리기(`GlobalExceptionHandler`)**가 한곳에서 담당한다. Controller에 `try-catch`를 작성하지 않는다.
 
-- **`ErrorResponse` DTO**: `status`, `code`, `message`, `timestamp`, `errors`(유효성 검사 세부 내역) 필드로 구성되며, `@JsonInclude(NON_EMPTY)`를 적용해 불필요한 null/빈 배열 출력을 직렬화에서 생략한다.
+- **`ErrorResponse` DTO**: `status`, `code`, `message`, `timestamp`, `traceId`, `errors`(유효성 검사 세부 내역) 필드로 구성되며, `@JsonInclude(NON_EMPTY)`를 적용해 불필요한 null/빈 배열 출력을 직렬화에서 생략한다.
 - **`GlobalExceptionHandler`**: `@RestControllerAdvice` 기반으로 `BusinessException`, `MethodArgumentNotValidException`(@Valid 실패), `HttpMessageNotReadableException`(JSON 파싱 실패), `HttpRequestMethodNotSupportedException`, 및 `Exception`(500 스택트레이스 은폐)을 수집 포착한다.
 
 ### 6.3 예외 → HTTP 상태코드 & 에러코드 매핑 기준
@@ -234,6 +234,14 @@ public class DuplicateMemberException extends BusinessException {
 | 중복/충돌 | `409 Conflict` | `DUPLICATE_EMAIL` (`M002`) | 이미 가입된 이메일 주소입니다. |
 | 잔액 부족 등 비즈니스 규칙 위반 | `400 Bad Request` | `INSUFFICIENT_BALANCE` (`P002`) | 포인트 잔액이 부족합니다. |
 | 미처 포착하지 못한 서버 내부 오류 | `500 Internal Server Error` | `INTERNAL_SERVER_ERROR` (`C003`) | 서버 내부 오류가 발생했습니다. (스택트레이스 서버 로깅 후 은폐) |
+
+### 6.4 관측가능성: Trace ID (`MdcLoggingFilter`)
+
+모든 HTTP 요청은 `Security` 필터 체인의 `MdcLoggingFilter`를 가장 먼저 통과한다. 이 필터가 요청 헤더 `X-Trace-Id`(없으면 신규 UUID)를 SLF4J MDC에 `traceId`로 주입하고, 요청 종료 시 `MDC.clear()`로 정리한다.
+
+- 그 결과 해당 요청 처리 중 찍히는 모든 로그 라인(`logback-spring.xml` 패턴에 `[%X{traceId}]` 반영)과 `ErrorResponse.traceId`가 자동으로 같은 값을 갖는다.
+- 개발자는 로그를 남기거나 예외를 던질 때 traceId를 직접 다루는 코드를 작성할 필요가 없다 — 필터가 이미 MDC에 넣어둔 값을 로깅 프레임워크와 `ErrorResponse`가 알아서 읽는다.
+- 장애 문의 시 클라이언트가 알려준 `traceId`로 로그를 검색하면 해당 요청의 전체 처리 과정을 즉시 역추적할 수 있다.
 
 ---
 

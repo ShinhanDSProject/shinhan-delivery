@@ -4,8 +4,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import jakarta.validation.ConstraintViolationException;
 import java.util.Set;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.slf4j.MDC;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -14,6 +16,27 @@ import org.springframework.web.servlet.NoHandlerFoundException;
 class GlobalExceptionHandlerTest {
 
   private final GlobalExceptionHandler handler = new GlobalExceptionHandler();
+
+  @AfterEach
+  void clearMdc() {
+    MDC.clear();
+  }
+
+  @Test
+  @DisplayName("MdcLoggingFilter가 주입한 traceId가 ErrorResponse에 그대로 담긴다.")
+  void handleBusinessExceptionIncludesTraceIdFromMdc() {
+    // given
+    MDC.put("traceId", "test-trace-id");
+    BusinessException exception = new BusinessException(ErrorCode.MEMBER_NOT_FOUND);
+
+    // when
+    ResponseEntity<ErrorResponse> responseEntity = handler.handleBusinessException(exception);
+
+    // then
+    ErrorResponse body = responseEntity.getBody();
+    assertThat(body).isNotNull();
+    assertThat(body.getTraceId()).isEqualTo("test-trace-id");
+  }
 
   @Test
   @DisplayName("비즈니스 예외(BusinessException) 발생 시 설정된 HTTP 상태와 ErrorCode 정보가 반환된다.")
