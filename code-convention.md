@@ -23,7 +23,7 @@
 
 ## 2. 패키지 구조
 
-**도메인을 최상위로 나누고, 그 안에서 레이어(controller/service/repository/entity/dto/exception)를 둔다.** 같은 기능(도메인)에 관련된 파일들이 한 폴더 안에 모여있어서, 기능 단위로 찾고 수정하기 쉽다.
+**도메인을 최상위로 나누고, 그 안에서 레이어(controller/service/repository/entity/dto/exception, 필요 시 helper)를 둔다.** 같은 기능(도메인)에 관련된 파일들이 한 폴더 안에 모여있어서, 기능 단위로 찾고 수정하기 쉽다.
 
 ```
 com.company.delivery
@@ -73,6 +73,8 @@ com.company.delivery
 │   ├── service
 │   │   ├── DeliveryService.java
 │   │   └── MatchingService.java
+│   ├── helper
+│   │   └── DeliveryFeeCalculator.java
 │   ├── controller
 │   │   └── DeliveryController.java
 │   ├── dto
@@ -107,6 +109,7 @@ com.company.delivery
 - 도메인 간에 공통으로 쓰는 것(전역 예외 처리기, 설정 클래스 등)만 `common` 패키지에 둔다. `common`이 특정 도메인 전용 로직을 담는 곳이 되지 않도록 주의한다.
 - 도메인 하나 안의 파일이 너무 많아지면(예: `delivery`가 계속 커지면) `delivery.request`, `delivery.matching`처럼 도메인을 더 잘게 쪼갠다.
 - Repository는 Entity 1개당 1개씩 만든다 (`MemberRepository` ↔ `Member`, ...).
+- Repository·Service 등 외부 협력 객체 의존 없이 순수 계산·변환만 하는 로직(복잡한 산출식, 좌표/거리 계산 등)이 무거워지면 `helper` 서브패키지로 분리한다 (§5.1 참고). 여러 도메인이 공유하는 계산 로직이면 `common.helper`에 둔다.
 
 ---
 
@@ -119,6 +122,7 @@ com.company.delivery
 | Repository | `~Repository`, `JpaRepository` 상속 | `interface VehicleRepository extends JpaRepository<Vehicle, Long>` |
 | Service | `~Service` | `VehicleService` |
 | Service의 public 메서드 | 동사로 시작 | `registerVehicle(...)`, `matchCourier(...)` |
+| Helper | 역할이 드러나는 이름(`~Helper`, `~Calculator` 등), 상태 없는 `@Component` | `DeliveryFeeCalculator` |
 | Controller | `~Controller` | `DeliveryController` |
 | 커스텀 예외 | `~Exception`, `RuntimeException` 상속 | `InvalidWeightException` |
 | DTO | `{도메인}{동작}{Request\|Response}` | `DeliveryCreateRequest`, `DeliveryCreateResponse` |
@@ -192,6 +196,29 @@ public class VehicleService {
 ```
 
 - Service는 다른 Service를 호출할 수 있다 (예: `DeliveryService`가 `PaymentService`를 호출). 단, **순환 호출**(A가 B를 부르고 B가 다시 A를 부르는 구조)은 금지 — 순환이 필요해 보이면 로직을 상위 UseCase성 메서드로 합치거나 이벤트로 분리한다.
+
+### 5.1 Helper 클래스 규칙 (Stateless Computation Helper Standard)
+
+**원칙:** §1의 6번(SLAP) 원칙에 따라, Repository나 다른 Service 같은 외부 협력 객체에 의존하지 않는 순수 계산·변환 로직(복잡한 산출식, 좌표/거리 계산, 문자열 파싱 등)이 Service 메서드 안에서 무거워지면 도메인 패키지의 `helper` 서브패키지로 분리한다.
+
+- **위치:** `{도메인}.helper.{이름}` (예: `delivery.helper.DeliveryFeeCalculator`). 여러 도메인이 공유하는 계산 로직이면 `common.helper`에 둔다.
+- **이름:** 역할이 드러나는 이름을 쓴다 (`~Calculator`, `~Formatter`, `~Helper` 등).
+- **상태를 갖지 않는다:** 인스턴스 필드로 Repository·Service·외부 자원을 주입받지 않는다. `static final` 상수만 둘 수 있다. 상태나 외부 협력이 필요해지는 순간 그건 Helper가 아니라 Service다.
+- **Spring 빈으로 등록하되 트랜잭션은 없다:** `@Component`로 등록해 Service에 생성자 주입하지만, `@Transactional`은 붙이지 않는다 — 트랜잭션 경계는 Service의 책임이다.
+- **Spring 컨텍스트 없이 단위 테스트 가능해야 한다:** `new`로 직접 생성해 순수 로직만 검증할 수 있어야 하고, Mockito 테스트에서는 mocking 없이 `@Spy`로 실제 인스턴스를 그대로 사용한다.
+
+```java
+@Component
+public class DeliveryFeeCalculator {
+
+    private static final BigDecimal BASE_FEE = BigDecimal.valueOf(3000);
+
+    public DeliveryEstimateResponse calculateFee(double distanceKm, double weight, ItemSize itemSize) {
+        // Repository/Service 의존 없는 순수 계산
+        ...
+    }
+}
+```
 
 ---
 
@@ -619,6 +646,7 @@ void 도메인은_다른_도메인의_repository를_직접_참조하지_않는�
 - [ ] 잔액/배정처럼 동시 요청에 취약한 로직을 변경했다면 `findByIdForUpdate`(비관적 락)와 동시성 테스트(`docs/concurrency-control-guide.md`)를 추가했는가?
 - [ ] `@Autowired` 필드 주입이 아니라 생성자 주입을 쓰는가?
 - [ ] Repository가 Entity 1개당 1개씩 대응되는가?
+- [ ] Service에서 Repository/Service 의존 없는 순수 계산·변환 로직을 새로 추출했다면 `helper` 서브패키지의 상태 없는 `@Component`로 분리했는가? (§5.1)
 - [ ] 다른 도메인의 Repository/Entity를 직접 참조하지 않고, 필요하면 그 도메인의 Service를 거쳤는가?
 - [ ] Enum 필드에 `@Enumerated(EnumType.STRING)`을 썼는가? (`ORDINAL` 금지)
 - [ ] 새로 추가한 서비스 로직에 단위 테스트가 있는가? (영문 메서드명 + `@DisplayName` 사용)
