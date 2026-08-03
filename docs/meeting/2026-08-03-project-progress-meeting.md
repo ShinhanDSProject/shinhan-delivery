@@ -3,7 +3,7 @@
 > **회의 일시:** 2026년 8월 3일 (월) 14:00 ~ 15:00  
 > **회의 성격:** 프로젝트 진행 상황 점검, 팀원 성과 공유 & MVP 전략 수립 회의  
 > **작성자 / 기록:** 개발팀 공통  
-> **문서 위치:** `docs/meeting-minutes/2026-08-03-project-progress-meeting.md`
+> **문서 위치:** `docs/meeting/2026-08-03-project-progress-meeting.md`
 
 ---
 
@@ -62,6 +62,6 @@ Spring Boot 4.1.0 & Thymeleaf 기반 스마트 퀵배송 & 온디맨드 매칭 �
 
 ## 📂 5. 회의록 관리 컨벤션 결정
 
-- **관리 경로:** `docs/meeting-minutes/`
+- **관리 경로:** `docs/meeting/`
 - **파일명 규격:** `YYYY-MM-DD-<주제-키워드>.md` (예: `2026-08-03-project-progress-meeting.md`)
 - **원칙:** 날짜 기반으로 회의록을 체계적으로 관리하며, 단일 원본(SSOT) 원칙을 유지.
