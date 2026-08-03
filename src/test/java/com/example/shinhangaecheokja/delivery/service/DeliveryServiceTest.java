@@ -14,11 +14,13 @@ import com.example.shinhangaecheokja.delivery.dto.request.DeliveryCompleteReques
 import com.example.shinhangaecheokja.delivery.dto.request.DeliveryCreateRequest;
 import com.example.shinhangaecheokja.delivery.dto.request.DeliveryEstimateRequest;
 import com.example.shinhangaecheokja.delivery.dto.request.DeliveryUpdateRequest;
+import com.example.shinhangaecheokja.delivery.dto.response.DeliveryDetailResponseDto;
 import com.example.shinhangaecheokja.delivery.dto.response.DeliveryEstimateResponse;
 import com.example.shinhangaecheokja.delivery.dto.response.ProofPhotoResponse;
 import com.example.shinhangaecheokja.delivery.entity.DeliveryRequest;
 import com.example.shinhangaecheokja.delivery.entity.DeliveryStatus;
 import com.example.shinhangaecheokja.delivery.entity.ItemSize;
+import com.example.shinhangaecheokja.delivery.entity.Matching;
 import com.example.shinhangaecheokja.delivery.event.DeliveryStatusChangedEvent;
 import com.example.shinhangaecheokja.delivery.exception.AlreadyMatchedException;
 import com.example.shinhangaecheokja.delivery.exception.InvalidDeliveryDistanceException;
@@ -29,8 +31,11 @@ import com.example.shinhangaecheokja.delivery.repository.DeliveryRequestReposito
 import com.example.shinhangaecheokja.delivery.repository.MatchingRepository;
 import com.example.shinhangaecheokja.member.entity.Member;
 import com.example.shinhangaecheokja.member.service.MemberService;
+import com.example.shinhangaecheokja.vehicle.entity.Vehicle;
+import com.example.shinhangaecheokja.vehicle.service.VehicleService;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -39,12 +44,17 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 @ExtendWith(MockitoExtension.class)
 class DeliveryServiceTest {
 
   @Mock private DeliveryRequestRepository deliveryRequestRepository;
   @Mock private MemberService memberService;
+  @Mock private VehicleService vehicleService;
   @Mock private MatchingRepository matchingRepository;
   @Mock private ApplicationEventPublisher eventPublisher;
   @InjectMocks private DeliveryService deliveryService;
@@ -408,5 +418,73 @@ class DeliveryServiceTest {
 
     assertThatThrownBy(() -> deliveryService.getProofPhoto(1L))
         .isInstanceOf(ProofPhotoNotFoundException.class);
+  }
+
+  @Test
+  @DisplayName("status가 없으면 회원의 전체 배송 내역을 최신순으로 조회한다")
+  void getMyDeliveryRequestsWithoutStatusReturnsAll() {
+    Pageable pageable = PageRequest.of(0, 10);
+    DeliveryRequest deliveryRequest = new DeliveryRequest();
+    deliveryRequest.setStatus(DeliveryStatus.COMPLETED);
+    when(deliveryRequestRepository.findByCustomerIdOrderByCreatedAtDesc(1L, pageable))
+        .thenReturn(new PageImpl<>(List.of(deliveryRequest)));
+
+    Page<DeliveryRequest> result = deliveryService.getMyDeliveryRequests(1L, null, pageable);
+
+    assertThat(result.getContent()).hasSize(1);
+    assertThat(result.getContent().get(0).getStatus()).isEqualTo(DeliveryStatus.COMPLETED);
+    verify(deliveryRequestRepository, never())
+        .findByCustomerIdAndStatusOrderByCreatedAtDesc(any(), any(), any());
+  }
+
+  @Test
+  @DisplayName("status가 있으면 그 상태로만 필터링해 조회한다")
+  void getMyDeliveryRequestsWithStatusFiltersByStatus() {
+    Pageable pageable = PageRequest.of(0, 10);
+    when(deliveryRequestRepository.findByCustomerIdAndStatusOrderByCreatedAtDesc(
+            1L, DeliveryStatus.CANCELLED, pageable))
+        .thenReturn(new PageImpl<>(List.of()));
+
+    Page<DeliveryRequest> result =
+        deliveryService.getMyDeliveryRequests(1L, DeliveryStatus.CANCELLED, pageable);
+
+    assertThat(result.getContent()).isEmpty();
+    verify(deliveryRequestRepository, never()).findByCustomerIdOrderByCreatedAtDesc(any(), any());
+  }
+
+  @Test
+  @DisplayName("매칭된 배송원이 있으면 상세조회에 배송원 이름이 담긴다")
+  void getDeliveryRequestDetailWithCourierIncludesCourierName() {
+    DeliveryRequest deliveryRequest = new DeliveryRequest();
+    deliveryRequest.setStatus(DeliveryStatus.MATCHED);
+    when(deliveryRequestRepository.findById(1L)).thenReturn(Optional.of(deliveryRequest));
+
+    Matching matching = new Matching();
+    matching.setVehicleId(10L);
+    when(matchingRepository.findByDeliveryRequestId(1L)).thenReturn(Optional.of(matching));
+
+    Vehicle vehicle = Vehicle.builder().id(10L).ownerId(20L).build();
+    when(vehicleService.getById(10L)).thenReturn(vehicle);
+
+    Member courier = new Member();
+    courier.setName("박배송");
+    when(memberService.getById(20L)).thenReturn(courier);
+
+    DeliveryDetailResponseDto response = deliveryService.getDeliveryRequestDetail(1L);
+
+    assertThat(response.courierName()).isEqualTo("박배송");
+  }
+
+  @Test
+  @DisplayName("매칭된 배송원이 없으면 상세조회의 배송원 이름은 null이다")
+  void getDeliveryRequestDetailWithoutCourierHasNullCourierName() {
+    DeliveryRequest deliveryRequest = new DeliveryRequest();
+    deliveryRequest.setStatus(DeliveryStatus.REQUESTED);
+    when(deliveryRequestRepository.findById(1L)).thenReturn(Optional.of(deliveryRequest));
+    when(matchingRepository.findByDeliveryRequestId(1L)).thenReturn(Optional.empty());
+
+    DeliveryDetailResponseDto response = deliveryService.getDeliveryRequestDetail(1L);
+
+    assertThat(response.courierName()).isNull();
   }
 }

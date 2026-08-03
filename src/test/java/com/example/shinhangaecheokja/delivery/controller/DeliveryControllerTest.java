@@ -14,6 +14,7 @@ import com.example.shinhangaecheokja.common.exception.ErrorCode;
 import com.example.shinhangaecheokja.delivery.dto.request.DeliveryCompleteRequest;
 import com.example.shinhangaecheokja.delivery.dto.request.DeliveryCreateRequest;
 import com.example.shinhangaecheokja.delivery.dto.request.DeliveryEstimateRequest;
+import com.example.shinhangaecheokja.delivery.dto.response.DeliveryDetailResponseDto;
 import com.example.shinhangaecheokja.delivery.dto.response.DeliveryEstimateResponse;
 import com.example.shinhangaecheokja.delivery.dto.response.ProofPhotoResponse;
 import com.example.shinhangaecheokja.delivery.entity.DeliveryRequest;
@@ -193,10 +194,38 @@ class DeliveryControllerTest {
   @Test
   @DisplayName("존재하지 않는 배송 요청을 조회하면 404를 반환한다")
   void getDeliveryNotFoundShouldReturn404() throws Exception {
-    when(deliveryService.getDeliveryRequest(eq(999L)))
+    when(deliveryService.getDeliveryRequestDetail(eq(999L)))
         .thenThrow(new EntityNotFoundException(ErrorCode.DELIVERY_NOT_FOUND));
 
     mockMvc.perform(get("/api/v1/delivery-requests/999")).andExpect(status().isNotFound());
+  }
+
+  @Test
+  @DisplayName("배송 요청 상세를 조회하면 배송원 이름을 포함한 응답을 반환한다")
+  void getDeliveryRequestDetailSuccess() throws Exception {
+    DeliveryDetailResponseDto response =
+        new DeliveryDetailResponseDto(
+            1L,
+            1L,
+            "서울시 강남구",
+            "서울시 서초구",
+            10.0,
+            5.0,
+            DeliveryStatus.MATCHED,
+            78776L,
+            37.0,
+            127.0,
+            38.0,
+            127.0,
+            ItemSize.MEDIUM,
+            "박배송",
+            null);
+    when(deliveryService.getDeliveryRequestDetail(1L)).thenReturn(response);
+
+    mockMvc
+        .perform(get("/api/v1/delivery-requests/1"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.courierName").value("박배송"));
   }
 
   @Test
