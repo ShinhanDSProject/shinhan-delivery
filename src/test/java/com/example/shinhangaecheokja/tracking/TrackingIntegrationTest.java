@@ -9,10 +9,12 @@ import com.example.shinhangaecheokja.delivery.entity.Matching;
 import com.example.shinhangaecheokja.delivery.entity.MatchingStatus;
 import com.example.shinhangaecheokja.delivery.repository.DeliveryRequestRepository;
 import com.example.shinhangaecheokja.delivery.repository.MatchingRepository;
+import com.example.shinhangaecheokja.delivery.service.DeliveryService;
 import com.example.shinhangaecheokja.member.entity.Member;
 import com.example.shinhangaecheokja.member.entity.MemberRole;
 import com.example.shinhangaecheokja.member.repository.MemberRepository;
 import com.example.shinhangaecheokja.tracking.dto.request.LocationUpdateRequest;
+import com.example.shinhangaecheokja.tracking.dto.response.DeliveryStatusBroadcastResponse;
 import com.example.shinhangaecheokja.tracking.dto.response.LocationBroadcastResponse;
 import com.example.shinhangaecheokja.vehicle.entity.Vehicle;
 import com.example.shinhangaecheokja.vehicle.entity.VehicleStatus;
@@ -42,8 +44,8 @@ import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
 
 /**
- * WebSocketStompClient로 실제 임베디드 서버에 접속해, 배송원이 발행한 위치가 매칭된 고객에게만 브로드캐스트되고 관계없는 회원에게는 전달되지 않는지 검증하는
- * 통합 테스트입니다.
+ * WebSocketStompClient로 실제 임베디드 서버에 접속해, 배송원이 발행한 위치와 배송 상태 변경이 매칭된 당사자에게만 브로드캐스트되고 관계없는 회원에게는 전달되지
+ * 않는지 검증하는 통합 테스트입니다.
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class TrackingIntegrationTest {
@@ -55,6 +57,7 @@ class TrackingIntegrationTest {
   @Autowired private VehicleRepository vehicleRepository;
   @Autowired private DeliveryRequestRepository deliveryRequestRepository;
   @Autowired private MatchingRepository matchingRepository;
+  @Autowired private DeliveryService deliveryService;
 
   private WebSocketStompClient stompClient;
 
@@ -143,7 +146,8 @@ class TrackingIntegrationTest {
     BlockingQueue<LocationBroadcastResponse> strangerReceived = new LinkedBlockingQueue<>();
     StompSession strangerSubscribeSession = connect(strangerId, "CUSTOMER");
     strangerSubscribeSession.subscribe(
-        "/topic/delivery/" + deliveryId + "/location", frameHandler(strangerReceived));
+        "/topic/delivery/" + deliveryId + "/location",
+        frameHandler(strangerReceived, LocationBroadcastResponse.class));
 
     StompSession strangerSendSession = connect(strangerId, "CUSTOMER");
     strangerSendSession.send("/app/delivery/" + deliveryId + "/location", locationUpdate(0.0, 0.0));
@@ -158,24 +162,63 @@ class TrackingIntegrationTest {
     assertThat(strangerReceived.poll(1, TimeUnit.SECONDS)).isNull();
   }
 
+  @Test
+  @DisplayName("배송 상태가 바뀌면 당사자(고객)가 상태 변경 브로드캐스트를 수신한다")
+  void broadcastStatusChangeShouldReachOwner() throws Exception {
+    BlockingQueue<DeliveryStatusBroadcastResponse> received = subscribeToStatusAsCustomer();
+
+    deliveryService.confirmPickup(deliveryId);
+
+    DeliveryStatusBroadcastResponse broadcast = received.poll(5, TimeUnit.SECONDS);
+
+    assertThat(broadcast).isNotNull();
+    assertThat(broadcast.deliveryId()).isEqualTo(deliveryId);
+    assertThat(broadcast.status()).isEqualTo(DeliveryStatus.PICKED_UP);
+  }
+
+  @Test
+  @DisplayName("권한없는 회원은 상태 변경 채널을 구독해도 브로드캐스트를 받지 못한다")
+  void broadcastStatusChangeUnauthorizedShouldBeIgnored() throws Exception {
+    BlockingQueue<DeliveryStatusBroadcastResponse> strangerReceived = new LinkedBlockingQueue<>();
+    StompSession strangerSession = connect(strangerId, "CUSTOMER");
+    strangerSession.subscribe(
+        "/topic/delivery/" + deliveryId + "/status",
+        frameHandler(strangerReceived, DeliveryStatusBroadcastResponse.class));
+
+    deliveryService.confirmPickup(deliveryId);
+
+    assertThat(strangerReceived.poll(2, TimeUnit.SECONDS)).isNull();
+  }
+
   private BlockingQueue<LocationBroadcastResponse> subscribeAsCustomer() throws Exception {
     BlockingQueue<LocationBroadcastResponse> received = new LinkedBlockingQueue<>();
     StompSession customerSession = connect(customerId, "CUSTOMER");
     customerSession.subscribe(
-        "/topic/delivery/" + deliveryId + "/location", frameHandler(received));
+        "/topic/delivery/" + deliveryId + "/location",
+        frameHandler(received, LocationBroadcastResponse.class));
     return received;
   }
 
-  private StompFrameHandler frameHandler(BlockingQueue<LocationBroadcastResponse> queue) {
+  private BlockingQueue<DeliveryStatusBroadcastResponse> subscribeToStatusAsCustomer()
+      throws Exception {
+    BlockingQueue<DeliveryStatusBroadcastResponse> received = new LinkedBlockingQueue<>();
+    StompSession customerSession = connect(customerId, "CUSTOMER");
+    customerSession.subscribe(
+        "/topic/delivery/" + deliveryId + "/status",
+        frameHandler(received, DeliveryStatusBroadcastResponse.class));
+    return received;
+  }
+
+  private <T> StompFrameHandler frameHandler(BlockingQueue<T> queue, Class<T> payloadType) {
     return new StompFrameHandler() {
       @Override
       public Type getPayloadType(StompHeaders headers) {
-        return LocationBroadcastResponse.class;
+        return payloadType;
       }
 
       @Override
       public void handleFrame(StompHeaders headers, Object payload) {
-        queue.add((LocationBroadcastResponse) payload);
+        queue.add(payloadType.cast(payload));
       }
     };
   }

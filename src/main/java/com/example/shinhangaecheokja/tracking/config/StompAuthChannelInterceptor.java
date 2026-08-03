@@ -16,13 +16,15 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
 
-/** STOMP CONNECT 시 JWT를 검증해 인증 주체를 세션에 설정하고, SUBSCRIBE 시 배송 추적 채널 접근 권한을 검증한다. */
+/**
+ * STOMP CONNECT 시 JWT를 검증해 인증 주체를 세션에 설정하고, SUBSCRIBE 시 배송 추적 채널 접근 권한을 검증한다. 위치 (`/location`)와 상태
+ * 변경(`/status`) 브로드캐스트 채널 모두 같은 배송 소유자·배정 배송원 검증을 거친다.
+ */
 @Component
 @RequiredArgsConstructor
 public class StompAuthChannelInterceptor implements ChannelInterceptor {
 
-  private static final String SUBSCRIBE_DESTINATION_PATTERN =
-      "/topic/delivery/{deliveryId}/location";
+  private static final String SUBSCRIBE_DESTINATION_PATTERN = "/topic/delivery/{deliveryId}/**";
   private static final AntPathMatcher PATH_MATCHER = new AntPathMatcher();
 
   private final JwtProvider jwtProvider;
