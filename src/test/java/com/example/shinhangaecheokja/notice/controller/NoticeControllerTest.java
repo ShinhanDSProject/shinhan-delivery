@@ -6,8 +6,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.example.shinhangaecheokja.notice.dto.response.NoticeDetailResponse;
-import com.example.shinhangaecheokja.notice.dto.response.NoticeResponse;
+import com.example.shinhangaecheokja.notice.entity.Notice;
 import com.example.shinhangaecheokja.notice.exception.NoticeNotFoundException;
 import com.example.shinhangaecheokja.notice.service.NoticeService;
 import java.time.LocalDateTime;
@@ -29,11 +28,18 @@ class NoticeControllerTest {
 
   @Test
   @DisplayName("GET /api/v1/notices 요청 시 공지사항 목록 페이징 결과를 반환한다")
-  void getNotices_Success() throws Exception {
-    NoticeResponse notice =
-        new NoticeResponse(
-            1L, "[안내] 서비스 점검 안내", "SYSTEM", true, LocalDateTime.now(), LocalDateTime.now());
-    when(noticeService.getNotices(any(), any())).thenReturn(new PageImpl<>(List.of(notice)));
+  void getNoticesSuccess() throws Exception {
+    Notice notice =
+        Notice.builder()
+            .id(1L)
+            .title("[안내] 서비스 점검 안내")
+            .content("내용")
+            .category("SYSTEM")
+            .isPinned(true)
+            .createdAt(LocalDateTime.now())
+            .updatedAt(LocalDateTime.now())
+            .build();
+    when(noticeService.list(any(), any())).thenReturn(new PageImpl<>(List.of(notice)));
 
     mockMvc
         .perform(get("/api/v1/notices"))
@@ -46,17 +52,18 @@ class NoticeControllerTest {
 
   @Test
   @DisplayName("GET /api/v1/notices/{id} 요청 시 공지사항 상세 정보를 반환한다")
-  void getNoticeDetail_Success() throws Exception {
-    NoticeDetailResponse detail =
-        new NoticeDetailResponse(
-            1L,
-            "[안내] 서비스 점검 안내",
-            "점검 본문 내용입니다.",
-            "SYSTEM",
-            true,
-            LocalDateTime.now(),
-            LocalDateTime.now());
-    when(noticeService.getNoticeDetail(1L)).thenReturn(detail);
+  void getNoticeDetailSuccess() throws Exception {
+    Notice detail =
+        Notice.builder()
+            .id(1L)
+            .title("[안내] 서비스 점검 안내")
+            .content("점검 본문 내용입니다.")
+            .category("SYSTEM")
+            .isPinned(true)
+            .createdAt(LocalDateTime.now())
+            .updatedAt(LocalDateTime.now())
+            .build();
+    when(noticeService.getById(1L)).thenReturn(detail);
 
     mockMvc
         .perform(get("/api/v1/notices/1"))
@@ -68,8 +75,8 @@ class NoticeControllerTest {
 
   @Test
   @DisplayName("존재하지 않는 공지사항 ID로 GET /api/v1/notices/{id} 요청 시 404 에러를 반환한다")
-  void getNoticeDetail_NotFound() throws Exception {
-    when(noticeService.getNoticeDetail(999L)).thenThrow(new NoticeNotFoundException());
+  void getNoticeDetailNotFound() throws Exception {
+    when(noticeService.getById(999L)).thenThrow(new NoticeNotFoundException());
 
     mockMvc
         .perform(get("/api/v1/notices/999"))

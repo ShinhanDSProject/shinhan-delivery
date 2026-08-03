@@ -15,6 +15,7 @@ import com.example.shinhangaecheokja.vehicle.entity.Vehicle;
 import com.example.shinhangaecheokja.vehicle.entity.VehicleStatus;
 import com.example.shinhangaecheokja.vehicle.entity.VehicleType;
 import com.example.shinhangaecheokja.vehicle.service.VehicleService;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -32,7 +33,8 @@ class VehicleControllerTest {
   @MockitoBean private VehicleService vehicleService;
 
   @Test
-  void 차량_생성_요청을_받으면_생성된_차량을_반환한다() throws Exception {
+  @DisplayName("차량 생성 요청을 받으면 생성된 차량을 반환한다")
+  void registerVehicleSuccess() throws Exception {
     VehicleCreateRequest request = new VehicleCreateRequest();
     request.setOwnerId(1L);
     request.setType(VehicleType.CAR);
@@ -50,7 +52,7 @@ class VehicleControllerTest {
             .longitude(127.0)
             .status(VehicleStatus.AVAILABLE)
             .build();
-    when(vehicleService.registerVehicle(any())).thenReturn(vehicle);
+    when(vehicleService.create(any())).thenReturn(vehicle);
 
     mockMvc
         .perform(
@@ -63,7 +65,8 @@ class VehicleControllerTest {
   }
 
   @Test
-  void 경도가_범위를_벗어나면_400을_반환한다() throws Exception {
+  @DisplayName("경도가 범위를 벗어나면 400을 반환한다")
+  void registerVehicleLongitudeOutOfRangeShouldReturn400() throws Exception {
     VehicleCreateRequest request = new VehicleCreateRequest();
     request.setOwnerId(1L);
     request.setType(VehicleType.CAR);
@@ -81,7 +84,8 @@ class VehicleControllerTest {
   }
 
   @Test
-  void 소유자_id가_없으면_400을_반환한다() throws Exception {
+  @DisplayName("소유자 id가 없으면 400을 반환한다")
+  void registerVehicleMissingOwnerIdShouldReturn400() throws Exception {
     VehicleCreateRequest request = new VehicleCreateRequest();
     request.setType(VehicleType.CAR);
     request.setMaxWeight(500);
@@ -96,8 +100,9 @@ class VehicleControllerTest {
   }
 
   @Test
-  void 존재하지_않는_차량을_조회하면_404를_반환한다() throws Exception {
-    when(vehicleService.getVehicle(eq(999L)))
+  @DisplayName("존재하지 않는 차량을 조회하면 404를 반환한다")
+  void getVehicleNotFoundShouldReturn404() throws Exception {
+    when(vehicleService.getById(eq(999L)))
         .thenThrow(new EntityNotFoundException(ErrorCode.VEHICLE_NOT_FOUND));
 
     mockMvc.perform(get("/api/v1/vehicles/999")).andExpect(status().isNotFound());

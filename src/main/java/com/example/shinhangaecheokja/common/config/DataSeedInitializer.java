@@ -126,12 +126,12 @@ public class DataSeedInitializer implements CommandLineRunner {
     deliveryRequest.setDropoffLatitude(37.6);
     deliveryRequest.setDropoffLongitude(127.05);
     deliveryRequest.setItemSize(ItemSize.MEDIUM);
-    Long deliveryRequestId = deliveryService.requestDelivery(deliveryRequest).id();
+    Long deliveryRequestId = deliveryService.requestDelivery(deliveryRequest).getId();
 
     MatchingCreateRequest matchingRequest = new MatchingCreateRequest();
     matchingRequest.setDeliveryRequestId(deliveryRequestId);
     matchingRequest.setVehicleId(vehicleId);
-    matchingService.createMatching(matchingRequest);
+    matchingService.create(matchingRequest);
   }
 
   /** 알림센터 UI(홈 화면 배지, 목록·필터)를 로컬에서 바로 확인할 수 있도록 카테고리별 알림을 만든다. */

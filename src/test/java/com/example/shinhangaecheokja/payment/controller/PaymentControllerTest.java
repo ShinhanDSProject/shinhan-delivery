@@ -13,6 +13,7 @@ import com.example.shinhangaecheokja.common.exception.ErrorCode;
 import com.example.shinhangaecheokja.payment.dto.request.PointWalletCreateRequest;
 import com.example.shinhangaecheokja.payment.entity.PointWallet;
 import com.example.shinhangaecheokja.payment.service.PaymentService;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -30,12 +31,16 @@ class PaymentControllerTest {
   @MockitoBean private PaymentService paymentService;
 
   @Test
-  void 지갑_생성_요청을_받으면_생성된_지갑을_반환한다() throws Exception {
+  @DisplayName("지갑 생성 요청을 받으면 생성된 지갑을 반환한다")
+  void createWalletSuccess() throws Exception {
     PointWalletCreateRequest request = new PointWalletCreateRequest();
     request.setMemberId(1L);
 
-    PointWallet wallet = PointWallet.builder().id(1L).memberId(1L).balance(0L).build();
-    when(paymentService.createWallet(any())).thenReturn(wallet);
+    PointWallet wallet = new PointWallet();
+    wallet.setId(1L);
+    wallet.setMemberId(1L);
+    wallet.setBalance(0L);
+    when(paymentService.create(any())).thenReturn(wallet);
 
     mockMvc
         .perform(
@@ -44,12 +49,13 @@ class PaymentControllerTest {
                 .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.memberId").value(1L))
-        .andExpect(jsonPath("$.balance").value(0));
+        .andExpect(jsonPath("$.balance").value(0L));
   }
 
   @Test
-  void 존재하지_않는_지갑을_조회하면_404를_반환한다() throws Exception {
-    when(paymentService.getWallet(eq(999L)))
+  @DisplayName("존재하지 않는 지갑을 조회하면 404를 반환한다")
+  void getWalletNotFoundShouldReturn404() throws Exception {
+    when(paymentService.getById(eq(999L)))
         .thenThrow(new EntityNotFoundException(ErrorCode.POINT_WALLET_NOT_FOUND));
 
     mockMvc.perform(get("/api/v1/point-wallets/999")).andExpect(status().isNotFound());

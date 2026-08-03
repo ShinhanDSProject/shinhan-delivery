@@ -20,7 +20,7 @@
 - `@Transactional`은 `Service` 계층에만 붙입니다. Controller는 DTO만 다루고 Entity를 직접 반환하지 않습니다.
 - 포맷팅은 Spotless + google-java-format으로 강제됩니다(2칸 들여쓰기, wildcard import 금지) — 스타일 취향이 아니라 규칙이므로, 커밋 전에 `spotlessApply`를 실행하세요.
 - 개발자가 채팅창에 `/plan <이슈번호>`(예: `/plan 108`)를 입력하면 백그라운드에서 `python3 scripts/langgraph/issue_plan_graph.py <이슈번호>`를 자동 구동하여 GitHub Issue 수집 및 GraphRAG 탐색 후 `implementation_plan.md`를 생성하고 개발자 승인을 기다려야 합니다.
-- 커밋 메시지: `type: 설명`(Conventional Commits 기반, 한글 설명), `type`은 `feat|fix|refactor|test|docs|chore` 중 하나(컨벤션 §16). 브랜치명: `feat/도메인-내용`, `develop`을 대상으로 PR합니다(`hotfix`는 `main` 예외).
+- 커밋 메시지: `type: 설명`(Conventional Commits 기반, 한글 설명), `type`은 `feat|fix|refactor|test|docs|chore` 중 하나(컨벤션 §16). 브랜치명: `feat/도메인-내용`, `main`을 대상으로 PR합니다(`main` 단일 브랜치 전략, 이슈 #200).
 
 ## 명령어
 
@@ -58,5 +58,5 @@ gradlew.bat spotlessApply      # 컨벤션에 맞게 자동 포맷팅
 
 - 베이스 패키지: `com.example.shinhangaecheokja`.
 - `code-convention.md` §2 기준 목표 구조: `controller`(DTO만 다룸), `service`(비즈니스 로직·트랜잭션·예외 발생), `repository`(`~Repository extends JpaRepository<Entity, Long>`, Entity 1개당 1개), `entity`(`@Entity` + Lombok), `dto/{request,response}`, `exception`(커스텀 예외 + `GlobalExceptionHandler`), `config`.
-- 새 도메인 로직을 추가할 때는 "Controller → Service → Repository" 단방향 의존과 "Repository는 Service/Controller에 의존하지 않는다"는 규칙(컨벤션 §14)을 지키세요. 아직 이 규칙을 빌드 시점에 강제하는 ArchUnit 테스트는 없으니, 필요하면 컨벤션 §14의 예시를 참고해 추가하세요.
+- 새 도메인 로직을 추가할 때는 "Controller → Service → Repository" 단방향 의존과 "Repository는 Service/Controller에 의존하지 않는다"는 규칙(컨벤션 §14)을 지키세요. 이 규칙은 `src/test/java/com/example/shinhangaecheokja/common/LayeredArchitectureTest.java`의 ArchUnit 테스트로 빌드 시점에 이미 강제되고 있습니다.
 - 영속성: MariaDB(`org.mariadb.jdbc`) 대상 Spring Data JPA + Flyway. 스키마 변경은 항상 새 마이그레이션 파일(`src/main/resources/db/migration/V<n>__설명.sql`)로 추가하고, `spring.jpa.hibernate.ddl-auto`는 `validate`(또는 `none`)로 유지합니다 — Hibernate가 스키마를 직접 생성하게 하면 안 됩니다.

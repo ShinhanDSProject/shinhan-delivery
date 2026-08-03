@@ -8,13 +8,12 @@ import static org.mockito.Mockito.when;
 import com.example.shinhangaecheokja.common.exception.EntityNotFoundException;
 import com.example.shinhangaecheokja.member.dto.request.MemberCreateRequest;
 import com.example.shinhangaecheokja.member.dto.request.MemberProfileUpdateRequestDto;
-import com.example.shinhangaecheokja.member.dto.response.MemberProfileResponseDto;
-import com.example.shinhangaecheokja.member.dto.response.MemberResponse;
 import com.example.shinhangaecheokja.member.entity.Member;
 import com.example.shinhangaecheokja.member.entity.MemberRole;
 import com.example.shinhangaecheokja.member.exception.DuplicateMemberException;
 import com.example.shinhangaecheokja.member.repository.MemberRepository;
 import java.util.Optional;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -30,7 +29,8 @@ class MemberServiceTest {
   @InjectMocks private MemberService memberService;
 
   @Test
-  void 이메일이_중복되지_않으면_회원을_생성한다() {
+  @DisplayName("이메일이 중복되지 않으면 회원을 생성한다")
+  void createMemberSuccess() {
     MemberCreateRequest request = new MemberCreateRequest();
     request.setEmail("user@example.com");
     request.setPassword("password123");
@@ -43,32 +43,34 @@ class MemberServiceTest {
     when(memberRepository.save(any(Member.class)))
         .thenAnswer(invocation -> invocation.getArgument(0));
 
-    Member response = memberService.createMember(request);
+    Member response = memberService.create(request);
 
     assertThat(response.getEmail()).isEqualTo("user@example.com");
     assertThat(response.getRole()).isEqualTo(MemberRole.CUSTOMER);
   }
 
   @Test
-  void 이메일이_중복되면_DuplicateMemberException을_던진다() {
+  @DisplayName("이메일이 중복되면 DuplicateMemberException을 던진다")
+  void createMemberDuplicateEmailShouldThrowException() {
     MemberCreateRequest request = new MemberCreateRequest();
     request.setEmail("dup@example.com");
     when(memberRepository.existsByEmail("dup@example.com")).thenReturn(true);
 
-    assertThatThrownBy(() -> memberService.createMember(request))
+    assertThatThrownBy(() -> memberService.create(request))
         .isInstanceOf(DuplicateMemberException.class);
   }
 
   @Test
-  void 존재하지_않는_회원을_조회하면_EntityNotFoundException을_던진다() {
+  @DisplayName("존재하지 않는 회원을 조회하면 EntityNotFoundException을 던진다")
+  void getMemberNotFoundShouldThrowException() {
     when(memberRepository.findById(1L)).thenReturn(Optional.empty());
 
-    assertThatThrownBy(() -> memberService.getMember(1L))
-        .isInstanceOf(EntityNotFoundException.class);
+    assertThatThrownBy(() -> memberService.getById(1L)).isInstanceOf(EntityNotFoundException.class);
   }
 
   @Test
-  void 존재하는_회원을_조회하면_MemberResponse를_반환한다() {
+  @DisplayName("존재하는 회원을 조회하면 Member를 반환한다")
+  void getMemberSuccess() {
     Member member = new Member();
     member.setEmail("user@example.com");
     member.setName("홍길동");
@@ -76,13 +78,14 @@ class MemberServiceTest {
     member.setRole(MemberRole.COURIER);
     when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
 
-    MemberResponse response = memberService.getMember(1L);
+    Member response = memberService.getById(1L);
 
-    assertThat(response.email()).isEqualTo("user@example.com");
+    assertThat(response.getEmail()).isEqualTo("user@example.com");
   }
 
   @Test
-  void 로그인한_본인의_프로필을_조회한다() {
+  @DisplayName("로그인한 본인의 프로필을 조회한다")
+  void getMyProfileSuccess() {
     Member member = new Member();
     member.setEmail("my@example.com");
     member.setName("김철수");
@@ -90,15 +93,16 @@ class MemberServiceTest {
     member.setRole(MemberRole.CUSTOMER);
     when(memberRepository.findById(2L)).thenReturn(Optional.of(member));
 
-    MemberProfileResponseDto response = memberService.getMyProfile(2L);
+    Member response = memberService.getMyProfile(2L);
 
-    assertThat(response.email()).isEqualTo("my@example.com");
-    assertThat(response.name()).isEqualTo("김철수");
-    assertThat(response.phoneNumber()).isEqualTo("010-9876-5432");
+    assertThat(response.getEmail()).isEqualTo("my@example.com");
+    assertThat(response.getName()).isEqualTo("김철수");
+    assertThat(response.getPhoneNumber()).isEqualTo("010-9876-5432");
   }
 
   @Test
-  void 로그인한_본인의_프로필_이름과_연락처를_수정한다() {
+  @DisplayName("로그인한 본인의 프로필 이름과 연락처를 수정한다")
+  void updateMyProfileSuccess() {
     Member member = new Member();
     member.setEmail("my@example.com");
     member.setName("김철수");
@@ -109,9 +113,9 @@ class MemberServiceTest {
     MemberProfileUpdateRequestDto request =
         new MemberProfileUpdateRequestDto("김영희", "010-1111-2222");
 
-    MemberProfileResponseDto response = memberService.updateMyProfile(2L, request);
+    Member response = memberService.updateMyProfile(2L, request);
 
-    assertThat(response.name()).isEqualTo("김영희");
-    assertThat(response.phoneNumber()).isEqualTo("010-1111-2222");
+    assertThat(response.getName()).isEqualTo("김영희");
+    assertThat(response.getPhoneNumber()).isEqualTo("010-1111-2222");
   }
 }

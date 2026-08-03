@@ -20,6 +20,7 @@ import com.example.shinhangaecheokja.common.security.CustomUserDetails;
 import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -57,7 +58,8 @@ class AddressControllerTest {
   }
 
   @Test
-  void 인증된_사용자의_주소_목록을_조회한다() throws Exception {
+  @DisplayName("인증된 사용자의 주소 목록을 조회한다")
+  void getAddressesAuthenticatedShouldReturnAddresses() throws Exception {
     CustomUserDetails customUser =
         new CustomUserDetails(10L, "user@example.com", "pass", "CUSTOMER");
     UsernamePasswordAuthenticationToken auth =
@@ -73,7 +75,7 @@ class AddressControllerTest {
             .detailAddress("101호")
             .pickupGuide("문 앞")
             .build();
-    when(addressService.getAddresses(eq(10L))).thenReturn(List.of(addr));
+    when(addressService.list(eq(10L))).thenReturn(List.of(addr));
 
     mockMvc
         .perform(get("/api/v1/addresses").principal(auth))
@@ -83,7 +85,8 @@ class AddressControllerTest {
   }
 
   @Test
-  void 주소_생성_요청을_처리한다() throws Exception {
+  @DisplayName("주소 생성 요청을 처리한다")
+  void createAddressProcessRequest() throws Exception {
     CustomUserDetails customUser =
         new CustomUserDetails(10L, "user@example.com", "pass", "CUSTOMER");
     UsernamePasswordAuthenticationToken auth =
@@ -95,7 +98,7 @@ class AddressControllerTest {
     request.setAddress("서울시 서초구");
 
     Address created = Address.builder().id(2L).memberId(10L).alias("회사").address("서울시 서초구").build();
-    when(addressService.createAddress(eq(10L), any())).thenReturn(created);
+    when(addressService.create(eq(10L), any())).thenReturn(created);
 
     mockMvc
         .perform(
@@ -108,7 +111,8 @@ class AddressControllerTest {
   }
 
   @Test
-  void 주소_수정_요청을_처리한다() throws Exception {
+  @DisplayName("주소 수정 요청을 처리한다")
+  void updateAddressProcessRequest() throws Exception {
     CustomUserDetails customUser =
         new CustomUserDetails(10L, "user@example.com", "pass", "CUSTOMER");
     UsernamePasswordAuthenticationToken auth =
@@ -121,7 +125,7 @@ class AddressControllerTest {
 
     Address updated =
         Address.builder().id(1L).memberId(10L).alias("우리집").address("서울시 송파구").build();
-    when(addressService.updateAddress(eq(1L), eq(10L), any())).thenReturn(updated);
+    when(addressService.update(eq(10L), eq(1L), any())).thenReturn(updated);
 
     mockMvc
         .perform(
@@ -134,7 +138,8 @@ class AddressControllerTest {
   }
 
   @Test
-  void 주소_삭제_요청을_처리한다() throws Exception {
+  @DisplayName("주소 삭제 요청을 처리한다")
+  void deleteAddressProcessRequest() throws Exception {
     CustomUserDetails customUser =
         new CustomUserDetails(10L, "user@example.com", "pass", "CUSTOMER");
     UsernamePasswordAuthenticationToken auth =
@@ -145,6 +150,6 @@ class AddressControllerTest {
         .perform(delete("/api/v1/addresses/1").principal(auth))
         .andExpect(status().isNoContent());
 
-    verify(addressService).deleteAddress(1L, 10L);
+    verify(addressService).delete(10L, 1L);
   }
 }

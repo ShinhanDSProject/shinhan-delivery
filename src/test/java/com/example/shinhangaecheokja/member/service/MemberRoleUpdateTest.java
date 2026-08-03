@@ -30,7 +30,7 @@ class MemberRoleUpdateTest {
     createRequest.setPhoneNumber("010-1234-5678");
     createRequest.setRole(MemberRole.CUSTOMER);
 
-    Member created = memberService.createMember(createRequest);
+    Member created = memberService.create(createRequest);
     assertThat(created.getRole()).isEqualTo(MemberRole.CUSTOMER);
 
     // when
@@ -51,7 +51,7 @@ class MemberRoleUpdateTest {
     createRequest.setPhoneNumber("010-1234-5678");
     createRequest.setRole(MemberRole.CUSTOMER);
 
-    Member created = memberService.createMember(createRequest);
+    Member created = memberService.create(createRequest);
 
     // when & then
     assertThatThrownBy(() -> memberService.updateRole(created.getId(), MemberRole.ADMIN))

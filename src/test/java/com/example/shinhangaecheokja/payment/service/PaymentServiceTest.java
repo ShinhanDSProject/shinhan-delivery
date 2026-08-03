@@ -11,11 +11,11 @@ import com.example.shinhangaecheokja.member.service.MemberService;
 import com.example.shinhangaecheokja.payment.dto.request.PointChargeRequest;
 import com.example.shinhangaecheokja.payment.dto.request.PointUseRequest;
 import com.example.shinhangaecheokja.payment.dto.request.PointWalletCreateRequest;
-import com.example.shinhangaecheokja.payment.dto.response.PointWalletResponse;
 import com.example.shinhangaecheokja.payment.entity.PointWallet;
 import com.example.shinhangaecheokja.payment.exception.InsufficientPointException;
 import com.example.shinhangaecheokja.payment.repository.PaymentRepository;
 import java.util.Optional;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -30,53 +30,58 @@ class PaymentServiceTest {
   @InjectMocks private PaymentService paymentService;
 
   @Test
-  void 회원이_존재하면_잔액0인_지갑을_생성한다() {
+  @DisplayName("회원이 존재하면 잔액0인 지갑을 생성한다")
+  void createWalletSuccess() {
     PointWalletCreateRequest request = new PointWalletCreateRequest();
     request.setMemberId(1L);
 
     when(paymentRepository.save(any(PointWallet.class)))
         .thenAnswer(invocation -> invocation.getArgument(0));
 
-    PointWallet response = paymentService.createWallet(request);
+    PointWallet response = paymentService.create(request);
 
     assertThat(response.getMemberId()).isEqualTo(1L);
     assertThat(response.getBalance()).isEqualTo(0L);
   }
 
   @Test
-  void 존재하지_않는_회원이면_EntityNotFoundException을_던진다() {
+  @DisplayName("존재하지 않는 회원이면 EntityNotFoundException을 던진다")
+  void createWalletMemberNotFoundShouldThrowException() {
     PointWalletCreateRequest request = new PointWalletCreateRequest();
     request.setMemberId(999L);
 
-    when(memberService.getMember(999L))
+    when(memberService.getById(999L))
         .thenThrow(new EntityNotFoundException(ErrorCode.MEMBER_NOT_FOUND));
 
-    assertThatThrownBy(() -> paymentService.createWallet(request))
+    assertThatThrownBy(() -> paymentService.create(request))
         .isInstanceOf(EntityNotFoundException.class);
   }
 
   @Test
-  void 존재하지_않는_지갑을_조회하면_EntityNotFoundException을_던진다() {
+  @DisplayName("존재하지 않는 지갑을 조회하면 EntityNotFoundException을 던진다")
+  void getWalletNotFoundShouldThrowException() {
     when(paymentRepository.findById(1L)).thenReturn(Optional.empty());
 
-    assertThatThrownBy(() -> paymentService.getWallet(1L))
+    assertThatThrownBy(() -> paymentService.getById(1L))
         .isInstanceOf(EntityNotFoundException.class);
   }
 
   @Test
-  void 존재하는_지갑을_조회하면_PointWalletResponse를_반환한다() {
+  @DisplayName("존재하는 지갑을 조회하면 PointWallet을 반환한다")
+  void getWalletSuccess() {
     PointWallet wallet = new PointWallet();
     wallet.setMemberId(1L);
     wallet.setBalance(1000L);
     when(paymentRepository.findById(1L)).thenReturn(Optional.of(wallet));
 
-    PointWalletResponse response = paymentService.getWallet(1L);
+    PointWallet response = paymentService.getById(1L);
 
-    assertThat(response.balance()).isEqualTo(1000L);
+    assertThat(response.getBalance()).isEqualTo(1000L);
   }
 
   @Test
-  void 포인트를_충전하면_잔액이_증가한다() {
+  @DisplayName("포인트를 충전하면 잔액이 증가한다")
+  void chargePointSuccess() {
     PointWallet wallet = new PointWallet();
     wallet.setMemberId(1L);
     wallet.setBalance(1000L);
@@ -85,13 +90,14 @@ class PaymentServiceTest {
     PointChargeRequest request = new PointChargeRequest();
     request.setAmount(500L);
 
-    PointWalletResponse response = paymentService.chargePoint(1L, request);
+    PointWallet response = paymentService.chargePoint(1L, request);
 
-    assertThat(response.balance()).isEqualTo(1500L);
+    assertThat(response.getBalance()).isEqualTo(1500L);
   }
 
   @Test
-  void 잔액이_충분하면_포인트를_사용한다() {
+  @DisplayName("잔액이 충분하면 포인트를 사용한다")
+  void usePointSuccess() {
     PointWallet wallet = new PointWallet();
     wallet.setMemberId(1L);
     wallet.setBalance(1000L);
@@ -100,13 +106,14 @@ class PaymentServiceTest {
     PointUseRequest request = new PointUseRequest();
     request.setAmount(300L);
 
-    PointWalletResponse response = paymentService.usePoint(1L, request);
+    PointWallet response = paymentService.usePoint(1L, request);
 
-    assertThat(response.balance()).isEqualTo(700L);
+    assertThat(response.getBalance()).isEqualTo(700L);
   }
 
   @Test
-  void 잔액이_부족하면_InsufficientPointException을_던진다() {
+  @DisplayName("잔액이 부족하면 InsufficientPointException을 던진다")
+  void usePointInsufficientPointShouldThrowException() {
     PointWallet wallet = new PointWallet();
     wallet.setMemberId(1L);
     wallet.setBalance(100L);

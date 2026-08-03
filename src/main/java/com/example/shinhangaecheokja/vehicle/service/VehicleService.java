@@ -5,7 +5,6 @@ import com.example.shinhangaecheokja.common.exception.ErrorCode;
 import com.example.shinhangaecheokja.member.service.MemberService;
 import com.example.shinhangaecheokja.vehicle.dto.request.VehicleCreateRequest;
 import com.example.shinhangaecheokja.vehicle.dto.request.VehicleUpdateRequest;
-import com.example.shinhangaecheokja.vehicle.dto.response.VehicleResponse;
 import com.example.shinhangaecheokja.vehicle.entity.Vehicle;
 import com.example.shinhangaecheokja.vehicle.entity.VehicleStatus;
 import com.example.shinhangaecheokja.vehicle.exception.InvalidWeightException;
@@ -27,19 +26,17 @@ public class VehicleService {
 
   /** 소유자(Member) 존재 여부와 무게/거리 유효성을 검증한 뒤 Vehicle을 등록한다 (Entity 리턴). */
   @Transactional
-  public Vehicle registerVehicle(VehicleCreateRequest request) {
-    memberService.getMember(request.getOwnerId());
+  public Vehicle create(VehicleCreateRequest request) {
+    memberService.getById(request.getOwnerId());
     validateWeightAndDistance(request.getMaxWeight(), request.getMaxDistance());
 
-    Vehicle vehicle = Vehicle.from(request);
-
-    return vehicleRepository.save(vehicle);
+    return vehicleRepository.save(Vehicle.from(request));
   }
 
   /** id로 Vehicle 단건을 조회한다. 없으면 EntityNotFoundException. */
   @Transactional(readOnly = true)
-  public VehicleResponse getVehicle(Long vehicleId) {
-    return VehicleResponse.from(findVehicleOrThrow(vehicleId));
+  public Vehicle getById(Long vehicleId) {
+    return findVehicleOrThrow(vehicleId);
   }
 
   /**
@@ -47,29 +44,28 @@ public class VehicleService {
    * 해당 차량 행을 잠근다.
    */
   @Transactional
-  public VehicleResponse getVehicleForUpdate(Long vehicleId) {
-    return VehicleResponse.from(
-        vehicleRepository
-            .findByIdForUpdate(vehicleId)
-            .orElseThrow(() -> new EntityNotFoundException(ErrorCode.VEHICLE_NOT_FOUND)));
+  public Vehicle getVehicleForUpdate(Long vehicleId) {
+    return vehicleRepository
+        .findByIdForUpdate(vehicleId)
+        .orElseThrow(() -> new EntityNotFoundException(ErrorCode.VEHICLE_NOT_FOUND));
   }
 
   /** 전체 Vehicle 목록을 조회한다. */
   @Transactional(readOnly = true)
-  public List<VehicleResponse> getVehicles() {
-    return vehicleRepository.findAll().stream().map(VehicleResponse::from).toList();
+  public List<Vehicle> list() {
+    return vehicleRepository.findAll();
   }
 
   /** Vehicle을 BUSY 상태로 전환한다. */
   @Transactional
   public void markBusy(Long vehicleId) {
-    findVehicleOrThrow(vehicleId).setStatus(VehicleStatus.BUSY);
+    findVehicleOrThrow(vehicleId).markAs(VehicleStatus.BUSY);
   }
 
   /** Vehicle을 AVAILABLE 상태로 전환한다. */
   @Transactional
   public void markAvailable(Long vehicleId) {
-    findVehicleOrThrow(vehicleId).setStatus(VehicleStatus.AVAILABLE);
+    findVehicleOrThrow(vehicleId).markAs(VehicleStatus.AVAILABLE);
   }
 
   /**
@@ -77,24 +73,19 @@ public class VehicleService {
    * 없다(AVAILABLE 상태에서만 허용).
    */
   @Transactional
-  public VehicleResponse updateVehicle(Long vehicleId, VehicleUpdateRequest request) {
+  public Vehicle update(Long vehicleId, VehicleUpdateRequest request) {
     validateWeightAndDistance(request.getMaxWeight(), request.getMaxDistance());
 
     Vehicle vehicle = findVehicleOrThrow(vehicleId);
     if (vehicle.getStatus() != VehicleStatus.AVAILABLE) {
       throw new VehicleNotAvailableException(vehicleId);
     }
-    vehicle.setType(request.getType());
-    vehicle.setMaxWeight(request.getMaxWeight());
-    vehicle.setMaxDistance(request.getMaxDistance());
-    vehicle.setLatitude(request.getLatitude());
-    vehicle.setLongitude(request.getLongitude());
-    return VehicleResponse.from(vehicle);
+    return vehicle.updateBy(request);
   }
 
   /** id로 Vehicle을 조회해 삭제한다. 없으면 EntityNotFoundException. */
   @Transactional
-  public void deleteVehicle(Long vehicleId) {
+  public void delete(Long vehicleId) {
     Vehicle vehicle = findVehicleOrThrow(vehicleId);
     vehicleRepository.delete(vehicle);
   }

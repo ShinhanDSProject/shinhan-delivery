@@ -32,7 +32,7 @@ public class TrackingController {
       @DestinationVariable Long deliveryId,
       @Valid LocationUpdateRequest request,
       Principal principal) {
-    trackingService.broadcastLocation(deliveryId, request, extractMemberId(principal));
+    trackingService.broadcastLocation(extractMemberId(principal), deliveryId, request);
   }
 
   /** GlobalExceptionHandler는 STOMP를 못 잡으므로, 여기서 발행자 본인에게만 에러를 알린다. */

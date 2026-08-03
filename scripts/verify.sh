@@ -6,8 +6,9 @@
 # 이 스크립트는 CI(GitHub Actions) 환경과 동일한 순서로 검증을 수행합니다.
 # 1. Flyway 마이그레이션 파일명 규격 검사
 # 2. Flyway 마이그레이션 DDL 규칙 (Online DDL) 검사
-# 3. Spotless 코드 포맷팅 스타일 검사
-# 4. Gradle 테스트, JaCoCo 커버리지 및 전체 빌드 검사
+# 3. UI 공통 디자인 시스템 규격 검사
+# 4. Checkstyle 정적 분석 및 Spotless 코드 포맷팅 스타일 검사
+# 5. Gradle 테스트, JaCoCo 커버리지 및 전체 빌드 검사
 # ==============================================================================
 
 set -eo pipefail
@@ -56,12 +57,12 @@ else
     exit 1
 fi
 
-# Step 4: Spotless 포맷팅 검사
-echo -e "\n${YELLOW}📌 [4/5] Spotless 코드 포맷팅 스타일 검사...${RESET}"
-if $GRADLE_CMD spotlessCheck --quiet; then
-    echo -e "${GREEN}  ✓ 코드 포맷팅(Spotless) 검사 통과${RESET}"
+# Step 4: Checkstyle 정적 분석 및 Spotless 포맷팅 검사
+echo -e "\n${YELLOW}📌 [4/5] Checkstyle 정적 분석 및 Spotless 코드 포맷팅 검사...${RESET}"
+if $GRADLE_CMD checkstyleMain checkstyleTest spotlessCheck --quiet; then
+    echo -e "${GREEN}  ✓ Checkstyle 정적 분석 및 코드 포맷팅(Spotless) 검사 통과${RESET}"
 else
-    echo -e "${RED}  ❌ [피드백] 코드 포맷팅 규칙 위반! '${GRADLE_CMD} spotlessApply' 명령어를 실행하여 포맷팅을 정리를 하세요.${RESET}"
+    echo -e "${RED}  ❌ [피드백] Checkstyle 정적 분석 또는 Spotless 포맷팅 위반! 코드 컨벤션을 준수하도록 정제하세요.${RESET}"
     exit 1
 fi
 

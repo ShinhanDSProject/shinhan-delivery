@@ -6,7 +6,6 @@ import com.example.shinhangaecheokja.member.service.MemberService;
 import com.example.shinhangaecheokja.payment.dto.request.PointChargeRequest;
 import com.example.shinhangaecheokja.payment.dto.request.PointUseRequest;
 import com.example.shinhangaecheokja.payment.dto.request.PointWalletCreateRequest;
-import com.example.shinhangaecheokja.payment.dto.response.PointWalletResponse;
 import com.example.shinhangaecheokja.payment.entity.PointWallet;
 import com.example.shinhangaecheokja.payment.exception.InsufficientPointException;
 import com.example.shinhangaecheokja.payment.repository.PaymentRepository;
@@ -25,24 +24,22 @@ public class PaymentService {
 
   /** 회원 존재 여부를 검증한 뒤 잔액 0인 포인트 지갑을 생성한다 (PointWallet Entity 리턴). */
   @Transactional
-  public PointWallet createWallet(PointWalletCreateRequest request) {
-    memberService.getMember(request.getMemberId());
+  public PointWallet create(PointWalletCreateRequest request) {
+    memberService.getById(request.getMemberId());
 
-    PointWallet wallet = PointWallet.createEmpty(request.getMemberId());
-
-    return paymentRepository.save(wallet);
+    return paymentRepository.save(PointWallet.createEmpty(request.getMemberId()));
   }
 
   /** id로 포인트 지갑 단건을 조회한다. 없으면 EntityNotFoundException. */
   @Transactional(readOnly = true)
-  public PointWalletResponse getWallet(Long walletId) {
-    return PointWalletResponse.from(findWalletOrThrow(walletId));
+  public PointWallet getById(Long walletId) {
+    return findWalletOrThrow(walletId);
   }
 
   /** 전체 포인트 지갑 목록을 조회한다. */
   @Transactional(readOnly = true)
-  public List<PointWalletResponse> getWallets() {
-    return paymentRepository.findAll().stream().map(PointWalletResponse::from).toList();
+  public List<PointWallet> list() {
+    return paymentRepository.findAll();
   }
 
   /**
@@ -50,10 +47,10 @@ public class PaymentService {
    * 지갑 행을 잠근다.
    */
   @Transactional
-  public PointWalletResponse chargePoint(Long walletId, PointChargeRequest request) {
+  public PointWallet chargePoint(Long walletId, PointChargeRequest request) {
     PointWallet wallet = findWalletForUpdateOrThrow(walletId);
     wallet.setBalance(wallet.getBalance() + request.getAmount());
-    return PointWalletResponse.from(wallet);
+    return wallet;
   }
 
   /**
@@ -61,18 +58,18 @@ public class PaymentService {
    * 잔액이 음수가 되지 않도록 비관적 쓰기 락으로 지갑을 조회한다.
    */
   @Transactional
-  public PointWalletResponse usePoint(Long walletId, PointUseRequest request) {
+  public PointWallet usePoint(Long walletId, PointUseRequest request) {
     PointWallet wallet = findWalletForUpdateOrThrow(walletId);
     if (wallet.getBalance() < request.getAmount()) {
       throw new InsufficientPointException(walletId, request.getAmount());
     }
     wallet.setBalance(wallet.getBalance() - request.getAmount());
-    return PointWalletResponse.from(wallet);
+    return wallet;
   }
 
   /** id로 포인트 지갑을 조회해 삭제한다. 없으면 EntityNotFoundException. */
   @Transactional
-  public void deleteWallet(Long walletId) {
+  public void delete(Long walletId) {
     PointWallet wallet = findWalletOrThrow(walletId);
     paymentRepository.delete(wallet);
   }

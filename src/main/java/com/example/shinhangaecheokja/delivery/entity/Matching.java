@@ -48,4 +48,10 @@ public class Matching {
     matching.setMatchedAt(LocalDateTime.now());
     return matching;
   }
+
+  /** 매칭 상태를 변경하는 도메인 비즈니스 메서드. */
+  public Matching changeStatus(MatchingStatus newStatus) {
+    this.status = newStatus;
+    return this;
+  }
 }

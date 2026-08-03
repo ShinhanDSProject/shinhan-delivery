@@ -13,6 +13,11 @@
 3. **에러는 예외(Exception)로 처리한다.** 커스텀 예외를 던지고, `@RestControllerAdvice`(전역 예외 처리기)에서 HTTP 응답으로 변환한다.
 4. Entity 및 모든 DTO/Java 클래스의 `Getter`, `Setter` 메서드는 직접 코드로 수동 작성하지 않고 **무조건 Lombok 라이브러리(`@Getter`, `@Setter`)를 100% 사용하여 개발**한다. 수동 `getXXX()`, `setXXX()` 메서드 작성은 엄격히 금지된다. 별도의 불변 객체(Value Object)나 `Result` 타입 같은 함수형 패턴은 쓰지 않는다.
 5. **신규 기능은 설계 문서를 먼저 작성한다.** 코드를 작성하기 전에 `docs/design/기능명-design.md`(User Story·성공 기준, ERD 또는 아키텍처 흐름도, API/메시지 명세, 작업 분할(WBS))를 먼저 작성해 설계를 정리한 뒤 구현에 들어간다. 별도 설계 리뷰 승인까지는 필수가 아니며, 문서화 자체가 목적이다 (`docs/design-phase-guide.md` 참고).
+6. **What과 How를 명확히 분리하고 단일 추상화 수준(SLAP)을 유지한다.** 
+   - **Service 계층:** "무엇을 수행하는가(What)"에 집중하여 비즈니스 유스케이스 흐름을 선언적(Declarative)으로 작성합니다. DB 조작 기술, 복잡한 산출식, 문자열 파싱 등 "어떻게 처리하는가(How)"에 해당하는 세부 구현은 Entity, Repository, Helper로 위임합니다.
+   - **Entity/Domain 계층:** 도메인 비즈니스 규칙과 상태 변이 로직을 캡슐화합니다.
+   - **Repository 계층:** 데이터 영속화 및 기술적 조회 세부 사항(How)을 전담합니다.
+   - **Controller 계층:** Presentation 단위 데이터 변환 및 HTTP 요청/응답 라우팅만 담당합니다.
 
 ---
 
@@ -244,7 +249,51 @@ public class DuplicateMemberException extends BusinessException {
 
 ---
 
-## 8. 포맷팅 규칙
+## 8. 명명 및 포맷팅 규칙
+
+### 8.1 식별자 명명 규칙 (Naming Conventions)
+
+- **메서드명 (비즈니스/테스트 포함 모든 메서드):** 무조건 **`lowerCamelCase`**로 작성합니다 (예: `getMember`, `registerVehicle`, `updateBy`, `createAddressSuccess`). 메서드명에 언더스코어(`_`)나 한글 사용을 엄격히 금지합니다.
+- **상수 (`static final` 필드 및 Enum 상수):** 무조건 **`UPPER_SNAKE_CASE`**로 작성합니다 (예: `MAX_RETRY_COUNT`, `DEFAULT_PAGE_SIZE`, `MEMBER_NOT_FOUND`).
+- **클래스 및 인터페이스명:** 무조건 **`UpperCamelCase` (PascalCase)**로 작성합니다 (예: `MemberService`, `DeliveryRequest`, `VehicleType`).
+- **변수 및 필드명:** 무조건 **`lowerCamelCase`**로 작성합니다 (예: `memberId`, `deliveryRequestRepository`).
+
+### 8.2 단일 도메인 서비스 메서드명 명명 규칙 (Service Method Naming Standard)
+
+- **원칙:** 단일 도메인 서비스(`AddressService`, `MemberService`, `VehicleService`, `PaymentService`, `NoticeService` 등) 내부의 CRUD 및 조회 메서드는 서비스 클래스명에 이미 도메인이 포함되어 있으므로 **중복 명사를 제거하고 명확한 동사/조회 패턴(`create`, `getById`, `list`, `listByIds`, `update`, `delete`)을 적용**합니다.
+- **목적:** `addressService.getAddresses(...)` ❌ 대신 `addressService.list(...)` ⭕, `memberService.getMember(1L)` ❌ 대신 `memberService.getById(1L)` ⭕ 처럼 명명 직관성과 통일성을 사수합니다.
+- **표준 메서드 명명 매핑 규칙:**
+  1. **생성 (Create):** `create(...)`
+  2. **단건 ID 조회 (Read Single by ID):** `getById(...)` (예: `getById(Long id)`)
+  3. **다건/목록 조회 (Read List / Page):** `list(...)` (예: `list()`, `list(Pageable pageable)`, `list(Long memberId)`)
+  4. **ID 목록 조회 (Read List by IDs):** `listByIds(...)` (예: `listByIds(List<Long> ids)`)
+  5. **수정 (Update):** `update(...)`
+  6. **삭제 (Delete):** `delete(...)`
+  7. **도메인 특화 비즈니스 동작:** 의미 있는 도메인 어휘 선호 (`login`, `updatePassword`, `updateRole`, `chargePoint`, `usePoint` 등)
+  8. **다중 도메인 복합 서비스 (`DeliveryService` 등):** 문맥 구분이 필요하므로 특화 메서드명 유지 (`requestDelivery`, `estimateFee`, `confirmPickup`, `completeDelivery` 등)
+
+### 8.3 메서드 파라미터 계층 정렬 규칙 (Parameter Hierarchy Ordering Standard)
+
+- **원칙:** 메서드의 파라미터(인자) 순서는 **도메인 계층 구조(Domain Hierarchy)상 큰 개념(상위 도메인 / 소유자 ID)부터 작은 개념(하위 리소스 ID), 조건/필터, DTO/Payload 순으로 배치**합니다.
+- **목적:** "누가(Member) 어떤 리소스(Resource)를 무엇(Request)으로 변경하는가"의 비즈니스 문맥과 RESTful URL 경로(`/members/{memberId}/addresses/{addressId}`) 순서를 100% 동기화하여 위치 착오 버그를 방지합니다.
+- **표준 파라미터 배치 순서:**
+  1. **상위 도메인 식별자 (Parent / Aggregate Root / Owner ID):** 예) `memberId`
+  2. **하위 도메인 식별자 (Child Domain / Resource ID):** 예) `addressId`, `notificationId`
+  3. **조건 및 옵션 (Filter / Condition / Pageable):** 예) `category`, `pageable`
+  4. **수정/생성 데이터 패킷 (Request DTO / Command Payload):** 예) `request`
+- **적용 예시:**
+  ```java
+  // ⭕ 올바른 순서: memberId (상위) -> addressId (하위) -> request (DTO)
+  public Address update(Long memberId, Long id, AddressUpdateRequest request)
+  public void delete(Long memberId, Long id)
+  public Notification markAsRead(Long memberId, Long notificationId)
+
+  // ❌ 잘못된 순서 (하위 리소스 ID가 상위 소유자 ID보다 앞에 옴)
+  public Address update(Long id, Long memberId, AddressUpdateRequest request)
+  public Notification markAsRead(Long notificationId, Long memberId)
+  ```
+
+### 8.4 포맷팅 및 코드 스타일 규칙
 
 - 들여쓰기: 스페이스 2칸 (탭 금지)
 - 한 줄 최대 길이: 100자
@@ -259,11 +308,13 @@ public class DuplicateMemberException extends BusinessException {
 
 ## 9. 테스트 컨벤션
 
-- 테스트 메서드명: `given_when_then` 스타일 (한글 허용)
+- **테스트 메서드명:** 메서드명은 무조건 **`camelCase` 영문(English)**으로 작성합니다 (예: `registerVehicleShouldThrowExceptionWhenWeightIsZeroOrLess`, `createAddressSuccess`). 언더스코어(`_`)나 한글 메서드명 사용을 금지합니다.
+- **테스트 시나리오 설명 (`@DisplayName`):** 테스트 케이스에 대한 상세한 한글 설명은 JUnit 5 `@DisplayName("한글 시나리오 설명")` 어노테이션을 필수 부여하여 작성합니다.
 
 ```java
 @Test
-void 무게가_0이하면_InvalidWeightException을_던진다() {
+@DisplayName("무게가 0 이하이면 InvalidWeightException을 던진다")
+void registerVehicleShouldThrowExceptionWhenWeightIsZeroOrLess() {
     VehicleCreateRequest request = new VehicleCreateRequest(1L, VehicleType.CAR, -5, 10);
 
     assertThatThrownBy(() -> vehicleService.registerVehicle(request))
@@ -330,6 +381,56 @@ public record DeliveryCreateResponse(Long id, String status, long feePoint) {
   3. 이를 통해 코드 가독성을 확보하고 패키지 리팩토링 시 변경 요소를 최소화합니다.
 
 ---
+
+## 10.3 엔티티 도메인 메서드: DTO 수용 및 `this` 반환 (Fluent Update)
+
+- **원칙:** 엔티티의 상태 변경 메서드는 외부에서 필드를 개별로 주입받지 않고, **Request DTO 또는 의미 있는 도메인 단위 값을 통째로 수용**하며, `return this`를 통해 자기 자신을 반환합니다.
+- **목적:**
+  - Service 계층에서 인라인 체이닝 또는 단일 표현식으로 처리할 수 있어 코드 라인 수를 줄이고 가독성을 높입니다.
+  - `How`(필드를 일일이 꺼내 대입)를 Entity 내부로 완전히 캡슐화합니다.
+  - 반환값 사용은 선택 사항입니다 — `void`처럼 호출해도 JPA Dirty Checking은 정상 동작합니다.
+- **명명 규칙:**
+  - 단순 필드 일괄 수정: `updateBy(XxxUpdateRequest request)` 형식
+  - 도메인 의미 있는 상태 전이: `pickUp()`, `complete(request)`, `cancel()` 등 도메인 어휘 사용
+  - 단일 상태값 변경: `changeXxx(value)` 형식 (예: `changeRole(role)`, `changePassword(encoded)`)
+
+```java
+// Entity — updateBy + this 반환
+public Address updateBy(AddressUpdateRequest request) {
+    this.alias = request.getAlias();
+    this.address = request.getAddress();
+    this.detailAddress = request.getDetailAddress();
+    this.pickupGuide = request.getPickupGuide();
+    return this;
+}
+
+// Service — 단일 표현식으로 처리, 반환값 활용
+return findAddressOrThrow(id, memberId).updateBy(request);
+
+// Service — 반환값 미사용(void처럼), JPA Dirty Checking은 그대로 동작
+findAddressOrThrow(id, memberId).updateBy(request);
+```
+
+---
+
+## 10.4 불필요한 단발성 임시 변수 인라인화 (Inline Temporary Variable)
+
+- **원칙:** 메서드 생성/조회/수정 흐름에서 1회성으로 생성되어 즉시 `return`되거나 단 1회만 파라미터로 전달되어 소비되는 불필요한 단발성 임시 변수는 선언을 생략하고 즉시 **인라인(Inline)** 처리합니다.
+- **목적:**
+  1. 단발성 중간 임시 변수 생성을 억제하여 변수 스코프 오염을 줄입니다.
+  2. `return repository.save(Entity.from(request));` 처럼 객체 생성과 데이터 저장을 단일 선언적 표현식(Declarative Expression)으로 연결하여 코드 직관성과 읽기 편의성을 높입니다.
+
+```java
+// BAD: 1회만 참조되어 즉시 return되는 불필요한 단발성 임시 변수 선언
+Address address = Address.from(memberId, request);
+return addressRepository.save(address);
+
+// GOOD: 단일 선언적 표현식으로 즉시 인라인 처리
+return addressRepository.save(Address.from(memberId, request));
+```
+
+---
+
 
 ## 11. Controller 규칙
 
@@ -452,15 +553,15 @@ void 도메인은_다른_도메인의_repository를_직접_참조하지_않는�
 
 ### 16.1 브랜치 전략
 
+`main` 단일 브랜치 전략을 사용한다(과거 `develop` 통합 브랜치를 시도했으나 실제 PR이 계속 `main`에 직접 병합되며 방치되어, 이슈 #200을 계기로 `main` 단일 브랜치 전략으로 공식 전환했다).
+
 | 브랜치 유형 | 용도 | 이름 규칙 | 대상 상위 브랜치 |
 |---|---|---|---|
-| `main` | 배포 가능한 가장 안정적인 브랜치 | `main` | - |
-| `develop` | 다음 버전을 위한 기능이 모이는 통합 브랜치 | `develop` | `main` |
-| `feature` | 신규 기능/버그 수정 작업 브랜치 | `feat/도메인-내용` (예: `feat/delivery-fee-calculation`) | `develop` |
-| `release` | 배포 준비 및 최종 QA | `release/<버전>` | `develop` |
+| `main` | 배포 가능한 가장 안정적인 브랜치이자 모든 작업의 기준 브랜치 | `main` | - |
+| `feature` | 신규 기능/버그 수정 작업 브랜치 | `feat/도메인-내용` (예: `feat/delivery-fee-calculation`) | `main` |
 | `hotfix` | 배포된 `main`의 긴급 장애 패치 | `hotfix/<이슈번호>-<요약>` | `main` |
 
-- 작업 시작 전 `develop`을 최신화한 뒤 그 위에서 브랜치를 분기한다. `hotfix`만 예외적으로 `main`에서 분기해 `main`으로 PR한다.
+- 작업 시작 전 `main`을 최신화한 뒤 그 위에서 브랜치를 분기한다.
 - 머지 후 로컬 작업 브랜치는 삭제한다.
 
 ### 16.2 커밋 메시지
@@ -497,11 +598,11 @@ void 도메인은_다른_도메인의_repository를_직접_참조하지_않는�
 - [ ] Repository가 Entity 1개당 1개씩 대응되는가?
 - [ ] 다른 도메인의 Repository/Entity를 직접 참조하지 않고, 필요하면 그 도메인의 Service를 거쳤는가?
 - [ ] Enum 필드에 `@Enumerated(EnumType.STRING)`을 썼는가? (`ORDINAL` 금지)
-- [ ] 새로 추가한 서비스 로직에 단위 테스트가 있는가? (given_when_then 네이밍)
+- [ ] 새로 추가한 서비스 로직에 단위 테스트가 있는가? (영문 메서드명 + `@DisplayName` 사용)
 - [ ] ArchUnit 테스트(레이어 의존성 규칙)가 깨지지 않는가?
 - [ ] Spotless 포맷팅 검사를 통과하는가?
 - [ ] Entity 필드를 추가/변경했다면 대응하는 Flyway 마이그레이션 파일을 새로 추가했는가? (기존 마이그레이션 파일을 수정하지 않았는가?)
-- [ ] `develop`을 대상으로 브랜치를 분기·PR 했는가? (`hotfix`는 `main` 예외)
+- [ ] `main`을 대상으로 브랜치를 분기·PR 했는가?
 - [ ] 리뷰어를 지정하고, PR 템플릿의 요약/변경사항/리뷰 포인트/테스트 결과를 모두 작성했는가?
 - [ ] UI 개발 시 `/css/design-system.css` 토큰 및 `templates/fragments/components.html` Thymeleaf 프래그먼트를 100% 준수하였는가?
 

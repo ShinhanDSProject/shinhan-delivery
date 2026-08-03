@@ -20,6 +20,8 @@ public class CategoryController {
   /** 물품 카테고리 전체 목록을 조회한다. */
   @GetMapping
   public ResponseEntity<List<CategoryResponse>> getCategories() {
-    return ResponseEntity.ok(categoryService.getCategories());
+    List<CategoryResponse> responses =
+        categoryService.list().stream().map(CategoryResponse::from).toList();
+    return ResponseEntity.ok(responses);
   }
 }

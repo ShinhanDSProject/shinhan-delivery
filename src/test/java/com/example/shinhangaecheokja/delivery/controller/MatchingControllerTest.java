@@ -18,6 +18,7 @@ import com.example.shinhangaecheokja.delivery.entity.DeliveryStatus;
 import com.example.shinhangaecheokja.delivery.entity.Matching;
 import com.example.shinhangaecheokja.delivery.service.MatchingService;
 import java.util.List;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -35,7 +36,8 @@ class MatchingControllerTest {
   @MockitoBean private MatchingService matchingService;
 
   @Test
-  void 매칭_생성_요청을_받으면_생성된_매칭을_반환한다() throws Exception {
+  @DisplayName("매칭 생성 요청을 받으면 생성된 매칭을 반환한다")
+  void createMatchingSuccess() throws Exception {
     MatchingCreateRequest request = new MatchingCreateRequest();
     request.setDeliveryRequestId(1L);
     request.setVehicleId(2L);
@@ -43,7 +45,7 @@ class MatchingControllerTest {
     Matching matching = Matching.from(request);
     matching.setId(1L);
 
-    when(matchingService.createMatching(any())).thenReturn(matching);
+    when(matchingService.create(any())).thenReturn(matching);
 
     mockMvc
         .perform(
@@ -56,7 +58,8 @@ class MatchingControllerTest {
   }
 
   @Test
-  void 차량의_열린_콜_목록을_조회한다() throws Exception {
+  @DisplayName("차량의 열린 콜 목록을 조회한다")
+  void getOpenCallsSuccess() throws Exception {
     DeliveryRequest deliveryRequest = new DeliveryRequest();
     deliveryRequest.setId(1L);
     deliveryRequest.setCustomerId(1L);
@@ -77,15 +80,17 @@ class MatchingControllerTest {
   }
 
   @Test
-  void 존재하지_않는_매칭을_조회하면_404를_반환한다() throws Exception {
-    when(matchingService.getMatching(eq(999L)))
+  @DisplayName("존재하지 않는 매칭을 조회하면 404를 반환한다")
+  void getMatchingNotFoundShouldReturn404() throws Exception {
+    when(matchingService.getById(eq(999L)))
         .thenThrow(new EntityNotFoundException(ErrorCode.DELIVERY_NOT_FOUND));
 
     mockMvc.perform(get("/api/v1/matchings/999")).andExpect(status().isNotFound());
   }
 
   @Test
-  void 매칭_생성시_deliveryRequestId가_없으면_400을_반환한다() throws Exception {
+  @DisplayName("매칭 생성시 deliveryRequestId가 없으면 400을 반환한다")
+  void createMatchingMissingDeliveryRequestIdShouldReturn400() throws Exception {
     MatchingCreateRequest request = new MatchingCreateRequest();
     request.setVehicleId(2L);
 
@@ -98,7 +103,8 @@ class MatchingControllerTest {
   }
 
   @Test
-  void 매칭_상태_변경시_status가_없으면_400을_반환한다() throws Exception {
+  @DisplayName("매칭 상태 변경시 status가 없으면 400을 반환한다")
+  void updateMatchingMissingStatusShouldReturn400() throws Exception {
     MatchingUpdateRequest request = new MatchingUpdateRequest();
 
     mockMvc

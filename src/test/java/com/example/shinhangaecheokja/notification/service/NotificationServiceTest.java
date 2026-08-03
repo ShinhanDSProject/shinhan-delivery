@@ -8,12 +8,12 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.example.shinhangaecheokja.common.exception.EntityNotFoundException;
-import com.example.shinhangaecheokja.notification.dto.response.NotificationResponse;
 import com.example.shinhangaecheokja.notification.entity.Notification;
 import com.example.shinhangaecheokja.notification.exception.NotificationAccessDeniedException;
 import com.example.shinhangaecheokja.notification.repository.NotificationRepository;
 import java.time.LocalDateTime;
 import java.util.Optional;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -30,13 +30,14 @@ class NotificationServiceTest {
   @InjectMocks private NotificationService notificationService;
 
   @Test
-  void category가_없으면_전체_알림을_최신순으로_조회한다() {
+  @DisplayName("category가 없으면 전체 알림을 최신순으로 조회한다")
+  void getNotificationsWithoutCategoryShouldReturnAll() {
     Pageable pageable = PageRequest.of(0, 10);
     Notification notification = newNotification(1L, 1L, "DELIVERY", false);
     when(notificationRepository.findByMemberIdOrderByCreatedAtDesc(1L, pageable))
         .thenReturn(new PageImpl<>(java.util.List.of(notification)));
 
-    var responses = notificationService.getNotifications(1L, null, pageable);
+    var responses = notificationService.list(1L, null, pageable);
 
     assertThat(responses.getContent()).hasSize(1);
     verify(notificationRepository, never())
@@ -44,43 +45,47 @@ class NotificationServiceTest {
   }
 
   @Test
-  void category가_있으면_해당_카테고리만_조회한다() {
+  @DisplayName("category가 있으면 해당 카테고리만 조회한다")
+  void getNotificationsWithCategoryShouldFilterByCategory() {
     Pageable pageable = PageRequest.of(0, 10);
     Notification notification = newNotification(1L, 1L, "DELIVERY", false);
     when(notificationRepository.findByMemberIdAndCategoryOrderByCreatedAtDesc(
             1L, "DELIVERY", pageable))
         .thenReturn(new PageImpl<>(java.util.List.of(notification)));
 
-    var responses = notificationService.getNotifications(1L, "DELIVERY", pageable);
+    var responses = notificationService.list(1L, "DELIVERY", pageable);
 
     assertThat(responses.getContent()).hasSize(1);
-    assertThat(responses.getContent().get(0).category()).isEqualTo("DELIVERY");
+    assertThat(responses.getContent().get(0).getCategory()).isEqualTo("DELIVERY");
   }
 
   @Test
-  void 본인_알림을_읽음_처리한다() {
+  @DisplayName("본인 알림을 읽음 처리한다")
+  void markAsReadSuccess() {
     Notification notification = newNotification(1L, 1L, "DELIVERY", false);
     when(notificationRepository.findById(1L)).thenReturn(Optional.of(notification));
 
-    NotificationResponse response = notificationService.markAsRead(1L, 1L);
+    Notification response = notificationService.markAsRead(1L, 1L);
 
-    assertThat(response.read()).isTrue();
+    assertThat(response.isRead()).isTrue();
   }
 
   @Test
-  void 존재하지_않는_알림이면_EntityNotFoundException을_던진다() {
+  @DisplayName("존재하지 않는 알림이면 EntityNotFoundException을 던진다")
+  void markAsReadNotFoundShouldThrowException() {
     when(notificationRepository.findById(999L)).thenReturn(Optional.empty());
 
-    assertThatThrownBy(() -> notificationService.markAsRead(999L, 1L))
+    assertThatThrownBy(() -> notificationService.markAsRead(1L, 999L))
         .isInstanceOf(EntityNotFoundException.class);
   }
 
   @Test
-  void 본인_알림이_아니면_NotificationAccessDeniedException을_던진다() {
+  @DisplayName("본인 알림이 아니면 NotificationAccessDeniedException을 던진다")
+  void markAsReadAccessDeniedShouldThrowException() {
     Notification notification = newNotification(1L, 1L, "DELIVERY", false);
     when(notificationRepository.findById(1L)).thenReturn(Optional.of(notification));
 
-    assertThatThrownBy(() -> notificationService.markAsRead(1L, 2L))
+    assertThatThrownBy(() -> notificationService.markAsRead(2L, 1L))
         .isInstanceOf(NotificationAccessDeniedException.class);
     assertThat(notification.isRead()).isFalse();
   }

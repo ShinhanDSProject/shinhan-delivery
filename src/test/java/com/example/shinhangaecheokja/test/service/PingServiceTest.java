@@ -12,7 +12,7 @@ class PingServiceTest {
 
   @Test
   @DisplayName("getPingMessage 호출 시 message는 pong, timestamp는 현재 시각으로 채워진 응답을 반환한다")
-  void getPingMessage_returnsPongWithTimestamp() {
+  void getPingMessageReturnsPongWithTimestamp() {
     PingResponse response = pingService.getPingMessage();
 
     assertThat(response).isNotNull();

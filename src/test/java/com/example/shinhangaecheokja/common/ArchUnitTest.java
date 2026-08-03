@@ -24,7 +24,7 @@ class ArchUnitTest {
 
   @Test
   @DisplayName("Controller 계층은 Repository 계층을 직접 참조해서는 안 된다 (반드시 Service 거침)")
-  void controller는_repository를_직접_호출하지_않는다() {
+  void controllerShouldNotDependOnRepository() {
     noClasses()
         .that()
         .resideInAPackage("..controller..")
@@ -35,8 +35,8 @@ class ArchUnitTest {
   }
 
   @Test
-  @DisplayName("Repository 계층은 Service나 Controller 계층에 역방향 의존해서는 안 된다")
-  void repository는_service나_controller에_의존하지_않는다() {
+  @DisplayName("Repository는 Service나 Controller에 의존하지 않는다")
+  void repositoryShouldNotDependOnServiceOrController() {
     noClasses()
         .that()
         .resideInAPackage("..repository..")
@@ -48,7 +48,7 @@ class ArchUnitTest {
 
   @Test
   @DisplayName("도메인 계층 간(member, vehicle, delivery, payment) 타 도메인의 Repository를 직접 참조해서는 안 된다")
-  void 타_도메인의_repository를_직접_참조하지_않는다() {
+  void domainShouldNotDependOnOtherDomainRepository() {
     noClasses()
         .that()
         .resideInAPackage("..vehicle..")

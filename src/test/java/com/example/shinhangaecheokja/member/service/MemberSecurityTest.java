@@ -71,7 +71,7 @@ class MemberSecurityTest {
             });
 
     // when
-    Member response = memberService.createMember(request);
+    Member response = memberService.create(request);
 
     assertThat(response.getId()).isEqualTo(2L);
     assertThat(passwordEncoder.matches("rawPassword123", testMember.getPassword())).isTrue();

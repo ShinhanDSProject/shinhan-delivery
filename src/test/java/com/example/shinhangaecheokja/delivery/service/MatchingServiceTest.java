@@ -12,7 +12,6 @@ import com.example.shinhangaecheokja.common.exception.EntityNotFoundException;
 import com.example.shinhangaecheokja.common.exception.ErrorCode;
 import com.example.shinhangaecheokja.delivery.dto.request.MatchingCreateRequest;
 import com.example.shinhangaecheokja.delivery.dto.request.MatchingUpdateRequest;
-import com.example.shinhangaecheokja.delivery.dto.response.MatchingResponse;
 import com.example.shinhangaecheokja.delivery.entity.DeliveryRequest;
 import com.example.shinhangaecheokja.delivery.entity.DeliveryStatus;
 import com.example.shinhangaecheokja.delivery.entity.Matching;
@@ -22,13 +21,14 @@ import com.example.shinhangaecheokja.delivery.exception.InvalidMatchingTransitio
 import com.example.shinhangaecheokja.delivery.exception.VehicleCapacityMismatchException;
 import com.example.shinhangaecheokja.delivery.repository.DeliveryRequestRepository;
 import com.example.shinhangaecheokja.delivery.repository.MatchingRepository;
-import com.example.shinhangaecheokja.vehicle.dto.response.VehicleResponse;
+import com.example.shinhangaecheokja.vehicle.entity.Vehicle;
 import com.example.shinhangaecheokja.vehicle.entity.VehicleStatus;
 import com.example.shinhangaecheokja.vehicle.entity.VehicleType;
 import com.example.shinhangaecheokja.vehicle.exception.VehicleNotAvailableException;
 import com.example.shinhangaecheokja.vehicle.service.VehicleService;
 import java.util.List;
 import java.util.Optional;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -43,9 +43,31 @@ class MatchingServiceTest {
   @Mock private VehicleService vehicleService;
   @InjectMocks private MatchingService matchingService;
 
-  private VehicleResponse availableVehicle(Long id) {
-    return new VehicleResponse(
-        id, 1L, VehicleType.CAR, 500, 100, 37.5, 127.0, VehicleStatus.AVAILABLE);
+  private Vehicle availableVehicle(Long id) {
+    Vehicle vehicle = new Vehicle();
+    vehicle.setId(id);
+    vehicle.setOwnerId(1L);
+    vehicle.setType(VehicleType.CAR);
+    vehicle.setMaxWeight(500);
+    vehicle.setMaxDistance(100);
+    vehicle.setLatitude(37.5);
+    vehicle.setLongitude(127.0);
+    vehicle.setStatus(VehicleStatus.AVAILABLE);
+    return vehicle;
+  }
+
+  private Vehicle vehicleWithStatusAndCapacity(
+      Long id, VehicleStatus status, double weight, double distance) {
+    Vehicle vehicle = new Vehicle();
+    vehicle.setId(id);
+    vehicle.setOwnerId(1L);
+    vehicle.setType(VehicleType.CAR);
+    vehicle.setMaxWeight(weight);
+    vehicle.setMaxDistance(distance);
+    vehicle.setLatitude(37.5);
+    vehicle.setLongitude(127.0);
+    vehicle.setStatus(status);
+    return vehicle;
   }
 
   private DeliveryRequest deliveryRequest(Long id) {
@@ -61,7 +83,8 @@ class MatchingServiceTest {
   }
 
   @Test
-  void 배송요청과_차량이_존재하고_매칭되지_않았으면_매칭을_생성한다() {
+  @DisplayName("배송요청과 차량이 존재하고 매칭되지 않았으면 매칭을 생성한다")
+  void createMatchingSuccess() {
     MatchingCreateRequest request = new MatchingCreateRequest();
     request.setDeliveryRequestId(1L);
     request.setVehicleId(2L);
@@ -72,7 +95,7 @@ class MatchingServiceTest {
     when(matchingRepository.save(any(Matching.class)))
         .thenAnswer(invocation -> invocation.getArgument(0));
 
-    Matching response = matchingService.createMatching(request);
+    Matching response = matchingService.create(request);
 
     assertThat(response.getDeliveryRequestId()).isEqualTo(1L);
     assertThat(response.getVehicleId()).isEqualTo(2L);
@@ -82,19 +105,21 @@ class MatchingServiceTest {
   }
 
   @Test
-  void 존재하지_않는_배송요청이면_EntityNotFoundException을_던진다() {
+  @DisplayName("존재하지 않는 배송요청이면 EntityNotFoundException을 던진다")
+  void createMatchingDeliveryNotFoundShouldThrowException() {
     MatchingCreateRequest request = new MatchingCreateRequest();
     request.setDeliveryRequestId(999L);
     request.setVehicleId(2L);
 
     when(deliveryRequestRepository.findByIdForUpdate(999L)).thenReturn(Optional.empty());
 
-    assertThatThrownBy(() -> matchingService.createMatching(request))
+    assertThatThrownBy(() -> matchingService.create(request))
         .isInstanceOf(EntityNotFoundException.class);
   }
 
   @Test
-  void 존재하지_않는_차량이면_EntityNotFoundException을_던진다() {
+  @DisplayName("존재하지 않는 차량이면 EntityNotFoundException을 던진다")
+  void createMatchingVehicleNotFoundShouldThrowException() {
     MatchingCreateRequest request = new MatchingCreateRequest();
     request.setDeliveryRequestId(1L);
     request.setVehicleId(999L);
@@ -104,12 +129,13 @@ class MatchingServiceTest {
     when(vehicleService.getVehicleForUpdate(999L))
         .thenThrow(new EntityNotFoundException(ErrorCode.VEHICLE_NOT_FOUND));
 
-    assertThatThrownBy(() -> matchingService.createMatching(request))
+    assertThatThrownBy(() -> matchingService.create(request))
         .isInstanceOf(EntityNotFoundException.class);
   }
 
   @Test
-  void 이미_BUSY인_차량이면_VehicleNotAvailableException을_던진다() {
+  @DisplayName("이미 BUSY인 차량이면 VehicleNotAvailableException을 던진다")
+  void createMatchingVehicleBusyShouldThrowException() {
     MatchingCreateRequest request = new MatchingCreateRequest();
     request.setDeliveryRequestId(1L);
     request.setVehicleId(2L);
@@ -117,16 +143,15 @@ class MatchingServiceTest {
     when(deliveryRequestRepository.findByIdForUpdate(1L))
         .thenReturn(Optional.of(deliveryRequest(1L)));
     when(vehicleService.getVehicleForUpdate(2L))
-        .thenReturn(
-            new VehicleResponse(
-                2L, 1L, VehicleType.CAR, 500, 100, 37.5, 127.0, VehicleStatus.BUSY));
+        .thenReturn(vehicleWithStatusAndCapacity(2L, VehicleStatus.BUSY, 500, 100));
 
-    assertThatThrownBy(() -> matchingService.createMatching(request))
+    assertThatThrownBy(() -> matchingService.create(request))
         .isInstanceOf(VehicleNotAvailableException.class);
   }
 
   @Test
-  void 차량이_무게_거리를_감당하지_못하면_VehicleCapacityMismatchException을_던진다() {
+  @DisplayName("차량이 무게 거리를 감당하지 못하면 VehicleCapacityMismatchException을 던진다")
+  void createMatchingCapacityMismatchShouldThrowException() {
     MatchingCreateRequest request = new MatchingCreateRequest();
     request.setDeliveryRequestId(1L);
     request.setVehicleId(2L);
@@ -134,16 +159,15 @@ class MatchingServiceTest {
     when(deliveryRequestRepository.findByIdForUpdate(1L))
         .thenReturn(Optional.of(deliveryRequest(1L)));
     when(vehicleService.getVehicleForUpdate(2L))
-        .thenReturn(
-            new VehicleResponse(
-                2L, 1L, VehicleType.CAR, 5, 100, 37.5, 127.0, VehicleStatus.AVAILABLE));
+        .thenReturn(vehicleWithStatusAndCapacity(2L, VehicleStatus.AVAILABLE, 5, 100));
 
-    assertThatThrownBy(() -> matchingService.createMatching(request))
+    assertThatThrownBy(() -> matchingService.create(request))
         .isInstanceOf(VehicleCapacityMismatchException.class);
   }
 
   @Test
-  void 이미_매칭된_배송요청이면_AlreadyMatchedException을_던진다() {
+  @DisplayName("이미 매칭된 배송요청이면 AlreadyMatchedException을 던진다")
+  void createMatchingAlreadyMatchedShouldThrowException() {
     MatchingCreateRequest request = new MatchingCreateRequest();
     request.setDeliveryRequestId(1L);
     request.setVehicleId(2L);
@@ -152,15 +176,16 @@ class MatchingServiceTest {
 
     when(deliveryRequestRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(deliveryRequest));
 
-    assertThatThrownBy(() -> matchingService.createMatching(request))
+    assertThatThrownBy(() -> matchingService.create(request))
         .isInstanceOf(AlreadyMatchedException.class);
   }
 
   @Test
-  void 차량이_가용하면_조건에_맞는_열린_콜_목록을_반환한다() {
+  @DisplayName("차량이 가용하면 조건에 맞는 열린 콜 목록을 반환한다")
+  void getOpenCallsAvailableVehicleShouldReturnOpenCalls() {
     DeliveryRequest deliveryRequest = deliveryRequest(1L);
 
-    when(vehicleService.getVehicle(2L)).thenReturn(availableVehicle(2L));
+    when(vehicleService.getById(2L)).thenReturn(availableVehicle(2L));
     when(deliveryRequestRepository.findByStatusAndWeightLessThanEqualAndDistanceLessThanEqual(
             DeliveryStatus.REQUESTED, 500, 100))
         .thenReturn(List.of(deliveryRequest));
@@ -172,11 +197,10 @@ class MatchingServiceTest {
   }
 
   @Test
-  void 차량이_BUSY면_열린_콜_목록이_비어있다() {
-    when(vehicleService.getVehicle(2L))
-        .thenReturn(
-            new VehicleResponse(
-                2L, 1L, VehicleType.CAR, 500, 100, 37.5, 127.0, VehicleStatus.BUSY));
+  @DisplayName("차량이 BUSY면 열린 콜 목록이 비어있다")
+  void getOpenCallsBusyVehicleShouldReturnEmptyList() {
+    when(vehicleService.getById(2L))
+        .thenReturn(vehicleWithStatusAndCapacity(2L, VehicleStatus.BUSY, 500, 100));
 
     List<DeliveryRequest> calls = matchingService.getOpenCalls(2L);
 
@@ -184,8 +208,9 @@ class MatchingServiceTest {
   }
 
   @Test
-  void 존재하지_않는_차량으로_열린_콜을_조회하면_EntityNotFoundException을_던진다() {
-    when(vehicleService.getVehicle(999L))
+  @DisplayName("존재하지 않는 차량으로 열린 콜을 조회하면 EntityNotFoundException을 던진다")
+  void getOpenCallsVehicleNotFoundShouldThrowException() {
+    when(vehicleService.getById(999L))
         .thenThrow(new EntityNotFoundException(ErrorCode.VEHICLE_NOT_FOUND));
 
     assertThatThrownBy(() -> matchingService.getOpenCalls(999L))
@@ -193,28 +218,31 @@ class MatchingServiceTest {
   }
 
   @Test
-  void 존재하지_않는_매칭을_조회하면_EntityNotFoundException을_던진다() {
+  @DisplayName("존재하지 않는 매칭을 조회하면 EntityNotFoundException을 던진다")
+  void getMatchingNotFoundShouldThrowException() {
     when(matchingRepository.findById(1L)).thenReturn(Optional.empty());
 
-    assertThatThrownBy(() -> matchingService.getMatching(1L))
+    assertThatThrownBy(() -> matchingService.getById(1L))
         .isInstanceOf(EntityNotFoundException.class);
   }
 
   @Test
-  void 존재하는_매칭을_조회하면_MatchingResponse를_반환한다() {
+  @DisplayName("존재하는 매칭을 조회하면 Matching을 반환한다")
+  void getMatchingSuccess() {
     Matching matching = new Matching();
     matching.setDeliveryRequestId(1L);
     matching.setVehicleId(2L);
     matching.setStatus(MatchingStatus.MATCHED);
     when(matchingRepository.findById(1L)).thenReturn(Optional.of(matching));
 
-    MatchingResponse response = matchingService.getMatching(1L);
+    Matching response = matchingService.getById(1L);
 
-    assertThat(response.deliveryRequestId()).isEqualTo(1L);
+    assertThat(response.getDeliveryRequestId()).isEqualTo(1L);
   }
 
   @Test
-  void 매칭_상태를_COMPLETED로_변경하면_차량이_AVAILABLE로_복귀하고_배송요청_상태도_동기화된다() {
+  @DisplayName("매칭 상태를 COMPLETED로 변경하면 차량이 AVAILABLE로 복귀하고 배송요청 상태도 동기화된다")
+  void updateMatchingToCompletedShouldSynchronizeStatus() {
     Matching matching = new Matching();
     matching.setDeliveryRequestId(1L);
     matching.setVehicleId(2L);
@@ -226,16 +254,17 @@ class MatchingServiceTest {
     when(matchingRepository.findById(1L)).thenReturn(Optional.of(matching));
     when(deliveryRequestRepository.findById(1L)).thenReturn(Optional.of(deliveryRequest));
 
-    MatchingResponse response = matchingService.updateMatching(1L, request);
+    Matching response = matchingService.update(1L, request);
 
-    assertThat(response.status()).isEqualTo(MatchingStatus.COMPLETED);
+    assertThat(response.getStatus()).isEqualTo(MatchingStatus.COMPLETED);
     assertThat(deliveryRequest.getStatus()).isEqualTo(DeliveryStatus.COMPLETED);
     verify(vehicleService).markAvailable(2L);
     verify(vehicleService, never()).markBusy(eq(2L));
   }
 
   @Test
-  void 취소된_매칭을_MATCHED로_되돌릴때_차량이_다른_건으로_BUSY면_VehicleNotAvailableException을_던진다() {
+  @DisplayName("취소된 매칭을 MATCHED로 되돌릴때 차량이 다른 건으로 BUSY면 VehicleNotAvailableException을 던진다")
+  void updateMatchingRevertMatchedWhenBusyShouldThrowException() {
     Matching matching = new Matching();
     matching.setDeliveryRequestId(1L);
     matching.setVehicleId(2L);
@@ -246,17 +275,16 @@ class MatchingServiceTest {
     when(matchingRepository.findById(1L)).thenReturn(Optional.of(matching));
     when(deliveryRequestRepository.findById(1L)).thenReturn(Optional.of(deliveryRequest(1L)));
     when(vehicleService.getVehicleForUpdate(2L))
-        .thenReturn(
-            new VehicleResponse(
-                2L, 1L, VehicleType.CAR, 500, 100, 37.5, 127.0, VehicleStatus.BUSY));
+        .thenReturn(vehicleWithStatusAndCapacity(2L, VehicleStatus.BUSY, 500, 100));
 
-    assertThatThrownBy(() -> matchingService.updateMatching(1L, request))
+    assertThatThrownBy(() -> matchingService.update(1L, request))
         .isInstanceOf(VehicleNotAvailableException.class);
     verify(vehicleService, never()).markBusy(2L);
   }
 
   @Test
-  void 취소된_매칭을_MATCHED로_되돌릴때_차량이_용량을_감당못하면_VehicleCapacityMismatchException을_던진다() {
+  @DisplayName("취소된 매칭을 MATCHED로 되돌릴때 차량이 용량을 감당못하면 VehicleCapacityMismatchException을 던진다")
+  void updateMatchingRevertMatchedWhenCapacityExceededShouldThrowException() {
     Matching matching = new Matching();
     matching.setDeliveryRequestId(1L);
     matching.setVehicleId(2L);
@@ -267,17 +295,16 @@ class MatchingServiceTest {
     when(matchingRepository.findById(1L)).thenReturn(Optional.of(matching));
     when(deliveryRequestRepository.findById(1L)).thenReturn(Optional.of(deliveryRequest(1L)));
     when(vehicleService.getVehicleForUpdate(2L))
-        .thenReturn(
-            new VehicleResponse(
-                2L, 1L, VehicleType.CAR, 5, 100, 37.5, 127.0, VehicleStatus.AVAILABLE));
+        .thenReturn(vehicleWithStatusAndCapacity(2L, VehicleStatus.AVAILABLE, 5, 100));
 
-    assertThatThrownBy(() -> matchingService.updateMatching(1L, request))
+    assertThatThrownBy(() -> matchingService.update(1L, request))
         .isInstanceOf(VehicleCapacityMismatchException.class);
     verify(vehicleService, never()).markBusy(2L);
   }
 
   @Test
-  void 취소된_매칭을_MATCHED로_되돌릴때_차량이_가용하면_다시_매칭된다() {
+  @DisplayName("취소된 매칭을 MATCHED로 되돌릴때 차량이 가용하면 다시 매칭된다")
+  void updateMatchingRevertMatchedWhenAvailableShouldReMatch() {
     Matching matching = new Matching();
     matching.setDeliveryRequestId(1L);
     matching.setVehicleId(2L);
@@ -290,14 +317,15 @@ class MatchingServiceTest {
     when(vehicleService.getVehicleForUpdate(2L)).thenReturn(availableVehicle(2L));
     when(deliveryRequestRepository.findById(1L)).thenReturn(Optional.of(deliveryRequest));
 
-    MatchingResponse response = matchingService.updateMatching(1L, request);
+    Matching response = matchingService.update(1L, request);
 
-    assertThat(response.status()).isEqualTo(MatchingStatus.MATCHED);
+    assertThat(response.getStatus()).isEqualTo(MatchingStatus.MATCHED);
     verify(vehicleService).markBusy(2L);
   }
 
   @Test
-  void COMPLETED된_매칭을_다른_상태로_바꾸려하면_InvalidMatchingTransitionException을_던진다() {
+  @DisplayName("COMPLETED된 매칭을 다른 상태로 바꾸려하면 InvalidMatchingTransitionException을 던진다")
+  void updateMatchingFromCompletedShouldThrowException() {
     Matching matching = new Matching();
     matching.setDeliveryRequestId(1L);
     matching.setVehicleId(2L);
@@ -307,12 +335,13 @@ class MatchingServiceTest {
 
     when(matchingRepository.findById(1L)).thenReturn(Optional.of(matching));
 
-    assertThatThrownBy(() -> matchingService.updateMatching(1L, request))
+    assertThatThrownBy(() -> matchingService.update(1L, request))
         .isInstanceOf(InvalidMatchingTransitionException.class);
   }
 
   @Test
-  void 매칭을_삭제하면_차량이_AVAILABLE로_복귀하고_배송요청_상태가_REQUESTED로_복귀한다() {
+  @DisplayName("매칭을 삭제하면 차량이 AVAILABLE로 복귀하고 배송요청 상태가 REQUESTED로 복귀한다")
+  void deleteMatchingMatchedStatusShouldRevertStatus() {
     Matching matching = new Matching();
     matching.setDeliveryRequestId(1L);
     matching.setVehicleId(2L);
@@ -323,7 +352,7 @@ class MatchingServiceTest {
     when(matchingRepository.findById(1L)).thenReturn(Optional.of(matching));
     when(deliveryRequestRepository.findById(1L)).thenReturn(Optional.of(deliveryRequest));
 
-    matchingService.deleteMatching(1L);
+    matchingService.delete(1L);
 
     assertThat(deliveryRequest.getStatus()).isEqualTo(DeliveryStatus.REQUESTED);
     verify(vehicleService).markAvailable(2L);
@@ -331,7 +360,8 @@ class MatchingServiceTest {
   }
 
   @Test
-  void 이미_COMPLETED된_매칭을_삭제해도_배송요청_상태를_되돌리지_않는다() {
+  @DisplayName("이미 COMPLETED된 매칭을 삭제해도 배송요청 상태를 되돌리지 않는다")
+  void deleteMatchingCompletedStatusShouldNotRevertStatus() {
     Matching matching = new Matching();
     matching.setDeliveryRequestId(1L);
     matching.setVehicleId(2L);
@@ -341,7 +371,7 @@ class MatchingServiceTest {
 
     when(matchingRepository.findById(1L)).thenReturn(Optional.of(matching));
 
-    matchingService.deleteMatching(1L);
+    matchingService.delete(1L);
 
     assertThat(deliveryRequest.getStatus()).isEqualTo(DeliveryStatus.COMPLETED);
     verify(vehicleService, never()).markAvailable(2L);

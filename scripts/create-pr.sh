@@ -29,8 +29,8 @@ else
 fi
 
 CURRENT_BRANCH=$(git branch --show-current)
-if [ "$CURRENT_BRANCH" = "main" ] || [ "$CURRENT_BRANCH" = "develop" ]; then
-    echo "❌ main 또는 develop 브랜치에서는 직접 커밋/푸시할 수 없습니다. 새 브랜치를 생성하세요."
+if [ "$CURRENT_BRANCH" = "main" ]; then
+    echo "❌ main 브랜치에서는 직접 커밋/푸시할 수 없습니다. 새 브랜치를 생성하세요."
     exit 1
 fi
 

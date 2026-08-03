@@ -26,7 +26,7 @@ class PingControllerTest {
 
   @Test
   @DisplayName("GET /api/test/ping 요청 시 200 OK와 message: pong 응답을 반환한다")
-  void getPing_success() throws Exception {
+  void getPingSuccess() throws Exception {
     given(pingService.getPingMessage()).willReturn(new PingResponse("pong", LocalDateTime.now()));
 
     mockMvc

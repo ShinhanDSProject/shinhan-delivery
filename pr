@@ -11,7 +11,7 @@ echo -e "${BLUE}🚀 [1/3] 로컬 검증(Verify) 실행 중...${RESET}"
 bash scripts/verify.sh
 
 CURRENT_BRANCH=$(git branch --show-current)
-if [ "$CURRENT_BRANCH" = "main" ] || [ "$CURRENT_BRANCH" = "develop" ]; then
+if [ "$CURRENT_BRANCH" = "main" ]; then
     NEW_BRANCH="feat/auto-pr-$(date +%Y%m%d%H%M%S)"
     echo -e "${BLUE}📌 main 브랜치 감지 -> 새 작업 브랜치 생성: $NEW_BRANCH${RESET}"
     git checkout -b "$NEW_BRANCH"

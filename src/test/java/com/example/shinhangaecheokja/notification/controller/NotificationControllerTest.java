@@ -10,11 +10,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.example.shinhangaecheokja.common.security.JwtProvider;
-import com.example.shinhangaecheokja.notification.dto.response.NotificationResponse;
+import com.example.shinhangaecheokja.notification.entity.Notification;
 import com.example.shinhangaecheokja.notification.exception.NotificationAccessDeniedException;
 import com.example.shinhangaecheokja.notification.service.NotificationService;
 import java.time.LocalDateTime;
 import java.util.List;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -38,16 +39,25 @@ class NotificationControllerTest {
   @MockitoBean private NotificationService notificationService;
 
   @Test
-  void 인증_토큰이_없으면_403을_반환한다() throws Exception {
+  @DisplayName("인증 토큰이 없으면 403을 반환한다")
+  void getNotificationsUnauthenticatedShouldReturn403() throws Exception {
     mockMvc.perform(get("/api/v1/notifications")).andExpect(status().isForbidden());
   }
 
   @Test
-  void 인증된_회원은_본인_알림_목록을_조회한다() throws Exception {
+  @DisplayName("인증된 회원은 본인 알림 목록을 조회한다")
+  void getNotificationsAuthenticatedShouldReturnNotifications() throws Exception {
     String token = jwtProvider.createAccessToken(1L, "user@test.com", "CUSTOMER");
-    NotificationResponse notification =
-        new NotificationResponse(1L, "제목", "내용", "DELIVERY", false, LocalDateTime.now());
-    when(notificationService.getNotifications(eq(1L), isNull(), any()))
+    Notification notification = new Notification();
+    notification.setId(1L);
+    notification.setMemberId(1L);
+    notification.setTitle("제목");
+    notification.setMessage("내용");
+    notification.setCategory("DELIVERY");
+    notification.setRead(false);
+    notification.setCreatedAt(LocalDateTime.now());
+
+    when(notificationService.list(eq(1L), isNull(), any()))
         .thenReturn(new PageImpl<>(List.of(notification)));
 
     mockMvc
@@ -57,10 +67,18 @@ class NotificationControllerTest {
   }
 
   @Test
-  void 읽음_처리에_성공하면_read가_true인_알림을_반환한다() throws Exception {
+  @DisplayName("읽음 처리에 성공하면 read가 true인 알림을 반환한다")
+  void markAsReadSuccess() throws Exception {
     String token = jwtProvider.createAccessToken(1L, "user@test.com", "CUSTOMER");
-    NotificationResponse updated =
-        new NotificationResponse(1L, "제목", "내용", "DELIVERY", true, LocalDateTime.now());
+    Notification updated = new Notification();
+    updated.setId(1L);
+    updated.setMemberId(1L);
+    updated.setTitle("제목");
+    updated.setMessage("내용");
+    updated.setCategory("DELIVERY");
+    updated.setRead(true);
+    updated.setCreatedAt(LocalDateTime.now());
+
     when(notificationService.markAsRead(1L, 1L)).thenReturn(updated);
 
     mockMvc
@@ -70,9 +88,10 @@ class NotificationControllerTest {
   }
 
   @Test
-  void 본인_알림이_아니면_403을_반환한다() throws Exception {
+  @DisplayName("본인 알림이 아니면 403을 반환한다")
+  void markAsReadForbiddenShouldReturn403() throws Exception {
     String token = jwtProvider.createAccessToken(2L, "stranger@test.com", "CUSTOMER");
-    when(notificationService.markAsRead(1L, 2L))
+    when(notificationService.markAsRead(2L, 1L))
         .thenThrow(new NotificationAccessDeniedException(1L, 2L));
 
     mockMvc

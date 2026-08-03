@@ -7,8 +7,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.example.shinhangaecheokja.notice.dto.response.NoticeDetailResponse;
-import com.example.shinhangaecheokja.notice.dto.response.NoticeResponse;
 import com.example.shinhangaecheokja.notice.entity.Notice;
 import com.example.shinhangaecheokja.notice.exception.NoticeNotFoundException;
 import com.example.shinhangaecheokja.notice.repository.NoticeRepository;
@@ -35,52 +33,52 @@ class NoticeServiceTest {
 
   @Test
   @DisplayName("카테고리가 없으면 전체 공지사항을 상단고정 및 최신순으로 조회한다")
-  void getNotices_WithoutCategory() {
+  void getNoticesWithoutCategory() {
     Pageable pageable = PageRequest.of(0, 10);
     Notice notice = createNotice(1L, "제목", "내용", "SYSTEM", true);
     when(noticeRepository.findAllByOrderByIsPinnedDescCreatedAtDesc(pageable))
         .thenReturn(new PageImpl<>(List.of(notice)));
 
-    Page<NoticeResponse> responses = noticeService.getNotices(null, pageable);
+    Page<Notice> responses = noticeService.list(null, pageable);
 
     assertThat(responses.getContent()).hasSize(1);
-    assertThat(responses.getContent().get(0).title()).isEqualTo("제목");
+    assertThat(responses.getContent().get(0).getTitle()).isEqualTo("제목");
     verify(noticeRepository, never()).findByCategoryOrderByIsPinnedDescCreatedAtDesc(any(), any());
   }
 
   @Test
   @DisplayName("카테고리가 주어지면 해당 카테고리의 공지사항만 필터링하여 조회한다")
-  void getNotices_WithCategory() {
+  void getNoticesWithCategory() {
     Pageable pageable = PageRequest.of(0, 10);
     Notice notice = createNotice(2L, "이벤트 제목", "내용", "EVENT", false);
     when(noticeRepository.findByCategoryOrderByIsPinnedDescCreatedAtDesc("EVENT", pageable))
         .thenReturn(new PageImpl<>(List.of(notice)));
 
-    Page<NoticeResponse> responses = noticeService.getNotices("EVENT", pageable);
+    Page<Notice> responses = noticeService.list("EVENT", pageable);
 
     assertThat(responses.getContent()).hasSize(1);
-    assertThat(responses.getContent().get(0).category()).isEqualTo("EVENT");
+    assertThat(responses.getContent().get(0).getCategory()).isEqualTo("EVENT");
   }
 
   @Test
   @DisplayName("존재하는 공지사항 ID로 상세 조회 시 상세 정보를 반환한다")
-  void getNoticeDetail_Success() {
+  void getNoticeDetailSuccess() {
     Notice notice = createNotice(1L, "상세 제목", "상세 본문 내용", "SYSTEM", true);
     when(noticeRepository.findById(1L)).thenReturn(Optional.of(notice));
 
-    NoticeDetailResponse response = noticeService.getNoticeDetail(1L);
+    Notice response = noticeService.getById(1L);
 
-    assertThat(response.id()).isEqualTo(1L);
-    assertThat(response.title()).isEqualTo("상세 제목");
-    assertThat(response.content()).isEqualTo("상세 본문 내용");
+    assertThat(response.getId()).isEqualTo(1L);
+    assertThat(response.getTitle()).isEqualTo("상세 제목");
+    assertThat(response.getContent()).isEqualTo("상세 본문 내용");
   }
 
   @Test
   @DisplayName("존재하지 않는 공지사항 ID로 상세 조회 시 NoticeNotFoundException 예외를 던진다")
-  void getNoticeDetail_NotFound() {
+  void getNoticeDetailNotFound() {
     when(noticeRepository.findById(999L)).thenReturn(Optional.empty());
 
-    assertThatThrownBy(() -> noticeService.getNoticeDetail(999L))
+    assertThatThrownBy(() -> noticeService.getById(999L))
         .isInstanceOf(NoticeNotFoundException.class);
   }
 

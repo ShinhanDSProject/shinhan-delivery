@@ -70,8 +70,8 @@ class MatchingConcurrencyTest {
   }
 
   @Test
-  @DisplayName("서로 다른 차량 100대가 동시에 같은 배송 요청을 수락해도 단 1건만 매칭에 성공한다")
-  void 동시_콜_수락_요청은_비관적_락으로_직렬화되어_한_건만_성공한다() throws InterruptedException {
+  @DisplayName("동시 콜 수락 요청은 비관적 락으로 직렬화되어 한 건만 성공한다")
+  void concurrentCallAcceptShouldSerializeWithPessimisticLock() throws InterruptedException {
     customerId = createMember("customer", MemberRole.CUSTOMER);
     courierId = createMember("courier", MemberRole.COURIER);
 
@@ -116,7 +116,7 @@ class MatchingConcurrencyTest {
               MatchingCreateRequest request = new MatchingCreateRequest();
               request.setDeliveryRequestId(deliveryRequestId);
               request.setVehicleId(vehicleId);
-              matchingService.createMatching(request);
+              matchingService.create(request);
               successCount.incrementAndGet();
             } catch (AlreadyMatchedException e) {
               alreadyMatchedCount.incrementAndGet();

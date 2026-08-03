@@ -44,7 +44,7 @@ public class MemberController {
   @PostMapping
   public ResponseEntity<MemberResponse> createMember(
       @Valid @RequestBody MemberCreateRequest request) {
-    Member created = memberService.createMember(request);
+    Member created = memberService.create(request);
     return ResponseEntity.status(HttpStatus.CREATED).body(MemberResponse.from(created));
   }
 
@@ -59,7 +59,8 @@ public class MemberController {
   public ResponseEntity<MemberProfileResponseDto> getMyProfile(
       @AuthenticationPrincipal CustomUserDetails userDetails) {
     CustomUserDetails resolved = resolveUserDetails(userDetails);
-    return ResponseEntity.ok(memberService.getMyProfile(resolved.getId()));
+    return ResponseEntity.ok(
+        MemberProfileResponseDto.from(memberService.getMyProfile(resolved.getId())));
   }
 
   /** 인증된 본인의 프로필 정보(이름, 연락처)를 수정한다. */
@@ -68,7 +69,8 @@ public class MemberController {
       @AuthenticationPrincipal CustomUserDetails userDetails,
       @Valid @RequestBody MemberProfileUpdateRequestDto request) {
     CustomUserDetails resolved = resolveUserDetails(userDetails);
-    return ResponseEntity.ok(memberService.updateMyProfile(resolved.getId(), request));
+    return ResponseEntity.ok(
+        MemberProfileResponseDto.from(memberService.updateMyProfile(resolved.getId(), request)));
   }
 
   /** 인증된 본인의 비밀번호를 변경한다. */
@@ -97,20 +99,22 @@ public class MemberController {
   /** 회원 단건을 조회한다. */
   @GetMapping("/{memberId}")
   public ResponseEntity<MemberResponse> getMember(@PathVariable Long memberId) {
-    return ResponseEntity.ok(memberService.getMember(memberId));
+    return ResponseEntity.ok(MemberResponse.from(memberService.getById(memberId)));
   }
 
   /** 회원 전체 목록을 조회한다. */
   @GetMapping
   public ResponseEntity<List<MemberResponse>> getMembers() {
-    return ResponseEntity.ok(memberService.getMembers());
+    List<MemberResponse> responses =
+        memberService.list().stream().map(MemberResponse::from).toList();
+    return ResponseEntity.ok(responses);
   }
 
   /** 회원 정보를 수정한다. */
   @PutMapping("/{memberId}")
   public ResponseEntity<MemberResponse> updateMember(
       @PathVariable Long memberId, @RequestBody MemberUpdateRequest request) {
-    Member updated = memberService.updateMember(memberId, request);
+    Member updated = memberService.update(memberId, request);
     return ResponseEntity.ok(MemberResponse.from(updated));
   }
 
@@ -125,7 +129,7 @@ public class MemberController {
   /** 회원을 삭제한다. */
   @DeleteMapping("/{memberId}")
   public ResponseEntity<Void> deleteMember(@PathVariable Long memberId) {
-    memberService.deleteMember(memberId);
+    memberService.delete(memberId);
     return ResponseEntity.noContent().build();
   }
 }

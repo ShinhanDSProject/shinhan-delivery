@@ -34,7 +34,7 @@ public class MatchingController {
   @PostMapping
   public ResponseEntity<MatchingResponse> createMatching(
       @RequestBody @Valid MatchingCreateRequest request) {
-    Matching created = matchingService.createMatching(request);
+    Matching created = matchingService.create(request);
     return ResponseEntity.status(HttpStatus.CREATED).body(MatchingResponse.from(created));
   }
 
@@ -48,26 +48,29 @@ public class MatchingController {
   /** 매칭 단건을 조회한다. */
   @GetMapping("/{matchingId}")
   public ResponseEntity<MatchingResponse> getMatching(@PathVariable Long matchingId) {
-    return ResponseEntity.ok(matchingService.getMatching(matchingId));
+    return ResponseEntity.ok(MatchingResponse.from(matchingService.getById(matchingId)));
   }
 
   /** 매칭 전체 목록을 조회한다. */
   @GetMapping
   public ResponseEntity<List<MatchingResponse>> getMatchings() {
-    return ResponseEntity.ok(matchingService.getMatchings());
+    List<MatchingResponse> responses =
+        matchingService.list().stream().map(MatchingResponse::from).toList();
+    return ResponseEntity.ok(responses);
   }
 
   /** 매칭 상태를 변경한다. */
   @PutMapping("/{matchingId}")
   public ResponseEntity<MatchingResponse> updateMatching(
       @PathVariable Long matchingId, @RequestBody @Valid MatchingUpdateRequest request) {
-    return ResponseEntity.ok(matchingService.updateMatching(matchingId, request));
+    Matching updated = matchingService.update(matchingId, request);
+    return ResponseEntity.ok(MatchingResponse.from(updated));
   }
 
   /** 매칭을 삭제한다. */
   @DeleteMapping("/{matchingId}")
   public ResponseEntity<Void> deleteMatching(@PathVariable Long matchingId) {
-    matchingService.deleteMatching(matchingId);
+    matchingService.delete(matchingId);
     return ResponseEntity.noContent().build();
   }
 }
