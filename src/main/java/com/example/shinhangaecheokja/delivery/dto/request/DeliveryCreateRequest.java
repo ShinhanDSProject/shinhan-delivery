@@ -15,9 +15,6 @@ import lombok.Setter;
 @NoArgsConstructor
 public class DeliveryCreateRequest {
 
-  @NotNull(message = "고객 id는 필수입니다.")
-  private Long customerId;
-
   @NotBlank(message = "픽업 주소는 필수입니다.")
   private String pickupAddress;
 

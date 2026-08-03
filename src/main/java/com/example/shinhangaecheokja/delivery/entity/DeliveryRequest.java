@@ -77,9 +77,12 @@ public class DeliveryRequest {
   @Column(name = "picked_up_at")
   private LocalDateTime pickedUpAt;
 
+  @Column(name = "created_at")
+  private LocalDateTime createdAt;
+
   /** DeliveryCreateRequest DTO 수용 기반으로 REQUESTED 상태의 DeliveryRequest 엔티티를 생성하는 정적 팩토리 메서드. */
   public static DeliveryRequest of(
-      DeliveryCreateRequest request, double distanceKm, long feePoint) {
+      Long customerId, DeliveryCreateRequest request, double distanceKm, long feePoint) {
     if (request.getWeight() <= 0) {
       throw new InvalidDeliveryWeightException(request.getWeight());
     }
@@ -88,7 +91,7 @@ public class DeliveryRequest {
     }
 
     DeliveryRequest deliveryRequest = new DeliveryRequest();
-    deliveryRequest.setCustomerId(request.getCustomerId());
+    deliveryRequest.setCustomerId(customerId);
     deliveryRequest.setPickupAddress(request.getPickupAddress());
     deliveryRequest.setDropoffAddress(request.getDropoffAddress());
     deliveryRequest.setWeight(request.getWeight());
@@ -100,6 +103,7 @@ public class DeliveryRequest {
     deliveryRequest.setItemSize(request.getItemSize());
     deliveryRequest.setStatus(DeliveryStatus.REQUESTED);
     deliveryRequest.setFeePoint(feePoint);
+    deliveryRequest.setCreatedAt(LocalDateTime.now());
     return deliveryRequest;
   }
 
