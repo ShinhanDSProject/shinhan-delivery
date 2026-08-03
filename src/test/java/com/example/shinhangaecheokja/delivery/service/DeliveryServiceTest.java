@@ -427,7 +427,7 @@ class DeliveryServiceTest {
     Pageable pageable = PageRequest.of(0, 10);
     DeliveryRequest deliveryRequest = new DeliveryRequest();
     deliveryRequest.setStatus(DeliveryStatus.COMPLETED);
-    when(deliveryRequestRepository.findByCustomerIdOrderByCreatedAtDesc(1L, pageable))
+    when(deliveryRequestRepository.findByCustomerIdOrderByCreatedAtDescIdDesc(1L, pageable))
         .thenReturn(new PageImpl<>(List.of(deliveryRequest)));
 
     Page<DeliveryRequest> result = deliveryService.getMyDeliveryRequests(1L, null, pageable);
@@ -435,14 +435,14 @@ class DeliveryServiceTest {
     assertThat(result.getContent()).hasSize(1);
     assertThat(result.getContent().get(0).getStatus()).isEqualTo(DeliveryStatus.COMPLETED);
     verify(deliveryRequestRepository, never())
-        .findByCustomerIdAndStatusOrderByCreatedAtDesc(any(), any(), any());
+        .findByCustomerIdAndStatusOrderByCreatedAtDescIdDesc(any(), any(), any());
   }
 
   @Test
   @DisplayName("status가 있으면 그 상태로만 필터링해 조회한다")
   void getMyDeliveryRequestsWithStatusFiltersByStatus() {
     Pageable pageable = PageRequest.of(0, 10);
-    when(deliveryRequestRepository.findByCustomerIdAndStatusOrderByCreatedAtDesc(
+    when(deliveryRequestRepository.findByCustomerIdAndStatusOrderByCreatedAtDescIdDesc(
             1L, DeliveryStatus.CANCELLED, pageable))
         .thenReturn(new PageImpl<>(List.of()));
 
@@ -450,7 +450,8 @@ class DeliveryServiceTest {
         deliveryService.getMyDeliveryRequests(1L, DeliveryStatus.CANCELLED, pageable);
 
     assertThat(result.getContent()).isEmpty();
-    verify(deliveryRequestRepository, never()).findByCustomerIdOrderByCreatedAtDesc(any(), any());
+    verify(deliveryRequestRepository, never())
+        .findByCustomerIdOrderByCreatedAtDescIdDesc(any(), any());
   }
 
   @Test

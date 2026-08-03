@@ -138,8 +138,8 @@ public class DeliveryService {
   public Page<DeliveryRequest> getMyDeliveryRequests(
       Long customerId, DeliveryStatus status, Pageable pageable) {
     return status == null
-        ? deliveryRequestRepository.findByCustomerIdOrderByCreatedAtDesc(customerId, pageable)
-        : deliveryRequestRepository.findByCustomerIdAndStatusOrderByCreatedAtDesc(
+        ? deliveryRequestRepository.findByCustomerIdOrderByCreatedAtDescIdDesc(customerId, pageable)
+        : deliveryRequestRepository.findByCustomerIdAndStatusOrderByCreatedAtDescIdDesc(
             customerId, status, pageable);
   }
 
