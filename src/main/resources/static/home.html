@@ -521,7 +521,7 @@
             const me = await meResponse.json();
             document.getElementById('greetingName').textContent = `${me.name} 님`;
 
-            const deliveriesResponse = await fetch('/api/v1/delivery-requests', {
+            const deliveriesResponse = await fetch('/api/v1/delivery-requests?size=100', {
                 headers: { Authorization: header }
             });
             const deliveriesPage = await deliveriesResponse.json();
