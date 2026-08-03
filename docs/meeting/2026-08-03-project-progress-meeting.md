@@ -9,20 +9,27 @@
 
 ## 📌 1. 회의 요약 (Executive Summary)
 
-Spring Boot 4.1.0 & Thymeleaf 기반 스마트 퀵배송 & 온디맨드 매칭 플랫폼 프로젝트의 현 상태를 점검하였습니다. **디자이너 Yeeun 님의 Figma 실전 디자인**을 기반으로 **MVP 핵심 기능의 약 75%**를 성공적으로 완수하였으며, 하네스 검증 피드백 루프(`./scripts/verify.sh`)를 통과한 **무결점(Zero-Defect) 상태**를 확인했습니다.
+Spring Boot 4.1.0 & Thymeleaf 기반 스마트 퀵배송 & 온디맨드 매칭 플랫폼 프로젝트의 현 상태를 점검하였습니다. **개발 생산성 및 무결점 품질 확보를 위한 개발 환경(코드 컨벤션, Flyway 무중단 마이그레이션, 자동 검증 하네스 `./pr`) 구축**과 **디자이너 Yeeun 님의 Figma 실전 디자인**을 바탕으로 **MVP 핵심 기능의 약 75%**를 성공적으로 완수하였으며, 하네스 검증 피드백 루프(`./scripts/verify.sh`)를 통과한 **무결점(Zero-Defect) 상태**를 확인했습니다.
 
 ---
 
 ## 🔍 2. GitHub Issue & PR 기반 MVP 기능 정의 및 구현 현황
 
-기획된 전체 MVP 기능(Sprint 1 ~ 6)의 세부 모듈 목록과 현재 구현 완료 여부 매트릭스입니다.
+기획된 전체 MVP 기능(Sprint 1 ~ 6 및 개발 환경/거버넌스 모듈)의 세부 목록과 현재 구현 완료 여부 매트릭스입니다.
 
-- **전체 MVP 기능 완목율:** **34 / 50개 이슈 완료 (74.5%)**
+- **전체 MVP 및 인프라 완목율:** **34 / 50개 이슈 완료 (74.5%)**
 
-### 📊 MVP 기능별 구현 매트릭스 (Feature Status Matrix)
+### 📊 MVP 기능 및 개발 환경 구축 매트릭스 (Feature & Infra Status Matrix)
 
-| 모듈 / 스프린트 | 기획된 MVP 기능 항목 | 주요 API / 화면 스펙 | 구현 상태 | 관련 이슈 |
+| 모듈 / 영역 | 기획된 MVP 기능 및 개발 환경 구축 항목 | 주요 스펙 / 구현 내용 | 구현 상태 | 관련 이슈 |
 | :--- | :--- | :--- | :---: | :---: |
+| **Dev Environment<br/>& Governance<br/>(개발 환경 & 통제)** | **단일 원본(SSOT) 코딩 컨벤션 정립** | `code-convention.md`, `CLAUDE.md`, `AGENTS.md` | 🟢 완료 | `#197` |
+| | **Flyway 무중단 DDL 마이그레이션 체계** | `db/migration/V1__*.sql` 및 Online DDL 린트 | 🟢 완료 | `#188` |
+| | **원클릭 자동 검증 & PR 하네스 구축** | `./scripts/verify.sh`, `./pr` 하네스 | 🟢 완료 | `#181` |
+| | **Checkstyle & Spotless 정적 분석 자동화** | 코드 포맷팅 & Inline Variable 컨벤션 연동 | 🟢 완료 | `#196` |
+| | **ArchUnit & JaCoCo 60%+ 커버리지 게이트** | 단방향 레이어링 규칙 및 커버리지 자동 통제 | 🟢 완료 | `#128` |
+| | **MDC 기반 Trace ID 분산 로깅 구축** | 요청별 Trace ID 할당 및 장애 역추적 체계 | 🟢 완료 | `#73, #203` |
+| | **단일 main 브랜치 Flow 전략 수립** | 빠른 피드백 루프를 위한 Git 단일 브랜치 갱신 | 🟢 완료 | `#201` |
 | **Sprint 1<br/>(인증 & 온보딩)** | 스플래시 & 워크스루 화면 | `FE-001, FE-002` | 🟢 완료 | `#96` |
 | | 소셜/이메일 로그인 & 회원가입 UI | `FE-003 ~ FE-006` | 🟢 완료 | `#97` |
 | | 고객 회원가입 API | `POST /api/members` | 🟢 완료 | `#94` |
@@ -62,9 +69,9 @@ Spring Boot 4.1.0 & Thymeleaf 기반 스마트 퀵배송 & 온디맨드 매칭 �
 
 | 팀원 | 역할 및 핵심 기여 내용 |
 | :--- | :--- |
+| **Sungmin Jo** | • **팀 개발 환경 & 자동 검증 하네스 총괄**: 단일 원본(SSOT) 코딩 컨벤션(`code-convention.md`, `CLAUDE.md`, `AGENTS.md`) 정립, Flyway 무중단 Online DDL 린팅 환경 구축, 원클릭 자동 검증 & PR 제출 하네스 (`./scripts/verify.sh`, `./pr`) 구축<br/>• **품질 게이트 & 정적 분석 연동**: Checkstyle & Spotless 코드 포맷터 연동 (`#196`), ArchUnit 아키텍처 규칙 검증 & JaCoCo 60%+ 커버리지 게이트 통제, 단일 `main` 브랜치 Flow 수립 (`#201`)<br/>• **아키텍처 리팩토링 & 모니터링**: `DeliveryFeeCalculator` 요금 산정 헬퍼 분리 (`#208`), Service-Controller DTO/Entity 책임 분리 (`#194`, `#199`), MDC Trace ID 분산 로깅 (`#203`), LangGraph AI 오케스트레이션 파이프라인 (`#154`) |
 | **Yeeun** | • **UI/UX 실전 디자인**: Figma를 활용한 30+개 화면(온보딩, 메인, 배송신청, PIN 결제, 실시간 추적, 마이페이지 등) 와이어프레임 및 UX Flow 설계 |
 | **haejin** | • **디자인 시스템 표준화**: Yeeun 님의 Figma 스펙 기반 디자인 토큰(Primary/Secondary 색상, 버튼, 카드 모듈) 정립 및 `design-system.md` 동기화 |
-| **Sungmin Jo** | • **아키텍처 & 품질 통제**: `DeliveryFeeCalculator` 요금 산정 헬퍼 분리 (`#208`), Service-Controller DTO/Entity 책임 분리 (`#194`, `#199`), MDC Trace ID 로깅 (`#203`), LangGraph AI 파이프라인 (`#154`) |
 | **kms7522 (강민성)** | • **배송/매칭 코어 & 동시성 & API**: 매칭/결제 동시성 제어 (`#71`), 배송 요금 산정 API (`#99`), 배송 내역 조회 API (`#205`), 공통 이미지 업로드 API (`#101`), 알림 목록 API (`#102`, `#145`), 카테고리 API (`#100`), 실시간 WebSocket 브로드캐스트 (`#189`, `#207`) |
 | **jaeya1006-arch** | • **마이페이지 & 회원 UI**: 프로필 편집 & 주소 관리 UI (`#155`), 비밀번호 변경 & 공지사항 UI (`#160`), 홈-마이페이지 동선 연결 (`#167`) |
 | **mwzzang00-ctrl** | • **회원 API & 주소록/공지사항**: 내 정보 조회 & 프로필 수정 REST API (`#144`), 주소록 CRUD API (`#146`), 공지사항 조회 API (`#147`) |
@@ -75,6 +82,7 @@ Spring Boot 4.1.0 & Thymeleaf 기반 스마트 퀵배송 & 온디맨드 매칭 �
 
 ### 💻 가. 개발 환경 (Dev Environment)
 - Docker Compose 기반 MariaDB 로컬 데이터베이스 가동 파이프라인 표준화.
+- 구축된 `./scripts/verify.sh` 및 Flyway 마이그레이션 린팅 체계를 CI 파이프라인과 100% 동기화.
 - Swagger UI (`springdoc-openapi`) 실시간 동기화로 API 명세 최신화.
 
 ### ⚙️ 나. 기능 개발 (Feature Development)
