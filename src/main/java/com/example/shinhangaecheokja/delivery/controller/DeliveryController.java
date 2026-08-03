@@ -56,11 +56,13 @@ public class DeliveryController {
     return ResponseEntity.ok(deliveryService.estimateFee(request));
   }
 
-  /** 배송 요청 상세를 조회한다(배송원 이름·증거사진 포함). */
+  /** 배송 요청 상세를 조회한다(배송원 이름·증거사진 포함). 고객 본인 또는 배정된 배송원 본인만 조회할 수 있다. */
   @GetMapping("/{deliveryRequestId}")
+  @PreAuthorize("isAuthenticated()")
   public ResponseEntity<DeliveryDetailResponseDto> getDeliveryRequest(
-      @PathVariable Long deliveryRequestId) {
-    return ResponseEntity.ok(deliveryService.getDeliveryRequestDetail(deliveryRequestId));
+      @AuthenticationPrincipal CustomUserDetails principal, @PathVariable Long deliveryRequestId) {
+    return ResponseEntity.ok(
+        deliveryService.getDeliveryRequestDetail(principal.getId(), deliveryRequestId));
   }
 
   /** 로그인 회원 본인의 배송 내역을 최신순으로 페이징 조회한다. status로 선택적 필터링이 가능하다. */

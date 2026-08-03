@@ -8,9 +8,14 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.example.shinhangaecheokja.common.exception.EntityNotFoundException;
+import com.example.shinhangaecheokja.common.exception.ErrorCode;
 import com.example.shinhangaecheokja.common.security.JwtProvider;
+import com.example.shinhangaecheokja.delivery.dto.response.DeliveryDetailResponseDto;
 import com.example.shinhangaecheokja.delivery.entity.DeliveryRequest;
 import com.example.shinhangaecheokja.delivery.entity.DeliveryStatus;
+import com.example.shinhangaecheokja.delivery.entity.ItemSize;
+import com.example.shinhangaecheokja.delivery.exception.DeliveryAccessDeniedException;
 import com.example.shinhangaecheokja.delivery.service.DeliveryService;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
@@ -80,5 +85,64 @@ class DeliveryHistoryControllerTest {
         .perform(get("/api/v1/delivery-requests").header("Authorization", "Bearer " + token))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.content[0].status").value("COMPLETED"));
+  }
+
+  @Test
+  @DisplayName("인증 토큰이 없으면 상세 조회도 403을 반환한다")
+  void getDeliveryRequestDetailUnauthenticatedShouldReturn403() throws Exception {
+    mockMvc.perform(get("/api/v1/delivery-requests/1")).andExpect(status().isForbidden());
+  }
+
+  @Test
+  @DisplayName("고객 본인이 조회하면 배송원 이름을 포함한 상세 응답을 반환한다")
+  void getDeliveryRequestDetailOwnerCanView() throws Exception {
+    String token = jwtProvider.createAccessToken(1L, "user@test.com", "CUSTOMER");
+    DeliveryDetailResponseDto response =
+        new DeliveryDetailResponseDto(
+            1L,
+            1L,
+            "서울시 강남구",
+            "서울시 서초구",
+            10.0,
+            5.0,
+            DeliveryStatus.MATCHED,
+            78776L,
+            37.0,
+            127.0,
+            38.0,
+            127.0,
+            ItemSize.MEDIUM,
+            "박배송",
+            null);
+    when(deliveryService.getDeliveryRequestDetail(1L, 1L)).thenReturn(response);
+
+    mockMvc
+        .perform(get("/api/v1/delivery-requests/1").header("Authorization", "Bearer " + token))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.courierName").value("박배송"));
+  }
+
+  @Test
+  @DisplayName("고객 본인도 배정된 배송원도 아니면 403을 반환한다")
+  void getDeliveryRequestDetailForbiddenShouldReturn403() throws Exception {
+    String token = jwtProvider.createAccessToken(999L, "stranger@test.com", "CUSTOMER");
+    when(deliveryService.getDeliveryRequestDetail(999L, 1L))
+        .thenThrow(new DeliveryAccessDeniedException(1L, 999L));
+
+    mockMvc
+        .perform(get("/api/v1/delivery-requests/1").header("Authorization", "Bearer " + token))
+        .andExpect(status().isForbidden());
+  }
+
+  @Test
+  @DisplayName("존재하지 않는 배송 요청을 조회하면 404를 반환한다")
+  void getDeliveryRequestDetailNotFoundShouldReturn404() throws Exception {
+    String token = jwtProvider.createAccessToken(1L, "user@test.com", "CUSTOMER");
+    when(deliveryService.getDeliveryRequestDetail(1L, 999L))
+        .thenThrow(new EntityNotFoundException(ErrorCode.DELIVERY_NOT_FOUND));
+
+    mockMvc
+        .perform(get("/api/v1/delivery-requests/999").header("Authorization", "Bearer " + token))
+        .andExpect(status().isNotFound());
   }
 }
