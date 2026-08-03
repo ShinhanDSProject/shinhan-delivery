@@ -28,7 +28,6 @@ Spring Boot 4.1.0 & Thymeleaf 기반 스마트 퀵배송 & 온디맨드 매칭 �
 | | **원클릭 자동 검증 & PR 하네스 구축** | `./scripts/verify.sh`, `./pr` 하네스 | 🟢 완료 | `#181` |
 | | **Checkstyle & Spotless 정적 분석 자동화** | 코드 포맷팅 & Inline Variable 컨벤션 연동 | 🟢 완료 | `#196` |
 | | **ArchUnit & JaCoCo 60%+ 커버리지 게이트** | 단방향 레이어링 규칙 및 커버리지 자동 통제 | 🟢 완료 | `#128` |
-| | **MDC 기반 Trace ID 분산 로깅 구축** | 요청별 Trace ID 할당 및 장애 역추적 체계 | 🟢 완료 | `#73, #203` |
 | | **단일 main 브랜치 Flow 전략 수립** | 빠른 피드백 루프를 위한 Git 단일 브랜치 갱신 | 🟢 완료 | `#201` |
 | **Sprint 1<br/>(인증 & 온보딩)** | 스플래시 & 워크스루 화면 | `FE-001, FE-002` | 🟢 완료 | `#96` |
 | | 소셜/이메일 로그인 & 회원가입 UI | `FE-003 ~ FE-006` | 🟢 완료 | `#97` |
@@ -69,7 +68,7 @@ Spring Boot 4.1.0 & Thymeleaf 기반 스마트 퀵배송 & 온디맨드 매칭 �
 
 | 팀원 | 역할 및 핵심 기여 내용 |
 | :--- | :--- |
-| **Sungmin Jo** | • **팀 개발 환경 & 자동 검증 하네스 총괄**: 단일 원본(SSOT) 코딩 컨벤션(`code-convention.md`, `CLAUDE.md`, `AGENTS.md`) 정립, Flyway 무중단 Online DDL 린팅 환경 구축, 원클릭 자동 검증 & PR 제출 하네스 (`./scripts/verify.sh`, `./pr`) 구축<br/>• **품질 게이트 & 정적 분석 연동**: Checkstyle & Spotless 코드 포맷터 연동 (`#196`), ArchUnit 아키텍처 규칙 검증 & JaCoCo 60%+ 커버리지 게이트 통제, 단일 `main` 브랜치 Flow 수립 (`#201`)<br/>• **아키텍처 리팩토링 & 모니터링**: `DeliveryFeeCalculator` 요금 산정 헬퍼 분리 (`#208`), Service-Controller DTO/Entity 책임 분리 (`#194`, `#199`), MDC Trace ID 분산 로깅 (`#203`), LangGraph AI 오케스트레이션 파이프라인 (`#154`) |
+| **Sungmin Jo** | • **팀 개발 환경 & 자동 검증 하네스 총괄**: 단일 원본(SSOT) 코딩 컨벤션(`code-convention.md`, `CLAUDE.md`, `AGENTS.md`) 정립, Flyway 무중단 Online DDL 마이그레이션 구축, 원클릭 자동 검증 & PR 제출 하네스 (`./scripts/verify.sh`, `./pr`) 구축<br/>• **품질 게이트 & 정적 분석 연동**: Checkstyle & Spotless 코드 포맷터 연동 (`#196`), ArchUnit 아키텍처 규칙 검증 & JaCoCo 60%+ 커버리지 게이트 통제, 단일 `main` 브랜치 Flow 수립 (`#201`)<br/>• **아키텍처 리팩토링 & AI**: `DeliveryFeeCalculator` 요금 산정 헬퍼 분리 (`#208`), Service-Controller DTO/Entity 책임 분리 (`#194`, `#199`), LangGraph AI 오케스트레이션 파이프라인 (`#154`) |
 | **Yeeun** | • **UI/UX 실전 디자인**: Figma를 활용한 30+개 화면(온보딩, 메인, 배송신청, PIN 결제, 실시간 추적, 마이페이지 등) 와이어프레임 및 UX Flow 설계 |
 | **haejin** | • **디자인 시스템 표준화**: Yeeun 님의 Figma 스펙 기반 디자인 토큰(Primary/Secondary 색상, 버튼, 카드 모듈) 정립 및 `design-system.md` 동기화 |
 | **kms7522 (강민성)** | • **배송/매칭 코어 & 동시성 & API**: 매칭/결제 동시성 제어 (`#71`), 배송 요금 산정 API (`#99`), 배송 내역 조회 API (`#205`), 공통 이미지 업로드 API (`#101`), 알림 목록 API (`#102`, `#145`), 카테고리 API (`#100`), 실시간 WebSocket 브로드캐스트 (`#189`, `#207`) |
@@ -90,8 +89,7 @@ Spring Boot 4.1.0 & Thymeleaf 기반 스마트 퀵배송 & 온디맨드 매칭 �
 - Security Context 기반 `customerId` 강제 매핑으로 신원 위조 보안 문제(`#204`) 해결.
 
 ### 📊 다. 모니터링 (Observability & Ops)
-- MDC Trace ID 로그를 파일 롤링 및 APM과 연동하여 장애 발생 시 1초 내 역추적 체계 마련.
-- Spring Boot Actuator (`/actuator/health`) 엔드포인트 연동 모니터링 강화 (`#74`).
+- Spring Boot Actuator (`/actuator/health`) 엔드포인트 연동으로 DB 커넥션 및 메모리 상태 주기적 관제 강화 (`#74`).
 
 ### 🧪 라. 테스트 (Testing & QA Gate)
 - 회원가입부터 배송완료까지 전체 프로세스를 검증하는 **E2E Full Scenario 통합 테스트 (`#72`)** 작성.

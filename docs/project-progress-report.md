@@ -33,7 +33,6 @@
 | | **원클릭 자동 검증 & PR 하네스 구축** | `./scripts/verify.sh`, `./pr` 하네스 | 🟢 완료 | `#181` |
 | | **Checkstyle & Spotless 정적 분석 자동화** | 코드 포맷팅 & Inline Variable 컨벤션 연동 | 🟢 완료 | `#196` |
 | | **ArchUnit & JaCoCo 60%+ 커버리지 게이트** | 단방향 레이어링 규칙 및 커버리지 자동 통제 | 🟢 완료 | `#128` |
-| | **MDC 기반 Trace ID 분산 로깅 구축** | 요청별 Trace ID 할당 및 장애 역추적 체계 | 🟢 완료 | `#73, #203` |
 | | **단일 main 브랜치 Flow 전략 수립** | 빠른 피드백 루프를 위한 Git 단일 브랜치 갱신 | 🟢 완료 | `#201` |
 | **Sprint 1<br/>(인증 & 온보딩)** | 스플래시 & 워크스루 화면 | `FE-001, FE-002` | 🟢 완료 | `#96` |
 | | 소셜/이메일 로그인 & 회원가입 UI | `FE-003 ~ FE-006` | 🟢 완료 | `#97` |
@@ -96,8 +95,8 @@ graph TD
 - **정적 분석 & 커버리지 품질 통제 (`#128`, `#196`, `#201`)**
   - Checkstyle & Spotless 자동 포맷터 연동, ArchUnit 단방향 의존성 검증 및 JaCoCo 커버리지 60%+ 게이트 통제.
   - 단일 `main` 브랜치 전략 갱신으로 빠른 통합 피드백 환경 조성 (`#201`).
-- **아키텍처 리팩토링 & 모니터링 체계 구축 (`#73`, `#154`, `#194`, `#199`, `#203`, `#208`)**
-  - `DeliveryFeeCalculator` 헬퍼 분리 (`#208`), Service-Controller DTO/Entity 책임 분리 (`#194`, `#199`), MDC Trace ID 로깅 구축 (`#203`) 및 LangGraph AI 파이프라인 수립 (`#154`).
+- **아키텍처 리팩토링 & AI 파이프라인 구축 (`#154`, `#194`, `#199`, `#208`)**
+  - `DeliveryFeeCalculator` 헬퍼 분리 (`#208`), Service-Controller DTO/Entity 책임 분리 (`#194`, `#199`) 및 LangGraph AI 파이프라인 수립 (`#154`).
 
 ### 🎨 Yeeun (UI/UX 디자이너 - 애플리케이션 화면 디자인)
 - **Figma 기반 실제 애플리케이션 UI/UX 디자인 완비**
@@ -152,8 +151,7 @@ graph LR
 - **보안 하네스 강화:** `#204` 이슈 해결을 위해 Spring Security Context 기반 인증 사용자 ID 강제 binding 검증 로직 적용.
 
 ### 📊 3. 모니터링 (Observability & Ops) 보완
-- **MDC Trace ID 로그 시각화:** 구축된 MDC Trace ID를 Logback 파일 롤링 및 APM/Prometheus와 연동하여 에러 발생 시 1초 내 역추적 체계 완성.
-- **Actuator 헬스체크 연동:** `#74` Spring Boot Actuator (`/actuator/health`) 엔드포인트 연동으로 DB 커넥션 및 메모리 상태 주기적 관제.
+- **Actuator 헬스체크 연동:** `#74` Spring Boot Actuator (`/actuator/health`) 엔드포인트 연동으로 DB 커넥션 및 메모리 상태 주기적 관제 강화.
 
 ### 🧪 4. 테스트 (Testing & QA Gate) 보완
 - **E2E 통합 시나리오 테스트 구축 (`#72`):** 회원가입 ➔ 배송신청 ➔ PIN결제 ➔ 기사매칭 ➔ 배송완료로 이어지는 전 과정 Full Scenario 통합 테스트 작성.
@@ -165,7 +163,7 @@ graph LR
 ## 🎯 5. 결론 및 향후 실행 스케줄 (Action Items)
 
 1. **1차 목표 (MVP 피처 완성):** 남아있는 결제/매칭 Open 이슈 (`#107`~`#111`) 개발 완료를 통해 MVP 100% 달성.
-2. **2차 목표 (4대 요점 보완):** E2E 테스트 구축, 보안 검증 강화(`#204`), MDC 모니터링 연동.
+2. **2차 목표 (4대 요점 보완):** E2E 테스트 구축, 보안 검증 강화(`#204`), Actuator 헬스체크 연동.
 3. **3차 목표 (추가 기능 검토):** Yeeun 님의 Figma 원본 디자인 스펙과 MVP 완성 후 사용자 피드백을 기반으로 2차 확장 기능 기획.
 
 ---
