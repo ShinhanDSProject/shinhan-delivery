@@ -41,11 +41,13 @@ public class DeliveryController {
 
   private final DeliveryService deliveryService;
 
-  /** 배송을 요청한다. */
+  /** 로그인한 고객 본인 명의로 배송을 요청한다. */
   @PostMapping
+  @PreAuthorize("isAuthenticated()")
   public ResponseEntity<DeliveryResponse> requestDelivery(
+      @AuthenticationPrincipal CustomUserDetails principal,
       @RequestBody @Valid DeliveryCreateRequest request) {
-    DeliveryRequest created = deliveryService.requestDelivery(request);
+    DeliveryRequest created = deliveryService.requestDelivery(principal.getId(), request);
     return ResponseEntity.status(HttpStatus.CREATED).body(DeliveryResponse.from(created));
   }
 

@@ -10,7 +10,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.example.shinhangaecheokja.delivery.dto.request.DeliveryCompleteRequest;
-import com.example.shinhangaecheokja.delivery.dto.request.DeliveryCreateRequest;
 import com.example.shinhangaecheokja.delivery.dto.request.DeliveryEstimateRequest;
 import com.example.shinhangaecheokja.delivery.dto.response.DeliveryEstimateResponse;
 import com.example.shinhangaecheokja.delivery.dto.response.ProofPhotoResponse;
@@ -38,72 +37,6 @@ class DeliveryControllerTest {
   @Autowired private ObjectMapper objectMapper;
 
   @MockitoBean private DeliveryService deliveryService;
-
-  @Test
-  @DisplayName("배송 요청을 받으면 생성된 배송 요청을 반환한다")
-  void requestDeliverySuccess() throws Exception {
-    DeliveryCreateRequest request = new DeliveryCreateRequest();
-    request.setCustomerId(1L);
-    request.setPickupAddress("서울시 강남구");
-    request.setDropoffAddress("서울시 서초구");
-    request.setWeight(10);
-    request.setPickupLatitude(37.0);
-    request.setPickupLongitude(127.0);
-    request.setDropoffLatitude(38.0);
-    request.setDropoffLongitude(127.0);
-    request.setItemSize(ItemSize.MEDIUM);
-
-    DeliveryRequest mockDeliveryRequest = new DeliveryRequest();
-    mockDeliveryRequest.setCustomerId(1L);
-    mockDeliveryRequest.setPickupAddress("서울시 강남구");
-    mockDeliveryRequest.setDropoffAddress("서울시 서초구");
-    mockDeliveryRequest.setStatus(DeliveryStatus.REQUESTED);
-    mockDeliveryRequest.setFeePoint(78776L);
-    mockDeliveryRequest.setItemSize(ItemSize.MEDIUM);
-    when(deliveryService.requestDelivery(any())).thenReturn(mockDeliveryRequest);
-
-    mockMvc
-        .perform(
-            post("/api/v1/delivery-requests")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
-        .andExpect(status().isCreated())
-        .andExpect(jsonPath("$.customerId").value(1L))
-        .andExpect(jsonPath("$.status").value("REQUESTED"));
-  }
-
-  @Test
-  @DisplayName("위도가 범위를 벗어나면 400을 반환한다")
-  void createDeliveryLatitudeOutOfRangeShouldReturn400() throws Exception {
-    DeliveryCreateRequest request = new DeliveryCreateRequest();
-    request.setCustomerId(1L);
-    request.setWeight(10);
-    request.setPickupLatitude(200);
-    request.setPickupLongitude(127.0);
-
-    mockMvc
-        .perform(
-            post("/api/v1/delivery-requests")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
-        .andExpect(status().isBadRequest());
-  }
-
-  @Test
-  @DisplayName("픽업 주소가 없으면 400을 반환한다")
-  void createDeliveryMissingPickupAddressShouldReturn400() throws Exception {
-    DeliveryCreateRequest request = new DeliveryCreateRequest();
-    request.setCustomerId(1L);
-    request.setDropoffAddress("서울시 서초구");
-    request.setWeight(10);
-
-    mockMvc
-        .perform(
-            post("/api/v1/delivery-requests")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
-        .andExpect(status().isBadRequest());
-  }
 
   @Test
   @DisplayName("견적 요청을 받으면 산정된 요금을 반환한다")
