@@ -1,4 +1,4 @@
-package com.example.shinhangaecheokja.delivery.service;
+package com.example.shinhangaecheokja.delivery.helper;
 
 import com.example.shinhangaecheokja.delivery.dto.response.DeliveryEstimateResponse;
 import com.example.shinhangaecheokja.delivery.entity.ItemSize;
@@ -7,8 +7,8 @@ import java.math.RoundingMode;
 import org.springframework.stereotype.Component;
 
 /**
- * 배송 거리·요금 산정 공식을 전담하는 계산기. {@link DeliveryService#requestDelivery}와 {@link
- * DeliveryService#estimateFee}가 동일한 공식을 공유하기 위해 이 클래스를 거친다.
+ * 배송 거리·요금 산정 공식을 전담하는 계산기. DeliveryService의 requestDelivery와 estimateFee가 동일한 공식을 공유하기 위해 이 클래스를
+ * 거친다.
  */
 @Component
 public class DeliveryFeeCalculator {

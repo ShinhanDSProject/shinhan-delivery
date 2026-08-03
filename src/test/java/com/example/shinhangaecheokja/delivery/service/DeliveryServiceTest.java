@@ -28,6 +28,7 @@ import com.example.shinhangaecheokja.delivery.exception.InvalidDeliveryDistanceE
 import com.example.shinhangaecheokja.delivery.exception.InvalidDeliveryTransitionException;
 import com.example.shinhangaecheokja.delivery.exception.InvalidDeliveryWeightException;
 import com.example.shinhangaecheokja.delivery.exception.ProofPhotoNotFoundException;
+import com.example.shinhangaecheokja.delivery.helper.DeliveryFeeCalculator;
 import com.example.shinhangaecheokja.delivery.repository.DeliveryRequestRepository;
 import com.example.shinhangaecheokja.delivery.repository.MatchingRepository;
 import com.example.shinhangaecheokja.member.entity.Member;
