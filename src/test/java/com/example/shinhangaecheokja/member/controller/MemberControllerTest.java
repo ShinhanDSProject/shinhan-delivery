@@ -20,7 +20,6 @@ import com.example.shinhangaecheokja.member.dto.request.MemberProfileUpdateReque
 import com.example.shinhangaecheokja.member.entity.Member;
 import com.example.shinhangaecheokja.member.entity.MemberRole;
 import com.example.shinhangaecheokja.member.service.MemberService;
-import com.example.shinhangaecheokja.vehicle.entity.VehicleType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -92,42 +91,6 @@ class MemberControllerTest {
   }
 
   @Test
-  @DisplayName("배송원 회원가입 요청이면 추가 필드를 함께 검증한다")
-  void createCourierMemberSuccess() throws Exception {
-    MemberCreateRequest request = new MemberCreateRequest();
-    request.setEmail("courier@example.com");
-    request.setPassword("password123");
-    request.setName("박배송");
-    request.setPhoneNumber("010-1234-5678");
-    request.setRole(MemberRole.COURIER);
-    request.setVehicleType(VehicleType.MOTORCYCLE);
-    request.setActivityRegion("서울특별시 강남구");
-    request.setPreferredWeight(15.0);
-
-    Member member =
-        Member.builder()
-            .id(2L)
-            .email("courier@example.com")
-            .password("password123")
-            .name("박배송")
-            .phoneNumber("010-1234-5678")
-            .activityRegion("서울특별시 강남구")
-            .preferredWeight(15.0)
-            .role(MemberRole.COURIER)
-            .build();
-    when(memberService.create(any())).thenReturn(member);
-
-    mockMvc
-        .perform(
-            post("/api/v1/members")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
-        .andExpect(status().isCreated())
-        .andExpect(jsonPath("$.email").value("courier@example.com"))
-        .andExpect(jsonPath("$.role").value("COURIER"));
-  }
-
-  @Test
   @DisplayName("존재하지 않는 회원을 조회하면 404를 반환한다")
   void getMemberNotFoundShouldReturn404() throws Exception {
     when(memberService.getById(eq(999L)))
@@ -175,24 +138,6 @@ class MemberControllerTest {
   void createMemberMissingFieldShouldReturn400() throws Exception {
     MemberCreateRequest request = new MemberCreateRequest();
     // email, password, name, phoneNumber 누락
-
-    mockMvc
-        .perform(
-            post("/api/v1/members")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
-        .andExpect(status().isBadRequest());
-  }
-
-  @Test
-  @DisplayName("배송원 회원가입 추가 필드가 누락되면 400을 반환한다")
-  void createCourierMemberMissingCourierProfileShouldReturn400() throws Exception {
-    MemberCreateRequest request = new MemberCreateRequest();
-    request.setEmail("courier@example.com");
-    request.setPassword("password123");
-    request.setName("박배송");
-    request.setPhoneNumber("010-1234-5678");
-    request.setRole(MemberRole.COURIER);
 
     mockMvc
         .perform(

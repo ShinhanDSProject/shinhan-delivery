@@ -11,7 +11,6 @@ import com.example.shinhangaecheokja.member.dto.request.MemberPasswordUpdateRequ
 import com.example.shinhangaecheokja.member.entity.Member;
 import com.example.shinhangaecheokja.member.entity.MemberRole;
 import com.example.shinhangaecheokja.member.repository.MemberRepository;
-import com.example.shinhangaecheokja.vehicle.repository.VehicleRepository;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -28,7 +27,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 class MemberPasswordUpdateTest {
 
   @Mock private MemberRepository memberRepository;
-  @Mock private VehicleRepository vehicleRepository;
   @Spy private PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
   @Mock private JwtProvider jwtProvider;
   @InjectMocks private MemberService memberService;

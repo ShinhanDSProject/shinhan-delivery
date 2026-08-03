@@ -45,12 +45,6 @@ public class Member {
   @Column(name = "phone_number", nullable = false, length = 20)
   private String phoneNumber;
 
-  @Column(name = "activity_region", length = 100)
-  private String activityRegion;
-
-  @Column(name = "preferred_weight")
-  private Double preferredWeight;
-
   @Enumerated(EnumType.STRING)
   @Column(nullable = false, length = 20)
   private MemberRole role;
@@ -97,8 +91,6 @@ public class Member {
         .password(encodedPassword)
         .name(request.getName())
         .phoneNumber(request.getPhoneNumber())
-        .activityRegion(request.getActivityRegion())
-        .preferredWeight(request.getPreferredWeight())
         .role(request.getRole())
         .build();
   }

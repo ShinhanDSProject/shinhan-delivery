@@ -11,16 +11,8 @@ import org.springframework.data.repository.query.Param;
 /** PointWallet 엔티티에 대한 JPA 저장소. */
 public interface PaymentRepository extends JpaRepository<PointWallet, Long> {
 
-  /** 회원 id로 포인트 지갑을 조회한다. */
-  Optional<PointWallet> findByMemberId(Long memberId);
-
   /** 포인트 충전·차감 시 동시성 제어를 위해 비관적 쓰기 락으로 포인트 지갑을 조회한다. */
   @Lock(LockModeType.PESSIMISTIC_WRITE)
   @Query("select w from PointWallet w where w.id = :id")
   Optional<PointWallet> findByIdForUpdate(@Param("id") Long id);
-
-  /** 회원 기준 포인트 충전 시 동시성 제어를 위해 비관적 쓰기 락으로 지갑을 조회한다. */
-  @Lock(LockModeType.PESSIMISTIC_WRITE)
-  @Query("select w from PointWallet w where w.memberId = :memberId")
-  Optional<PointWallet> findByMemberIdForUpdate(@Param("memberId") Long memberId);
 }

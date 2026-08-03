@@ -14,10 +14,6 @@ import com.example.shinhangaecheokja.member.entity.Member;
 import com.example.shinhangaecheokja.member.entity.MemberRole;
 import com.example.shinhangaecheokja.member.exception.DuplicateMemberException;
 import com.example.shinhangaecheokja.member.repository.MemberRepository;
-import com.example.shinhangaecheokja.vehicle.entity.Vehicle;
-import com.example.shinhangaecheokja.vehicle.entity.VehicleStatus;
-import com.example.shinhangaecheokja.vehicle.entity.VehicleType;
-import com.example.shinhangaecheokja.vehicle.repository.VehicleRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -32,7 +28,6 @@ public class MemberService {
   private final MemberRepository memberRepository;
   private final PasswordEncoder passwordEncoder;
   private final JwtProvider jwtProvider;
-  private final VehicleRepository vehicleRepository;
 
   /** 이메일 중복을 검증하고 비밀번호를 암호화해 회원을 생성한다 (Entity 리턴). */
   @Transactional
@@ -40,16 +35,9 @@ public class MemberService {
     if (memberRepository.existsByEmail(request.getEmail())) {
       throw new DuplicateMemberException(request.getEmail());
     }
-    validateCourierProfile(request);
 
     String encodedPassword = passwordEncoder.encode(request.getPassword());
-    Member created = memberRepository.save(Member.from(request, encodedPassword));
-
-    if (created.getRole() == MemberRole.COURIER) {
-      vehicleRepository.save(createCourierVehicle(created.getId(), request));
-    }
-
-    return created;
+    return memberRepository.save(Member.from(request, encodedPassword));
   }
 
   /** 이메일과 비밀번호를 검증하여 JWT Access/Refresh 토큰을 발급한다. */
@@ -136,40 +124,5 @@ public class MemberService {
     return memberRepository
         .findById(memberId)
         .orElseThrow(() -> new EntityNotFoundException(ErrorCode.MEMBER_NOT_FOUND));
-  }
-
-  private void validateCourierProfile(MemberCreateRequest request) {
-    if (request.getRole() != MemberRole.COURIER) {
-      return;
-    }
-    if (request.getVehicleType() == null
-        || request.getActivityRegion() == null
-        || request.getActivityRegion().isBlank()
-        || request.getPreferredWeight() == null
-        || request.getPreferredWeight() <= 0) {
-      throw new BusinessException(
-          ErrorCode.INVALID_INPUT_VALUE,
-          "배송원 회원가입에는 차량 종류, 활동 희망 지역, 희망 배송 중량이 모두 필요합니다.");
-    }
-  }
-
-  private Vehicle createCourierVehicle(Long ownerId, MemberCreateRequest request) {
-    return Vehicle.builder()
-        .ownerId(ownerId)
-        .type(request.getVehicleType())
-        .maxWeight(request.getPreferredWeight())
-        .maxDistance(resolveDefaultMaxDistance(request.getVehicleType()))
-        .latitude(0)
-        .longitude(0)
-        .status(VehicleStatus.AVAILABLE)
-        .build();
-  }
-
-  private double resolveDefaultMaxDistance(VehicleType vehicleType) {
-    return switch (vehicleType) {
-      case DRONE -> 30.0;
-      case MOTORCYCLE -> 80.0;
-      case CAR -> 300.0;
-    };
   }
 }

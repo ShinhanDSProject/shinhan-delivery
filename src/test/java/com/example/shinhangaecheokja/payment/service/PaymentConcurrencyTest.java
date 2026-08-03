@@ -22,7 +22,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
 
 /**
  * PointWallet 잔액 차감의 동시성 제어(비관적 락)를 실제 DB 트랜잭션으로 검증하는 테스트입니다.
@@ -31,7 +30,6 @@ import org.springframework.test.context.ActiveProfiles;
  * 지갑에 대한 100개의 동시 차감 요청을 발생시킨다.
  */
 @SpringBootTest
-@ActiveProfiles("test")
 class PaymentConcurrencyTest {
 
   private static final int THREAD_COUNT = 100;

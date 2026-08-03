@@ -7,7 +7,7 @@
 ## 1. 요구사항 정의서 (User Story)
 
 * **User Story:** 
-  우리는 **고객(Client) 또는 배송원(Courier)**으로서, 서비스 이용 권한을 획득하고 계정을 안전하게 관리하기 위해 **이메일과 비밀번호로 회원가입·조회하고 본인 비밀번호를 변경**하기를 원한다. 배송원은 가입 시 차량 종류, 활동 희망 지역, 희망 배송 중량을 함께 제출해 즉시 배송 가능 프로필을 완성한다.
+  우리는 **고객(Client) 또는 배송원(Courier)**으로서, 서비스 이용 권한을 획득하고 계정을 안전하게 관리하기 위해 **이메일과 비밀번호로 회원가입·조회하고 본인 비밀번호를 변경**하기를 원한다.
 * **성공 기준 (Acceptance Criteria):**
   1. 회원가입 시 이메일은 중복될 수 없으며, 중복 발생 시 `409 Conflict` 예외와 적절한 에러 메시지를 반환해야 한다.
   2. 저장되는 비밀번호는 평문이 아닌 안전한 해시 함수(BCrypt)로 암호화되어 저장되어야 한다.
@@ -27,8 +27,6 @@ erDiagram
         String password "BCrypt Encoded"
         String name "User Name"
         String phoneNumber "Phone Number"
-        String activityRegion "Courier Operating Area"
-        Double preferredWeight "Courier Preferred Weight (kg)"
         String role "CUSTOMER / COURIER"
     }
 ```
@@ -49,19 +47,6 @@ erDiagram
     "role": "CUSTOMER"
   }
   ```
-* **배송원 가입 요청 예시:**
-  ```json
-  {
-    "email": "courier@example.com",
-    "password": "securepassword123",
-    "name": "박배송",
-    "phoneNumber": "010-1234-5678",
-    "role": "COURIER",
-    "vehicleType": "MOTORCYCLE",
-    "activityRegion": "서울특별시 강남구",
-    "preferredWeight": 15.0
-  }
-  ```
 * **응답 바디 및 상태 코드 (Response Body & Status):**
   * **Success (201 Created):**
     ```json
@@ -80,15 +65,6 @@ erDiagram
       "code": "M002",
       "message": "이미 가입된 이메일 주소입니다. (Email: trainee@example.com)",
       "timestamp": "2026-07-28T10:00:00"
-    }
-    ```
-  * **Failure (400 Bad Request - 배송원 추가 정보 누락, ErrorCode `C001`):**
-    ```json
-    {
-      "status": 400,
-      "code": "C001",
-      "message": "배송원 회원가입에는 차량 종류, 활동 희망 지역, 희망 배송 중량이 모두 필요합니다.",
-      "timestamp": "2026-08-03T10:00:00"
     }
     ```
 

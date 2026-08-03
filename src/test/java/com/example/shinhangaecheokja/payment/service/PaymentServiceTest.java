@@ -11,11 +11,9 @@ import com.example.shinhangaecheokja.member.service.MemberService;
 import com.example.shinhangaecheokja.payment.dto.request.PointChargeRequest;
 import com.example.shinhangaecheokja.payment.dto.request.PointUseRequest;
 import com.example.shinhangaecheokja.payment.dto.request.PointWalletCreateRequest;
-import com.example.shinhangaecheokja.payment.entity.PaymentMethod;
 import com.example.shinhangaecheokja.payment.entity.PointWallet;
 import com.example.shinhangaecheokja.payment.exception.InsufficientPointException;
 import com.example.shinhangaecheokja.payment.repository.PaymentRepository;
-import com.example.shinhangaecheokja.payment.repository.PointHistoryRepository;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -28,7 +26,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class PaymentServiceTest {
 
   @Mock private PaymentRepository paymentRepository;
-  @Mock private PointHistoryRepository pointHistoryRepository;
   @Mock private MemberService memberService;
   @InjectMocks private PaymentService paymentService;
 
@@ -92,7 +89,6 @@ class PaymentServiceTest {
 
     PointChargeRequest request = new PointChargeRequest();
     request.setAmount(500L);
-    request.setPaymentMethod(PaymentMethod.CARD);
 
     PointWallet response = paymentService.chargePoint(1L, request);
 
