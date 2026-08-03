@@ -65,12 +65,21 @@ public class StompAuthChannelInterceptor implements ChannelInterceptor {
     if (destination == null || !PATH_MATCHER.match(SUBSCRIBE_DESTINATION_PATTERN, destination)) {
       return;
     }
-    Long deliveryId =
-        Long.valueOf(
-            PATH_MATCHER
-                .extractUriTemplateVariables(SUBSCRIBE_DESTINATION_PATTERN, destination)
-                .get("deliveryId"));
-    trackingService.assertCanSubscribe(extractMemberId(accessor.getUser()), deliveryId);
+    String rawDeliveryId =
+        PATH_MATCHER
+            .extractUriTemplateVariables(SUBSCRIBE_DESTINATION_PATTERN, destination)
+            .get("deliveryId");
+    trackingService.assertCanSubscribe(
+        extractMemberId(accessor.getUser()), parseDeliveryId(rawDeliveryId));
+  }
+
+  /** deliveryId 경로 변수가 숫자가 아니면(잘못된 구독 요청) 서버 오류 대신 접근 거부로 처리한다. */
+  private Long parseDeliveryId(String rawDeliveryId) {
+    try {
+      return Long.valueOf(rawDeliveryId);
+    } catch (NumberFormatException e) {
+      throw new AccessDeniedException("유효하지 않은 배송 채널 구독 요청입니다: " + rawDeliveryId);
+    }
   }
 
   private Long extractMemberId(Principal principal) {

@@ -39,6 +39,8 @@ import org.springframework.messaging.simp.stomp.StompFrameHandler;
 import org.springframework.messaging.simp.stomp.StompHeaders;
 import org.springframework.messaging.simp.stomp.StompSession;
 import org.springframework.messaging.simp.stomp.StompSessionHandlerAdapter;
+import org.springframework.messaging.simp.user.SimpUser;
+import org.springframework.messaging.simp.user.SimpUserRegistry;
 import org.springframework.web.socket.WebSocketHttpHeaders;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
@@ -58,6 +60,7 @@ class TrackingIntegrationTest {
   @Autowired private DeliveryRequestRepository deliveryRequestRepository;
   @Autowired private MatchingRepository matchingRepository;
   @Autowired private DeliveryService deliveryService;
+  @Autowired private SimpUserRegistry userRegistry;
 
   private WebSocketStompClient stompClient;
 
@@ -199,14 +202,41 @@ class TrackingIntegrationTest {
     return received;
   }
 
+  /**
+   * 구독(SUBSCRIBE)은 비동기라 서버가 실제로 등록하기 전에 리턴될 수 있다. 인프로세스로 직접 호출하는 {@code confirmPickup}은 네트워크를 안 타
+   * 거의 즉시 실행되므로, {@link SimpUserRegistry}로 브로커에 구독이 실제로 등록됐는지 폴링해 확인한 뒤에야 반환해 두 호출 사이의 경쟁 상태(타이밍에
+   * 따라 브로드캐스트를 놓치는 flaky 테스트)를 없앤다. (STOMP RECEIPT 프레임으로 동기화하는 방법도 시도했지만, 이 환경에서 신뢰성 있게 동작하지 않아 같은
+   * JVM 안의 실제 브로커 상태를 직접 폴링하는 방식을 택했다.)
+   */
   private BlockingQueue<DeliveryStatusBroadcastResponse> subscribeToStatusAsCustomer()
       throws Exception {
     BlockingQueue<DeliveryStatusBroadcastResponse> received = new LinkedBlockingQueue<>();
     StompSession customerSession = connect(customerId, "CUSTOMER");
+    String destination = "/topic/delivery/" + deliveryId + "/status";
     customerSession.subscribe(
-        "/topic/delivery/" + deliveryId + "/status",
-        frameHandler(received, DeliveryStatusBroadcastResponse.class));
+        destination, frameHandler(received, DeliveryStatusBroadcastResponse.class));
+    awaitSubscriptionRegistered(customerId, destination);
     return received;
+  }
+
+  /** SimpUserRegistry를 폴링해 브로커에 구독이 실제로 등록될 때까지(최대 5초) 기다린다. */
+  private void awaitSubscriptionRegistered(Long memberId, String destination)
+      throws InterruptedException {
+    String username = memberId + "@test.com";
+    long deadline = System.currentTimeMillis() + 5000;
+    while (System.currentTimeMillis() < deadline) {
+      SimpUser user = userRegistry.getUser(username);
+      boolean registered =
+          user != null
+              && user.getSessions().stream()
+                  .flatMap(session -> session.getSubscriptions().stream())
+                  .anyMatch(subscription -> destination.equals(subscription.getDestination()));
+      if (registered) {
+        return;
+      }
+      Thread.sleep(20);
+    }
+    throw new AssertionError("구독이 " + destination + "에 등록되지 않았습니다 (타임아웃)");
   }
 
   private <T> StompFrameHandler frameHandler(BlockingQueue<T> queue, Class<T> payloadType) {
