@@ -6,6 +6,7 @@ import com.example.shinhangaecheokja.delivery.dto.request.DeliveryCompleteReques
 import com.example.shinhangaecheokja.delivery.dto.request.DeliveryCreateRequest;
 import com.example.shinhangaecheokja.delivery.dto.request.DeliveryEstimateRequest;
 import com.example.shinhangaecheokja.delivery.dto.request.DeliveryUpdateRequest;
+import com.example.shinhangaecheokja.delivery.dto.response.DeliveryDetailResponseDto;
 import com.example.shinhangaecheokja.delivery.dto.response.DeliveryEstimateResponse;
 import com.example.shinhangaecheokja.delivery.dto.response.ProofPhotoResponse;
 import com.example.shinhangaecheokja.delivery.entity.DeliveryRequest;
@@ -17,13 +18,16 @@ import com.example.shinhangaecheokja.delivery.exception.InvalidDeliveryTransitio
 import com.example.shinhangaecheokja.delivery.exception.ProofPhotoNotFoundException;
 import com.example.shinhangaecheokja.delivery.repository.DeliveryRequestRepository;
 import com.example.shinhangaecheokja.delivery.repository.MatchingRepository;
+import com.example.shinhangaecheokja.member.entity.Member;
 import com.example.shinhangaecheokja.member.service.MemberService;
+import com.example.shinhangaecheokja.vehicle.service.VehicleService;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,6 +45,7 @@ public class DeliveryService {
 
   private final DeliveryRequestRepository deliveryRequestRepository;
   private final MemberService memberService;
+  private final VehicleService vehicleService;
   private final MatchingRepository matchingRepository;
   private final ApplicationEventPublisher eventPublisher;
 
@@ -128,10 +133,30 @@ public class DeliveryService {
     return findDeliveryRequestOrThrow(deliveryRequestId);
   }
 
-  /** 전체 배송 요청 목록을 조회한다 (DeliveryRequest Entity 리턴). */
+  /** 로그인 회원 본인의 배송 요청을 최신순으로 페이징 조회한다 (DeliveryRequest Entity 리턴). status가 있으면 그 상태로만 필터링한다. */
   @Transactional(readOnly = true)
-  public List<DeliveryRequest> getDeliveryRequests() {
-    return deliveryRequestRepository.findAll();
+  public Page<DeliveryRequest> getMyDeliveryRequests(
+      Long customerId, DeliveryStatus status, Pageable pageable) {
+    return status == null
+        ? deliveryRequestRepository.findByCustomerIdOrderByCreatedAtDesc(customerId, pageable)
+        : deliveryRequestRepository.findByCustomerIdAndStatusOrderByCreatedAtDesc(
+            customerId, status, pageable);
+  }
+
+  /**
+   * 배송 요청 상세를 조회한다. 매칭된 배송원이 있으면 차량 소유자(Member)의 이름을 courierName으로 함께 담고, 없으면 courierName은 null이다.
+   */
+  @Transactional(readOnly = true)
+  public DeliveryDetailResponseDto getDeliveryRequestDetail(Long deliveryRequestId) {
+    DeliveryRequest deliveryRequest = findDeliveryRequestOrThrow(deliveryRequestId);
+    String courierName =
+        matchingRepository
+            .findByDeliveryRequestId(deliveryRequestId)
+            .map(matching -> vehicleService.getById(matching.getVehicleId()).getOwnerId())
+            .map(memberService::getById)
+            .map(Member::getName)
+            .orElse(null);
+    return DeliveryDetailResponseDto.from(deliveryRequest, courierName);
   }
 
   /**

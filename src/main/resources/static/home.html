@@ -521,10 +521,12 @@
             const me = await meResponse.json();
             document.getElementById('greetingName').textContent = `${me.name} 님`;
 
-            const deliveriesResponse = await fetch('/api/v1/delivery-requests');
-            const deliveries = await deliveriesResponse.json();
-            const myActiveDeliveries = deliveries.filter(
-                (d) => d.customerId === me.id && (d.status === 'REQUESTED' || d.status === 'MATCHED')
+            const deliveriesResponse = await fetch('/api/v1/delivery-requests', {
+                headers: { Authorization: header }
+            });
+            const deliveriesPage = await deliveriesResponse.json();
+            const myActiveDeliveries = (deliveriesPage.content || []).filter(
+                (d) => d.status === 'REQUESTED' || d.status === 'MATCHED'
             );
             renderActiveDeliveries(myActiveDeliveries);
 

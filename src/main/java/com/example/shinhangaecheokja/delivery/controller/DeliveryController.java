@@ -1,19 +1,27 @@
 package com.example.shinhangaecheokja.delivery.controller;
 
+import com.example.shinhangaecheokja.common.security.CustomUserDetails;
 import com.example.shinhangaecheokja.delivery.dto.request.DeliveryCompleteRequest;
 import com.example.shinhangaecheokja.delivery.dto.request.DeliveryCreateRequest;
 import com.example.shinhangaecheokja.delivery.dto.request.DeliveryEstimateRequest;
 import com.example.shinhangaecheokja.delivery.dto.request.DeliveryUpdateRequest;
+import com.example.shinhangaecheokja.delivery.dto.response.DeliveryDetailResponseDto;
 import com.example.shinhangaecheokja.delivery.dto.response.DeliveryEstimateResponse;
+import com.example.shinhangaecheokja.delivery.dto.response.DeliveryListResponseDto;
 import com.example.shinhangaecheokja.delivery.dto.response.DeliveryResponse;
 import com.example.shinhangaecheokja.delivery.dto.response.ProofPhotoResponse;
 import com.example.shinhangaecheokja.delivery.entity.DeliveryRequest;
+import com.example.shinhangaecheokja.delivery.entity.DeliveryStatus;
 import com.example.shinhangaecheokja.delivery.service.DeliveryService;
 import jakarta.validation.Valid;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -22,6 +30,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /** DeliveryRequest CRUD API를 제공하는 컨트롤러. */
@@ -47,18 +56,25 @@ public class DeliveryController {
     return ResponseEntity.ok(deliveryService.estimateFee(request));
   }
 
-  /** 배송 요청 단건을 조회한다. */
+  /** 배송 요청 상세를 조회한다(배송원 이름·증거사진 포함). */
   @GetMapping("/{deliveryRequestId}")
-  public ResponseEntity<DeliveryResponse> getDeliveryRequest(@PathVariable Long deliveryRequestId) {
-    DeliveryRequest deliveryRequest = deliveryService.getDeliveryRequest(deliveryRequestId);
-    return ResponseEntity.ok(DeliveryResponse.from(deliveryRequest));
+  public ResponseEntity<DeliveryDetailResponseDto> getDeliveryRequest(
+      @PathVariable Long deliveryRequestId) {
+    return ResponseEntity.ok(deliveryService.getDeliveryRequestDetail(deliveryRequestId));
   }
 
-  /** 배송 요청 전체 목록을 조회한다. */
+  /** 로그인 회원 본인의 배송 내역을 최신순으로 페이징 조회한다. status로 선택적 필터링이 가능하다. */
   @GetMapping
-  public ResponseEntity<List<DeliveryResponse>> getDeliveryRequests() {
-    List<DeliveryRequest> list = deliveryService.getDeliveryRequests();
-    return ResponseEntity.ok(list.stream().map(DeliveryResponse::from).toList());
+  @PreAuthorize("isAuthenticated()")
+  public ResponseEntity<Page<DeliveryListResponseDto>> getDeliveryRequests(
+      @AuthenticationPrincipal CustomUserDetails principal,
+      @RequestParam(required = false) DeliveryStatus status,
+      @PageableDefault(size = 10) Pageable pageable) {
+    Page<DeliveryListResponseDto> responses =
+        deliveryService
+            .getMyDeliveryRequests(principal.getId(), status, pageable)
+            .map(DeliveryListResponseDto::from);
+    return ResponseEntity.ok(responses);
   }
 
   /** 배송 요청의 픽업지·도착지를 수정한다. */
