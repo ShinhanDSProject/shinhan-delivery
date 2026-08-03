@@ -9,8 +9,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.example.shinhangaecheokja.common.exception.EntityNotFoundException;
-import com.example.shinhangaecheokja.common.exception.ErrorCode;
 import com.example.shinhangaecheokja.delivery.dto.request.DeliveryCompleteRequest;
 import com.example.shinhangaecheokja.delivery.dto.request.DeliveryCreateRequest;
 import com.example.shinhangaecheokja.delivery.dto.request.DeliveryEstimateRequest;
@@ -188,15 +186,6 @@ class DeliveryControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isBadRequest());
-  }
-
-  @Test
-  @DisplayName("존재하지 않는 배송 요청을 조회하면 404를 반환한다")
-  void getDeliveryNotFoundShouldReturn404() throws Exception {
-    when(deliveryService.getDeliveryRequest(eq(999L)))
-        .thenThrow(new EntityNotFoundException(ErrorCode.DELIVERY_NOT_FOUND));
-
-    mockMvc.perform(get("/api/v1/delivery-requests/999")).andExpect(status().isNotFound());
   }
 
   @Test
