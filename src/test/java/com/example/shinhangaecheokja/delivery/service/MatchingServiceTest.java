@@ -16,6 +16,7 @@ import com.example.shinhangaecheokja.delivery.entity.DeliveryRequest;
 import com.example.shinhangaecheokja.delivery.entity.DeliveryStatus;
 import com.example.shinhangaecheokja.delivery.entity.Matching;
 import com.example.shinhangaecheokja.delivery.entity.MatchingStatus;
+import com.example.shinhangaecheokja.delivery.event.DeliveryStatusChangedEvent;
 import com.example.shinhangaecheokja.delivery.exception.AlreadyMatchedException;
 import com.example.shinhangaecheokja.delivery.exception.InvalidMatchingTransitionException;
 import com.example.shinhangaecheokja.delivery.exception.VehicleCapacityMismatchException;
@@ -31,9 +32,11 @@ import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 
 @ExtendWith(MockitoExtension.class)
 class MatchingServiceTest {
@@ -41,6 +44,7 @@ class MatchingServiceTest {
   @Mock private MatchingRepository matchingRepository;
   @Mock private DeliveryRequestRepository deliveryRequestRepository;
   @Mock private VehicleService vehicleService;
+  @Mock private ApplicationEventPublisher eventPublisher;
   @InjectMocks private MatchingService matchingService;
 
   private Vehicle availableVehicle(Long id) {
@@ -102,6 +106,12 @@ class MatchingServiceTest {
     assertThat(response.getStatus()).isEqualTo(MatchingStatus.MATCHED);
     assertThat(deliveryRequest.getStatus()).isEqualTo(DeliveryStatus.MATCHED);
     verify(vehicleService).markBusy(2L);
+
+    ArgumentCaptor<DeliveryStatusChangedEvent> eventCaptor =
+        ArgumentCaptor.forClass(DeliveryStatusChangedEvent.class);
+    verify(eventPublisher).publishEvent(eventCaptor.capture());
+    assertThat(eventCaptor.getValue().deliveryRequestId()).isEqualTo(1L);
+    assertThat(eventCaptor.getValue().status()).isEqualTo(DeliveryStatus.MATCHED);
   }
 
   @Test
@@ -260,6 +270,12 @@ class MatchingServiceTest {
     assertThat(deliveryRequest.getStatus()).isEqualTo(DeliveryStatus.COMPLETED);
     verify(vehicleService).markAvailable(2L);
     verify(vehicleService, never()).markBusy(eq(2L));
+
+    ArgumentCaptor<DeliveryStatusChangedEvent> eventCaptor =
+        ArgumentCaptor.forClass(DeliveryStatusChangedEvent.class);
+    verify(eventPublisher).publishEvent(eventCaptor.capture());
+    assertThat(eventCaptor.getValue().deliveryRequestId()).isEqualTo(1L);
+    assertThat(eventCaptor.getValue().status()).isEqualTo(DeliveryStatus.COMPLETED);
   }
 
   @Test
@@ -357,6 +373,12 @@ class MatchingServiceTest {
     assertThat(deliveryRequest.getStatus()).isEqualTo(DeliveryStatus.REQUESTED);
     verify(vehicleService).markAvailable(2L);
     verify(matchingRepository).delete(matching);
+
+    ArgumentCaptor<DeliveryStatusChangedEvent> eventCaptor =
+        ArgumentCaptor.forClass(DeliveryStatusChangedEvent.class);
+    verify(eventPublisher).publishEvent(eventCaptor.capture());
+    assertThat(eventCaptor.getValue().deliveryRequestId()).isEqualTo(1L);
+    assertThat(eventCaptor.getValue().status()).isEqualTo(DeliveryStatus.REQUESTED);
   }
 
   @Test
@@ -376,5 +398,6 @@ class MatchingServiceTest {
     assertThat(deliveryRequest.getStatus()).isEqualTo(DeliveryStatus.COMPLETED);
     verify(vehicleService, never()).markAvailable(2L);
     verify(matchingRepository).delete(matching);
+    verify(eventPublisher, never()).publishEvent(any());
   }
 }

@@ -8,6 +8,7 @@ import com.example.shinhangaecheokja.delivery.entity.DeliveryRequest;
 import com.example.shinhangaecheokja.delivery.entity.DeliveryStatus;
 import com.example.shinhangaecheokja.delivery.entity.Matching;
 import com.example.shinhangaecheokja.delivery.entity.MatchingStatus;
+import com.example.shinhangaecheokja.delivery.event.DeliveryStatusChangedEvent;
 import com.example.shinhangaecheokja.delivery.exception.AlreadyMatchedException;
 import com.example.shinhangaecheokja.delivery.exception.InvalidMatchingTransitionException;
 import com.example.shinhangaecheokja.delivery.exception.VehicleCapacityMismatchException;
@@ -17,8 +18,10 @@ import com.example.shinhangaecheokja.vehicle.entity.Vehicle;
 import com.example.shinhangaecheokja.vehicle.entity.VehicleStatus;
 import com.example.shinhangaecheokja.vehicle.exception.VehicleNotAvailableException;
 import com.example.shinhangaecheokja.vehicle.service.VehicleService;
+import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,6 +33,7 @@ public class MatchingService {
   private final MatchingRepository matchingRepository;
   private final DeliveryRequestRepository deliveryRequestRepository;
   private final VehicleService vehicleService;
+  private final ApplicationEventPublisher eventPublisher;
 
   /**
    * 매칭을 생성한다. 배송 요청과 차량을 각각 findByIdForUpdate(비관적 락)로 조회해 조건(상태, 무게, 거리)을 검증하고, Matching 엔티티를 저장한다.
@@ -129,8 +133,11 @@ public class MatchingService {
     Matching matching = findMatchingOrThrow(matchingId);
     if (matching.getStatus() == MatchingStatus.MATCHED) {
       vehicleService.markAvailable(matching.getVehicleId());
-      findDeliveryRequestOrThrow(matching.getDeliveryRequestId())
-          .changeStatus(DeliveryStatus.REQUESTED);
+      Long deliveryRequestId = matching.getDeliveryRequestId();
+      findDeliveryRequestOrThrow(deliveryRequestId).changeStatus(DeliveryStatus.REQUESTED);
+      eventPublisher.publishEvent(
+          new DeliveryStatusChangedEvent(
+              deliveryRequestId, DeliveryStatus.REQUESTED, LocalDateTime.now()));
     }
     matchingRepository.delete(matching);
   }
@@ -151,15 +158,22 @@ public class MatchingService {
     }
   }
 
-  /** Matching 상태 변화에 맞춰 DeliveryRequest·Vehicle 상태를 함께 갱신한다. */
+  /**
+   * Matching 상태 변화에 맞춰 DeliveryRequest·Vehicle 상태를 함께 갱신하고, DeliveryStatusChangedEvent를 발행해
+   * tracking 패키지의 WebSocket 브로드캐스트로 이어지게 한다.
+   */
   private void applyStatus(
       Matching matching, DeliveryRequest deliveryRequest, MatchingStatus status) {
-    deliveryRequest.changeStatus(toDeliveryStatus(status));
+    DeliveryStatus deliveryStatus = toDeliveryStatus(status);
+    deliveryRequest.changeStatus(deliveryStatus);
     if (status == MatchingStatus.MATCHED) {
       vehicleService.markBusy(matching.getVehicleId());
     } else {
       vehicleService.markAvailable(matching.getVehicleId());
     }
+    eventPublisher.publishEvent(
+        new DeliveryStatusChangedEvent(
+            deliveryRequest.getId(), deliveryStatus, LocalDateTime.now()));
   }
 
   private DeliveryStatus toDeliveryStatus(MatchingStatus status) {
