@@ -32,8 +32,7 @@ public class PointController {
       @RequestHeader("Idempotency-Key") String idempotencyKey,
       @Valid @RequestBody PointChargeRequest request) {
     CustomUserDetails resolved = resolveUserDetails(userDetails);
-    return ResponseEntity.ok(
-        paymentService.chargePoint(resolved.getId(), idempotencyKey, request));
+    return ResponseEntity.ok(paymentService.chargePoint(resolved.getId(), idempotencyKey, request));
   }
 
   private CustomUserDetails resolveUserDetails(CustomUserDetails userDetails) {

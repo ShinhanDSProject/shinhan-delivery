@@ -1,10 +1,13 @@
-package com.example.shinhangaecheokja.tracking;
+package com.example.shinhangaecheokja.realtime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.example.shinhangaecheokja.common.security.JwtProvider;
+import com.example.shinhangaecheokja.delivery.dto.request.DeliveryCreateRequest;
+import com.example.shinhangaecheokja.delivery.dto.response.DeliveryResponse;
 import com.example.shinhangaecheokja.delivery.entity.DeliveryRequest;
 import com.example.shinhangaecheokja.delivery.entity.DeliveryStatus;
+import com.example.shinhangaecheokja.delivery.entity.ItemSize;
 import com.example.shinhangaecheokja.delivery.entity.Matching;
 import com.example.shinhangaecheokja.delivery.entity.MatchingStatus;
 import com.example.shinhangaecheokja.delivery.repository.DeliveryRequestRepository;
@@ -13,9 +16,9 @@ import com.example.shinhangaecheokja.delivery.service.DeliveryService;
 import com.example.shinhangaecheokja.member.entity.Member;
 import com.example.shinhangaecheokja.member.entity.MemberRole;
 import com.example.shinhangaecheokja.member.repository.MemberRepository;
-import com.example.shinhangaecheokja.tracking.dto.request.LocationUpdateRequest;
-import com.example.shinhangaecheokja.tracking.dto.response.DeliveryStatusBroadcastResponse;
-import com.example.shinhangaecheokja.tracking.dto.response.LocationBroadcastResponse;
+import com.example.shinhangaecheokja.realtime.dto.request.LocationUpdateRequest;
+import com.example.shinhangaecheokja.realtime.dto.response.DeliveryStatusBroadcastResponse;
+import com.example.shinhangaecheokja.realtime.dto.response.LocationBroadcastResponse;
 import com.example.shinhangaecheokja.vehicle.entity.Vehicle;
 import com.example.shinhangaecheokja.vehicle.entity.VehicleStatus;
 import com.example.shinhangaecheokja.vehicle.entity.VehicleType;
@@ -35,6 +38,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
+import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompFrameHandler;
 import org.springframework.messaging.simp.stomp.StompHeaders;
 import org.springframework.messaging.simp.stomp.StompSession;
@@ -193,6 +197,86 @@ class TrackingIntegrationTest {
     assertThat(strangerReceived.poll(2, TimeUnit.SECONDS)).isNull();
   }
 
+  @Test
+  @DisplayName("차량 소유주가 오퍼 채널을 구독하면 조건에 맞는 신규 배송요청 오퍼를 수신한다")
+  void subscribeOfferAsVehicleOwnerShouldReceiveBroadcast() throws Exception {
+    Long offerCourierId = createMember("offer-courier", MemberRole.COURIER);
+    Long offerVehicleId = createAvailableVehicle(offerCourierId);
+    try {
+      BlockingQueue<DeliveryResponse> received = new LinkedBlockingQueue<>();
+      StompSession session = connect(offerCourierId, "COURIER");
+      String destination = "/topic/vehicles/" + offerVehicleId + "/offers";
+      session.subscribe(destination, frameHandler(received, DeliveryResponse.class));
+      awaitSubscriptionRegistered(offerCourierId, destination);
+
+      DeliveryRequest created = deliveryService.requestDelivery(customerId, newDeliveryRequest());
+      try {
+        DeliveryResponse offer = received.poll(5, TimeUnit.SECONDS);
+
+        assertThat(offer).isNotNull();
+        assertThat(offer.id()).isEqualTo(created.getId());
+      } finally {
+        deliveryRequestRepository.deleteById(created.getId());
+      }
+    } finally {
+      vehicleRepository.deleteById(offerVehicleId);
+      memberRepository.deleteById(offerCourierId);
+    }
+  }
+
+  @Test
+  @DisplayName("차량 소유주가 아니면 오퍼 채널 구독이 거부되어 브로드캐스트를 받지 못한다")
+  void subscribeOfferAsNonOwnerShouldBeIgnored() throws Exception {
+    Long offerCourierId = createMember("offer-courier", MemberRole.COURIER);
+    Long offerVehicleId = createAvailableVehicle(offerCourierId);
+    try {
+      BlockingQueue<DeliveryResponse> strangerReceived = new LinkedBlockingQueue<>();
+      BlockingQueue<Object> subscribeRejections = new LinkedBlockingQueue<>();
+      StompSession strangerSession =
+          connectWithRejectionCapture(strangerId, "CUSTOMER", subscribeRejections);
+      strangerSession.subscribe(
+          "/topic/vehicles/" + offerVehicleId + "/offers",
+          frameHandler(strangerReceived, DeliveryResponse.class));
+
+      assertThat(subscribeRejections.poll(5, TimeUnit.SECONDS)).isNotNull();
+
+      DeliveryRequest created = deliveryService.requestDelivery(customerId, newDeliveryRequest());
+      try {
+        assertThat(strangerReceived.poll(2, TimeUnit.SECONDS)).isNull();
+      } finally {
+        deliveryRequestRepository.deleteById(created.getId());
+      }
+    } finally {
+      vehicleRepository.deleteById(offerVehicleId);
+      memberRepository.deleteById(offerCourierId);
+    }
+  }
+
+  private Long createAvailableVehicle(Long ownerId) {
+    Vehicle vehicle = new Vehicle();
+    vehicle.setOwnerId(ownerId);
+    vehicle.setType(VehicleType.CAR);
+    vehicle.setMaxWeight(500);
+    vehicle.setMaxDistance(500);
+    vehicle.setLatitude(37.5);
+    vehicle.setLongitude(127.0);
+    vehicle.setStatus(VehicleStatus.AVAILABLE);
+    return vehicleRepository.save(vehicle).getId();
+  }
+
+  private DeliveryCreateRequest newDeliveryRequest() {
+    DeliveryCreateRequest request = new DeliveryCreateRequest();
+    request.setPickupAddress("서울시 강남구");
+    request.setDropoffAddress("서울시 서초구");
+    request.setWeight(10);
+    request.setPickupLatitude(37.0);
+    request.setPickupLongitude(127.0);
+    request.setDropoffLatitude(38.0);
+    request.setDropoffLongitude(127.0);
+    request.setItemSize(ItemSize.MEDIUM);
+    return request;
+  }
+
   private BlockingQueue<LocationBroadcastResponse> subscribeAsCustomer() throws Exception {
     BlockingQueue<LocationBroadcastResponse> received = new LinkedBlockingQueue<>();
     StompSession customerSession = connect(customerId, "CUSTOMER");
@@ -272,6 +356,39 @@ class TrackingIntegrationTest {
             (WebSocketHttpHeaders) null,
             connectHeaders,
             new StompSessionHandlerAdapter() {})
+        .get(5, TimeUnit.SECONDS);
+  }
+
+  /**
+   * 거절될 구독을 테스트하기 위해, 세션 레벨 프레임(구독이 특정되지 않은 ERROR 프레임 등)과 세션 예외를 모두 큐에 담는 핸들러로 연결한다. 구독 거절 처리가 서버에서
+   * 실제로 끝난 뒤에야 후속 동작(예: 배송요청 생성)을 진행해, 두 호출 사이의 경쟁 상태로 인한 flaky 테스트를 없앤다.
+   */
+  private StompSession connectWithRejectionCapture(
+      Long memberId, String role, BlockingQueue<Object> signals) throws Exception {
+    String token = jwtProvider.createAccessToken(memberId, memberId + "@test.com", role);
+    StompHeaders connectHeaders = new StompHeaders();
+    connectHeaders.add("Authorization", "Bearer " + token);
+    return stompClient
+        .connectAsync(
+            "ws://localhost:" + port + "/ws",
+            (WebSocketHttpHeaders) null,
+            connectHeaders,
+            new StompSessionHandlerAdapter() {
+              @Override
+              public void handleFrame(StompHeaders headers, Object payload) {
+                signals.add(headers);
+              }
+
+              @Override
+              public void handleException(
+                  StompSession session,
+                  StompCommand command,
+                  StompHeaders headers,
+                  byte[] payload,
+                  Throwable exception) {
+                signals.add(exception);
+              }
+            })
         .get(5, TimeUnit.SECONDS);
   }
 

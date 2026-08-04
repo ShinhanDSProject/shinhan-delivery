@@ -8,9 +8,11 @@ import com.example.shinhangaecheokja.delivery.dto.request.DeliveryEstimateReques
 import com.example.shinhangaecheokja.delivery.dto.request.DeliveryUpdateRequest;
 import com.example.shinhangaecheokja.delivery.dto.response.DeliveryDetailResponseDto;
 import com.example.shinhangaecheokja.delivery.dto.response.DeliveryEstimateResponse;
+import com.example.shinhangaecheokja.delivery.dto.response.DeliveryResponse;
 import com.example.shinhangaecheokja.delivery.dto.response.ProofPhotoResponse;
 import com.example.shinhangaecheokja.delivery.entity.DeliveryRequest;
 import com.example.shinhangaecheokja.delivery.entity.DeliveryStatus;
+import com.example.shinhangaecheokja.delivery.event.DeliveryOfferBroadcastEvent;
 import com.example.shinhangaecheokja.delivery.event.DeliveryStatusChangedEvent;
 import com.example.shinhangaecheokja.delivery.exception.AlreadyMatchedException;
 import com.example.shinhangaecheokja.delivery.exception.DeliveryAccessDeniedException;
@@ -20,8 +22,10 @@ import com.example.shinhangaecheokja.delivery.helper.DeliveryFeeCalculator;
 import com.example.shinhangaecheokja.delivery.repository.DeliveryRequestRepository;
 import com.example.shinhangaecheokja.delivery.repository.MatchingRepository;
 import com.example.shinhangaecheokja.member.service.MemberService;
+import com.example.shinhangaecheokja.vehicle.entity.Vehicle;
 import com.example.shinhangaecheokja.vehicle.service.VehicleService;
 import java.time.LocalDateTime;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
@@ -44,7 +48,7 @@ public class DeliveryService {
   /**
    * 로그인한 고객 본인 명의로 배송을 요청한다. customerId는 요청 바디가 아니라 인증된 호출자에게서 받아, 다른 회원 명의로 배송을 대신 생성하지 못하게 한다.
    * 요금은 {@link #estimateFee}와 동일한 공식으로 서버가 직접 계산한다(거리는 클라이언트가 준 값이 아니라 좌표로 계산 — 요금 조작 방지). 매칭은 차량이
-   * 콜을 수락하면서 별도로 이루어진다.
+   * 콜을 수락하면서 별도로 이루어진다. 저장 직후, 조건(용량)이 맞는 후보 차량이 있으면 오퍼 브로드캐스트 이벤트를 발행한다.
    */
   @Transactional
   public DeliveryRequest requestDelivery(Long customerId, DeliveryCreateRequest request) {
@@ -60,8 +64,19 @@ public class DeliveryService {
     DeliveryEstimateResponse fee =
         deliveryFeeCalculator.calculateFee(distanceKm, request.getWeight(), request.getItemSize());
 
-    return deliveryRequestRepository.save(
-        DeliveryRequest.of(customerId, request, distanceKm, fee.totalFee().longValueExact()));
+    DeliveryRequest saved =
+        deliveryRequestRepository.save(
+            DeliveryRequest.of(customerId, request, distanceKm, fee.totalFee().longValueExact()));
+
+    List<Long> candidateVehicleIds =
+        vehicleService.findOfferCandidates(saved.getWeight(), saved.getDistance()).stream()
+            .map(Vehicle::getId)
+            .toList();
+    if (!candidateVehicleIds.isEmpty()) {
+      eventPublisher.publishEvent(
+          new DeliveryOfferBroadcastEvent(candidateVehicleIds, DeliveryResponse.from(saved)));
+    }
+    return saved;
   }
 
   /** 배송 요청을 생성하지 않고 예상 요금만 계산한다({@link #requestDelivery}와 완전히 동일한 공식). */

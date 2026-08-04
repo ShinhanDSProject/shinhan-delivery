@@ -1,9 +1,9 @@
-package com.example.shinhangaecheokja.tracking.controller;
+package com.example.shinhangaecheokja.realtime.controller;
 
 import com.example.shinhangaecheokja.common.security.CustomUserDetails;
-import com.example.shinhangaecheokja.tracking.dto.request.LocationUpdateRequest;
-import com.example.shinhangaecheokja.tracking.exception.UnauthorizedTrackingAccessException;
-import com.example.shinhangaecheokja.tracking.service.TrackingService;
+import com.example.shinhangaecheokja.realtime.dto.request.LocationUpdateRequest;
+import com.example.shinhangaecheokja.realtime.exception.UnauthorizedTrackingAccessException;
+import com.example.shinhangaecheokja.realtime.service.TrackingService;
 import jakarta.validation.Valid;
 import java.security.Principal;
 import lombok.RequiredArgsConstructor;

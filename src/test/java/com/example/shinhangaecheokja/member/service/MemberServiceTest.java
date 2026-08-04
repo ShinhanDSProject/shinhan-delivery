@@ -82,7 +82,8 @@ class MemberServiceTest {
               member.setId(10L);
               return member;
             });
-    when(vehicleRepository.save(any(Vehicle.class))).thenAnswer(invocation -> invocation.getArgument(0));
+    when(vehicleRepository.save(any(Vehicle.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
 
     Member response = memberService.create(request);
 

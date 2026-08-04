@@ -55,8 +55,7 @@ class PointControllerTest {
   @Test
   @DisplayName("인증된 회원이 포인트를 충전하면 잔액과 마지막 충전 시각을 반환한다")
   void chargePointSuccess() throws Exception {
-    CustomUserDetails customUser =
-        new CustomUserDetails(10L, "my@example.com", "pass", "CUSTOMER");
+    CustomUserDetails customUser = new CustomUserDetails(10L, "my@example.com", "pass", "CUSTOMER");
     UsernamePasswordAuthenticationToken auth =
         new UsernamePasswordAuthenticationToken(customUser, null, customUser.getAuthorities());
     SecurityContextHolder.getContext().setAuthentication(auth);
@@ -66,7 +65,8 @@ class PointControllerTest {
     request.setPaymentMethod(PaymentMethod.CARD);
 
     when(paymentService.chargePoint(eq(10L), eq("idem-123"), any(PointChargeRequest.class)))
-        .thenReturn(new PointBalanceResponse(15000L, java.time.LocalDateTime.of(2026, 8, 4, 1, 30)));
+        .thenReturn(
+            new PointBalanceResponse(15000L, java.time.LocalDateTime.of(2026, 8, 4, 1, 30)));
 
     mockMvc
         .perform(

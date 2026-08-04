@@ -1,4 +1,4 @@
-package com.example.shinhangaecheokja.tracking.dto.request;
+package com.example.shinhangaecheokja.realtime.dto.request;
 
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;

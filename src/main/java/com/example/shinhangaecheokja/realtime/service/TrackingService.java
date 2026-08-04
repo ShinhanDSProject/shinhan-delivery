@@ -1,13 +1,14 @@
-package com.example.shinhangaecheokja.tracking.service;
+package com.example.shinhangaecheokja.realtime.service;
 
 import com.example.shinhangaecheokja.common.exception.EntityNotFoundException;
 import com.example.shinhangaecheokja.delivery.entity.DeliveryRequest;
 import com.example.shinhangaecheokja.delivery.entity.Matching;
 import com.example.shinhangaecheokja.delivery.service.DeliveryService;
 import com.example.shinhangaecheokja.delivery.service.MatchingService;
-import com.example.shinhangaecheokja.tracking.dto.request.LocationUpdateRequest;
-import com.example.shinhangaecheokja.tracking.dto.response.LocationBroadcastResponse;
-import com.example.shinhangaecheokja.tracking.exception.UnauthorizedTrackingAccessException;
+import com.example.shinhangaecheokja.realtime.dto.request.LocationUpdateRequest;
+import com.example.shinhangaecheokja.realtime.dto.response.LocationBroadcastResponse;
+import com.example.shinhangaecheokja.realtime.exception.UnauthorizedOfferAccessException;
+import com.example.shinhangaecheokja.realtime.exception.UnauthorizedTrackingAccessException;
 import com.example.shinhangaecheokja.vehicle.entity.Vehicle;
 import com.example.shinhangaecheokja.vehicle.service.VehicleService;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +37,14 @@ public class TrackingService {
       return;
     }
     throw new UnauthorizedTrackingAccessException(deliveryId, memberId);
+  }
+
+  /** 요청자가 해당 차량의 오퍼 채널을 구독할 수 있는지 검증한다 — 그 차량의 소유주여야 한다. */
+  @Transactional(readOnly = true)
+  public void assertCanSubscribeToOffers(Long memberId, Long vehicleId) {
+    if (!isOwner(memberId, vehicleId)) {
+      throw new UnauthorizedOfferAccessException(vehicleId);
+    }
   }
 
   /**

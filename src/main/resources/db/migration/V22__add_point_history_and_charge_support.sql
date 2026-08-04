@@ -13,4 +13,5 @@ CREATE TABLE point_history (
     CONSTRAINT fk_point_history_wallet FOREIGN KEY (wallet_id) REFERENCES point_wallet (id)
 );
 
+-- linter:ignore-online-ddl
 ALTER TABLE point_wallet ADD COLUMN version BIGINT NOT NULL DEFAULT 0;

@@ -1,11 +1,11 @@
-package com.example.shinhangaecheokja.tracking.service;
+package com.example.shinhangaecheokja.realtime.service;
 
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 
 import com.example.shinhangaecheokja.delivery.entity.DeliveryStatus;
 import com.example.shinhangaecheokja.delivery.event.DeliveryStatusChangedEvent;
-import com.example.shinhangaecheokja.tracking.dto.response.DeliveryStatusBroadcastResponse;
+import com.example.shinhangaecheokja.realtime.dto.response.DeliveryStatusBroadcastResponse;
 import java.time.LocalDateTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

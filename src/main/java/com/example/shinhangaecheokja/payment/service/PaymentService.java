@@ -49,8 +49,8 @@ public class PaymentService {
   }
 
   /**
-   * 포인트 지갑에 포인트를 충전한다. 동일 지갑에 대한 동시 충전/차감 요청이 잔액을 잃어버리지 않도록 비관적 쓰기 락으로 지갑을 조회해 트랜잭션이 끝날 때까지 해당 지갑 락을
-   * 점유한다.
+   * 포인트 지갑에 포인트를 충전한다. 동일 지갑에 대한 동시 충전/차감 요청이 잔액을 잃어버리지 않도록 비관적 쓰기 락으로 지갑을 조회해 트랜잭션이 끝날 때까지 해당 지갑
+   * 락을 점유한다.
    */
   @Transactional
   public PointWallet chargePoint(Long walletId, PointChargeRequest request) {
@@ -66,7 +66,9 @@ public class PaymentService {
     memberService.getById(memberId);
 
     PointHistory existing =
-        pointHistoryRepository.findByMemberIdAndIdempotencyKey(memberId, idempotencyKey).orElse(null);
+        pointHistoryRepository
+            .findByMemberIdAndIdempotencyKey(memberId, idempotencyKey)
+            .orElse(null);
     if (existing != null) {
       return new PointBalanceResponse(existing.getBalanceAfter(), existing.getCreatedAt());
     }
@@ -90,8 +92,8 @@ public class PaymentService {
   }
 
   /**
-   * 다른 도메인 Service가 회원의 포인트를 차감할 때 사용한다. 잔액이 부족하면 InsufficientPointException. 동일 지갑에 대한 동시 차감 요청으로 잔액이 음수로
-   * 가지 않도록 비관적 쓰기 락으로 지갑을 조회한다.
+   * 다른 도메인 Service가 회원의 포인트를 차감할 때 사용한다. 잔액이 부족하면 InsufficientPointException. 동일 지갑에 대한 동시 차감 요청으로
+   * 잔액이 음수로 가지 않도록 비관적 쓰기 락으로 지갑을 조회한다.
    */
   @Transactional
   public PointWallet usePoint(Long walletId, PointUseRequest request) {
