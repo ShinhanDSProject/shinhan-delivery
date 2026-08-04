@@ -13,9 +13,9 @@ public class OpenApiConfig {
     return new OpenAPI()
         .info(
             new Info()
-                .title("신한 배달 배송 서비스 API 명세서")
+                .title("Shinhan Delivery 배송 서비스 API 명세서")
                 .description(
-                    "신한 배달 프로젝트의 회원가입, 차량 관리, 배송 요청, 매칭 서비스 및 결제 지갑 연동 API 자동화 문서입니다. 개발을 공부하는 교육생분들의 테스트 환경을 돕기 위해 Swagger UI가 활성화되어 있습니다.")
+                    "Shinhan Delivery 프로젝트의 회원가입, 차량 관리, 배송 요청, 매칭 서비스 및 결제 지갑 연동 API 자동화 문서입니다. 개발을 공부하는 교육생분들의 테스트 환경을 돕기 위해 Swagger UI가 활성화되어 있습니다.")
                 .version("1.0.0"));
   }
 }

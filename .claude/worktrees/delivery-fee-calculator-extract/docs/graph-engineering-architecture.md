@@ -9,7 +9,7 @@
 - [2. LangGraph: 상태 기반 에이전트 오케스트레이션](#2-langgraph-상태-기반-에이전트-오케스트레이션)
 - [3. GraphRAG: 지식 그래프 기반의 검색 및 다단계 추론](#3-graphrag-지식-그래프-기반의-검색-및-다단계-추론)
 - [4. AI 하네스 자동화에서의 그래프 엔지니어링 적용 사례](#4-ai-하네스-자동화에서의-그래프-엔지니어링-적용-사례)
-- [5. 신한 배달 배송 도메인 상태 머신 그래프 (Domain State Graph)](#5-신한-배달-배송-도메인-상태-머신-그래프-domain-state-graph)
+- [5. Shinhan Delivery 배송 도메인 상태 머신 그래프 (Domain State Graph)](#5-shinhan-delivery-배송-도메인-상태-머신-그래프-domain-state-graph)
 - [6. 실증 검증 명령어 & 참고 도서](#6-실증-검증-명령어--참고-도서)
 
 ---
@@ -97,7 +97,7 @@ graph LR
 
 ---
 
-## 5. 신한 배달 배송 도메인 상태 머신 그래프 (Domain State Graph)
+## 5. Shinhan Delivery 배송 도메인 상태 머신 그래프 (Domain State Graph)
 
 온디맨드 배송 서비스의 배송 주문(`DeliveryRequest`) 생애주기는 비즈니스 도메인 관점의 **상태 전이 그래프(State Transition Graph)**로 설계되어 불법적인 상태 변경을 완벽히 차단합니다.
 

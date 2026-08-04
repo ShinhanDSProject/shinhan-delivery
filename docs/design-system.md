@@ -1,4 +1,4 @@
-# 🎨 신한 배달 공통 디자인 시스템 (Design System Guide)
+# 🎨 Shinhan Delivery 공통 디자인 시스템 (Design System Guide)
 
 > **HTML5, Vanilla CSS & Thymeleaf UI 개발을 위한 통합 디자인 토큰 및 공통 컴포넌트 가이드북**  
 > 프로젝트 전체에서 일관된 UI/UX 경험을 제공하고 컴포넌트 재사용성을 극대화하기 위해 구축된 표준 가이드입니다.

@@ -1,6 +1,6 @@
 # 🕸️ 배송 도메인 상태 전이 그래프 명세서 (Delivery State Graph Design)
 
-> **신한 배달 배송 주문 생애주기(Delivery Request Lifecycle) 상태 전이 그래프 및 동시성 제어 설계 명세서**
+> **Shinhan Delivery 배송 주문 생애주기(Delivery Request Lifecycle) 상태 전이 그래프 및 동시성 제어 설계 명세서**
 
 ---
 

@@ -1,4 +1,4 @@
-# 🚀 신한 배달 (shinhan-delivery)
+# 🚀 Shinhan Delivery (shinhan-delivery)
 
 > **Spring Boot & Thymeleaf/HTML5/Vanilla JS 기반의 스마트 퀵배송 & 온디맨드 매칭 플랫폼**  
 > 초급 개발자부터 AI 에이전트까지 세계 최고 수준(Google, Apple, Meta 급)의 무결점 개발 규격을 준수하며 함께 성장하는 프로젝트입니다.
