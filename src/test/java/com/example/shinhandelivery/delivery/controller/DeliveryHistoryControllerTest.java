@@ -63,6 +63,7 @@ class DeliveryHistoryControllerTest {
     deliveryRequest.setStatus(DeliveryStatus.CANCELLED);
     deliveryRequest.setPickupAddress("서울시 강남구");
     deliveryRequest.setDropoffAddress("서울시 서초구");
+    deliveryRequest.setFeePoint(6000);
 
     when(deliveryService.getMyDeliveryRequests(eq(1L), eq(DeliveryStatus.CANCELLED), any()))
         .thenReturn(new PageImpl<>(List.of(deliveryRequest)));
@@ -72,7 +73,8 @@ class DeliveryHistoryControllerTest {
             get("/api/v1/delivery-requests?status=CANCELLED")
                 .header("Authorization", "Bearer " + token))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.content[0].status").value("CANCELLED"));
+        .andExpect(jsonPath("$.content[0].status").value("CANCELLED"))
+        .andExpect(jsonPath("$.content[0].feePoint").value(6000));
   }
 
   @Test
