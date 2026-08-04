@@ -38,6 +38,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
+import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompFrameHandler;
 import org.springframework.messaging.simp.stomp.StompHeaders;
 import org.springframework.messaging.simp.stomp.StompSession;
@@ -230,10 +231,14 @@ class TrackingIntegrationTest {
     Long offerVehicleId = createAvailableVehicle(offerCourierId);
     try {
       BlockingQueue<DeliveryResponse> strangerReceived = new LinkedBlockingQueue<>();
-      StompSession strangerSession = connect(strangerId, "CUSTOMER");
+      BlockingQueue<Object> subscribeRejections = new LinkedBlockingQueue<>();
+      StompSession strangerSession =
+          connectWithRejectionCapture(strangerId, "CUSTOMER", subscribeRejections);
       strangerSession.subscribe(
           "/topic/vehicles/" + offerVehicleId + "/offers",
           frameHandler(strangerReceived, DeliveryResponse.class));
+
+      assertThat(subscribeRejections.poll(5, TimeUnit.SECONDS)).isNotNull();
 
       DeliveryRequest created = deliveryService.requestDelivery(customerId, newDeliveryRequest());
       try {
@@ -351,6 +356,39 @@ class TrackingIntegrationTest {
             (WebSocketHttpHeaders) null,
             connectHeaders,
             new StompSessionHandlerAdapter() {})
+        .get(5, TimeUnit.SECONDS);
+  }
+
+  /**
+   * 거절될 구독을 테스트하기 위해, 세션 레벨 프레임(구독이 특정되지 않은 ERROR 프레임 등)과 세션 예외를 모두 큐에 담는 핸들러로 연결한다. 구독 거절 처리가 서버에서
+   * 실제로 끝난 뒤에야 후속 동작(예: 배송요청 생성)을 진행해, 두 호출 사이의 경쟁 상태로 인한 flaky 테스트를 없앤다.
+   */
+  private StompSession connectWithRejectionCapture(
+      Long memberId, String role, BlockingQueue<Object> signals) throws Exception {
+    String token = jwtProvider.createAccessToken(memberId, memberId + "@test.com", role);
+    StompHeaders connectHeaders = new StompHeaders();
+    connectHeaders.add("Authorization", "Bearer " + token);
+    return stompClient
+        .connectAsync(
+            "ws://localhost:" + port + "/ws",
+            (WebSocketHttpHeaders) null,
+            connectHeaders,
+            new StompSessionHandlerAdapter() {
+              @Override
+              public void handleFrame(StompHeaders headers, Object payload) {
+                signals.add(headers);
+              }
+
+              @Override
+              public void handleException(
+                  StompSession session,
+                  StompCommand command,
+                  StompHeaders headers,
+                  byte[] payload,
+                  Throwable exception) {
+                signals.add(exception);
+              }
+            })
         .get(5, TimeUnit.SECONDS);
   }
 
