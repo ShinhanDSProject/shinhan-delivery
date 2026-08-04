@@ -47,8 +47,8 @@
 
     <section class="hero">
         <div class="eyebrow">STEP 2 · SECURITY PIN</div>
-        <h2>6자리 결제 PIN을 입력해 주세요.</h2>
-        <p>안전한 결제를 위해 등록된 결제 PIN을 입력합니다. 3회 연속 실패하면 이번 세션에서는 잠깁니다.</p>
+        <h2>6자리 결제 PIN을 입력해 주세요</h2>
+        <p>안전한 결제를 위해 등록된 결제 PIN을 입력합니다. 3회 연속 실패하면 이번 세션에서 잠깁니다.</p>
     </section>
 
     <div class="amount-card">
@@ -74,7 +74,7 @@
         <button type="button" data-key="9">9</button>
         <button type="button" class="alt" data-action="clear">전체 삭제</button>
         <button type="button" data-key="0">0</button>
-        <button type="button" class="alt" data-action="delete">한 글자</button>
+        <button type="button" class="alt" data-action="delete">지우기</button>
     </div>
 
     <div class="pin-actions">
@@ -144,29 +144,37 @@
         return pin === '123456';
     }
 
+    function buildPaymentRequest(draft) {
+        return {
+            totalFee: draft.paymentEstimate.totalFee,
+            categoryId: draft.categoryId,
+            pickup: {
+                address: draft.pickup.address,
+                lat: draft.pickup.lat,
+                lng: draft.pickup.lng
+            },
+            dropoff: {
+                address: draft.dropoff.address,
+                lat: draft.dropoff.lat,
+                lng: draft.dropoff.lng
+            },
+            weight: draft.weight,
+            itemSize: draft.itemSize
+        };
+    }
+
     async function payDeliveryWithFallback() {
         const draft = loadDraft();
         const payment = draft.paymentEstimate;
+        const idempotencyKey = crypto.randomUUID ? crypto.randomUUID() : `payment-${Date.now()}`;
         try {
             const response = await fetch('/api/v1/delivery-requests/pay', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    totalFee: payment.totalFee,
-                    categoryId: draft.categoryId,
-                    pickup: {
-                        address: draft.pickup.address,
-                        lat: draft.pickup.lat,
-                        lng: draft.pickup.lng
-                    },
-                    dropoff: {
-                        address: draft.dropoff.address,
-                        lat: draft.dropoff.lat,
-                        lng: draft.dropoff.lng
-                    },
-                    weight: draft.weight,
-                    itemSize: draft.itemSize
-                })
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Idempotency-Key': idempotencyKey
+                },
+                body: JSON.stringify(buildPaymentRequest(draft))
             });
             if (response.ok) {
                 return await response.json();
