@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+  <!-- ==================================================================== -->
+  <!-- 1. Primary & Secondary Buttons Fragment                             -->
+  <!-- ==================================================================== -->
+  <button th:fragment="primaryBtn(text)"
+          type="submit"
+          class="btn btn-primary btn-full"
+          th:text="${text}">
+    확인
+  </button>
+
+  <button th:fragment="secondaryBtn(text)"
+          type="button"
+          class="btn btn-outline btn-full"
+          th:text="${text}">
+    취소
+  </button>
+
+  <!-- ==================================================================== -->
+  <!-- 2. Social Login Buttons Fragment                                    -->
+  <!-- ==================================================================== -->
+  <button th:fragment="socialBtn(provider, text)"
+          type="button"
+          th:class="'btn btn-full btn-' + ${#strings.toLowerCase(provider)}"
+          th:text="${text}">
+    소셜 로그인
+  </button>
+
+  <!-- ==================================================================== -->
+  <!-- 3. Form Input Field Fragment                                         -->
+  <!-- ==================================================================== -->
+  <div th:fragment="inputField(id, label, type, name, placeholder)" class="input-group">
+    <label th:for="${id}" class="input-label" th:text="${label}">라벨</label>
+    <input th:id="${id}"
+           th:name="${name}"
+           th:type="${type}"
+           class="input-field"
+           th:placeholder="${placeholder}" />
+  </div>
+
+  <!-- ==================================================================== -->
+  <!-- 4. Card Box Fragment                                                 -->
+  <!-- ==================================================================== -->
+  <div th:fragment="cardBox(title, content)" class="card-box">
+    <h3 class="typo-display1 text-black-200" th:text="${title}">카드 제목</h3>
+    <p class="typo-display3 text-grey-300" th:text="${content}">카드 상세 내용이 표시됩니다.</p>
+  </div>
+
+  <!-- ==================================================================== -->
+  <!-- 5. Status Badge Fragment                                             -->
+  <!-- ==================================================================== -->
+  <span th:fragment="badge(text, badgeType)"
+        th:class="'badge badge-' + ${badgeType}"
+        th:text="${text}">
+    상태
+  </span>
+
+</body>
+</html>
