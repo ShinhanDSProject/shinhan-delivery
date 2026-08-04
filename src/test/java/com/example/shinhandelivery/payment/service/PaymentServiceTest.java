@@ -13,6 +13,7 @@ import com.example.shinhandelivery.payment.dto.request.PointChargeRequest;
 import com.example.shinhandelivery.payment.dto.request.PointUseRequest;
 import com.example.shinhandelivery.payment.dto.request.PointWalletCreateRequest;
 import com.example.shinhandelivery.payment.dto.response.PointBalanceResponse;
+import com.example.shinhandelivery.payment.dto.response.PointUseResultResponse;
 import com.example.shinhandelivery.payment.entity.PaymentMethod;
 import com.example.shinhandelivery.payment.entity.PointHistory;
 import com.example.shinhandelivery.payment.entity.PointHistoryType;
@@ -38,7 +39,7 @@ class PaymentServiceTest {
   @InjectMocks private PaymentService paymentService;
 
   @Test
-  @DisplayName("회원이 존재하면 잔액 0인 지갑을 생성한다")
+  @DisplayName("회원이 존재하면 잔액 0의 지갑을 생성한다")
   void createWalletSuccess() {
     PointWalletCreateRequest request = new PointWalletCreateRequest();
     request.setMemberId(1L);
@@ -105,7 +106,7 @@ class PaymentServiceTest {
   }
 
   @Test
-  @DisplayName("동일 멱등 키 재호출 시 기존 충전 결과를 재사용한다")
+  @DisplayName("동일 멱등 키의 충전 요청은 기존 충전 결과를 재사용한다")
   void chargePointWithDuplicateIdempotencyKeyReusesExistingHistory() {
     Member member = new Member();
     member.setId(1L);
@@ -191,5 +192,62 @@ class PaymentServiceTest {
 
     assertThatThrownBy(() -> paymentService.usePoint(1L, request))
         .isInstanceOf(InsufficientPointException.class);
+  }
+
+  @Test
+  @DisplayName("회원 기준 포인트 차감 시 사용 이력을 저장하고 결과를 반환한다")
+  void usePointByMemberCreatesHistory() {
+    Member member = new Member();
+    member.setId(1L);
+    when(memberService.getById(1L)).thenReturn(member);
+    when(pointHistoryRepository.findByMemberIdAndIdempotencyKey(1L, "pay-1"))
+        .thenReturn(Optional.empty());
+
+    PointWallet wallet = new PointWallet();
+    wallet.setId(10L);
+    wallet.setMemberId(1L);
+    wallet.setBalance(5000L);
+    when(paymentRepository.findByMemberIdForUpdate(1L)).thenReturn(Optional.of(wallet));
+    when(pointHistoryRepository.save(any(PointHistory.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
+
+    PointUseRequest request = new PointUseRequest();
+    request.setAmount(3000L);
+
+    PointUseResultResponse response = paymentService.usePoint(1L, "pay-1", request);
+
+    assertThat(response.balance()).isEqualTo(2000L);
+    assertThat(response.usedAmount()).isEqualTo(3000L);
+    assertThat(response.paidAt()).isNotNull();
+  }
+
+  @Test
+  @DisplayName("동일 멱등 키의 포인트 차감 요청은 기존 결과를 재사용한다")
+  void usePointByMemberDuplicateIdempotencyKeyReusesExistingHistory() {
+    Member member = new Member();
+    member.setId(1L);
+    when(memberService.getById(1L)).thenReturn(member);
+
+    PointHistory history =
+        PointHistory.builder()
+            .memberId(1L)
+            .walletId(10L)
+            .amount(2000L)
+            .balanceAfter(7000L)
+            .type(PointHistoryType.USE)
+            .idempotencyKey("pay-2")
+            .createdAt(LocalDateTime.of(2026, 8, 4, 10, 0))
+            .build();
+    when(pointHistoryRepository.findByMemberIdAndIdempotencyKey(1L, "pay-2"))
+        .thenReturn(Optional.of(history));
+
+    PointUseRequest request = new PointUseRequest();
+    request.setAmount(2000L);
+
+    PointUseResultResponse response = paymentService.usePoint(1L, "pay-2", request);
+
+    assertThat(response.balance()).isEqualTo(7000L);
+    assertThat(response.usedAmount()).isEqualTo(2000L);
+    assertThat(response.paidAt()).isEqualTo(LocalDateTime.of(2026, 8, 4, 10, 0));
   }
 }
