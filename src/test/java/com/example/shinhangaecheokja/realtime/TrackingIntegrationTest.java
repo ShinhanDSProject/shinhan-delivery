@@ -1,4 +1,4 @@
-package com.example.shinhangaecheokja.tracking;
+package com.example.shinhangaecheokja.realtime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -13,9 +13,9 @@ import com.example.shinhangaecheokja.delivery.service.DeliveryService;
 import com.example.shinhangaecheokja.member.entity.Member;
 import com.example.shinhangaecheokja.member.entity.MemberRole;
 import com.example.shinhangaecheokja.member.repository.MemberRepository;
-import com.example.shinhangaecheokja.tracking.dto.request.LocationUpdateRequest;
-import com.example.shinhangaecheokja.tracking.dto.response.DeliveryStatusBroadcastResponse;
-import com.example.shinhangaecheokja.tracking.dto.response.LocationBroadcastResponse;
+import com.example.shinhangaecheokja.realtime.dto.request.LocationUpdateRequest;
+import com.example.shinhangaecheokja.realtime.dto.response.DeliveryStatusBroadcastResponse;
+import com.example.shinhangaecheokja.realtime.dto.response.LocationBroadcastResponse;
 import com.example.shinhangaecheokja.vehicle.entity.Vehicle;
 import com.example.shinhangaecheokja.vehicle.entity.VehicleStatus;
 import com.example.shinhangaecheokja.vehicle.entity.VehicleType;

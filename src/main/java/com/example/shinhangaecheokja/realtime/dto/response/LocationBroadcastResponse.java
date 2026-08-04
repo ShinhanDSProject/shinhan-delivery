@@ -1,4 +1,4 @@
-package com.example.shinhangaecheokja.tracking.dto.response;
+package com.example.shinhangaecheokja.realtime.dto.response;
 
 import java.time.LocalDateTime;
 

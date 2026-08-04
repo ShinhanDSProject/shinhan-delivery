@@ -1,8 +1,8 @@
-package com.example.shinhangaecheokja.tracking.config;
+package com.example.shinhangaecheokja.realtime.config;
 
 import com.example.shinhangaecheokja.common.security.CustomUserDetails;
 import com.example.shinhangaecheokja.common.security.JwtProvider;
-import com.example.shinhangaecheokja.tracking.service.TrackingService;
+import com.example.shinhangaecheokja.realtime.service.TrackingService;
 import java.security.Principal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.Message;

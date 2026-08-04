@@ -1,4 +1,4 @@
-package com.example.shinhangaecheokja.tracking.exception;
+package com.example.shinhangaecheokja.realtime.exception;
 
 import com.example.shinhangaecheokja.common.exception.BusinessException;
 import com.example.shinhangaecheokja.common.exception.ErrorCode;
