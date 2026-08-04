@@ -477,7 +477,9 @@
                 card.querySelector('[data-action="track"]').addEventListener('click', () => {
                     location.href = `/realtime-tracking.html?id=${delivery.id}`;
                 });
-                card.querySelector('[data-action="detail"]').addEventListener('click', notReady);
+                card.querySelector('[data-action="detail"]').addEventListener('click', () => {
+                    location.href = `/delivery-detail.html?id=${delivery.id}`;
+                });
                 activeList.appendChild(card);
             });
         } else {
