@@ -435,29 +435,44 @@ class DeliveryServiceTest {
   }
 
   @Test
-  @DisplayName("완료된 배송의 증거사진을 조회한다")
+  @DisplayName("고객 본인이 조회하면 완료된 배송의 증거사진을 조회한다")
   void getProofPhotoSuccess() {
     LocalDateTime completedAt = LocalDateTime.of(2026, 7, 31, 10, 0);
     DeliveryRequest deliveryRequest = new DeliveryRequest();
+    deliveryRequest.setCustomerId(1L);
     deliveryRequest.setStatus(DeliveryStatus.COMPLETED);
     deliveryRequest.setProofPhotoUrl("https://example.com/proof.jpg");
     deliveryRequest.setCompletedAt(completedAt);
     when(deliveryRequestRepository.findById(1L)).thenReturn(Optional.of(deliveryRequest));
 
-    ProofPhotoResponse response = deliveryService.getProofPhoto(1L);
+    ProofPhotoResponse response = deliveryService.getProofPhoto(1L, 1L);
 
     assertThat(response.proofPhotoUrl()).isEqualTo("https://example.com/proof.jpg");
     assertThat(response.completedAt()).isEqualTo(completedAt);
   }
 
   @Test
+  @DisplayName("고객 본인도 배정된 배송원도 아니면 DeliveryAccessDeniedException을 던진다")
+  void getProofPhotoNonOwnerNonCourierShouldThrowException() {
+    DeliveryRequest deliveryRequest = new DeliveryRequest();
+    deliveryRequest.setCustomerId(1L);
+    deliveryRequest.setStatus(DeliveryStatus.COMPLETED);
+    deliveryRequest.setProofPhotoUrl("https://example.com/proof.jpg");
+    when(deliveryRequestRepository.findById(1L)).thenReturn(Optional.of(deliveryRequest));
+
+    assertThatThrownBy(() -> deliveryService.getProofPhoto(999L, 1L))
+        .isInstanceOf(DeliveryAccessDeniedException.class);
+  }
+
+  @Test
   @DisplayName("완료되지 않은 배송의 증거사진 조회 시 ProofPhotoNotFoundException을 던진다")
   void getProofPhotoNotCompletedShouldThrowException() {
     DeliveryRequest deliveryRequest = new DeliveryRequest();
+    deliveryRequest.setCustomerId(1L);
     deliveryRequest.setStatus(DeliveryStatus.MATCHED);
     when(deliveryRequestRepository.findById(1L)).thenReturn(Optional.of(deliveryRequest));
 
-    assertThatThrownBy(() -> deliveryService.getProofPhoto(1L))
+    assertThatThrownBy(() -> deliveryService.getProofPhoto(1L, 1L))
         .isInstanceOf(ProofPhotoNotFoundException.class);
   }
 
@@ -465,10 +480,11 @@ class DeliveryServiceTest {
   @DisplayName("완료된 배송이어도 증거사진 URL이 없으면 ProofPhotoNotFoundException을 던진다")
   void getProofPhotoMissingUrlShouldThrowException() {
     DeliveryRequest deliveryRequest = new DeliveryRequest();
+    deliveryRequest.setCustomerId(1L);
     deliveryRequest.setStatus(DeliveryStatus.COMPLETED);
     when(deliveryRequestRepository.findById(1L)).thenReturn(Optional.of(deliveryRequest));
 
-    assertThatThrownBy(() -> deliveryService.getProofPhoto(1L))
+    assertThatThrownBy(() -> deliveryService.getProofPhoto(1L, 1L))
         .isInstanceOf(ProofPhotoNotFoundException.class);
   }
 

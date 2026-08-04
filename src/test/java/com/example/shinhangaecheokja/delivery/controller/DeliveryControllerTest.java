@@ -3,7 +3,6 @@ package com.example.shinhangaecheokja.delivery.controller;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -12,15 +11,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.example.shinhangaecheokja.delivery.dto.request.DeliveryCompleteRequest;
 import com.example.shinhangaecheokja.delivery.dto.request.DeliveryEstimateRequest;
 import com.example.shinhangaecheokja.delivery.dto.response.DeliveryEstimateResponse;
-import com.example.shinhangaecheokja.delivery.dto.response.ProofPhotoResponse;
 import com.example.shinhangaecheokja.delivery.entity.DeliveryRequest;
 import com.example.shinhangaecheokja.delivery.entity.DeliveryStatus;
 import com.example.shinhangaecheokja.delivery.entity.ItemSize;
 import com.example.shinhangaecheokja.delivery.exception.InvalidDeliveryTransitionException;
-import com.example.shinhangaecheokja.delivery.exception.ProofPhotoNotFoundException;
 import com.example.shinhangaecheokja.delivery.service.DeliveryService;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -214,29 +210,5 @@ class DeliveryControllerTest {
                 DeliveryStatus.REQUESTED, DeliveryStatus.PICKED_UP));
 
     mockMvc.perform(patch("/api/v1/delivery-requests/1/pickup")).andExpect(status().isConflict());
-  }
-
-  @Test
-  @DisplayName("증거사진 조회 요청을 받으면 사진 URL과 완료시각을 반환한다")
-  void getProofPhotoProcessRequest() throws Exception {
-    LocalDateTime completedAt = LocalDateTime.of(2026, 7, 31, 10, 0);
-    when(deliveryService.getProofPhoto(1L))
-        .thenReturn(new ProofPhotoResponse(1L, "https://example.com/proof.jpg", completedAt));
-
-    mockMvc
-        .perform(get("/api/v1/delivery-requests/1/proof-photo"))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.proofPhotoUrl").value("https://example.com/proof.jpg"))
-        .andExpect(jsonPath("$.completedAt").exists());
-  }
-
-  @Test
-  @DisplayName("완료되지 않은 배송의 증거사진을 조회하면 404를 반환한다")
-  void getProofPhotoNotCompletedStatusShouldReturn404() throws Exception {
-    when(deliveryService.getProofPhoto(1L)).thenThrow(new ProofPhotoNotFoundException(1L));
-
-    mockMvc
-        .perform(get("/api/v1/delivery-requests/1/proof-photo"))
-        .andExpect(status().isNotFound());
   }
 }

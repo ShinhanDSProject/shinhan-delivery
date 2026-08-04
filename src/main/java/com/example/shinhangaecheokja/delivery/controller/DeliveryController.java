@@ -111,9 +111,11 @@ public class DeliveryController {
     return ResponseEntity.ok(DeliveryResponse.from(completed));
   }
 
-  /** 배송 완료 증거 사진을 조회한다. */
+  /** 배송 완료 증거 사진을 조회한다. 배송 요청의 고객 본인 또는 배정된 배송원 본인만 조회할 수 있다. */
   @GetMapping("/{deliveryRequestId}/proof-photo")
-  public ResponseEntity<ProofPhotoResponse> getProofPhoto(@PathVariable Long deliveryRequestId) {
-    return ResponseEntity.ok(deliveryService.getProofPhoto(deliveryRequestId));
+  @PreAuthorize("isAuthenticated()")
+  public ResponseEntity<ProofPhotoResponse> getProofPhoto(
+      @AuthenticationPrincipal CustomUserDetails principal, @PathVariable Long deliveryRequestId) {
+    return ResponseEntity.ok(deliveryService.getProofPhoto(principal.getId(), deliveryRequestId));
   }
 }
