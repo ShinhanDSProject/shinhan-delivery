@@ -3,6 +3,7 @@ package com.example.shinhangaecheokja.delivery.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -21,6 +22,7 @@ import com.example.shinhangaecheokja.delivery.entity.DeliveryRequest;
 import com.example.shinhangaecheokja.delivery.entity.DeliveryStatus;
 import com.example.shinhangaecheokja.delivery.entity.ItemSize;
 import com.example.shinhangaecheokja.delivery.entity.Matching;
+import com.example.shinhangaecheokja.delivery.event.DeliveryOfferBroadcastEvent;
 import com.example.shinhangaecheokja.delivery.event.DeliveryStatusChangedEvent;
 import com.example.shinhangaecheokja.delivery.exception.AlreadyMatchedException;
 import com.example.shinhangaecheokja.delivery.exception.DeliveryAccessDeniedException;
@@ -42,6 +44,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -84,6 +87,56 @@ class DeliveryServiceTest {
     assertThat(response.getCustomerId()).isEqualTo(1L);
     assertThat(response.getFeePoint()).isEqualTo(78776L);
     assertThat(response.getStatus()).isEqualTo(DeliveryStatus.REQUESTED);
+  }
+
+  @Test
+  @DisplayName("오퍼 후보 차량이 있으면 DeliveryOfferBroadcastEvent를 발행한다")
+  void requestDeliveryWithCandidatesShouldPublishOfferEvent() {
+    DeliveryCreateRequest request = new DeliveryCreateRequest();
+    request.setPickupAddress("서울시 강남구");
+    request.setDropoffAddress("서울시 서초구");
+    request.setWeight(10);
+    request.setPickupLatitude(37.0);
+    request.setPickupLongitude(127.0);
+    request.setDropoffLatitude(38.0);
+    request.setDropoffLongitude(127.0);
+    request.setItemSize(ItemSize.MEDIUM);
+
+    when(deliveryRequestRepository.save(any(DeliveryRequest.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
+    Vehicle candidate = Vehicle.builder().id(2L).ownerId(20L).build();
+    when(vehicleService.findOfferCandidates(anyDouble(), anyDouble()))
+        .thenReturn(List.of(candidate));
+
+    deliveryService.requestDelivery(1L, request);
+
+    ArgumentCaptor<DeliveryOfferBroadcastEvent> eventCaptor =
+        ArgumentCaptor.forClass(DeliveryOfferBroadcastEvent.class);
+    verify(eventPublisher).publishEvent(eventCaptor.capture());
+    assertThat(eventCaptor.getValue().candidateVehicleIds()).containsExactly(2L);
+    assertThat(eventCaptor.getValue().offer().customerId()).isEqualTo(1L);
+  }
+
+  @Test
+  @DisplayName("오퍼 후보 차량이 없으면 DeliveryOfferBroadcastEvent를 발행하지 않는다")
+  void requestDeliveryWithoutCandidatesShouldNotPublishOfferEvent() {
+    DeliveryCreateRequest request = new DeliveryCreateRequest();
+    request.setPickupAddress("서울시 강남구");
+    request.setDropoffAddress("서울시 서초구");
+    request.setWeight(10);
+    request.setPickupLatitude(37.0);
+    request.setPickupLongitude(127.0);
+    request.setDropoffLatitude(38.0);
+    request.setDropoffLongitude(127.0);
+    request.setItemSize(ItemSize.MEDIUM);
+
+    when(deliveryRequestRepository.save(any(DeliveryRequest.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
+    when(vehicleService.findOfferCandidates(anyDouble(), anyDouble())).thenReturn(List.of());
+
+    deliveryService.requestDelivery(1L, request);
+
+    verify(eventPublisher, never()).publishEvent(any(DeliveryOfferBroadcastEvent.class));
   }
 
   @Test

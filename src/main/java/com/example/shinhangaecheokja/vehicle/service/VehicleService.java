@@ -52,6 +52,13 @@ public class VehicleService {
     return vehicleRepository.findAll();
   }
 
+  /** 신규 배송요청을 감당할 수 있는(AVAILABLE + 용량 충분) 오퍼 후보 차량 목록을 조회한다. */
+  @Transactional(readOnly = true)
+  public List<Vehicle> findOfferCandidates(double weight, double distance) {
+    return vehicleRepository.findByStatusAndMaxWeightGreaterThanEqualAndMaxDistanceGreaterThanEqual(
+        VehicleStatus.AVAILABLE, weight, distance);
+  }
+
   /** Vehicle을 BUSY 상태로 전환한다. */
   @Transactional
   public void markBusy(Long vehicleId) {
