@@ -6,6 +6,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -32,7 +33,9 @@ public class PointWallet {
   @Column(nullable = false)
   private long balance;
 
-  /** 잔액 0원인 신규 포인트 지갑 엔티티를 생성하는 정적 팩토리 메서드. */
+  @Version private Long version;
+
+  /** 잔액 0인 새 포인트 지갑 엔티티를 생성하는 정적 팩토리 메서드. */
   public static PointWallet createEmpty(Long memberId) {
     return PointWallet.builder().memberId(memberId).balance(0L).build();
   }

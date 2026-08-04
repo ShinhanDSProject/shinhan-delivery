@@ -6,6 +6,7 @@ import com.example.shinhangaecheokja.payment.dto.request.PointWalletCreateReques
 import com.example.shinhangaecheokja.payment.dto.response.PointWalletResponse;
 import com.example.shinhangaecheokja.payment.entity.PointWallet;
 import com.example.shinhangaecheokja.payment.service.PaymentService;
+import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -29,7 +30,7 @@ public class PaymentController {
   /** 포인트 지갑을 생성한다. */
   @PostMapping
   public ResponseEntity<PointWalletResponse> createWallet(
-      @RequestBody PointWalletCreateRequest request) {
+      @Valid @RequestBody PointWalletCreateRequest request) {
     PointWallet created = paymentService.create(request);
     return ResponseEntity.status(HttpStatus.CREATED).body(PointWalletResponse.from(created));
   }
@@ -51,7 +52,7 @@ public class PaymentController {
   /** 포인트를 충전한다. */
   @PostMapping("/{walletId}/charge")
   public ResponseEntity<PointWalletResponse> chargePoint(
-      @PathVariable Long walletId, @RequestBody PointChargeRequest request) {
+      @PathVariable Long walletId, @Valid @RequestBody PointChargeRequest request) {
     PointWallet wallet = paymentService.chargePoint(walletId, request);
     return ResponseEntity.ok(PointWalletResponse.from(wallet));
   }
@@ -59,7 +60,7 @@ public class PaymentController {
   /** 포인트를 사용한다. */
   @PostMapping("/{walletId}/use")
   public ResponseEntity<PointWalletResponse> usePoint(
-      @PathVariable Long walletId, @RequestBody PointUseRequest request) {
+      @PathVariable Long walletId, @Valid @RequestBody PointUseRequest request) {
     PointWallet wallet = paymentService.usePoint(walletId, request);
     return ResponseEntity.ok(PointWalletResponse.from(wallet));
   }

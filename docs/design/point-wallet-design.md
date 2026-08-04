@@ -1,106 +1,95 @@
-# 설계서: 포인트 지갑 및 결제 (Point Wallet & Payments)
+# 설계서: 포인트 지갑 및 충전 (Point Wallet & Payments)
 
-이 문서는 사용자의 포인트 지갑 개설, 금액 충전 및 차감(사용)을 담당하는 포인트 지갑 기능에 대한 설계 문서입니다.
+이 문서는 회원 포인트 지갑 생성, 충전, 사용, 충전 이력과 멱등성 처리를 다룹니다.
 
 ---
 
-## 1. 요구사항 정의서 (User Story)
+## 1. 요구사항 정의 (User Story)
 
-* **User Story:** 
-  우리는 **회원(Member)**으로서, 매칭 대금 정산 및 지불을 위해 **개인 포인트 지갑을 개설하고, 원하는 금액만큼 포인트를 충전하고 잔액 한도 내에서 차감(사용)**하기를 원한다.
+* **User Story:**
+  우리는 **회원(Member)** 으로서 배송 정산과 지불을 위해 개인 포인트 지갑을 보유하고 충전 및 차감을 수행하기를 원한다.
 * **성공 기준 (Acceptance Criteria):**
-  1. 하나의 회원은 오직 하나의 포인트 지갑만 개설할 수 있으며, 중복 개설 시도 시 예외를 발생시킨다.
-  2. 포인트 충전 금액은 `0`원 이상이어야 하며, 0원 미만 충전 시 `400 Bad Request` 에러를 반환한다.
-  3. 포인트 사용(차감) 시 현재 지갑 잔액보다 큰 금액을 사용하려 하면 `400 Bad Request (잔액 부족 오류)`를 반환하고 트랜잭션을 취소해야 한다.
+  1. 회원당 포인트 지갑은 1개만 가진다.
+  2. 충전/차감 금액은 0보다 커야 한다.
+  3. 잔액 부족 차감은 `400 Bad Request` 로 거절한다.
+  4. 인증 회원 기준 충전 API는 `Idempotency-Key` 로 중복 충전을 막아야 한다.
+  5. 충전 성공 시 충전 이력이 저장되어야 한다.
 
 ---
 
-## 2. ERD 설계 (Entity-Relationship Diagram)
+## 2. ERD 설계
 
 ```mermaid
 erDiagram
-    MEMBER ||--o| POINT_WALLET : "owns"
+    MEMBER ||--o| POINT_WALLET : owns
+    POINT_WALLET ||--o{ POINT_HISTORY : records
+
     POINT_WALLET {
-        Long id PK "Auto Increment"
-        Long member_id FK "Unique Member"
-        Long balance "Remaining Points (Won)"
+        Long id PK
+        Long member_id FK
+        Long balance
+        Long version
+    }
+
+    POINT_HISTORY {
+        Long id PK
+        Long member_id FK
+        Long wallet_id FK
+        Long amount
+        Long balance_after
+        String type
+        String payment_method
+        String idempotency_key
+        LocalDateTime created_at
     }
 ```
 
 ---
 
-## 3. API 명세서 (API Specification)
+## 3. API 명세
 
-### 3.1 포인트 지갑 개설
+### 3.1 포인트 지갑 생성
 * **엔드포인트:** `POST /api/v1/point-wallets`
-* **요청 바디 (Request Body):**
-  ```json
-  {
-    "memberId": 1
-  }
-  ```
-* **응답 바디 및 상태 코드 (Response Body & Status):**
-  * **Success (201 Created):**
-    ```json
-    {
-      "id": 1,
-      "memberId": 1,
-      "balance": 0
-    }
-    ```
 
-### 3.2 포인트 충전
+### 3.2 지갑 기준 충전
 * **엔드포인트:** `POST /api/v1/point-wallets/{walletId}/charge`
-* **요청 바디 (Request Body):**
-  ```json
-  {
-    "amount": 50000
-  }
-  ```
-* **응답 바디 및 상태 코드 (Response Body & Status):**
-  * **Success (200 OK):**
-    ```json
-    {
-      "id": 1,
-      "memberId": 1,
-      "balance": 50000
-    }
-    ```
+* **비고:** 기존 관리/기본 CRUD 성격 API로 유지한다.
 
-### 3.3 포인트 사용 (차감)
+### 3.3 지갑 기준 사용
 * **엔드포인트:** `POST /api/v1/point-wallets/{walletId}/use`
-* **요청 바디 (Request Body):**
+
+### 3.4 인증 회원 기준 충전
+* **엔드포인트:** `POST /api/v1/points/charge`
+* **헤더:** `Authorization: Bearer {accessToken}`, `Idempotency-Key: {uuid}`
+* **Request Body 예시:**
   ```json
   {
-    "amount": 15000
+    "amount": 50000,
+    "paymentMethod": "CARD"
   }
   ```
-* **응답 바디 및 상태 코드 (Response Body & Status):**
-  * **Success (200 OK):**
-    ```json
-    {
-      "id": 1,
-      "memberId": 1,
-      "balance": 35000
-    }
-    ```
-  * **Failure (400 Bad Request - 잔액 부족, ErrorCode `P002`):**
-    ```json
-    {
-      "status": 400,
-      "code": "P002",
-      "message": "포인트 잔액이 부족합니다. (Wallet ID: 1, 요청 금액: 15000)",
-      "timestamp": "2026-07-28T10:00:00"
-    }
-    ```
+* **Response Body 예시:**
+  ```json
+  {
+    "balance": 50000,
+    "lastChargedAt": "2026-08-04T01:30:00"
+  }
+  ```
+
+> [!IMPORTANT]
+> 동일 회원이 같은 `Idempotency-Key` 로 재호출하면 새 이력을 만들지 않고 기존 충전 결과를 그대로 반환합니다.
 
 ---
 
-## 4. 작업 분할 목록 (WBS)
+## 4. 구현 메모
 
-- [x] 포인트 지갑 테이블 생성 DB 마이그레이션 스크립트 작성 (`V6__create_point_wallet_table.sql`)
-- [x] `PointWallet` 도메인 Entity 설계 (회원 외래키 unique 제약 조건 설정)
-- [x] `InsufficientPointException`(`BusinessException` 상속) 및 공통 `EntityNotFoundException` + `ErrorCode.POINT_WALLET_NOT_FOUND` 매핑
-- [x] 포인트 지갑 생성/충전/차감 시의 비즈니스 유효성 검증(잔액 점검, 마이너스 충전 방지) 로직 구현
-- [x] `PaymentService` 비즈니스 레이어 로직 작성 및 트랜잭션 원자성(Atomicity) 단위 테스트 구현
-- [x] `PaymentController` 엔드포인트 연동 및 API E2E 검증 테스트 구현
+* 지갑 잔액 변경은 `PaymentRepository.findByIdForUpdate(...)` 또는 `findByMemberIdForUpdate(...)` 로 비관적 락을 사용한다.
+* 인증 회원 기준 충전은 `PointHistory` 에 `CHARGE` 이력을 남긴다.
+* `point_history(member_id, idempotency_key)` 유니크 제약으로 멱등성을 보강한다.
+
+## 5. 검증 명령어
+
+```bash
+./gradlew.bat test --tests "*PaymentServiceTest" --tests "*PointControllerTest"
+./scripts/verify.sh
+```
