@@ -43,7 +43,7 @@ public class TrackingService {
   @Transactional(readOnly = true)
   public void assertCanSubscribeToOffers(Long memberId, Long vehicleId) {
     if (!isOwner(memberId, vehicleId)) {
-      throw new UnauthorizedOfferAccessException(vehicleId, memberId);
+      throw new UnauthorizedOfferAccessException(vehicleId);
     }
   }
 
