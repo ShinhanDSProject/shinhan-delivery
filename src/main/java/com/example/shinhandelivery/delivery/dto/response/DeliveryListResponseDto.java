@@ -10,6 +10,7 @@ public record DeliveryListResponseDto(
     DeliveryStatus status,
     String pickupAddress,
     String dropoffAddress,
+    long feePoint,
     LocalDateTime createdAt) {
 
   /** DeliveryRequest 엔티티를 목록 응답 DTO로 변환한다. */
@@ -19,6 +20,7 @@ public record DeliveryListResponseDto(
         entity.getStatus(),
         entity.getPickupAddress(),
         entity.getDropoffAddress(),
+        entity.getFeePoint(),
         entity.getCreatedAt());
   }
 }

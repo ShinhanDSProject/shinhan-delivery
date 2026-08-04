@@ -262,12 +262,18 @@ class DeliveryControllerTest {
   @Test
   @DisplayName("증빙사진 조회 요청을 받으면 사진 URL과 완료시각을 반환한다")
   void getProofPhotoProcessRequest() throws Exception {
+    CustomUserDetails customUser =
+        new CustomUserDetails(1L, "proof@example.com", "pass", "CUSTOMER");
+    UsernamePasswordAuthenticationToken auth =
+        new UsernamePasswordAuthenticationToken(customUser, null, customUser.getAuthorities());
+    SecurityContextHolder.getContext().setAuthentication(auth);
+
     LocalDateTime completedAt = LocalDateTime.of(2026, 7, 31, 10, 0);
-    when(deliveryService.getProofPhoto(1L))
+    when(deliveryService.getProofPhoto(1L, 1L))
         .thenReturn(new ProofPhotoResponse(1L, "https://example.com/proof.jpg", completedAt));
 
     mockMvc
-        .perform(get("/api/v1/delivery-requests/1/proof-photo"))
+        .perform(get("/api/v1/delivery-requests/1/proof-photo").principal(auth))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.proofPhotoUrl").value("https://example.com/proof.jpg"))
         .andExpect(jsonPath("$.completedAt").exists());
@@ -276,10 +282,16 @@ class DeliveryControllerTest {
   @Test
   @DisplayName("완료되지 않은 배송의 증빙사진을 조회하면 404를 반환한다")
   void getProofPhotoNotCompletedStatusShouldReturn404() throws Exception {
-    when(deliveryService.getProofPhoto(1L)).thenThrow(new ProofPhotoNotFoundException(1L));
+    CustomUserDetails customUser =
+        new CustomUserDetails(1L, "proof@example.com", "pass", "CUSTOMER");
+    UsernamePasswordAuthenticationToken auth =
+        new UsernamePasswordAuthenticationToken(customUser, null, customUser.getAuthorities());
+    SecurityContextHolder.getContext().setAuthentication(auth);
+
+    when(deliveryService.getProofPhoto(1L, 1L)).thenThrow(new ProofPhotoNotFoundException(1L));
 
     mockMvc
-        .perform(get("/api/v1/delivery-requests/1/proof-photo"))
+        .perform(get("/api/v1/delivery-requests/1/proof-photo").principal(auth))
         .andExpect(status().isNotFound());
   }
 
