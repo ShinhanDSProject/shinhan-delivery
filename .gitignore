@@ -47,3 +47,6 @@ out/
 
 # Personal local notes (never pushed)
 /.local/
+
+# Local Claude worktrees
+/.claude/worktrees/

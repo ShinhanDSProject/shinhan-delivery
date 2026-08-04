@@ -1,9 +1,0 @@
-# .cursorrules
-# Cursor AI Agent Rules for shinhan-delivery
-
-Please follow all conventions in `code-convention.md`, `CLAUDE.md`, and `AGENTS.md`.
-
-- All UI development MUST follow the Design System (`/css/design-system.css`, `docs/design-system.md`) and use Thymeleaf Fragments (`templates/fragments/components.html`).
-- Before declaring task completion, always run `./scripts/verify.sh` to perform the 4-step Test Harness check.
-- When user runs `/plan <issue_num>` (e.g. `/plan 108`), execute `python3 scripts/langgraph/issue_plan_graph.py <issue_num>` to generate plan and wait for approval.
-- If any step fails (Spotless, Flyway, ArchUnit, Unit Tests), read the error output and self-correct until `./scripts/verify.sh` passes with exit code 0.
