@@ -521,11 +521,15 @@
             const me = await meResponse.json();
             document.getElementById('greetingName').textContent = `${me.name} 님`;
 
-            const deliveriesResponse = await fetch('/api/v1/delivery-requests');
-            const deliveries = await deliveriesResponse.json();
-            const myActiveDeliveries = deliveries.filter(
-                (d) => d.customerId === me.id && (d.status === 'REQUESTED' || d.status === 'MATCHED')
+            const activeStatuses = ['REQUESTED', 'MATCHED'];
+            const activeResponses = await Promise.all(
+                activeStatuses.map((status) =>
+                    fetch(`/api/v1/delivery-requests?status=${status}&size=100`, {
+                        headers: { Authorization: header }
+                    }).then((res) => res.json())
+                )
             );
+            const myActiveDeliveries = activeResponses.flatMap((page) => page.content || []);
             renderActiveDeliveries(myActiveDeliveries);
 
             const notificationsResponse = await fetch('/api/v1/notifications?size=20', {

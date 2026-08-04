@@ -3,6 +3,8 @@ package com.example.shinhangaecheokja.delivery.entity;
 import com.example.shinhangaecheokja.delivery.dto.request.DeliveryCompleteRequest;
 import com.example.shinhangaecheokja.delivery.dto.request.DeliveryCreateRequest;
 import com.example.shinhangaecheokja.delivery.dto.request.DeliveryUpdateRequest;
+import com.example.shinhangaecheokja.delivery.exception.InvalidDeliveryDistanceException;
+import com.example.shinhangaecheokja.delivery.exception.InvalidDeliveryWeightException;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -75,11 +77,21 @@ public class DeliveryRequest {
   @Column(name = "picked_up_at")
   private LocalDateTime pickedUpAt;
 
+  @Column(name = "created_at")
+  private LocalDateTime createdAt;
+
   /** DeliveryCreateRequest DTO 수용 기반으로 REQUESTED 상태의 DeliveryRequest 엔티티를 생성하는 정적 팩토리 메서드. */
   public static DeliveryRequest of(
-      DeliveryCreateRequest request, double distanceKm, long feePoint) {
+      Long customerId, DeliveryCreateRequest request, double distanceKm, long feePoint) {
+    if (request.getWeight() <= 0) {
+      throw new InvalidDeliveryWeightException(request.getWeight());
+    }
+    if (distanceKm <= 0) {
+      throw new InvalidDeliveryDistanceException(distanceKm);
+    }
+
     DeliveryRequest deliveryRequest = new DeliveryRequest();
-    deliveryRequest.setCustomerId(request.getCustomerId());
+    deliveryRequest.setCustomerId(customerId);
     deliveryRequest.setPickupAddress(request.getPickupAddress());
     deliveryRequest.setDropoffAddress(request.getDropoffAddress());
     deliveryRequest.setWeight(request.getWeight());
@@ -91,6 +103,7 @@ public class DeliveryRequest {
     deliveryRequest.setItemSize(request.getItemSize());
     deliveryRequest.setStatus(DeliveryStatus.REQUESTED);
     deliveryRequest.setFeePoint(feePoint);
+    deliveryRequest.setCreatedAt(LocalDateTime.now());
     return deliveryRequest;
   }
 

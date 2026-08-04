@@ -23,7 +23,7 @@
 
 ## 2. 패키지 구조
 
-**도메인을 최상위로 나누고, 그 안에서 레이어(controller/service/repository/entity/dto/exception)를 둔다.** 같은 기능(도메인)에 관련된 파일들이 한 폴더 안에 모여있어서, 기능 단위로 찾고 수정하기 쉽다.
+**도메인을 최상위로 나누고, 그 안에서 레이어(controller/service/repository/entity/dto/exception, 필요 시 helper)를 둔다.** 같은 기능(도메인)에 관련된 파일들이 한 폴더 안에 모여있어서, 기능 단위로 찾고 수정하기 쉽다.
 
 ```
 com.company.delivery
@@ -73,6 +73,8 @@ com.company.delivery
 │   ├── service
 │   │   ├── DeliveryService.java
 │   │   └── MatchingService.java
+│   ├── helper
+│   │   └── DeliveryFeeCalculator.java
 │   ├── controller
 │   │   └── DeliveryController.java
 │   ├── dto
@@ -107,6 +109,7 @@ com.company.delivery
 - 도메인 간에 공통으로 쓰는 것(전역 예외 처리기, 설정 클래스 등)만 `common` 패키지에 둔다. `common`이 특정 도메인 전용 로직을 담는 곳이 되지 않도록 주의한다.
 - 도메인 하나 안의 파일이 너무 많아지면(예: `delivery`가 계속 커지면) `delivery.request`, `delivery.matching`처럼 도메인을 더 잘게 쪼갠다.
 - Repository는 Entity 1개당 1개씩 만든다 (`MemberRepository` ↔ `Member`, ...).
+- Repository·Service 등 외부 협력 객체 의존 없이 순수 계산·변환만 하는 로직(복잡한 산출식, 좌표/거리 계산 등)이 무거워지면 `helper` 서브패키지로 분리한다 (§5.1 참고). 여러 도메인이 공유하는 계산 로직이면 `common.helper`에 둔다.
 
 ---
 
@@ -119,6 +122,7 @@ com.company.delivery
 | Repository | `~Repository`, `JpaRepository` 상속 | `interface VehicleRepository extends JpaRepository<Vehicle, Long>` |
 | Service | `~Service` | `VehicleService` |
 | Service의 public 메서드 | 동사로 시작 | `registerVehicle(...)`, `matchCourier(...)` |
+| Helper | 역할이 드러나는 이름(`~Helper`, `~Calculator` 등), 상태 없는 `@Component` | `DeliveryFeeCalculator` |
 | Controller | `~Controller` | `DeliveryController` |
 | 커스텀 예외 | `~Exception`, `RuntimeException` 상속 | `InvalidWeightException` |
 | DTO | `{도메인}{동작}{Request\|Response}` | `DeliveryCreateRequest`, `DeliveryCreateResponse` |
@@ -193,6 +197,29 @@ public class VehicleService {
 
 - Service는 다른 Service를 호출할 수 있다 (예: `DeliveryService`가 `PaymentService`를 호출). 단, **순환 호출**(A가 B를 부르고 B가 다시 A를 부르는 구조)은 금지 — 순환이 필요해 보이면 로직을 상위 UseCase성 메서드로 합치거나 이벤트로 분리한다.
 
+### 5.1 Helper 클래스 규칙 (Stateless Computation Helper Standard)
+
+**원칙:** §1의 6번(SLAP) 원칙에 따라, Repository나 다른 Service 같은 외부 협력 객체에 의존하지 않는 순수 계산·변환 로직(복잡한 산출식, 좌표/거리 계산, 문자열 파싱 등)이 Service 메서드 안에서 무거워지면 도메인 패키지의 `helper` 서브패키지로 분리한다.
+
+- **위치:** `{도메인}.helper.{이름}` (예: `delivery.helper.DeliveryFeeCalculator`). 여러 도메인이 공유하는 계산 로직이면 `common.helper`에 둔다.
+- **이름:** 역할이 드러나는 이름을 쓴다 (`~Calculator`, `~Formatter`, `~Helper` 등).
+- **상태를 갖지 않는다:** 인스턴스 필드로 Repository·Service·외부 자원을 주입받지 않는다. `static final` 상수만 둘 수 있다. 상태나 외부 협력이 필요해지는 순간 그건 Helper가 아니라 Service다.
+- **Spring 빈으로 등록하되 트랜잭션은 없다:** `@Component`로 등록해 Service에 생성자 주입하지만, `@Transactional`은 붙이지 않는다 — 트랜잭션 경계는 Service의 책임이다.
+- **Spring 컨텍스트 없이 단위 테스트 가능해야 한다:** `new`로 직접 생성해 순수 로직만 검증할 수 있어야 하고, Mockito 테스트에서는 mocking 없이 `@Spy`로 실제 인스턴스를 그대로 사용한다.
+
+```java
+@Component
+public class DeliveryFeeCalculator {
+
+    private static final BigDecimal BASE_FEE = BigDecimal.valueOf(3000);
+
+    public DeliveryEstimateResponse calculateFee(double distanceKm, double weight, ItemSize itemSize) {
+        // Repository/Service 의존 없는 순수 계산
+        ...
+    }
+}
+```
+
 ---
 
 ## 6. 예외 처리
@@ -222,7 +249,7 @@ public class DuplicateMemberException extends BusinessException {
 
 모든 예외 → HTTP 응답 변환은 **전역 예외 처리기(`GlobalExceptionHandler`)**가 한곳에서 담당한다. Controller에 `try-catch`를 작성하지 않는다.
 
-- **`ErrorResponse` DTO**: `status`, `code`, `message`, `timestamp`, `errors`(유효성 검사 세부 내역) 필드로 구성되며, `@JsonInclude(NON_EMPTY)`를 적용해 불필요한 null/빈 배열 출력을 직렬화에서 생략한다.
+- **`ErrorResponse` DTO**: `status`, `code`, `message`, `timestamp`, `traceId`, `errors`(유효성 검사 세부 내역) 필드로 구성되며, `@JsonInclude(NON_EMPTY)`를 적용해 불필요한 null/빈 배열 출력을 직렬화에서 생략한다.
 - **`GlobalExceptionHandler`**: `@RestControllerAdvice` 기반으로 `BusinessException`, `MethodArgumentNotValidException`(@Valid 실패), `HttpMessageNotReadableException`(JSON 파싱 실패), `HttpRequestMethodNotSupportedException`, 및 `Exception`(500 스택트레이스 은폐)을 수집 포착한다.
 
 ### 6.3 예외 → HTTP 상태코드 & 에러코드 매핑 기준
@@ -234,6 +261,14 @@ public class DuplicateMemberException extends BusinessException {
 | 중복/충돌 | `409 Conflict` | `DUPLICATE_EMAIL` (`M002`) | 이미 가입된 이메일 주소입니다. |
 | 잔액 부족 등 비즈니스 규칙 위반 | `400 Bad Request` | `INSUFFICIENT_BALANCE` (`P002`) | 포인트 잔액이 부족합니다. |
 | 미처 포착하지 못한 서버 내부 오류 | `500 Internal Server Error` | `INTERNAL_SERVER_ERROR` (`C003`) | 서버 내부 오류가 발생했습니다. (스택트레이스 서버 로깅 후 은폐) |
+
+### 6.4 관측가능성: Trace ID (`MdcLoggingFilter`)
+
+모든 HTTP 요청은 `Security` 필터 체인의 `MdcLoggingFilter`를 가장 먼저 통과한다. 이 필터가 요청 헤더 `X-Trace-Id`(없으면 신규 UUID)를 SLF4J MDC에 `traceId`로 주입하고, 요청 종료 시 `MDC.clear()`로 정리한다.
+
+- 그 결과 해당 요청 처리 중 찍히는 모든 로그 라인(`logback-spring.xml` 패턴에 `[%X{traceId}]` 반영)과 `ErrorResponse.traceId`가 자동으로 같은 값을 갖는다.
+- 개발자는 로그를 남기거나 예외를 던질 때 traceId를 직접 다루는 코드를 작성할 필요가 없다 — 필터가 이미 MDC에 넣어둔 값을 로깅 프레임워크와 `ErrorResponse`가 알아서 읽는다.
+- 장애 문의 시 클라이언트가 알려준 `traceId`로 로그를 검색하면 해당 요청의 전체 처리 과정을 즉시 역추적할 수 있다.
 
 ---
 
@@ -431,6 +466,21 @@ return addressRepository.save(Address.from(memberId, request));
 
 ---
 
+## 10.5 검증 책임 분리 규칙 (Validation Responsibility Separation Standard)
+
+- **원칙:** 입력값 유효성 검증과 도메인 불변성 검증을 각 레이어의 본래 책임에 맞게 명확히 분리하며, Service 계층에 수동 필드 검증 코드가 흩어지는 것을 차단합니다.
+- **목적:** Service 계층은 유스케이스 흐름 오케스트레이션에만 집중시키고, 입력 파라미터의 형태 검증은 DTO Bean Validation 어노테이션이, 도메인 생성 및 상태 변경 시의 비즈니스 불변 규칙 검증은 Entity 내부에서 전담하도록 아키텍처 결합도를 낮춥니다.
+- **레이어별 검증 분리 표준:**
+  1. **1차 입력값 검증 (DTO Layer):**
+     - HTTP 요청 파라미터의 필수 여부, 범위, 형식 검증(예: 음수 방지, 필수값 등)은 **DTO 필드에 Bean Validation 어노테이션 (`@NotNull`, `@NotBlank`, `@DecimalMin`, `@Positive` 등)**을 선언하여 Controller 레벨 `@Valid`로 1차 처리합니다.
+     - Service 계층에 `validateWeight(weight)`와 같은 필드 레벨 수동 `if` 검증 프라이빗 메서드를 작성하는 것을 금지합니다.
+  2. **2차 도메인 불변성 검증 (Domain Entity Layer):**
+     - 도메인 객체 생성 및 상태 변경 시 지켜져야 하는 핵심 불변성 규칙(Domain Invariants)은 **Entity의 정적 팩토리 메서드 (`Entity.of(...)`) 또는 도메인 비즈니스 메서드** 내부에서 검증하여 도메인 캡슐화를 사수합니다.
+  3. **Service 계층의 역할 (Usecase Orchestration):**
+     - Service 계층은 복수 도메인 서비스 조율, 도메인 생성 위임, 저장소(`Repository`) 호출, 이벤트 발행 등 유스케이스의 실행 흐름 오케스트레이션에만 집중합니다.
+
+---
+
 
 ## 11. Controller 규칙
 
@@ -596,6 +646,7 @@ void 도메인은_다른_도메인의_repository를_직접_참조하지_않는�
 - [ ] 잔액/배정처럼 동시 요청에 취약한 로직을 변경했다면 `findByIdForUpdate`(비관적 락)와 동시성 테스트(`docs/concurrency-control-guide.md`)를 추가했는가?
 - [ ] `@Autowired` 필드 주입이 아니라 생성자 주입을 쓰는가?
 - [ ] Repository가 Entity 1개당 1개씩 대응되는가?
+- [ ] Service에서 Repository/Service 의존 없는 순수 계산·변환 로직을 새로 추출했다면 `helper` 서브패키지의 상태 없는 `@Component`로 분리했는가? (§5.1)
 - [ ] 다른 도메인의 Repository/Entity를 직접 참조하지 않고, 필요하면 그 도메인의 Service를 거쳤는가?
 - [ ] Enum 필드에 `@Enumerated(EnumType.STRING)`을 썼는가? (`ORDINAL` 금지)
 - [ ] 새로 추가한 서비스 로직에 단위 테스트가 있는가? (영문 메서드명 + `@DisplayName` 사용)

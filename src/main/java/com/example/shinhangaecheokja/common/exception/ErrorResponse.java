@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.Getter;
+import org.slf4j.MDC;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 
@@ -18,6 +19,7 @@ public class ErrorResponse {
   private final String code;
   private final String message;
   private final LocalDateTime timestamp;
+  private final String traceId;
   private final List<FieldErrorDetail> errors;
 
   private ErrorResponse(ErrorCode errorCode, List<FieldErrorDetail> errors) {
@@ -25,6 +27,7 @@ public class ErrorResponse {
     this.code = errorCode.getCode();
     this.message = errorCode.getMessage();
     this.timestamp = LocalDateTime.now();
+    this.traceId = MDC.get("traceId");
     this.errors = errors;
   }
 
@@ -33,6 +36,7 @@ public class ErrorResponse {
     this.code = errorCode.getCode();
     this.message = customMessage != null ? customMessage : errorCode.getMessage();
     this.timestamp = LocalDateTime.now();
+    this.traceId = MDC.get("traceId");
     this.errors = new ArrayList<>();
   }
 

@@ -9,10 +9,12 @@ import com.example.shinhangaecheokja.delivery.entity.Matching;
 import com.example.shinhangaecheokja.delivery.entity.MatchingStatus;
 import com.example.shinhangaecheokja.delivery.repository.DeliveryRequestRepository;
 import com.example.shinhangaecheokja.delivery.repository.MatchingRepository;
+import com.example.shinhangaecheokja.delivery.service.DeliveryService;
 import com.example.shinhangaecheokja.member.entity.Member;
 import com.example.shinhangaecheokja.member.entity.MemberRole;
 import com.example.shinhangaecheokja.member.repository.MemberRepository;
 import com.example.shinhangaecheokja.tracking.dto.request.LocationUpdateRequest;
+import com.example.shinhangaecheokja.tracking.dto.response.DeliveryStatusBroadcastResponse;
 import com.example.shinhangaecheokja.tracking.dto.response.LocationBroadcastResponse;
 import com.example.shinhangaecheokja.vehicle.entity.Vehicle;
 import com.example.shinhangaecheokja.vehicle.entity.VehicleStatus;
@@ -37,13 +39,15 @@ import org.springframework.messaging.simp.stomp.StompFrameHandler;
 import org.springframework.messaging.simp.stomp.StompHeaders;
 import org.springframework.messaging.simp.stomp.StompSession;
 import org.springframework.messaging.simp.stomp.StompSessionHandlerAdapter;
+import org.springframework.messaging.simp.user.SimpUser;
+import org.springframework.messaging.simp.user.SimpUserRegistry;
 import org.springframework.web.socket.WebSocketHttpHeaders;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
 
 /**
- * WebSocketStompClient로 실제 임베디드 서버에 접속해, 배송원이 발행한 위치가 매칭된 고객에게만 브로드캐스트되고 관계없는 회원에게는 전달되지 않는지 검증하는
- * 통합 테스트입니다.
+ * WebSocketStompClient로 실제 임베디드 서버에 접속해, 배송원이 발행한 위치와 배송 상태 변경이 매칭된 당사자에게만 브로드캐스트되고 관계없는 회원에게는 전달되지
+ * 않는지 검증하는 통합 테스트입니다.
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class TrackingIntegrationTest {
@@ -55,6 +59,8 @@ class TrackingIntegrationTest {
   @Autowired private VehicleRepository vehicleRepository;
   @Autowired private DeliveryRequestRepository deliveryRequestRepository;
   @Autowired private MatchingRepository matchingRepository;
+  @Autowired private DeliveryService deliveryService;
+  @Autowired private SimpUserRegistry userRegistry;
 
   private WebSocketStompClient stompClient;
 
@@ -143,7 +149,8 @@ class TrackingIntegrationTest {
     BlockingQueue<LocationBroadcastResponse> strangerReceived = new LinkedBlockingQueue<>();
     StompSession strangerSubscribeSession = connect(strangerId, "CUSTOMER");
     strangerSubscribeSession.subscribe(
-        "/topic/delivery/" + deliveryId + "/location", frameHandler(strangerReceived));
+        "/topic/delivery/" + deliveryId + "/location",
+        frameHandler(strangerReceived, LocationBroadcastResponse.class));
 
     StompSession strangerSendSession = connect(strangerId, "CUSTOMER");
     strangerSendSession.send("/app/delivery/" + deliveryId + "/location", locationUpdate(0.0, 0.0));
@@ -158,24 +165,90 @@ class TrackingIntegrationTest {
     assertThat(strangerReceived.poll(1, TimeUnit.SECONDS)).isNull();
   }
 
+  @Test
+  @DisplayName("배송 상태가 바뀌면 당사자(고객)가 상태 변경 브로드캐스트를 수신한다")
+  void broadcastStatusChangeShouldReachOwner() throws Exception {
+    BlockingQueue<DeliveryStatusBroadcastResponse> received = subscribeToStatusAsCustomer();
+
+    deliveryService.confirmPickup(deliveryId);
+
+    DeliveryStatusBroadcastResponse broadcast = received.poll(5, TimeUnit.SECONDS);
+
+    assertThat(broadcast).isNotNull();
+    assertThat(broadcast.deliveryId()).isEqualTo(deliveryId);
+    assertThat(broadcast.status()).isEqualTo(DeliveryStatus.PICKED_UP);
+  }
+
+  @Test
+  @DisplayName("권한없는 회원은 상태 변경 채널을 구독해도 브로드캐스트를 받지 못한다")
+  void broadcastStatusChangeUnauthorizedShouldBeIgnored() throws Exception {
+    BlockingQueue<DeliveryStatusBroadcastResponse> strangerReceived = new LinkedBlockingQueue<>();
+    StompSession strangerSession = connect(strangerId, "CUSTOMER");
+    strangerSession.subscribe(
+        "/topic/delivery/" + deliveryId + "/status",
+        frameHandler(strangerReceived, DeliveryStatusBroadcastResponse.class));
+
+    deliveryService.confirmPickup(deliveryId);
+
+    assertThat(strangerReceived.poll(2, TimeUnit.SECONDS)).isNull();
+  }
+
   private BlockingQueue<LocationBroadcastResponse> subscribeAsCustomer() throws Exception {
     BlockingQueue<LocationBroadcastResponse> received = new LinkedBlockingQueue<>();
     StompSession customerSession = connect(customerId, "CUSTOMER");
     customerSession.subscribe(
-        "/topic/delivery/" + deliveryId + "/location", frameHandler(received));
+        "/topic/delivery/" + deliveryId + "/location",
+        frameHandler(received, LocationBroadcastResponse.class));
     return received;
   }
 
-  private StompFrameHandler frameHandler(BlockingQueue<LocationBroadcastResponse> queue) {
+  /**
+   * 구독(SUBSCRIBE)은 비동기라 서버가 실제로 등록하기 전에 리턴될 수 있다. 인프로세스로 직접 호출하는 {@code confirmPickup}은 네트워크를 안 타
+   * 거의 즉시 실행되므로, {@link SimpUserRegistry}로 브로커에 구독이 실제로 등록됐는지 폴링해 확인한 뒤에야 반환해 두 호출 사이의 경쟁 상태(타이밍에
+   * 따라 브로드캐스트를 놓치는 flaky 테스트)를 없앤다. (STOMP RECEIPT 프레임으로 동기화하는 방법도 시도했지만, 이 환경에서 신뢰성 있게 동작하지 않아 같은
+   * JVM 안의 실제 브로커 상태를 직접 폴링하는 방식을 택했다.)
+   */
+  private BlockingQueue<DeliveryStatusBroadcastResponse> subscribeToStatusAsCustomer()
+      throws Exception {
+    BlockingQueue<DeliveryStatusBroadcastResponse> received = new LinkedBlockingQueue<>();
+    StompSession customerSession = connect(customerId, "CUSTOMER");
+    String destination = "/topic/delivery/" + deliveryId + "/status";
+    customerSession.subscribe(
+        destination, frameHandler(received, DeliveryStatusBroadcastResponse.class));
+    awaitSubscriptionRegistered(customerId, destination);
+    return received;
+  }
+
+  /** SimpUserRegistry를 폴링해 브로커에 구독이 실제로 등록될 때까지(최대 5초) 기다린다. */
+  private void awaitSubscriptionRegistered(Long memberId, String destination)
+      throws InterruptedException {
+    String username = memberId + "@test.com";
+    long deadline = System.currentTimeMillis() + 5000;
+    while (System.currentTimeMillis() < deadline) {
+      SimpUser user = userRegistry.getUser(username);
+      boolean registered =
+          user != null
+              && user.getSessions().stream()
+                  .flatMap(session -> session.getSubscriptions().stream())
+                  .anyMatch(subscription -> destination.equals(subscription.getDestination()));
+      if (registered) {
+        return;
+      }
+      Thread.sleep(20);
+    }
+    throw new AssertionError("구독이 " + destination + "에 등록되지 않았습니다 (타임아웃)");
+  }
+
+  private <T> StompFrameHandler frameHandler(BlockingQueue<T> queue, Class<T> payloadType) {
     return new StompFrameHandler() {
       @Override
       public Type getPayloadType(StompHeaders headers) {
-        return LocationBroadcastResponse.class;
+        return payloadType;
       }
 
       @Override
       public void handleFrame(StompHeaders headers, Object payload) {
-        queue.add((LocationBroadcastResponse) payload);
+        queue.add(payloadType.cast(payload));
       }
     };
   }

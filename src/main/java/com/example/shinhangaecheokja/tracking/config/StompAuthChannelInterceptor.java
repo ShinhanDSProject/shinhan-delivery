@@ -16,13 +16,15 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
 
-/** STOMP CONNECT 시 JWT를 검증해 인증 주체를 세션에 설정하고, SUBSCRIBE 시 배송 추적 채널 접근 권한을 검증한다. */
+/**
+ * STOMP CONNECT 시 JWT를 검증해 인증 주체를 세션에 설정하고, SUBSCRIBE 시 배송 추적 채널 접근 권한을 검증한다. 위치 (`/location`)와 상태
+ * 변경(`/status`) 브로드캐스트 채널 모두 같은 배송 소유자·배정 배송원 검증을 거친다.
+ */
 @Component
 @RequiredArgsConstructor
 public class StompAuthChannelInterceptor implements ChannelInterceptor {
 
-  private static final String SUBSCRIBE_DESTINATION_PATTERN =
-      "/topic/delivery/{deliveryId}/location";
+  private static final String SUBSCRIBE_DESTINATION_PATTERN = "/topic/delivery/{deliveryId}/**";
   private static final AntPathMatcher PATH_MATCHER = new AntPathMatcher();
 
   private final JwtProvider jwtProvider;
@@ -63,12 +65,21 @@ public class StompAuthChannelInterceptor implements ChannelInterceptor {
     if (destination == null || !PATH_MATCHER.match(SUBSCRIBE_DESTINATION_PATTERN, destination)) {
       return;
     }
-    Long deliveryId =
-        Long.valueOf(
-            PATH_MATCHER
-                .extractUriTemplateVariables(SUBSCRIBE_DESTINATION_PATTERN, destination)
-                .get("deliveryId"));
-    trackingService.assertCanSubscribe(extractMemberId(accessor.getUser()), deliveryId);
+    String rawDeliveryId =
+        PATH_MATCHER
+            .extractUriTemplateVariables(SUBSCRIBE_DESTINATION_PATTERN, destination)
+            .get("deliveryId");
+    trackingService.assertCanSubscribe(
+        extractMemberId(accessor.getUser()), parseDeliveryId(rawDeliveryId));
+  }
+
+  /** deliveryId 경로 변수가 숫자가 아니면(잘못된 구독 요청) 서버 오류 대신 접근 거부로 처리한다. */
+  private Long parseDeliveryId(String rawDeliveryId) {
+    try {
+      return Long.valueOf(rawDeliveryId);
+    } catch (NumberFormatException e) {
+      throw new AccessDeniedException("유효하지 않은 배송 채널 구독 요청입니다: " + rawDeliveryId);
+    }
   }
 
   private Long extractMemberId(Principal principal) {

@@ -51,6 +51,12 @@ graph LR
 
 ## Part 3. 표준 에러 응답 구조 (ErrorCode & ErrorResponse)
 
+### 0. 🔍 요청 진입 시 traceId 발급 (`MdcLoggingFilter`)
+
+모든 HTTP 요청은 가장 먼저 [`MdcLoggingFilter`](file:///Users/sungminjo/workspace/shinhan/shinhan-gaecheokja/src/main/java/com/example/shinhangaecheokja/common/logging/MdcLoggingFilter.java)를 통과합니다. 이 필터는 요청 헤더 `X-Trace-Id`가 있으면 그 값을, 없으면 새 UUID를 발급해 SLF4J의 MDC(Mapped Diagnostic Context)에 `traceId`로 주입하고, 요청이 끝나면 `MDC.clear()`로 정리합니다.
+
+그 덕분에 **해당 요청 처리 중 찍히는 모든 로그 줄에 자동으로 같은 traceId가 붙고**, 아래에서 볼 `ErrorResponse`에도 같은 값이 담깁니다. 클라이언트가 에러를 겪었을 때 응답의 `traceId`만 알려주면, 서버 로그에서 그 값으로 검색해 해당 요청의 전체 처리 과정을 즉시 역추적할 수 있습니다 — 별도로 요청 ID를 로그마다 직접 찍는 코드를 작성할 필요가 없습니다.
+
 ### 1. 🏷️ 에러 코드 관리 (`ErrorCode.java`)
 도메인별로 발생할 수 있는 에러 상황을 Enum으로 정형화해 관리합니다.
 
@@ -68,7 +74,8 @@ graph LR
   "status": 404,
   "code": "M001",
   "message": "존재하지 않는 회원입니다.",
-  "timestamp": "2026-07-27T17:20:00"
+  "timestamp": "2026-07-27T17:20:00",
+  "traceId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
 }
 ```
 
@@ -79,6 +86,7 @@ graph LR
   "code": "C001",
   "message": "유효하지 않은 입력값입니다.",
   "timestamp": "2026-07-27T17:20:00",
+  "traceId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
   "errors": [
     {
       "field": "email",

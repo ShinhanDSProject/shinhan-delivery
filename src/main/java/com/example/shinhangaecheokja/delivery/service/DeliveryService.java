@@ -6,26 +6,26 @@ import com.example.shinhangaecheokja.delivery.dto.request.DeliveryCompleteReques
 import com.example.shinhangaecheokja.delivery.dto.request.DeliveryCreateRequest;
 import com.example.shinhangaecheokja.delivery.dto.request.DeliveryEstimateRequest;
 import com.example.shinhangaecheokja.delivery.dto.request.DeliveryUpdateRequest;
+import com.example.shinhangaecheokja.delivery.dto.response.DeliveryDetailResponseDto;
 import com.example.shinhangaecheokja.delivery.dto.response.DeliveryEstimateResponse;
 import com.example.shinhangaecheokja.delivery.dto.response.ProofPhotoResponse;
 import com.example.shinhangaecheokja.delivery.entity.DeliveryRequest;
 import com.example.shinhangaecheokja.delivery.entity.DeliveryStatus;
-import com.example.shinhangaecheokja.delivery.entity.ItemSize;
 import com.example.shinhangaecheokja.delivery.event.DeliveryStatusChangedEvent;
 import com.example.shinhangaecheokja.delivery.exception.AlreadyMatchedException;
-import com.example.shinhangaecheokja.delivery.exception.InvalidDeliveryDistanceException;
+import com.example.shinhangaecheokja.delivery.exception.DeliveryAccessDeniedException;
 import com.example.shinhangaecheokja.delivery.exception.InvalidDeliveryTransitionException;
-import com.example.shinhangaecheokja.delivery.exception.InvalidDeliveryWeightException;
 import com.example.shinhangaecheokja.delivery.exception.ProofPhotoNotFoundException;
+import com.example.shinhangaecheokja.delivery.helper.DeliveryFeeCalculator;
 import com.example.shinhangaecheokja.delivery.repository.DeliveryRequestRepository;
 import com.example.shinhangaecheokja.delivery.repository.MatchingRepository;
 import com.example.shinhangaecheokja.member.service.MemberService;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
+import com.example.shinhangaecheokja.vehicle.service.VehicleService;
 import java.time.LocalDateTime;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,96 +34,48 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class DeliveryService {
 
-  private static final double EARTH_RADIUS_KM = 6371.0;
-  private static final BigDecimal ESTIMATE_BASE_FEE = BigDecimal.valueOf(3000);
-  private static final BigDecimal ESTIMATE_FEE_PER_KM = BigDecimal.valueOf(500);
-  private static final BigDecimal ESTIMATE_FEE_PER_KG = BigDecimal.valueOf(200);
-  private static final BigDecimal SIZE_SURCHARGE_RATE_MEDIUM = BigDecimal.valueOf(0.30);
-  private static final BigDecimal SIZE_SURCHARGE_RATE_LARGE = BigDecimal.valueOf(0.60);
-
   private final DeliveryRequestRepository deliveryRequestRepository;
   private final MemberService memberService;
+  private final VehicleService vehicleService;
   private final MatchingRepository matchingRepository;
   private final ApplicationEventPublisher eventPublisher;
+  private final DeliveryFeeCalculator deliveryFeeCalculator;
 
   /**
-   * 고객 존재 여부를 검증한 뒤 배송을 요청한다. 요금은 {@link #estimateFee}와 동일한 공식으로 서버가 직접 계산한다(거리는 클라이언트가 준 값이 아니라
-   * 좌표로 계산 — 요금 조작 방지). 매칭은 차량이 콜을 수락하면서 별도로 이루어진다.
+   * 로그인한 고객 본인 명의로 배송을 요청한다. customerId는 요청 바디가 아니라 인증된 호출자에게서 받아, 다른 회원 명의로 배송을 대신 생성하지 못하게 한다.
+   * 요금은 {@link #estimateFee}와 동일한 공식으로 서버가 직접 계산한다(거리는 클라이언트가 준 값이 아니라 좌표로 계산 — 요금 조작 방지). 매칭은 차량이
+   * 콜을 수락하면서 별도로 이루어진다.
    */
   @Transactional
-  public DeliveryRequest requestDelivery(DeliveryCreateRequest request) {
-    memberService.getById(request.getCustomerId());
-    validateWeight(request.getWeight());
+  public DeliveryRequest requestDelivery(Long customerId, DeliveryCreateRequest request) {
+    memberService.getById(customerId);
 
     double distanceKm =
-        calculateHaversineDistance(
+        deliveryFeeCalculator.calculateDistanceKm(
             request.getPickupLatitude(),
             request.getPickupLongitude(),
             request.getDropoffLatitude(),
             request.getDropoffLongitude());
-    validateDistance(distanceKm);
 
     DeliveryEstimateResponse fee =
-        calculateFee(distanceKm, request.getWeight(), request.getItemSize());
+        deliveryFeeCalculator.calculateFee(distanceKm, request.getWeight(), request.getItemSize());
 
     return deliveryRequestRepository.save(
-        DeliveryRequest.of(request, distanceKm, fee.totalFee().longValueExact()));
+        DeliveryRequest.of(customerId, request, distanceKm, fee.totalFee().longValueExact()));
   }
 
   /** 배송 요청을 생성하지 않고 예상 요금만 계산한다({@link #requestDelivery}와 완전히 동일한 공식). */
   @Transactional(readOnly = true)
   public DeliveryEstimateResponse estimateFee(DeliveryEstimateRequest request) {
     double distanceKm =
-        calculateHaversineDistance(
+        deliveryFeeCalculator.calculateDistanceKm(
             request.getPickupLatitude(),
             request.getPickupLongitude(),
             request.getDestinationLatitude(),
             request.getDestinationLongitude());
 
-    return calculateFee(distanceKm, request.getWeight(), request.getItemSize());
-  }
-
-  /**
-   * 기본료 + 거리 할증(하버사인 거리 × km당 요금) + 무게 할증(무게 × kg당 요금)의 소계에, 물품 크기별 할증률(SMALL 0%/MEDIUM 30%/LARGE
-   * 60%)을 곱한 크기 할증을 더한다. {@link #requestDelivery}와 {@link #estimateFee}가 공유하는 단일 요금 공식이다.
-   */
-  private DeliveryEstimateResponse calculateFee(
-      double distanceKm, double weight, ItemSize itemSize) {
-    BigDecimal distanceSurcharge =
-        ESTIMATE_FEE_PER_KM
-            .multiply(BigDecimal.valueOf(distanceKm))
-            .setScale(0, RoundingMode.HALF_UP);
-    BigDecimal weightSurcharge =
-        ESTIMATE_FEE_PER_KG.multiply(BigDecimal.valueOf(weight)).setScale(0, RoundingMode.HALF_UP);
-    BigDecimal subtotal = ESTIMATE_BASE_FEE.add(distanceSurcharge).add(weightSurcharge);
-    BigDecimal sizeSurcharge =
-        subtotal.multiply(sizeSurchargeRate(itemSize)).setScale(0, RoundingMode.HALF_UP);
-    BigDecimal totalFee = subtotal.add(sizeSurcharge);
-
-    return new DeliveryEstimateResponse(
-        ESTIMATE_BASE_FEE, distanceSurcharge, weightSurcharge, sizeSurcharge, totalFee);
-  }
-
-  private BigDecimal sizeSurchargeRate(ItemSize itemSize) {
-    return switch (itemSize) {
-      case SMALL -> BigDecimal.ZERO;
-      case MEDIUM -> SIZE_SURCHARGE_RATE_MEDIUM;
-      case LARGE -> SIZE_SURCHARGE_RATE_LARGE;
-    };
-  }
-
-  /** 두 좌표(위도/경도) 간의 대권 거리를 하버사인 공식으로 계산한다(단위: km). */
-  private double calculateHaversineDistance(double lat1, double lon1, double lat2, double lon2) {
-    double dLat = Math.toRadians(lat2 - lat1);
-    double dLon = Math.toRadians(lon2 - lon1);
-    double a =
-        Math.sin(dLat / 2) * Math.sin(dLat / 2)
-            + Math.cos(Math.toRadians(lat1))
-                * Math.cos(Math.toRadians(lat2))
-                * Math.sin(dLon / 2)
-                * Math.sin(dLon / 2);
-    double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return EARTH_RADIUS_KM * c;
+    return deliveryFeeCalculator.calculateFee(
+        distanceKm, request.getWeight(), request.getItemSize());
   }
 
   /** id로 배송 요청 단건을 조회한다 (DeliveryRequest Entity 리턴). 없으면 EntityNotFoundException. */
@@ -132,10 +84,38 @@ public class DeliveryService {
     return findDeliveryRequestOrThrow(deliveryRequestId);
   }
 
-  /** 전체 배송 요청 목록을 조회한다 (DeliveryRequest Entity 리턴). */
+  /** 로그인 회원 본인의 배송 요청을 최신순으로 페이징 조회한다 (DeliveryRequest Entity 리턴). status가 있으면 그 상태로만 필터링한다. */
   @Transactional(readOnly = true)
-  public List<DeliveryRequest> getDeliveryRequests() {
-    return deliveryRequestRepository.findAll();
+  public Page<DeliveryRequest> getMyDeliveryRequests(
+      Long customerId, DeliveryStatus status, Pageable pageable) {
+    return status == null
+        ? deliveryRequestRepository.findByCustomerIdOrderByCreatedAtDescIdDesc(customerId, pageable)
+        : deliveryRequestRepository.findByCustomerIdAndStatusOrderByCreatedAtDescIdDesc(
+            customerId, status, pageable);
+  }
+
+  /**
+   * 배송 요청 상세를 조회한다. 배송 요청의 고객 본인이거나 배정된 배송원 본인만 조회할 수 있고, 둘 다 아니면 DeliveryAccessDeniedException을
+   * 던진다. 매칭된 배송원이 있으면 차량 소유자(Member)의 이름을 courierName으로 함께 담고, 없으면 courierName은 null이다.
+   */
+  @Transactional(readOnly = true)
+  public DeliveryDetailResponseDto getDeliveryRequestDetail(Long callerId, Long deliveryRequestId) {
+    DeliveryRequest deliveryRequest = findDeliveryRequestOrThrow(deliveryRequestId);
+
+    Long courierId =
+        matchingRepository
+            .findByDeliveryRequestId(deliveryRequestId)
+            .map(matching -> vehicleService.getById(matching.getVehicleId()).getOwnerId())
+            .orElse(null);
+
+    boolean isOwner = callerId.equals(deliveryRequest.getCustomerId());
+    boolean isAssignedCourier = callerId.equals(courierId);
+    if (!isOwner && !isAssignedCourier) {
+      throw new DeliveryAccessDeniedException(deliveryRequestId, callerId);
+    }
+
+    String courierName = courierId == null ? null : memberService.getById(courierId).getName();
+    return DeliveryDetailResponseDto.from(deliveryRequest, courierName);
   }
 
   /**
@@ -207,19 +187,6 @@ public class DeliveryService {
       throw new ProofPhotoNotFoundException(deliveryRequestId);
     }
     return ProofPhotoResponse.from(deliveryRequest);
-  }
-
-  private void validateWeight(double weight) {
-    if (weight <= 0) {
-      throw new InvalidDeliveryWeightException(weight);
-    }
-  }
-
-  /** 출발지·도착지 좌표가 같으면(거리 0) 유효하지 않은 배송 요청으로 거절한다. */
-  private void validateDistance(double distanceKm) {
-    if (distanceKm <= 0) {
-      throw new InvalidDeliveryDistanceException(distanceKm);
-    }
   }
 
   private DeliveryRequest findDeliveryRequestOrThrow(Long deliveryRequestId) {

@@ -41,3 +41,9 @@ out/
 
 # Local file upload storage
 /uploads/
+
+# Local application logs
+/logs/
+
+# Personal local notes (never pushed)
+/.local/

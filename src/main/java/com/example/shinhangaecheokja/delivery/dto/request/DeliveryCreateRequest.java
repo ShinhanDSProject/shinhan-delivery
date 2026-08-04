@@ -15,15 +15,13 @@ import lombok.Setter;
 @NoArgsConstructor
 public class DeliveryCreateRequest {
 
-  @NotNull(message = "고객 id는 필수입니다.")
-  private Long customerId;
-
   @NotBlank(message = "픽업 주소는 필수입니다.")
   private String pickupAddress;
 
   @NotBlank(message = "도착 주소는 필수입니다.")
   private String dropoffAddress;
 
+  @DecimalMin(value = "0.0", inclusive = false, message = "물품 무게는 0보다 커야 합니다.")
   private double weight;
 
   @DecimalMin(value = "-90.0", message = "출발지 위도는 -90 이상이어야 합니다.")
