@@ -300,18 +300,26 @@
             location.replace('/login.html');
             return;
         }
-        const response = await fetch(`/api/v1/delivery-requests/${deliveryId}`, {
-            headers: { Authorization: header }
-        });
-        if (response.status === 401 || response.status === 403) {
-            location.replace('/login.html');
-            return;
-        }
-        if (!response.ok) {
+        try {
+            const response = await fetch(`/api/v1/delivery-requests/${deliveryId}`, {
+                headers: { Authorization: header }
+            });
+            if (response.status === 401) {
+                location.replace('/login.html');
+                return;
+            }
+            if (response.status === 403) {
+                document.getElementById('body').innerHTML = '<div class="loading-state">이 취소 내역을 볼 권한이 없어요.</div>';
+                return;
+            }
+            if (!response.ok) {
+                document.getElementById('body').innerHTML = '<div class="loading-state">취소 내역을 불러오지 못했어요.</div>';
+                return;
+            }
+            render(await response.json());
+        } catch (error) {
             document.getElementById('body').innerHTML = '<div class="loading-state">취소 내역을 불러오지 못했어요.</div>';
-            return;
         }
-        render(await response.json());
     }
 
     load();
