@@ -12,6 +12,7 @@ import com.example.shinhandelivery.delivery.dto.response.DeliveryResponse;
 import com.example.shinhandelivery.delivery.dto.response.ProofPhotoResponse;
 import com.example.shinhandelivery.delivery.entity.DeliveryRequest;
 import com.example.shinhandelivery.delivery.entity.DeliveryStatus;
+import com.example.shinhandelivery.delivery.entity.Matching;
 import com.example.shinhandelivery.delivery.event.DeliveryOfferBroadcastEvent;
 import com.example.shinhandelivery.delivery.event.DeliveryStatusChangedEvent;
 import com.example.shinhandelivery.delivery.exception.AlreadyMatchedException;
@@ -117,11 +118,9 @@ public class DeliveryService {
   public DeliveryDetailResponseDto getDeliveryRequestDetail(Long callerId, Long deliveryRequestId) {
     DeliveryRequest deliveryRequest = findDeliveryRequestOrThrow(deliveryRequestId);
 
+    Matching matching = matchingRepository.findByDeliveryRequestId(deliveryRequestId).orElse(null);
     Long courierId =
-        matchingRepository
-            .findByDeliveryRequestId(deliveryRequestId)
-            .map(matching -> vehicleService.getById(matching.getVehicleId()).getOwnerId())
-            .orElse(null);
+        matching == null ? null : vehicleService.getById(matching.getVehicleId()).getOwnerId();
 
     boolean isOwner = callerId.equals(deliveryRequest.getCustomerId());
     boolean isAssignedCourier = callerId.equals(courierId);
@@ -130,7 +129,8 @@ public class DeliveryService {
     }
 
     String courierName = courierId == null ? null : memberService.getById(courierId).getName();
-    return DeliveryDetailResponseDto.from(deliveryRequest, courierName);
+    LocalDateTime matchedAt = matching == null ? null : matching.getMatchedAt();
+    return DeliveryDetailResponseDto.from(deliveryRequest, courierName, matchedAt);
   }
 
   /**

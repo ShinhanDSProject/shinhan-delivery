@@ -122,6 +122,10 @@ class DeliveryHistoryControllerTest {
             127.0,
             ItemSize.MEDIUM,
             "박배송",
+            null,
+            null,
+            null,
+            null,
             null);
     when(deliveryService.getDeliveryRequestDetail(1L, 1L)).thenReturn(response);
 
