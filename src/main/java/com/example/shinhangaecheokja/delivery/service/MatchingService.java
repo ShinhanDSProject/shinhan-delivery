@@ -96,7 +96,10 @@ public class MatchingService {
         .orElseThrow(() -> new EntityNotFoundException(ErrorCode.MATCHING_NOT_FOUND));
   }
 
-  /** 매칭 상태를 변경하고, 연결된 배송 요청·차량 상태도 함께 동기화한다. */
+  /**
+   * 매칭 상태를 변경하고, 연결된 배송 요청·차량 상태도 함께 동기화한다. 요청한 상태가 지금 상태와 같으면(예: CANCELLED를 다시 CANCELLED로) 아무것도
+   * 바뀌지 않은 것이므로 그대로 반환하고, 차량 상태 재검증이나 이벤트 발행은 하지 않는다.
+   */
   @Transactional
   public Matching update(Long matchingId, MatchingUpdateRequest request) {
     Matching matching = findMatchingOrThrow(matchingId);
@@ -104,6 +107,9 @@ public class MatchingService {
     MatchingStatus newStatus = request.getStatus();
 
     validateTransition(previousStatus, newStatus);
+    if (newStatus == previousStatus) {
+      return matching;
+    }
 
     DeliveryRequest deliveryRequest = findDeliveryRequestOrThrow(matching.getDeliveryRequestId());
 

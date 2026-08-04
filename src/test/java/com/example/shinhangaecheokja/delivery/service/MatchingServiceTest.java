@@ -279,6 +279,65 @@ class MatchingServiceTest {
   }
 
   @Test
+  @DisplayName("MATCHED를 다시 MATCHED로 요청하면 아무것도 바뀌지 않고 이벤트도 발행되지 않는다")
+  void updateMatchingSameMatchedStatusShouldBeNoOp() {
+    Matching matching = new Matching();
+    matching.setDeliveryRequestId(1L);
+    matching.setVehicleId(2L);
+    matching.setStatus(MatchingStatus.MATCHED);
+    MatchingUpdateRequest request = new MatchingUpdateRequest();
+    request.setStatus(MatchingStatus.MATCHED);
+
+    when(matchingRepository.findById(1L)).thenReturn(Optional.of(matching));
+
+    Matching response = matchingService.update(1L, request);
+
+    assertThat(response.getStatus()).isEqualTo(MatchingStatus.MATCHED);
+    verify(vehicleService, never()).markBusy(any());
+    verify(vehicleService, never()).markAvailable(any());
+    verify(deliveryRequestRepository, never()).findById(any());
+    verify(eventPublisher, never()).publishEvent(any());
+  }
+
+  @Test
+  @DisplayName("CANCELLED를 다시 CANCELLED로 요청하면 아무것도 바뀌지 않고 이벤트도 발행되지 않는다")
+  void updateMatchingSameCancelledStatusShouldBeNoOp() {
+    Matching matching = new Matching();
+    matching.setDeliveryRequestId(1L);
+    matching.setVehicleId(2L);
+    matching.setStatus(MatchingStatus.CANCELLED);
+    MatchingUpdateRequest request = new MatchingUpdateRequest();
+    request.setStatus(MatchingStatus.CANCELLED);
+
+    when(matchingRepository.findById(1L)).thenReturn(Optional.of(matching));
+
+    Matching response = matchingService.update(1L, request);
+
+    assertThat(response.getStatus()).isEqualTo(MatchingStatus.CANCELLED);
+    verify(vehicleService, never()).markAvailable(any());
+    verify(eventPublisher, never()).publishEvent(any());
+  }
+
+  @Test
+  @DisplayName("COMPLETED를 다시 COMPLETED로 요청하면 아무것도 바뀌지 않고 이벤트도 발행되지 않는다")
+  void updateMatchingSameCompletedStatusShouldBeNoOp() {
+    Matching matching = new Matching();
+    matching.setDeliveryRequestId(1L);
+    matching.setVehicleId(2L);
+    matching.setStatus(MatchingStatus.COMPLETED);
+    MatchingUpdateRequest request = new MatchingUpdateRequest();
+    request.setStatus(MatchingStatus.COMPLETED);
+
+    when(matchingRepository.findById(1L)).thenReturn(Optional.of(matching));
+
+    Matching response = matchingService.update(1L, request);
+
+    assertThat(response.getStatus()).isEqualTo(MatchingStatus.COMPLETED);
+    verify(vehicleService, never()).markAvailable(any());
+    verify(eventPublisher, never()).publishEvent(any());
+  }
+
+  @Test
   @DisplayName("취소된 매칭을 MATCHED로 되돌릴때 차량이 다른 건으로 BUSY면 VehicleNotAvailableException을 던진다")
   void updateMatchingRevertMatchedWhenBusyShouldThrowException() {
     Matching matching = new Matching();
