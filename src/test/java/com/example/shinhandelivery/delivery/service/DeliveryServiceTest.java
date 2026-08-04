@@ -452,6 +452,29 @@ class DeliveryServiceTest {
   }
 
   @Test
+  @DisplayName("배정된 배송원이 조회하면 완료된 배송의 증거사진을 조회한다")
+  void getProofPhotoAssignedCourierSuccess() {
+    LocalDateTime completedAt = LocalDateTime.of(2026, 7, 31, 10, 0);
+    DeliveryRequest deliveryRequest = new DeliveryRequest();
+    deliveryRequest.setCustomerId(1L);
+    deliveryRequest.setStatus(DeliveryStatus.COMPLETED);
+    deliveryRequest.setProofPhotoUrl("https://example.com/proof.jpg");
+    deliveryRequest.setCompletedAt(completedAt);
+    when(deliveryRequestRepository.findById(1L)).thenReturn(Optional.of(deliveryRequest));
+
+    Matching matching = new Matching();
+    matching.setVehicleId(10L);
+    when(matchingRepository.findByDeliveryRequestId(1L)).thenReturn(Optional.of(matching));
+
+    Vehicle vehicle = Vehicle.builder().id(10L).ownerId(20L).build();
+    when(vehicleService.getById(10L)).thenReturn(vehicle);
+
+    ProofPhotoResponse response = deliveryService.getProofPhoto(20L, 1L);
+
+    assertThat(response.proofPhotoUrl()).isEqualTo("https://example.com/proof.jpg");
+  }
+
+  @Test
   @DisplayName("고객 본인도 배정된 배송원도 아니면 DeliveryAccessDeniedException을 던진다")
   void getProofPhotoNonOwnerNonCourierShouldThrowException() {
     DeliveryRequest deliveryRequest = new DeliveryRequest();

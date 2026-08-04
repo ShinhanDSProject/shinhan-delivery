@@ -244,8 +244,15 @@
                 `/api/v1/delivery-requests?status=CANCELLED&page=${currentPage}&size=${PAGE_SIZE}`,
                 { headers: { Authorization: header } }
             );
-            if (response.status === 401 || response.status === 403) {
+            if (response.status === 401) {
                 location.replace('/login.html');
+                return;
+            }
+            if (response.status === 403) {
+                if (currentPage === 0) {
+                    list.innerHTML = '<div class="empty-state">취소 내역을 볼 권한이 없어요.</div>';
+                }
+                isLastPage = true;
                 return;
             }
             if (!response.ok) return;

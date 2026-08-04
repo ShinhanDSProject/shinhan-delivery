@@ -316,32 +316,41 @@
             list.innerHTML = '<div class="loading-state">불러오는 중...</div>';
         }
 
-        const response = await fetchPage(tab, page);
+        try {
+            const response = await fetchPage(tab, page);
 
-        if (generation !== requestGeneration) {
-            // 응답이 오는 사이 다른 탭으로 전환됨 — 오래된 응답이라 화면에 반영하지 않고 버린다.
-            return;
+            if (generation !== requestGeneration) {
+                // 응답이 오는 사이 다른 탭으로 전환됨 — 오래된 응답이라 화면에 반영하지 않고 버린다.
+                return;
+            }
+            if (!response) return;
+
+            let items = response.content || [];
+            if (tab === 'IN_PROGRESS') {
+                items = items.filter((item) => IN_PROGRESS_STATUSES.includes(item.status));
+            }
+
+            if (page === 0) {
+                list.innerHTML = '';
+            }
+
+            if (page === 0 && items.length === 0 && response.last) {
+                list.innerHTML = '<div class="empty-state">표시할 배송 내역이 없어요.</div>';
+            } else {
+                items.forEach((item) => list.appendChild(renderCard(item)));
+            }
+
+            isLastPage = response.last;
+            currentPage += 1;
+        } catch (error) {
+            if (generation === requestGeneration && page === 0) {
+                list.innerHTML = '<div class="empty-state">배송 내역을 불러오지 못했어요.</div>';
+            }
+        } finally {
+            if (generation === requestGeneration) {
+                isLoading = false;
+            }
         }
-        isLoading = false;
-        if (!response) return;
-
-        let items = response.content || [];
-        if (tab === 'IN_PROGRESS') {
-            items = items.filter((item) => IN_PROGRESS_STATUSES.includes(item.status));
-        }
-
-        if (page === 0) {
-            list.innerHTML = '';
-        }
-
-        if (page === 0 && items.length === 0 && response.last) {
-            list.innerHTML = '<div class="empty-state">표시할 배송 내역이 없어요.</div>';
-        } else {
-            items.forEach((item) => list.appendChild(renderCard(item)));
-        }
-
-        isLastPage = response.last;
-        currentPage += 1;
     }
 
     function resetAndLoad(tab) {

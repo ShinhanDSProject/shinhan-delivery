@@ -316,7 +316,12 @@
                 document.getElementById('body').innerHTML = '<div class="loading-state">취소 내역을 불러오지 못했어요.</div>';
                 return;
             }
-            render(await response.json());
+            const detail = await response.json();
+            if (detail.status !== 'CANCELLED') {
+                document.getElementById('body').innerHTML = '<div class="loading-state">취소된 배송이 아니에요.</div>';
+                return;
+            }
+            render(detail);
         } catch (error) {
             document.getElementById('body').innerHTML = '<div class="loading-state">취소 내역을 불러오지 못했어요.</div>';
         }
