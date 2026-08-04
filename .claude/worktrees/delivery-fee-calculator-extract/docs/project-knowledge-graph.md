@@ -1,4 +1,4 @@
-# 🗺️ 신한 배달 전체 프로젝트 지식 그래프 인덱스 (Project Knowledge Graph)
+# 🗺️ Shinhan Delivery 전체 프로젝트 지식 그래프 인덱스 (Project Knowledge Graph)
 
 > **프로젝트의 모든 문서(Docs), 아키텍처 계층, 하네스 검증기 및 DB 스키마 간의 종속성과 연관 관계를 시각화한 지식 네트워크 지도**
 
