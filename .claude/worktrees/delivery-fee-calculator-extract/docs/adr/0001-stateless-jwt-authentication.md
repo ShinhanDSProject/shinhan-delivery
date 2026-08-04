@@ -2,7 +2,7 @@
 
 * **상태 (Status):** 🟢 ACCEPTED (채택됨)
 * **날짜 (Date):** 2026-07-28
-* **결정자 (Deciders):** Shinhan DS 개척자 아키텍처 팀
+* **결정자 (Deciders):** Shinhan DS 배달 아키텍처 팀
 * **연관 이슈 (Related Issue):** [Issue #70](https://github.com/ShinhanDSProject/shinhan-delivery/issues/70)
 * **연관 PR (Related PR):** [PR #84](https://github.com/ShinhanDSProject/shinhan-delivery/pull/84)
 

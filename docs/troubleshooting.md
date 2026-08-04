@@ -19,8 +19,8 @@ Migration checksum mismatch for migration version X.X
 * **방법 A (권장):** 마이그레이션 파일 내용을 로컬 테스트 중에 임의로 바꾸었다면, 로컬 DB의 스키마 및 데이터를 초기화(Drop & Recreate)하고 애플리케이션을 재구동하면 됩니다.
   ```sql
   -- MariaDB CLI 또는 DBeaver 등 툴에서 실행
-  DROP DATABASE shinhan_gaecheokja;
-  CREATE DATABASE shinhan_gaecheokja;
+  DROP DATABASE shinhan_delivery;
+  CREATE DATABASE shinhan_delivery;
   ```
 * **주의 사항:** 이미 협업 브랜치(`main`)에 병합되어 배포된 마이그레이션 파일은 절대 직접 수정하지 마세요. 변경 사항은 반드시 새로운 버전 번호(예: `V8__add_new_column.sql`)를 붙여 새 파일로 작성해야 합니다.
 

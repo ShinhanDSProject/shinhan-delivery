@@ -23,7 +23,7 @@ jobs:
         image: mariadb:10.11
         env:
           MARIADB_ROOT_PASSWORD: password
-          MARIADB_DATABASE: shinhan_gaecheokja
+          MARIADB_DATABASE: shinhan_delivery
         ports:
           - 3306:3306
         options: >-
@@ -58,7 +58,7 @@ jobs:
       - name: Verify JaCoCo Coverage Gate & ArchUnit Architecture Rules
         run: ./gradlew test jacocoTestReport jacocoTestCoverageVerification
         env:
-          DB_URL: jdbc:mariadb://localhost:3306/shinhan_gaecheokja
+          DB_URL: jdbc:mariadb://localhost:3306/shinhan_delivery
           DB_USER: root
           DB_PASSWORD: password
           DB_DRIVER: org.mariadb.jdbc.Driver
@@ -72,7 +72,7 @@ jobs:
       - name: Run Gradle Build and Package
         run: ./gradlew build -x test
         env:
-          DB_URL: jdbc:mariadb://localhost:3306/shinhan_gaecheokja
+          DB_URL: jdbc:mariadb://localhost:3306/shinhan_delivery
           DB_USER: root
           DB_PASSWORD: password
           DB_DRIVER: org.mariadb.jdbc.Driver
