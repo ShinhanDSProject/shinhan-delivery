@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>매칭 대기 - 신한 개척자</title>
+    <link rel="stylesheet" href="/css/design-system.css">
+    <style>
+        :root {
+            --text-dark: var(--color-black-200);
+            --text-muted: var(--color-grey-300);
+            --primary: var(--color-blue-30);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: var(--font-family-base);
+        }
+
+        body {
+            min-height: 100vh;
+            color: var(--text-dark);
+        }
+
+        .page {
+            max-width: 480px;
+            margin: 0 auto;
+            min-height: 100vh;
+            background: #FAFBFD;
+            display: flex;
+            flex-direction: column;
+            padding-bottom: 96px;
+        }
+
+        .body-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 48px;
+            padding: 80px 24px 40px;
+        }
+
+        .animation-area {
+            position: relative;
+            width: 220px;
+            height: 220px;
+        }
+
+        .pulse-outer, .pulse-inner {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border-radius: 999px;
+            background: var(--color-blue-50);
+        }
+
+        .pulse-outer {
+            width: 220px;
+            height: 220px;
+            opacity: 0.3;
+            animation: pulse 2s ease-out infinite;
+        }
+
+        .pulse-inner {
+            width: 160px;
+            height: 160px;
+            opacity: 0.6;
+            animation: pulse 2s ease-out infinite;
+            animation-delay: 0.3s;
+        }
+
+        @keyframes pulse {
+            0% { transform: translate(-50%, -50%) scale(0.9); }
+            50% { transform: translate(-50%, -50%) scale(1.05); }
+            100% { transform: translate(-50%, -50%) scale(0.9); }
+        }
+
+        .center-icon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100px;
+            height: 100px;
+            border-radius: 999px;
+            background: var(--primary);
+            box-shadow: 0 10px 24px rgba(74, 144, 255, 0.25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .center-icon svg {
+            width: 44px;
+            height: 44px;
+        }
+
+        .texts {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            text-align: center;
+        }
+
+        .texts h1 {
+            font-size: 22px;
+            font-weight: 800;
+        }
+
+        .texts p {
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        .loading-dots {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .loading-dots span {
+            width: 8px;
+            height: 8px;
+            border-radius: 999px;
+            background: var(--primary);
+            animation: dot-blink 1.2s ease-in-out infinite;
+        }
+
+        .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+        .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes dot-blink {
+            0%, 80%, 100% { opacity: 0.2; }
+            40% { opacity: 1; }
+        }
+
+        .footer-action {
+            display: flex;
+            justify-content: center;
+            padding: 24px 24px 0;
+        }
+
+        .cancel-link {
+            border: 0;
+            background: transparent;
+            color: var(--color-grey-100);
+            font-size: 15px;
+            font-weight: 700;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+
+        .status-message {
+            text-align: center;
+            padding: 48px 16px;
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        nav.bottom-tab-bar {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 480px;
+            background: #fff;
+            border-top: 1px solid var(--color-grey-50);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 16px 32px calc(16px + env(safe-area-inset-bottom));
+        }
+
+        nav.bottom-tab-bar button,
+        nav.bottom-tab-bar a {
+            border: 0;
+            background: transparent;
+            color: var(--color-grey-100);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2px 6px;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        nav.bottom-tab-bar svg {
+            width: 30px;
+            height: 30px;
+        }
+
+        nav.bottom-tab-bar .point-icon {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--primary);
+            line-height: 1;
+        }
+
+        #toast {
+            position: fixed;
+            left: 50%;
+            bottom: 110px;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: #fff;
+            padding: 10px 18px;
+            border-radius: 999px;
+            font-size: 13px;
+            white-space: nowrap;
+            z-index: 20;
+        }
+    </style>
+</head>
+<body>
+<main class="page" id="page">
+    <div class="body-area">
+        <div class="animation-area">
+            <div class="pulse-outer"></div>
+            <div class="pulse-inner"></div>
+            <div class="center-icon">
+                <svg viewBox="0 0 24 24" fill="none"><path d="M5 17h1a2 2 0 1 0 4 0h5a2 2 0 1 0 4 0h1v-4l-2-5h-4V6H5a1 1 0 0 0-1 1v10h1Z" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/><circle cx="8" cy="17" r="1.6" fill="#fff"/><circle cx="16" cy="17" r="1.6" fill="#fff"/></svg>
+            </div>
+        </div>
+
+        <div class="texts">
+            <h1>배송원을 찾고 있어요...</h1>
+            <p>예상 매칭 시간: 약 1시간</p>
+        </div>
+
+        <div class="loading-dots" aria-hidden="true">
+            <span></span><span></span><span></span>
+        </div>
+    </div>
+
+    <div class="footer-action">
+        <button class="cancel-link" type="button" id="cancelButton">취소하기</button>
+    </div>
+</main>
+
+<nav class="bottom-tab-bar" aria-label="하단 메뉴">
+    <button type="button" aria-label="포인트" onclick="showToast('아직 준비 중인 기능입니다.')"><span class="point-icon" aria-hidden="true">P</span></button>
+    <a href="/home.html" aria-label="홈">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M4 11 12 4l8 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 10v9a1 1 0 0 0 1 1h4v-6h2v6h4a1 1 0 0 0 1-1v-9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </a>
+    <a href="/my-page.html" aria-label="마이페이지">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M5 7h14M5 12h14M5 17h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+    </a>
+</nav>
+
+<script>
+    const deliveryId = new URLSearchParams(location.search).get('id');
+    const POLL_INTERVAL_MS = 5000;
+    let pollTimer = null;
+
+    function authHeader() {
+        const token = localStorage.getItem('accessToken');
+        const tokenType = localStorage.getItem('tokenType') || 'Bearer';
+        if (!token) return null;
+        return `${tokenType} ${token}`;
+    }
+
+    function showToast(message) {
+        const existing = document.getElementById('toast');
+        if (existing) existing.remove();
+        const toast = document.createElement('div');
+        toast.id = 'toast';
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 2000);
+    }
+
+    function showStatusMessage(message) {
+        document.getElementById('page').innerHTML = `<div class="status-message">${message}</div>`;
+    }
+    // message는 이 파일 안에서만 정의된 고정 문자열만 넘기므로 innerHTML로 꽂아도 XSS 위험이 없다.
+
+    function stopPolling() {
+        if (pollTimer) {
+            clearInterval(pollTimer);
+            pollTimer = null;
+        }
+    }
+
+    async function pollStatus() {
+        const header = authHeader();
+        if (!header) {
+            location.replace('/login.html');
+            return;
+        }
+        try {
+            const response = await fetch(`/api/v1/delivery-requests/${deliveryId}`, {
+                headers: { Authorization: header }
+            });
+            if (response.status === 401) {
+                location.replace('/login.html');
+                return;
+            }
+            if (response.status === 403) {
+                stopPolling();
+                showStatusMessage('이 배송 요청을 볼 권한이 없어요.');
+                return;
+            }
+            if (!response.ok) return;
+
+            const detail = await response.json();
+            if (detail.status === 'MATCHED' || detail.status === 'PICKED_UP' || detail.status === 'COMPLETED') {
+                stopPolling();
+                location.replace(`/matching-complete.html?id=${encodeURIComponent(deliveryId)}`);
+                return;
+            }
+            if (detail.status === 'CANCELLED') {
+                stopPolling();
+                showStatusMessage('배송 요청이 취소됐어요.');
+            }
+        } catch (error) {
+            // 일시적인 네트워크 오류는 다음 폴링에서 다시 시도한다.
+        }
+    }
+
+    document.getElementById('cancelButton').addEventListener('click', async () => {
+        const header = authHeader();
+        if (!header) {
+            location.replace('/login.html');
+            return;
+        }
+        stopPolling();
+        try {
+            const response = await fetch(`/api/v1/delivery-requests/${deliveryId}`, {
+                method: 'DELETE',
+                headers: { Authorization: header }
+            });
+            if (response.status === 204) {
+                location.replace('/home.html');
+                return;
+            }
+            if (response.status === 409 || response.status === 400) {
+                showToast('이미 배송원이 매칭되어 취소할 수 없어요.');
+                pollStatus();
+                pollTimer = setInterval(pollStatus, POLL_INTERVAL_MS);
+                return;
+            }
+            showToast('취소에 실패했어요. 다시 시도해 주세요.');
+            pollTimer = setInterval(pollStatus, POLL_INTERVAL_MS);
+        } catch (error) {
+            showToast('취소에 실패했어요. 다시 시도해 주세요.');
+            pollTimer = setInterval(pollStatus, POLL_INTERVAL_MS);
+        }
+    });
+
+    if (!authHeader() || !deliveryId) {
+        location.replace(authHeader() ? '/home.html' : '/login.html');
+    } else {
+        pollStatus();
+        pollTimer = setInterval(pollStatus, POLL_INTERVAL_MS);
+    }
+</script>
+</body>
+</html>
