@@ -11,7 +11,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.example.shinhangaecheokja.delivery.dto.request.DeliveryCompleteRequest;
 import com.example.shinhangaecheokja.delivery.dto.request.DeliveryEstimateRequest;
+import com.example.shinhangaecheokja.delivery.dto.request.DeliveryPayLocationRequest;
+import com.example.shinhangaecheokja.delivery.dto.request.DeliveryPayRequest;
 import com.example.shinhangaecheokja.delivery.dto.response.DeliveryEstimateResponse;
+import com.example.shinhangaecheokja.delivery.dto.response.DeliveryPaymentResponse;
 import com.example.shinhangaecheokja.delivery.dto.response.ProofPhotoResponse;
 import com.example.shinhangaecheokja.delivery.entity.DeliveryRequest;
 import com.example.shinhangaecheokja.delivery.entity.DeliveryStatus;
@@ -19,13 +22,17 @@ import com.example.shinhangaecheokja.delivery.entity.ItemSize;
 import com.example.shinhangaecheokja.delivery.exception.InvalidDeliveryTransitionException;
 import com.example.shinhangaecheokja.delivery.exception.ProofPhotoNotFoundException;
 import com.example.shinhangaecheokja.delivery.service.DeliveryService;
+import com.example.shinhangaecheokja.common.security.CustomUserDetails;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.ObjectMapper;
@@ -37,6 +44,11 @@ class DeliveryControllerTest {
   @Autowired private ObjectMapper objectMapper;
 
   @MockitoBean private DeliveryService deliveryService;
+
+  @AfterEach
+  void tearDown() {
+    SecurityContextHolder.clearContext();
+  }
 
   @Test
   @DisplayName("견적 요청을 받으면 산정된 요금을 반환한다")
@@ -65,6 +77,37 @@ class DeliveryControllerTest {
                 .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.totalFee").value(217823));
+  }
+
+  @Test
+  @DisplayName("배송 결제 요청을 받으면 배송 요청 ID와 차감 결과를 반환한다")
+  void payDeliverySuccess() throws Exception {
+    CustomUserDetails customUser =
+        new CustomUserDetails(1L, "pay@example.com", "pass", "CUSTOMER");
+    UsernamePasswordAuthenticationToken auth =
+        new UsernamePasswordAuthenticationToken(customUser, null, customUser.getAuthorities());
+    SecurityContextHolder.getContext().setAuthentication(auth);
+
+    DeliveryPayRequest request = new DeliveryPayRequest();
+    request.setPickup(createLocation("서울 강남구", 37.0, 127.0));
+    request.setDropoff(createLocation("서울 서초구", 38.0, 127.0));
+    request.setWeight(10.0);
+    request.setItemSize(ItemSize.MEDIUM);
+
+    when(deliveryService.payDelivery(eq(1L), eq("idem-pay"), any()))
+        .thenReturn(new DeliveryPaymentResponse(55L, 78776L, 5000L, DeliveryStatus.REQUESTED, "MATCHING"));
+
+    mockMvc
+        .perform(
+            post("/api/v1/delivery-requests/pay")
+                .principal(auth)
+                .header("Idempotency-Key", "idem-pay")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.deliveryRequestId").value(55L))
+        .andExpect(jsonPath("$.remainingBalance").value(5000L))
+        .andExpect(jsonPath("$.deliveryStatus").value("REQUESTED"));
   }
 
   @Test
@@ -238,5 +281,13 @@ class DeliveryControllerTest {
     mockMvc
         .perform(get("/api/v1/delivery-requests/1/proof-photo"))
         .andExpect(status().isNotFound());
+  }
+
+  private DeliveryPayLocationRequest createLocation(String address, double lat, double lng) {
+    DeliveryPayLocationRequest location = new DeliveryPayLocationRequest();
+    location.setAddress(address);
+    location.setLat(lat);
+    location.setLng(lng);
+    return location;
   }
 }

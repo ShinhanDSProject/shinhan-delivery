@@ -148,14 +148,24 @@
         const draft = loadDraft();
         const payment = draft.paymentEstimate;
         try {
-            const response = await fetch('/api/deliveries/pay', {
+            const response = await fetch('/api/v1/delivery-requests/pay', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     totalFee: payment.totalFee,
                     categoryId: draft.categoryId,
-                    pickup: draft.pickup,
-                    dropoff: draft.dropoff
+                    pickup: {
+                        address: draft.pickup.address,
+                        lat: draft.pickup.lat,
+                        lng: draft.pickup.lng
+                    },
+                    dropoff: {
+                        address: draft.dropoff.address,
+                        lat: draft.dropoff.lat,
+                        lng: draft.dropoff.lng
+                    },
+                    weight: draft.weight,
+                    itemSize: draft.itemSize
                 })
             });
             if (response.ok) {

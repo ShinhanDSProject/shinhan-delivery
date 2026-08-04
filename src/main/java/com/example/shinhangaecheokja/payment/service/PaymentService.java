@@ -7,6 +7,7 @@ import com.example.shinhangaecheokja.payment.dto.request.PointChargeRequest;
 import com.example.shinhangaecheokja.payment.dto.request.PointUseRequest;
 import com.example.shinhangaecheokja.payment.dto.request.PointWalletCreateRequest;
 import com.example.shinhangaecheokja.payment.dto.response.PointBalanceResponse;
+import com.example.shinhangaecheokja.payment.dto.response.PointUseResultResponse;
 import com.example.shinhangaecheokja.payment.entity.PointHistory;
 import com.example.shinhangaecheokja.payment.entity.PointHistoryType;
 import com.example.shinhangaecheokja.payment.entity.PointWallet;
@@ -101,6 +102,38 @@ public class PaymentService {
     }
     wallet.setBalance(wallet.getBalance() - request.getAmount());
     return wallet;
+  }
+
+  /** 인증된 회원 기준으로 포인트를 차감하고 멱등 키가 같으면 기존 결과를 재사용한다. */
+  @Transactional
+  public PointUseResultResponse usePoint(Long memberId, String idempotencyKey, PointUseRequest request) {
+    memberService.getById(memberId);
+
+    PointHistory existing =
+        pointHistoryRepository.findByMemberIdAndIdempotencyKey(memberId, idempotencyKey).orElse(null);
+    if (existing != null) {
+      return new PointUseResultResponse(
+          existing.getBalanceAfter(), existing.getAmount(), existing.getCreatedAt());
+    }
+
+    PointWallet wallet = findWalletByMemberForUpdateOrThrow(memberId);
+    if (wallet.getBalance() < request.getAmount()) {
+      throw new InsufficientPointException(wallet.getId(), request.getAmount());
+    }
+
+    wallet.setBalance(wallet.getBalance() - request.getAmount());
+    LocalDateTime paidAt = LocalDateTime.now();
+    pointHistoryRepository.save(
+        PointHistory.builder()
+            .memberId(memberId)
+            .walletId(wallet.getId())
+            .amount(request.getAmount())
+            .balanceAfter(wallet.getBalance())
+            .type(PointHistoryType.USE)
+            .idempotencyKey(idempotencyKey)
+            .createdAt(paidAt)
+            .build());
+    return new PointUseResultResponse(wallet.getBalance(), request.getAmount(), paidAt);
   }
 
   /** id로 포인트 지갑을 조회해 삭제한다. 없으면 EntityNotFoundException. */

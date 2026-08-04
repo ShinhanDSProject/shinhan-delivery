@@ -52,6 +52,9 @@ public class DeliveryRequest {
   @Column(name = "fee_point", nullable = false)
   private long feePoint;
 
+  @Column(name = "payment_idempotency_key", length = 100)
+  private String paymentIdempotencyKey;
+
   @Column(name = "pickup_latitude", nullable = false)
   private double pickupLatitude;
 

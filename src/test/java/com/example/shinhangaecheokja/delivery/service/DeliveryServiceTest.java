@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -13,9 +14,12 @@ import com.example.shinhangaecheokja.common.exception.ErrorCode;
 import com.example.shinhangaecheokja.delivery.dto.request.DeliveryCompleteRequest;
 import com.example.shinhangaecheokja.delivery.dto.request.DeliveryCreateRequest;
 import com.example.shinhangaecheokja.delivery.dto.request.DeliveryEstimateRequest;
+import com.example.shinhangaecheokja.delivery.dto.request.DeliveryPayLocationRequest;
+import com.example.shinhangaecheokja.delivery.dto.request.DeliveryPayRequest;
 import com.example.shinhangaecheokja.delivery.dto.request.DeliveryUpdateRequest;
 import com.example.shinhangaecheokja.delivery.dto.response.DeliveryDetailResponseDto;
 import com.example.shinhangaecheokja.delivery.dto.response.DeliveryEstimateResponse;
+import com.example.shinhangaecheokja.delivery.dto.response.DeliveryPaymentResponse;
 import com.example.shinhangaecheokja.delivery.dto.response.ProofPhotoResponse;
 import com.example.shinhangaecheokja.delivery.entity.DeliveryRequest;
 import com.example.shinhangaecheokja.delivery.entity.DeliveryStatus;
@@ -33,6 +37,9 @@ import com.example.shinhangaecheokja.delivery.repository.DeliveryRequestReposito
 import com.example.shinhangaecheokja.delivery.repository.MatchingRepository;
 import com.example.shinhangaecheokja.member.entity.Member;
 import com.example.shinhangaecheokja.member.service.MemberService;
+import com.example.shinhangaecheokja.payment.dto.request.PointUseRequest;
+import com.example.shinhangaecheokja.payment.dto.response.PointUseResultResponse;
+import com.example.shinhangaecheokja.payment.service.PaymentService;
 import com.example.shinhangaecheokja.vehicle.entity.Vehicle;
 import com.example.shinhangaecheokja.vehicle.service.VehicleService;
 import java.math.BigDecimal;
@@ -60,6 +67,7 @@ class DeliveryServiceTest {
   @Mock private VehicleService vehicleService;
   @Mock private MatchingRepository matchingRepository;
   @Mock private ApplicationEventPublisher eventPublisher;
+  @Mock private PaymentService paymentService;
   @Spy private DeliveryFeeCalculator deliveryFeeCalculator = new DeliveryFeeCalculator();
   @InjectMocks private DeliveryService deliveryService;
 
@@ -420,6 +428,60 @@ class DeliveryServiceTest {
   }
 
   @Test
+  @DisplayName("배송 결제 성공 시 포인트를 차감하고 REQUESTED 배송 요청을 생성한다")
+  void payDeliverySuccess() {
+    DeliveryPayRequest request = new DeliveryPayRequest();
+    request.setPickup(createLocation("서울 강남구", 37.0, 127.0));
+    request.setDropoff(createLocation("서울 서초구", 38.0, 127.0));
+    request.setWeight(10.0);
+    request.setItemSize(ItemSize.MEDIUM);
+
+    when(deliveryRequestRepository.findByCustomerIdAndPaymentIdempotencyKey(1L, "idem-pay"))
+        .thenReturn(Optional.empty());
+    when(deliveryRequestRepository.save(any(DeliveryRequest.class)))
+        .thenAnswer(
+            invocation -> {
+              DeliveryRequest entity = invocation.getArgument(0);
+              entity.setId(100L);
+              return entity;
+            });
+    when(paymentService.usePoint(eq(1L), eq("idem-pay"), any(PointUseRequest.class)))
+        .thenReturn(new PointUseResultResponse(1000L, 78776L, LocalDateTime.of(2026, 8, 4, 12, 0)));
+
+    DeliveryPaymentResponse response = deliveryService.payDelivery(1L, "idem-pay", request);
+
+    assertThat(response.deliveryRequestId()).isEqualTo(100L);
+    assertThat(response.paidAmount()).isEqualTo(78776L);
+    assertThat(response.remainingBalance()).isEqualTo(1000L);
+    assertThat(response.deliveryStatus()).isEqualTo(DeliveryStatus.REQUESTED);
+    assertThat(response.matchedStatus()).isEqualTo("MATCHING");
+  }
+
+  @Test
+  @DisplayName("동일 멱등 키 재호출 시 기존 배송 요청을 재사용한다")
+  void payDeliveryDuplicateIdempotencyKeyReusesExistingDelivery() {
+    DeliveryPayRequest request = new DeliveryPayRequest();
+    request.setPickup(createLocation("서울 강남구", 37.0, 127.0));
+    request.setDropoff(createLocation("서울 서초구", 38.0, 127.0));
+    request.setWeight(10.0);
+    request.setItemSize(ItemSize.MEDIUM);
+
+    DeliveryRequest existing = new DeliveryRequest();
+    existing.setId(200L);
+    existing.setStatus(DeliveryStatus.REQUESTED);
+    when(deliveryRequestRepository.findByCustomerIdAndPaymentIdempotencyKey(1L, "idem-reuse"))
+        .thenReturn(Optional.of(existing));
+    when(paymentService.usePoint(eq(1L), eq("idem-reuse"), any(PointUseRequest.class)))
+        .thenReturn(new PointUseResultResponse(500L, 78776L, LocalDateTime.of(2026, 8, 4, 12, 30)));
+
+    DeliveryPaymentResponse response = deliveryService.payDelivery(1L, "idem-reuse", request);
+
+    assertThat(response.deliveryRequestId()).isEqualTo(200L);
+    assertThat(response.remainingBalance()).isEqualTo(500L);
+    verify(deliveryRequestRepository, never()).save(any(DeliveryRequest.class));
+  }
+
+  @Test
   @DisplayName("status가 없으면 회원의 전체 배송 내역을 최신순으로 조회한다")
   void getMyDeliveryRequestsWithoutStatusReturnsAll() {
     Pageable pageable = PageRequest.of(0, 10);
@@ -525,5 +587,13 @@ class DeliveryServiceTest {
 
     assertThatThrownBy(() -> deliveryService.getDeliveryRequestDetail(999L, 1L))
         .isInstanceOf(DeliveryAccessDeniedException.class);
+  }
+
+  private DeliveryPayLocationRequest createLocation(String address, double lat, double lng) {
+    DeliveryPayLocationRequest location = new DeliveryPayLocationRequest();
+    location.setAddress(address);
+    location.setLat(lat);
+    location.setLng(lng);
+    return location;
   }
 }
