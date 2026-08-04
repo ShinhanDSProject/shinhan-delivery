@@ -280,22 +280,24 @@
         const badge = badgeFor(item.status);
         const card = document.createElement('a');
         card.className = 'history-card';
-        card.href = item.status === 'CANCELLED'
-            ? `/cancel-detail.html?id=${item.id}`
-            : `/delivery-detail.html?id=${item.id}`;
+        card.href = (item.status === 'CANCELLED' ? '/cancel-detail.html?id=' : '/delivery-detail.html?id=')
+            + encodeURIComponent(item.id);
         card.innerHTML = `
             <div class="card-top">
                 <span class="date">${formatDate(item.createdAt)}</span>
                 <span class="status-badge ${badge.className}">${badge.label}</span>
             </div>
             <div class="card-mid">
-                <div class="route">${item.pickupAddress} → ${item.dropoffAddress}</div>
+                <div class="route" data-field="route"></div>
             </div>
             <div class="card-bottom">
                 <span class="fee">${item.feePoint.toLocaleString()} P</span>
                 <span class="chevron" aria-hidden="true">›</span>
             </div>
         `;
+        // pickupAddress/dropoffAddress는 고객이 자유 입력하는 텍스트라 innerHTML에 직접 꽂지 않고
+        // textContent로만 채워 스크립트 삽입(XSS)을 막는다.
+        card.querySelector('[data-field="route"]').textContent = `${item.pickupAddress} → ${item.dropoffAddress}`;
         return card;
     }
 

@@ -244,11 +244,11 @@
             <section class="card">
                 <div class="detail-row">
                     <div class="label">출발지 (픽업)</div>
-                    <div class="value">${detail.pickupAddress}</div>
+                    <div class="value" data-field="pickupAddress"></div>
                 </div>
                 <div class="detail-row">
                     <div class="label">도착지</div>
-                    <div class="value">${detail.dropoffAddress}</div>
+                    <div class="value" data-field="dropoffAddress"></div>
                 </div>
                 <div class="detail-row">
                     <div class="label">물품 정보</div>
@@ -257,7 +257,7 @@
                 ${detail.courierName ? `
                 <div class="detail-row">
                     <div class="label">배송원</div>
-                    <div class="value">${detail.courierName}</div>
+                    <div class="value" data-field="courierName"></div>
                 </div>` : ''}
                 <div class="detail-row">
                     <div class="label">결제 요금</div>
@@ -265,6 +265,13 @@
                 </div>
             </section>
         `;
+        // pickupAddress/dropoffAddress/courierName은 사용자가 입력한 자유 텍스트라 innerHTML에 직접
+        // 꽂지 않고 textContent로만 채워 스크립트 삽입(XSS)을 막는다.
+        body.querySelector('[data-field="pickupAddress"]').textContent = detail.pickupAddress;
+        body.querySelector('[data-field="dropoffAddress"]').textContent = detail.dropoffAddress;
+        if (detail.courierName) {
+            body.querySelector('[data-field="courierName"]').textContent = detail.courierName;
+        }
 
         const footerActions = document.getElementById('footerActions');
         const photoCta = document.getElementById('photoCta');

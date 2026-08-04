@@ -238,7 +238,8 @@
     }
 
     function render(detail) {
-        document.getElementById('body').innerHTML = `
+        const body = document.getElementById('body');
+        body.innerHTML = `
             <div class="status-section">
                 <span class="status-badge">취소 완료</span>
                 <span class="order-no">배송번호 #${detail.id}</span>
@@ -246,7 +247,7 @@
 
             <section class="card">
                 <div class="card-title">배송 정보</div>
-                <div class="route">${detail.pickupAddress} → ${detail.dropoffAddress}</div>
+                <div class="route" data-field="route"></div>
                 <div class="item-line">
                     <span class="item-label">물품:</span>
                     <span>${itemSizeLabel(detail.itemSize)} (${detail.weight}kg)</span>
@@ -288,6 +289,9 @@
                 </div>
             </section>
         `;
+        // pickupAddress/dropoffAddress는 고객이 자유 입력하는 텍스트라 innerHTML에 직접 꽂지 않고
+        // textContent로만 채워 스크립트 삽입(XSS)을 막는다.
+        body.querySelector('[data-field="route"]').textContent = `${detail.pickupAddress} → ${detail.dropoffAddress}`;
     }
 
     async function load() {
