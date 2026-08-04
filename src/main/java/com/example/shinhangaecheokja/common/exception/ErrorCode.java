@@ -28,6 +28,9 @@ public enum ErrorCode {
   CURRENT_PASSWORD_MISMATCH(HttpStatus.BAD_REQUEST, "M004", "현재 비밀번호가 일치하지 않습니다."),
   PASSWORD_CONFIRMATION_MISMATCH(HttpStatus.BAD_REQUEST, "M005", "새 비밀번호와 비밀번호 확인이 일치하지 않습니다."),
   PASSWORD_REUSE_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "M006", "현재 비밀번호와 다른 비밀번호를 입력해야 합니다."),
+  INVALID_RESET_CODE(HttpStatus.BAD_REQUEST, "M007", "인증번호가 일치하지 않거나 만료되었습니다."),
+  INVALID_RESET_TOKEN(HttpStatus.BAD_REQUEST, "M008", "유효하지 않거나 만료된 비밀번호 재설정 토큰입니다."),
+  RESET_CODE_EXPIRED(HttpStatus.BAD_REQUEST, "M009", "인증번호 유효시간이 만료되었습니다."),
   UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "A001", "인증 권한이 필요합니다."),
 
   // Vehicle Domain Errors

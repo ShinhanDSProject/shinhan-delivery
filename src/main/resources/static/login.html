@@ -218,6 +218,74 @@
                 padding: 32px 24px;
             }
         }
+        /* Modal Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.5);
+            backdrop-filter: blur(4px);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #ffffff;
+            width: 100%;
+            max-width: 440px;
+            padding: 32px 28px;
+            border-radius: 16px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            position: relative;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h2 {
+            font-size: 20px;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .modal-close {
+            background: transparent;
+            border: 0;
+            font-size: 24px;
+            color: #64748b;
+            cursor: pointer;
+            padding: 0 4px;
+            line-height: 1;
+        }
+
+        .modal-step {
+            display: none;
+        }
+
+        .modal-step.active {
+            display: block;
+        }
+
+        .timer-badge {
+            display: inline-block;
+            font-size: 13px;
+            color: #ef4444;
+            font-weight: 600;
+            margin-top: 4px;
+        }
     </style>
 </head>
 <body>
@@ -250,6 +318,54 @@
         </nav>
     </div>
 </main>
+
+<!-- 비밀번호 찾기 / 재설정 모달 -->
+<div id="resetModal" class="modal-overlay" aria-hidden="true">
+    <div class="modal-content" role="dialog" aria-labelledby="modalTitle">
+        <div class="modal-header">
+            <h2 id="modalTitle">비밀번호 재설정</h2>
+            <button id="closeResetModal" class="modal-close" type="button" aria-label="닫기">&times;</button>
+        </div>
+
+        <!-- Step 1: 이메일 입력 -->
+        <div id="step1" class="modal-step active">
+            <p style="font-size: 14px; color: #64748b; margin-bottom: 16px;">가입 시 사용한 이메일 주소를 입력하시면 인증번호를 보내드립니다.</p>
+            <div class="field">
+                <label for="resetEmail">이메일 주소</label>
+                <input id="resetEmail" type="email" placeholder="example@lumen.com" required>
+            </div>
+            <p id="step1Msg" class="message" role="alert"></p>
+            <button id="btnRequestCode" class="login-button" type="button">인증번호 발송</button>
+        </div>
+
+        <!-- Step 2: 6자리 인증번호 입력 -->
+        <div id="step2" class="modal-step">
+            <p style="font-size: 14px; color: #64748b; margin-bottom: 8px;">이메일로 발송된 6자리 인증번호를 입력해주세요.</p>
+            <div class="timer-badge" id="timerDisplay">남은 시간 03:00</div>
+            <div class="field" style="margin-top: 12px;">
+                <label for="resetCode">인증번호 (6자리)</label>
+                <input id="resetCode" type="text" maxlength="6" placeholder="123456" required>
+            </div>
+            <p id="step2Msg" class="message" role="alert"></p>
+            <button id="btnVerifyCode" class="login-button" type="button">인증 확인</button>
+        </div>
+
+        <!-- Step 3: 새 비밀번호 입력 -->
+        <div id="step3" class="modal-step">
+            <p style="font-size: 14px; color: #64748b; margin-bottom: 16px;">새롭게 사용할 비밀번호를 입력해주세요 (8~20자).</p>
+            <div class="field">
+                <label for="newPassword">새 비밀번호</label>
+                <input id="newPassword" type="password" placeholder="8자 이상 입력" required>
+            </div>
+            <div class="field">
+                <label for="newPasswordConfirm">새 비밀번호 확인</label>
+                <input id="newPasswordConfirm" type="password" placeholder="비밀번호 재입력" required>
+            </div>
+            <p id="step3Msg" class="message" role="alert"></p>
+            <button id="btnConfirmReset" class="login-button" type="button">비밀번호 변경 완료</button>
+        </div>
+    </div>
+</div>
 
 <script>
     const loginForm = document.getElementById('loginForm');
@@ -298,9 +414,185 @@
         }
     });
 
-    document.getElementById('forgotPassword').addEventListener('click', (event) => {
-        event.preventDefault();
-        showMessage('비밀번호 찾기 기능은 아직 준비 중입니다.');
+    // 비밀번호 재설정 모달 Logic
+    const resetModal = document.getElementById('resetModal');
+    const forgotPasswordLink = document.getElementById('forgotPassword');
+    const closeResetModalBtn = document.getElementById('closeResetModal');
+
+    const step1 = document.getElementById('step1');
+    const step2 = document.getElementById('step2');
+    const step3 = document.getElementById('step3');
+
+    const resetEmailInput = document.getElementById('resetEmail');
+    const resetCodeInput = document.getElementById('resetCode');
+    const newPasswordInput = document.getElementById('newPassword');
+    const newPasswordConfirmInput = document.getElementById('newPasswordConfirm');
+
+    const step1Msg = document.getElementById('step1Msg');
+    const step2Msg = document.getElementById('step2Msg');
+    const step3Msg = document.getElementById('step3Msg');
+
+    const btnRequestCode = document.getElementById('btnRequestCode');
+    const btnVerifyCode = document.getElementById('btnVerifyCode');
+    const btnConfirmReset = document.getElementById('btnConfirmReset');
+    const timerDisplay = document.getElementById('timerDisplay');
+
+    let currentResetToken = '';
+    let timerInterval = null;
+
+    function setStep(stepNum) {
+        step1.classList.remove('active');
+        step2.classList.remove('active');
+        step3.classList.remove('active');
+        if (stepNum === 1) step1.classList.add('active');
+        if (stepNum === 2) step2.classList.add('active');
+        if (stepNum === 3) step3.classList.add('active');
+    }
+
+    function startTimer(seconds) {
+        clearInterval(timerInterval);
+        let remain = seconds;
+        const updateTimer = () => {
+            const m = String(Math.floor(remain / 60)).padStart(2, '0');
+            const s = String(remain % 60).padStart(2, '0');
+            timerDisplay.textContent = `남은 시간 ${m}:${s}`;
+            if (remain <= 0) {
+                clearInterval(timerInterval);
+                timerDisplay.textContent = '인증시간이 만료되었습니다. 다시 발송해주세요.';
+            }
+            remain--;
+        };
+        updateTimer();
+        timerInterval = setInterval(updateTimer, 1000);
+    }
+
+    forgotPasswordLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        setStep(1);
+        resetEmailInput.value = '';
+        resetCodeInput.value = '';
+        newPasswordInput.value = '';
+        newPasswordConfirmInput.value = '';
+        step1Msg.classList.remove('show');
+        step2Msg.classList.remove('show');
+        step3Msg.classList.remove('show');
+        resetModal.classList.add('active');
+        resetModal.setAttribute('aria-hidden', 'false');
+    });
+
+    closeResetModalBtn.addEventListener('click', () => {
+        resetModal.classList.remove('active');
+        resetModal.setAttribute('aria-hidden', 'true');
+        clearInterval(timerInterval);
+    });
+
+    btnRequestCode.addEventListener('click', async () => {
+        const email = resetEmailInput.value.trim();
+        if (!email) {
+            step1Msg.textContent = '이메일 주소를 입력해주세요.';
+            step1Msg.className = 'message show';
+            return;
+        }
+        btnRequestCode.disabled = true;
+        btnRequestCode.textContent = '발송 중...';
+        try {
+            const res = await fetch('/api/v1/auth/password-reset/request-code', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email })
+            });
+            const data = await res.json();
+            if (!res.ok) {
+                step1Msg.textContent = data.message || '가입되지 않은 이메일이거나 발송에 실패했습니다.';
+                step1Msg.className = 'message show';
+                return;
+            }
+            setStep(2);
+            startTimer(data.expiresInSeconds || 180);
+        } catch (err) {
+            step1Msg.textContent = '서버 통신 오류가 발생했습니다.';
+            step1Msg.className = 'message show';
+        } finally {
+            btnRequestCode.disabled = false;
+            btnRequestCode.textContent = '인증번호 발송';
+        }
+    });
+
+    btnVerifyCode.addEventListener('click', async () => {
+        const email = resetEmailInput.value.trim();
+        const code = resetCodeInput.value.trim();
+        if (!code || code.length !== 6) {
+            step2Msg.textContent = '6자리 인증번호를 입력해주세요.';
+            step2Msg.className = 'message show';
+            return;
+        }
+        btnVerifyCode.disabled = true;
+        btnVerifyCode.textContent = '인증 중...';
+        try {
+            const res = await fetch('/api/v1/auth/password-reset/verify-code', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, code })
+            });
+            const data = await res.json();
+            if (!res.ok) {
+                step2Msg.textContent = data.message || '인증번호가 일치하지 않거나 만료되었습니다.';
+                step2Msg.className = 'message show';
+                return;
+            }
+            currentResetToken = data.resetToken;
+            clearInterval(timerInterval);
+            setStep(3);
+        } catch (err) {
+            step2Msg.textContent = '서버 통신 오류가 발생했습니다.';
+            step2Msg.className = 'message show';
+        } finally {
+            btnVerifyCode.disabled = false;
+            btnVerifyCode.textContent = '인증 확인';
+        }
+    });
+
+    btnConfirmReset.addEventListener('click', async () => {
+        const newPassword = newPasswordInput.value;
+        const newPasswordConfirm = newPasswordConfirmInput.value;
+        if (!newPassword || newPassword.length < 8) {
+            step3Msg.textContent = '비밀번호는 8자 이상 입력해주세요.';
+            step3Msg.className = 'message show';
+            return;
+        }
+        if (newPassword !== newPasswordConfirm) {
+            step3Msg.textContent = '비밀번호 확인이 일치하지 않습니다.';
+            step3Msg.className = 'message show';
+            return;
+        }
+        btnConfirmReset.disabled = true;
+        btnConfirmReset.textContent = '변경 중...';
+        try {
+            const res = await fetch('/api/v1/auth/password-reset/confirm', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    resetToken: currentResetToken,
+                    newPassword,
+                    newPasswordConfirm
+                })
+            });
+            if (!res.ok) {
+                const data = await res.json();
+                step3Msg.textContent = data.message || '비밀번호 변경에 실패했습니다.';
+                step3Msg.className = 'message show';
+                return;
+            }
+            resetModal.classList.remove('active');
+            resetModal.setAttribute('aria-hidden', 'true');
+            showMessage('비밀번호가 성공적으로 변경되었습니다. 새 비밀번호로 로그인해주세요.', true);
+        } catch (err) {
+            step3Msg.textContent = '서버 통신 오류가 발생했습니다.';
+            step3Msg.className = 'message show';
+        } finally {
+            btnConfirmReset.disabled = false;
+            btnConfirmReset.textContent = '비밀번호 변경 완료';
+        }
     });
 </script>
 </body>
