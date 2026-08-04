@@ -3,6 +3,7 @@ package com.example.shinhangaecheokja.member.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.example.shinhangaecheokja.common.exception.EntityNotFoundException;
@@ -12,6 +13,10 @@ import com.example.shinhangaecheokja.member.entity.Member;
 import com.example.shinhangaecheokja.member.entity.MemberRole;
 import com.example.shinhangaecheokja.member.exception.DuplicateMemberException;
 import com.example.shinhangaecheokja.member.repository.MemberRepository;
+import com.example.shinhangaecheokja.vehicle.entity.Vehicle;
+import com.example.shinhangaecheokja.vehicle.entity.VehicleType;
+import com.example.shinhangaecheokja.vehicle.repository.VehicleRepository;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -26,6 +31,7 @@ class MemberServiceTest {
 
   @Mock private MemberRepository memberRepository;
   @Mock private PasswordEncoder passwordEncoder;
+  @Mock private VehicleRepository vehicleRepository;
   @InjectMocks private MemberService memberService;
 
   @Test
@@ -41,12 +47,47 @@ class MemberServiceTest {
     when(memberRepository.existsByEmail("user@example.com")).thenReturn(false);
     when(passwordEncoder.encode("password123")).thenReturn("encoded-password");
     when(memberRepository.save(any(Member.class)))
-        .thenAnswer(invocation -> invocation.getArgument(0));
+        .thenAnswer(
+            invocation -> {
+              Member member = invocation.getArgument(0);
+              member.setId(1L);
+              return member;
+            });
 
     Member response = memberService.create(request);
 
     assertThat(response.getEmail()).isEqualTo("user@example.com");
     assertThat(response.getRole()).isEqualTo(MemberRole.CUSTOMER);
+  }
+
+  @Test
+  @DisplayName("배송원 회원가입이면 기본 차량도 함께 생성한다")
+  void createCourierCreatesDefaultVehicle() {
+    MemberCreateRequest request = new MemberCreateRequest();
+    request.setEmail("courier@example.com");
+    request.setPassword("password123");
+    request.setName("배송원");
+    request.setPhoneNumber("010-1234-5678");
+    request.setRole(MemberRole.COURIER);
+    request.setVehicleType(VehicleType.MOTORCYCLE);
+    request.setActivityRegion("서울 강남구");
+    request.setPreferredWeight(15.0);
+
+    when(memberRepository.existsByEmail("courier@example.com")).thenReturn(false);
+    when(passwordEncoder.encode("password123")).thenReturn("encoded-password");
+    when(memberRepository.save(any(Member.class)))
+        .thenAnswer(
+            invocation -> {
+              Member member = invocation.getArgument(0);
+              member.setId(10L);
+              return member;
+            });
+    when(vehicleRepository.save(any(Vehicle.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+    Member response = memberService.create(request);
+
+    assertThat(response.getRole()).isEqualTo(MemberRole.COURIER);
+    verify(vehicleRepository).save(any(Vehicle.class));
   }
 
   @Test
@@ -117,5 +158,22 @@ class MemberServiceTest {
 
     assertThat(response.getName()).isEqualTo("김영희");
     assertThat(response.getPhoneNumber()).isEqualTo("010-1111-2222");
+  }
+
+  @Test
+  @DisplayName("배송원 회원 삭제 시 소유 차량을 먼저 정리한다")
+  void deleteCourierRemovesOwnedVehiclesFirst() {
+    Member member = new Member();
+    member.setId(3L);
+    when(memberRepository.findById(3L)).thenReturn(Optional.of(member));
+
+    Vehicle vehicle = new Vehicle();
+    vehicle.setId(99L);
+    when(vehicleRepository.findAllByOwnerId(3L)).thenReturn(List.of(vehicle));
+
+    memberService.delete(3L);
+
+    verify(vehicleRepository).delete(vehicle);
+    verify(memberRepository).delete(member);
   }
 }

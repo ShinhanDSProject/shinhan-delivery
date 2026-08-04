@@ -49,6 +49,12 @@ public class Member {
   @Column(nullable = false, length = 20)
   private MemberRole role;
 
+  @Column(name = "activity_region", length = 100)
+  private String activityRegion;
+
+  @Column(name = "preferred_weight")
+  private Double preferredWeight;
+
   /** 회원의 역할(CUSTOMER/COURIER)을 변경한다. ADMIN 권한 승격은 직접 변경을 불허한다. */
   public Member changeRole(MemberRole newRole) {
     if (newRole == null) {
@@ -70,14 +76,14 @@ public class Member {
     return this;
   }
 
-  /** MemberUpdateRequest DTO 기반으로 회원 이름·연락처를 수정하는 도메인 비즈니스 메서드. */
+  /** MemberUpdateRequest DTO 기반으로 회원 이름과 연락처를 수정한다. */
   public Member updateBy(MemberUpdateRequest request) {
     this.name = request.getName();
     this.phoneNumber = request.getPhoneNumber();
     return this;
   }
 
-  /** MemberProfileUpdateRequestDto DTO 기반으로 회원 프로필 정보(2이름·연락처)를 수정하는 도메인 비즈니스 메서드. */
+  /** MemberProfileUpdateRequestDto DTO 기반으로 회원 프로필 정보를 수정한다. */
   public Member updateProfileBy(MemberProfileUpdateRequestDto request) {
     this.name = request.getName();
     this.phoneNumber = request.getPhoneNumber();
@@ -92,6 +98,8 @@ public class Member {
         .name(request.getName())
         .phoneNumber(request.getPhoneNumber())
         .role(request.getRole())
+        .activityRegion(request.getActivityRegion())
+        .preferredWeight(request.getPreferredWeight())
         .build();
   }
 }

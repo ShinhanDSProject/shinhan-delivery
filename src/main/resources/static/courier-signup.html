@@ -164,7 +164,6 @@
             color: #dc2626;
         }
 
-        /* 커스텀 운송수단 드롭다운 (스크롤바 구현) */
         .custom-dropdown {
             position: relative;
             user-select: none;
@@ -210,14 +209,13 @@
             border-color: var(--primary);
         }
 
-        /* 스크롤바가 나오는 옵션 메뉴 목록 */
         .dropdown-menu {
             position: absolute;
             top: calc(100% + 6px);
             left: 0;
             right: 0;
-            max-height: 180px; /* 고정 높이 지정 */
-            overflow-y: auto;  /* 아래로 스크롤바가 생기도록 설정 */
+            max-height: 180px;
+            overflow-y: auto;
             background-color: #ffffff;
             border: 1.5px solid var(--primary);
             border-radius: 12px;
@@ -232,18 +230,20 @@
             animation: dropdownFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        /* 커스텀 스크롤바 스타일링 */
         .dropdown-menu::-webkit-scrollbar {
             width: 7px;
         }
+
         .dropdown-menu::-webkit-scrollbar-track {
             background: #f1f5f9;
             border-radius: 0 12px 12px 0;
         }
+
         .dropdown-menu::-webkit-scrollbar-thumb {
             background: #cbd5e1;
             border-radius: 4px;
         }
+
         .dropdown-menu::-webkit-scrollbar-thumb:hover {
             background: #94a3b8;
         }
@@ -275,7 +275,6 @@
             font-size: 16px;
         }
 
-        /* 희망 배송 중량 칩 그룹 (5kg ~ 30kg) */
         .weight-chips {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -309,7 +308,6 @@
             box-shadow: 0 4px 12px rgba(0, 70, 255, 0.25);
         }
 
-        /* 약관 동의 */
         .terms-section {
             margin: 28px 0;
             padding: 18px;
@@ -357,7 +355,6 @@
             font-weight: 700;
         }
 
-        /* 가입 완료 버튼 */
         .btn-submit {
             width: 100%;
             padding: 16px;
@@ -415,76 +412,68 @@
 
 <div class="signup-card">
     <button class="back-button" type="button" aria-label="배송파트너 로그인 페이지로 이동" onclick="location.href='/courier-login.html'"></button>
-    
+
     <div class="signup-header">
         <span class="badge">Shinhan Delivery Partner</span>
         <h1>배송원 회원가입</h1>
-        <p>신한 개척자 배송 파트너로 등록하여 수익을 창출하세요</p>
+        <p>신한 개척자 배송 파트너로 등록하여 수익을 창출하세요.</p>
     </div>
 
     <form id="courierSignupForm">
-        <!-- 1. 이름 -->
         <div class="form-group">
             <label for="name">이름 <span class="text-required">*</span></label>
             <input type="text" id="name" placeholder="홍길동" required>
         </div>
 
-        <!-- 2. 이메일 주소 -->
         <div class="form-group">
             <label for="email">이메일 주소 (계정 ID) <span class="text-required">*</span></label>
             <input type="email" id="email" placeholder="partner@shinhan.com" required>
         </div>
 
-        <!-- 3. 비밀번호 -->
         <div class="form-group">
             <label for="password">비밀번호 <span class="text-required">*</span></label>
-            <input type="password" id="password" placeholder="8자 이상의 영문/숫자/특수문증 조합" required>
+            <input type="password" id="password" placeholder="8자 이상 영문/숫자/특수문자 조합" required>
         </div>
 
-        <!-- 4. 비밀번호 확인 -->
         <div class="form-group">
             <label for="confirmPassword">비밀번호 확인 <span class="text-required">*</span></label>
-            <input type="password" id="confirmPassword" placeholder="비밀번호를 다시 한 번 입력해 주세요" required>
+            <input type="password" id="confirmPassword" placeholder="비밀번호를 다시 한 번 입력해 주세요." required>
             <div id="pwMatchStatus" class="status-badge"></div>
         </div>
 
-        <!-- 5. 휴대폰 번호 -->
         <div class="form-group">
             <label for="phoneNumber">휴대폰 번호 <span class="text-required">*</span></label>
             <input type="tel" id="phoneNumber" placeholder="01012345678" required>
         </div>
 
-        <!-- 6. 운송 수단 선택 (클릭 시 스크롤바가 나오는 커스텀 드롭다운) -->
         <div class="form-group">
-            <label for="vehicleInput">운송 수단 선택 <span class="text-required">*</span></label>
+            <label for="vehicleInput">배송 수단 선택 <span class="text-required">*</span></label>
             <input type="hidden" id="vehicleInput" name="vehicle" required>
-            
+
             <div class="custom-dropdown" id="vehicleDropdown">
                 <div class="dropdown-selected placeholder" id="dropdownSelectedText">
-                    <span>운송 수단을 선택해 주세요</span>
+                    <span>배송 수단을 선택해 주세요.</span>
                     <span class="dropdown-arrow"></span>
                 </div>
                 <div class="dropdown-menu" id="dropdownMenuList">
                     <div class="dropdown-item" data-value="오토바이"><span class="icon">🏍️</span> 오토바이</div>
                     <div class="dropdown-item" data-value="자전거"><span class="icon">🚲</span> 자전거</div>
-                    <div class="dropdown-item" data-value="드론"><span class="icon">🛸</span> 드론</div>
-                    <div class="dropdown-item" data-value="소형차"><span class="icon">🚗</span> 소형차</div>
+                    <div class="dropdown-item" data-value="승용차"><span class="icon">🚗</span> 승용차</div>
+                    <div class="dropdown-item" data-value="소형차"><span class="icon">🚙</span> 소형차</div>
                     <div class="dropdown-item" data-value="중형차"><span class="icon">🚘</span> 중형차</div>
-                    <div class="dropdown-item" data-value="대형차"><span class="icon">🚙</span> 대형차</div>
-                    <div class="dropdown-item" data-value="트럭"><span class="icon">🚚</span> 트럭</div>
-                    <div class="dropdown-item" data-value="도보"><span class="icon">🏃</span> 도보</div>
-                    <div class="dropdown-item" data-value="전동 킥보드/스쿠터"><span class="icon">🛴</span> 전동 킥보드/스쿠터</div>
+                    <div class="dropdown-item" data-value="대형차"><span class="icon">🚚</span> 대형차</div>
+                    <div class="dropdown-item" data-value="트럭"><span class="icon">🚛</span> 트럭</div>
+                    <div class="dropdown-item" data-value="도보"><span class="icon">🚶</span> 도보</div>
+                    <div class="dropdown-item" data-value="드론"><span class="icon">🛸</span> 드론</div>
                 </div>
             </div>
         </div>
 
-        <!-- 7. 활동 희망 지역 -->
         <div class="form-group">
             <label for="activityRegion">활동 희망 지역 <span class="text-required">*</span></label>
             <input type="text" id="activityRegion" placeholder="예: 서울특별시 강남구 / 경기 성남시" required>
         </div>
 
-        <!-- 8. 희망 배송 중량 (5kg, 10kg, 15kg, 20kg, 25kg, 30kg) -->
         <div class="form-group">
             <label>희망 배송 중량 <span class="text-required">*</span></label>
             <input type="hidden" id="preferredWeight" name="preferredWeight" required>
@@ -496,10 +485,9 @@
                 <button type="button" class="weight-chip" data-weight="25kg">25kg 이하</button>
                 <button type="button" class="weight-chip" data-weight="30kg">30kg 이하</button>
             </div>
-            <div id="weightError" class="status-badge error" style="display:none;">희망 배송 중량을 선택해주세요.</div>
+            <div id="weightError" class="status-badge error" style="display:none;">희망 배송 중량을 선택해 주세요.</div>
         </div>
 
-        <!-- 9. 이용동의 -->
         <div class="terms-section">
             <div class="terms-item all-agree">
                 <input type="checkbox" id="checkAll">
@@ -519,19 +507,17 @@
             </div>
             <div class="terms-item">
                 <input type="checkbox" id="marketingAgreed" class="term-check">
-                <label for="marketingAgreed"><span class="text-optional">[선택]</span> 마케팅 및 단건 배송 알림 동의</label>
+                <label for="marketingAgreed"><span class="text-optional">[선택]</span> 마케팅 및 이벤트 배송 알림 동의</label>
             </div>
         </div>
 
-        <!-- 10. 가입 완료 버튼 -->
-        <button type="submit" class="btn-submit">배송 파트너 가입 신청 완료</button>
+        <button type="submit" class="btn-submit">배송 파트너 가입 요청 완료</button>
     </form>
 
     <div id="resultToast" class="result-toast"></div>
 </div>
 
 <script>
-    // 1. 비밀번호 실시간 검사
     const pwInput = document.getElementById('password');
     const confirmPwInput = document.getElementById('confirmPassword');
     const pwMatchStatus = document.getElementById('pwMatchStatus');
@@ -543,20 +529,18 @@
         }
         if (pwInput.value === confirmPwInput.value) {
             pwMatchStatus.className = 'status-badge success';
-            pwMatchStatus.textContent = '✓ 비밀번호가 일치합니다.';
+            pwMatchStatus.textContent = '비밀번호가 일치합니다.';
         } else {
             pwMatchStatus.className = 'status-badge error';
-            pwMatchStatus.textContent = '✕ 비밀번호가 일치하지 않습니다.';
+            pwMatchStatus.textContent = '비밀번호가 일치하지 않습니다.';
         }
     }
 
     pwInput.addEventListener('input', checkPasswordMatch);
     confirmPwInput.addEventListener('input', checkPasswordMatch);
 
-    // 2. 운송 수단 커스텀 드롭다운 (스크롤바 구현)
     const vehicleDropdown = document.getElementById('vehicleDropdown');
     const dropdownSelectedText = document.getElementById('dropdownSelectedText');
-    const dropdownMenuList = document.getElementById('dropdownMenuList');
     const vehicleInput = document.getElementById('vehicleInput');
 
     dropdownSelectedText.addEventListener('click', (e) => {
@@ -569,7 +553,7 @@
             e.stopPropagation();
             const value = item.getAttribute('data-value');
             const iconAndText = item.innerHTML;
-            
+
             vehicleInput.value = value;
             dropdownSelectedText.innerHTML = `<span>${iconAndText}</span><span class="dropdown-arrow"></span>`;
             dropdownSelectedText.classList.remove('placeholder');
@@ -585,7 +569,6 @@
         vehicleDropdown.classList.remove('active');
     });
 
-    // 3. 희망 배송 중량 칩 클릭 선택 (5kg ~ 30kg)
     const weightChips = document.querySelectorAll('.weight-chip');
     const preferredWeightInput = document.getElementById('preferredWeight');
     const weightError = document.getElementById('weightError');
@@ -599,7 +582,6 @@
         });
     });
 
-    // 4. 약관 전체 선택 / 해제
     const checkAll = document.getElementById('checkAll');
     const termChecks = document.querySelectorAll('.term-check');
 
@@ -614,7 +596,6 @@
         });
     });
 
-    // 5. 회원가입 Form 제출 이벤트
     document.getElementById('courierSignupForm').addEventListener('submit', async function(e) {
         e.preventDefault();
         const resultToast = document.getElementById('resultToast');
@@ -627,14 +608,10 @@
         const vehicle = vehicleInput.value;
         const activityRegion = document.getElementById('activityRegion').value.trim();
         const preferredWeight = preferredWeightInput.value;
-        const termsAgreed = document.getElementById('termsAgreed').checked;
-        const privacyAgreed = document.getElementById('privacyAgreed').checked;
-        const safetyAgreed = document.getElementById('safetyAgreed').checked;
-        const marketingAgreed = document.getElementById('marketingAgreed').checked;
 
         if (!vehicle) {
             resultToast.className = 'result-toast error';
-            resultToast.textContent = '운송 수단을 선택해 주세요.';
+            resultToast.textContent = '배송 수단을 선택해 주세요.';
             vehicleDropdown.scrollIntoView({ behavior: 'smooth', block: 'center' });
             return;
         }
@@ -653,8 +630,7 @@
         }
 
         try {
-            // TODO: vehicle/activityRegion/preferredWeight는 아직 회원가입 API와 연결되어 있지 않다.
-            // 차량 등록은 회원가입과 별도로 POST /api/v1/vehicles 호출이 필요하다(ownerId 필요).
+            const preferredWeightValue = Number.parseFloat(preferredWeight.replace('kg', ''));
             const res = await fetch('/api/v1/members', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -663,7 +639,10 @@
                     email,
                     password,
                     phoneNumber,
-                    role: 'COURIER'
+                    role: 'COURIER',
+                    vehicleType: mapVehicleType(vehicle),
+                    activityRegion,
+                    preferredWeight: preferredWeightValue
                 })
             });
 
@@ -671,7 +650,7 @@
 
             if (res.ok) {
                 resultToast.className = 'result-toast success';
-                resultToast.textContent = `🎉 배송 파트너 가입 완료! 축하합니다, ${data.name}님 (${data.email})`;
+                resultToast.textContent = `배송 파트너 가입 완료! 축하합니다. ${data.name}님(${data.email})`;
                 setTimeout(() => {
                     location.href = '/courier-login.html';
                 }, 2000);
@@ -684,6 +663,12 @@
             resultToast.textContent = '서버 통신 오류가 발생했습니다.';
         }
     });
+
+    function mapVehicleType(vehicle) {
+        if (vehicle === '오토바이') return 'MOTORCYCLE';
+        if (vehicle === '드론') return 'DRONE';
+        return 'CAR';
+    }
 </script>
 
 </body>
