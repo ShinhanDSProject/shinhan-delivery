@@ -12,6 +12,7 @@ import com.example.shinhandelivery.delivery.dto.response.DeliveryResponse;
 import com.example.shinhandelivery.delivery.dto.response.ProofPhotoResponse;
 import com.example.shinhandelivery.delivery.entity.DeliveryRequest;
 import com.example.shinhandelivery.delivery.entity.DeliveryStatus;
+import com.example.shinhandelivery.delivery.entity.Matching;
 import com.example.shinhandelivery.delivery.event.DeliveryOfferBroadcastEvent;
 import com.example.shinhandelivery.delivery.event.DeliveryStatusChangedEvent;
 import com.example.shinhandelivery.delivery.exception.AlreadyMatchedException;
@@ -117,20 +118,13 @@ public class DeliveryService {
   public DeliveryDetailResponseDto getDeliveryRequestDetail(Long callerId, Long deliveryRequestId) {
     DeliveryRequest deliveryRequest = findDeliveryRequestOrThrow(deliveryRequestId);
 
-    Long courierId =
-        matchingRepository
-            .findByDeliveryRequestId(deliveryRequestId)
-            .map(matching -> vehicleService.getById(matching.getVehicleId()).getOwnerId())
-            .orElse(null);
-
-    boolean isOwner = callerId.equals(deliveryRequest.getCustomerId());
-    boolean isAssignedCourier = callerId.equals(courierId);
-    if (!isOwner && !isAssignedCourier) {
-      throw new DeliveryAccessDeniedException(deliveryRequestId, callerId);
-    }
+    Matching matching = matchingRepository.findByDeliveryRequestId(deliveryRequestId).orElse(null);
+    Long courierId = courierIdOf(matching);
+    assertCallerHasAccess(callerId, deliveryRequestId, deliveryRequest, courierId);
 
     String courierName = courierId == null ? null : memberService.getById(courierId).getName();
-    return DeliveryDetailResponseDto.from(deliveryRequest, courierName);
+    LocalDateTime matchedAt = matching == null ? null : matching.getMatchedAt();
+    return DeliveryDetailResponseDto.from(deliveryRequest, courierName, matchedAt);
   }
 
   /**
@@ -193,15 +187,37 @@ public class DeliveryService {
     return deliveryRequest;
   }
 
-  /** 완료된 배송 요청의 증거 사진을 조회한다. 완료되지 않았거나 사진이 없으면 ProofPhotoNotFoundException. */
+  /**
+   * 완료된 배송 요청의 증거 사진을 조회한다. 배송 요청의 고객 본인이거나 배정된 배송원 본인만 조회할 수 있고, 둘 다 아니면
+   * DeliveryAccessDeniedException을 던진다. 완료되지 않았거나 사진이 없으면 ProofPhotoNotFoundException.
+   */
   @Transactional(readOnly = true)
-  public ProofPhotoResponse getProofPhoto(Long deliveryRequestId) {
+  public ProofPhotoResponse getProofPhoto(Long callerId, Long deliveryRequestId) {
     DeliveryRequest deliveryRequest = findDeliveryRequestOrThrow(deliveryRequestId);
+
+    Matching matching = matchingRepository.findByDeliveryRequestId(deliveryRequestId).orElse(null);
+    assertCallerHasAccess(callerId, deliveryRequestId, deliveryRequest, courierIdOf(matching));
+
     if (deliveryRequest.getStatus() != DeliveryStatus.COMPLETED
         || deliveryRequest.getProofPhotoUrl() == null) {
       throw new ProofPhotoNotFoundException(deliveryRequestId);
     }
     return ProofPhotoResponse.from(deliveryRequest);
+  }
+
+  /** 매칭이 있으면 그 차량 소유주(Member) id를, 매칭이 없으면(아직 아무도 안 맡았으면) null을 반환한다. */
+  private Long courierIdOf(Matching matching) {
+    return matching == null ? null : vehicleService.getById(matching.getVehicleId()).getOwnerId();
+  }
+
+  /** 호출자가 배송 요청의 고객 본인이거나 배정된 배송원 본인이 아니면 DeliveryAccessDeniedException을 던진다. */
+  private void assertCallerHasAccess(
+      Long callerId, Long deliveryRequestId, DeliveryRequest deliveryRequest, Long courierId) {
+    boolean isOwner = callerId.equals(deliveryRequest.getCustomerId());
+    boolean isAssignedCourier = callerId.equals(courierId);
+    if (!isOwner && !isAssignedCourier) {
+      throw new DeliveryAccessDeniedException(deliveryRequestId, callerId);
+    }
   }
 
   private DeliveryRequest findDeliveryRequestOrThrow(Long deliveryRequestId) {
