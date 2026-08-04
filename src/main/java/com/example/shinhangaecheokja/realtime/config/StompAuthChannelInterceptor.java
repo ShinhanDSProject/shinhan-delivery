@@ -17,14 +17,15 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
 
 /**
- * STOMP CONNECT 시 JWT를 검증해 인증 주체를 세션에 설정하고, SUBSCRIBE 시 배송 추적 채널 접근 권한을 검증한다. 위치 (`/location`)와 상태
- * 변경(`/status`) 브로드캐스트 채널 모두 같은 배송 소유자·배정 배송원 검증을 거친다.
+ * STOMP CONNECT 시 JWT를 검증해 인증 주체를 세션에 설정하고, SUBSCRIBE 시 채널 접근 권한을 검증한다. 위치(`/location`)와 상태
+ * 변경(`/status`) 브로드캐스트 채널은 배송 소유자·배정 배송원 검증을, 오퍼(`/offers`) 채널은 그 차량 소유주 검증을 거친다.
  */
 @Component
 @RequiredArgsConstructor
 public class StompAuthChannelInterceptor implements ChannelInterceptor {
 
-  private static final String SUBSCRIBE_DESTINATION_PATTERN = "/topic/delivery/{deliveryId}/**";
+  private static final String DELIVERY_DESTINATION_PATTERN = "/topic/delivery/{deliveryId}/**";
+  private static final String OFFER_DESTINATION_PATTERN = "/topic/vehicles/{vehicleId}/offers";
   private static final AntPathMatcher PATH_MATCHER = new AntPathMatcher();
 
   private final JwtProvider jwtProvider;
@@ -59,26 +60,35 @@ public class StompAuthChannelInterceptor implements ChannelInterceptor {
     accessor.setUser(jwtProvider.getAuthentication(token));
   }
 
-  /** 배송 추적 채널 구독 시 deliveryId를 뽑아 TrackingService에 권한 검증을 위임한다. */
+  /** 구독 destination이 배송 추적 채널이면 deliveryId를, 오퍼 채널이면 vehicleId를 뽑아 TrackingService에 권한 검증을 위임한다. */
   private void authorizeSubscribe(StompHeaderAccessor accessor) {
     String destination = accessor.getDestination();
-    if (destination == null || !PATH_MATCHER.match(SUBSCRIBE_DESTINATION_PATTERN, destination)) {
+    if (destination == null) {
       return;
     }
-    String rawDeliveryId =
-        PATH_MATCHER
-            .extractUriTemplateVariables(SUBSCRIBE_DESTINATION_PATTERN, destination)
-            .get("deliveryId");
-    trackingService.assertCanSubscribe(
-        extractMemberId(accessor.getUser()), parseDeliveryId(rawDeliveryId));
+    if (PATH_MATCHER.match(DELIVERY_DESTINATION_PATTERN, destination)) {
+      String rawDeliveryId =
+          PATH_MATCHER
+              .extractUriTemplateVariables(DELIVERY_DESTINATION_PATTERN, destination)
+              .get("deliveryId");
+      trackingService.assertCanSubscribe(
+          extractMemberId(accessor.getUser()), parseId(rawDeliveryId, "배송 채널"));
+    } else if (PATH_MATCHER.match(OFFER_DESTINATION_PATTERN, destination)) {
+      String rawVehicleId =
+          PATH_MATCHER
+              .extractUriTemplateVariables(OFFER_DESTINATION_PATTERN, destination)
+              .get("vehicleId");
+      trackingService.assertCanSubscribeToOffers(
+          extractMemberId(accessor.getUser()), parseId(rawVehicleId, "오퍼 채널"));
+    }
   }
 
-  /** deliveryId 경로 변수가 숫자가 아니면(잘못된 구독 요청) 서버 오류 대신 접근 거부로 처리한다. */
-  private Long parseDeliveryId(String rawDeliveryId) {
+  /** 경로 변수가 숫자가 아니면(잘못된 구독 요청) 서버 오류 대신 접근 거부로 처리한다. */
+  private Long parseId(String rawId, String channelLabel) {
     try {
-      return Long.valueOf(rawDeliveryId);
+      return Long.valueOf(rawId);
     } catch (NumberFormatException e) {
-      throw new AccessDeniedException("유효하지 않은 배송 채널 구독 요청입니다: " + rawDeliveryId);
+      throw new AccessDeniedException("유효하지 않은 " + channelLabel + " 구독 요청입니다: " + rawId);
     }
   }
 

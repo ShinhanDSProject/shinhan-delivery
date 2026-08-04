@@ -3,8 +3,11 @@ package com.example.shinhangaecheokja.realtime;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.example.shinhangaecheokja.common.security.JwtProvider;
+import com.example.shinhangaecheokja.delivery.dto.request.DeliveryCreateRequest;
+import com.example.shinhangaecheokja.delivery.dto.response.DeliveryResponse;
 import com.example.shinhangaecheokja.delivery.entity.DeliveryRequest;
 import com.example.shinhangaecheokja.delivery.entity.DeliveryStatus;
+import com.example.shinhangaecheokja.delivery.entity.ItemSize;
 import com.example.shinhangaecheokja.delivery.entity.Matching;
 import com.example.shinhangaecheokja.delivery.entity.MatchingStatus;
 import com.example.shinhangaecheokja.delivery.repository.DeliveryRequestRepository;
@@ -191,6 +194,82 @@ class TrackingIntegrationTest {
     deliveryService.confirmPickup(deliveryId);
 
     assertThat(strangerReceived.poll(2, TimeUnit.SECONDS)).isNull();
+  }
+
+  @Test
+  @DisplayName("차량 소유주가 오퍼 채널을 구독하면 조건에 맞는 신규 배송요청 오퍼를 수신한다")
+  void subscribeOfferAsVehicleOwnerShouldReceiveBroadcast() throws Exception {
+    Long offerCourierId = createMember("offer-courier", MemberRole.COURIER);
+    Long offerVehicleId = createAvailableVehicle(offerCourierId);
+    try {
+      BlockingQueue<DeliveryResponse> received = new LinkedBlockingQueue<>();
+      StompSession session = connect(offerCourierId, "COURIER");
+      String destination = "/topic/vehicles/" + offerVehicleId + "/offers";
+      session.subscribe(destination, frameHandler(received, DeliveryResponse.class));
+      awaitSubscriptionRegistered(offerCourierId, destination);
+
+      DeliveryRequest created = deliveryService.requestDelivery(customerId, newDeliveryRequest());
+      try {
+        DeliveryResponse offer = received.poll(5, TimeUnit.SECONDS);
+
+        assertThat(offer).isNotNull();
+        assertThat(offer.id()).isEqualTo(created.getId());
+      } finally {
+        deliveryRequestRepository.deleteById(created.getId());
+      }
+    } finally {
+      vehicleRepository.deleteById(offerVehicleId);
+      memberRepository.deleteById(offerCourierId);
+    }
+  }
+
+  @Test
+  @DisplayName("차량 소유주가 아니면 오퍼 채널 구독이 거부되어 브로드캐스트를 받지 못한다")
+  void subscribeOfferAsNonOwnerShouldBeIgnored() throws Exception {
+    Long offerCourierId = createMember("offer-courier", MemberRole.COURIER);
+    Long offerVehicleId = createAvailableVehicle(offerCourierId);
+    try {
+      BlockingQueue<DeliveryResponse> strangerReceived = new LinkedBlockingQueue<>();
+      StompSession strangerSession = connect(strangerId, "CUSTOMER");
+      strangerSession.subscribe(
+          "/topic/vehicles/" + offerVehicleId + "/offers",
+          frameHandler(strangerReceived, DeliveryResponse.class));
+
+      DeliveryRequest created = deliveryService.requestDelivery(customerId, newDeliveryRequest());
+      try {
+        assertThat(strangerReceived.poll(2, TimeUnit.SECONDS)).isNull();
+      } finally {
+        deliveryRequestRepository.deleteById(created.getId());
+      }
+    } finally {
+      vehicleRepository.deleteById(offerVehicleId);
+      memberRepository.deleteById(offerCourierId);
+    }
+  }
+
+  private Long createAvailableVehicle(Long ownerId) {
+    Vehicle vehicle = new Vehicle();
+    vehicle.setOwnerId(ownerId);
+    vehicle.setType(VehicleType.CAR);
+    vehicle.setMaxWeight(500);
+    vehicle.setMaxDistance(500);
+    vehicle.setLatitude(37.5);
+    vehicle.setLongitude(127.0);
+    vehicle.setStatus(VehicleStatus.AVAILABLE);
+    return vehicleRepository.save(vehicle).getId();
+  }
+
+  private DeliveryCreateRequest newDeliveryRequest() {
+    DeliveryCreateRequest request = new DeliveryCreateRequest();
+    request.setPickupAddress("서울시 강남구");
+    request.setDropoffAddress("서울시 서초구");
+    request.setWeight(10);
+    request.setPickupLatitude(37.0);
+    request.setPickupLongitude(127.0);
+    request.setDropoffLatitude(38.0);
+    request.setDropoffLongitude(127.0);
+    request.setItemSize(ItemSize.MEDIUM);
+    return request;
   }
 
   private BlockingQueue<LocationBroadcastResponse> subscribeAsCustomer() throws Exception {
