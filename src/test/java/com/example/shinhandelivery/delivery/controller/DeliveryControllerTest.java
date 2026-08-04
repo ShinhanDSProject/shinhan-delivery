@@ -3,6 +3,7 @@ package com.example.shinhandelivery.delivery.controller;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -100,7 +101,7 @@ class DeliveryControllerTest {
     mockMvc
         .perform(
             post("/api/v1/delivery-requests/pay")
-                .principal(auth)
+                .with(authentication(auth))
                 .header("Idempotency-Key", "idem-pay")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
@@ -273,7 +274,7 @@ class DeliveryControllerTest {
         .thenReturn(new ProofPhotoResponse(1L, "https://example.com/proof.jpg", completedAt));
 
     mockMvc
-        .perform(get("/api/v1/delivery-requests/1/proof-photo").principal(auth))
+        .perform(get("/api/v1/delivery-requests/1/proof-photo").with(authentication(auth)))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.proofPhotoUrl").value("https://example.com/proof.jpg"))
         .andExpect(jsonPath("$.completedAt").exists());
@@ -291,7 +292,7 @@ class DeliveryControllerTest {
     when(deliveryService.getProofPhoto(1L, 1L)).thenThrow(new ProofPhotoNotFoundException(1L));
 
     mockMvc
-        .perform(get("/api/v1/delivery-requests/1/proof-photo").principal(auth))
+        .perform(get("/api/v1/delivery-requests/1/proof-photo").with(authentication(auth)))
         .andExpect(status().isNotFound());
   }
 

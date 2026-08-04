@@ -26,7 +26,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -137,8 +136,8 @@ public class DeliveryController {
   /** 배송 완료 증빙 사진을 조회한다. 배송 요청의 고객 본인 또는 배정된 배송원만 조회할 수 있다. */
   @GetMapping("/{deliveryRequestId}/proof-photo")
   @PreAuthorize("isAuthenticated()")
-  public ResponseEntity<ProofPhotoResponse> getProofPhoto(
-      @AuthenticationPrincipal CustomUserDetails principal, @PathVariable Long deliveryRequestId) {
-    return ResponseEntity.ok(deliveryService.getProofPhoto(principal.getId(), deliveryRequestId));
+  public ResponseEntity<ProofPhotoResponse> getProofPhoto(@PathVariable Long deliveryRequestId) {
+    return ResponseEntity.ok(
+        deliveryService.getProofPhoto(resolveUserDetails().getId(), deliveryRequestId));
   }
 }
