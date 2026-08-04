@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>공지사항 - 신한 개척자</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/design-system.css">
+  <link rel="stylesheet" href="/css/my-page.css">
+</head>
+<body class="mypage-body">
+<main class="mobile-shell">
+  <header class="page-header">
+    <button id="backButton" class="icon-button" type="button" aria-label="뒤로 가기">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="m15 18-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+    <h1 class="page-title">공지사항</h1>
+    <span aria-hidden="true"></span>
+  </header>
+
+  <section id="listView" class="content-view" aria-label="공지사항 목록">
+    <div id="noticeList" class="notice-list" aria-live="polite">
+      <div class="empty-state">공지사항을 불러오는 중입니다.</div>
+    </div>
+  </section>
+
+  <article id="detailView" class="notice-detail-view" aria-live="polite">
+    <h2 id="detailTitle" class="notice-detail__title"></h2>
+    <p id="detailMeta" class="notice-detail__meta"></p>
+    <p id="detailContent" class="notice-detail__content"></p>
+  </article>
+
+  <nav class="bottom-nav" aria-label="하단 내비게이션">
+    <a class="bottom-nav__item" href="/my-page.html" aria-label="포인트"><span class="brand-p">P</span></a>
+    <a class="bottom-nav__item" href="/home.html" aria-label="홈">
+      <svg width="23" height="23" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3.5 10.5 12 3l8.5 7.5v9a1.5 1.5 0 0 1-1.5 1.5H5a1.5 1.5 0 0 1-1.5-1.5v-9Z" stroke="currentColor" stroke-width="1.7"/><path d="M9 21v-7h6v7" stroke="currentColor" stroke-width="1.7"/></svg>
+    </a>
+    <a class="bottom-nav__item is-active" href="/my-page.html" aria-label="마이페이지">
+      <svg width="23" height="23" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 7h14M5 12h14M5 17h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+    </a>
+  </nav>
+</main>
+
+<script>
+  const API_PATH = "/api/v1/notices";
+  const listView = document.getElementById("listView");
+  const detailView = document.getElementById("detailView");
+  const noticeList = document.getElementById("noticeList");
+  const detailTitle = document.getElementById("detailTitle");
+  const detailMeta = document.getElementById("detailMeta");
+  const detailContent = document.getElementById("detailContent");
+  let detailIsOpen = false;
+
+  function formatDate(value) {
+    if (!value) return "";
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return "";
+    return new Intl.DateTimeFormat("ko-KR", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit"
+    }).format(date).replace(/\s/g, "");
+  }
+
+  function createNoticeCard(notice) {
+    const button = document.createElement("button");
+    button.className = "notice-card";
+    button.type = "button";
+    button.setAttribute("aria-label", `${notice.title} 공지사항 상세 보기`);
+
+    const text = document.createElement("span");
+    const title = document.createElement("span");
+    title.className = "notice-card__title";
+    if (notice.isPinned) {
+      const pin = document.createElement("span");
+      pin.className = "notice-pin";
+      pin.setAttribute("aria-label", "상단 고정");
+      title.appendChild(pin);
+    }
+    title.appendChild(document.createTextNode(notice.title));
+
+    const date = document.createElement("span");
+    date.className = "notice-card__date";
+    date.textContent = formatDate(notice.createdAt);
+    text.append(title, date);
+
+    const chevron = document.createElement("span");
+    chevron.className = "menu-chevron";
+    chevron.setAttribute("aria-hidden", "true");
+    chevron.textContent = "›";
+    button.append(text, chevron);
+    button.addEventListener("click", () => openDetail(notice.id));
+    return button;
+  }
+
+  async function loadNotices() {
+    try {
+      const response = await fetch(`${API_PATH}?size=30`);
+      if (!response.ok) throw new Error("공지사항을 불러오지 못했습니다.");
+      const page = await response.json();
+      const notices = page.content || [];
+      noticeList.replaceChildren();
+
+      if (!notices.length) {
+        const empty = document.createElement("div");
+        empty.className = "empty-state";
+        empty.textContent = "등록된 공지사항이 없습니다.";
+        noticeList.appendChild(empty);
+        return;
+      }
+      notices.forEach((notice) => noticeList.appendChild(createNoticeCard(notice)));
+    } catch (error) {
+      const empty = document.createElement("div");
+      empty.className = "empty-state";
+      empty.textContent = error.message;
+      noticeList.replaceChildren(empty);
+    }
+  }
+
+  async function openDetail(id) {
+    listView.classList.add("is-hidden");
+    detailView.classList.add("is-open");
+    detailIsOpen = true;
+    detailTitle.textContent = "불러오는 중...";
+    detailMeta.textContent = "";
+    detailContent.textContent = "";
+
+    try {
+      const response = await fetch(`${API_PATH}/${id}`);
+      if (!response.ok) {
+        const body = response.headers.get("content-type")?.includes("application/json")
+          ? await response.json()
+          : null;
+        throw new Error(body?.message || "공지사항을 불러오지 못했습니다.");
+      }
+      const notice = await response.json();
+      detailTitle.textContent = notice.title;
+      detailMeta.textContent = `${formatDate(notice.createdAt)} · ${notice.category}`;
+      detailContent.textContent = notice.content;
+    } catch (error) {
+      detailTitle.textContent = "공지사항을 열 수 없습니다.";
+      detailContent.textContent = error.message;
+    }
+  }
+
+  function closeDetail() {
+    detailView.classList.remove("is-open");
+    listView.classList.remove("is-hidden");
+    detailIsOpen = false;
+  }
+
+  document.getElementById("backButton").addEventListener("click", () => {
+    if (detailIsOpen) closeDetail();
+    else location.href = "/my-page.html";
+  });
+
+  loadNotices();
+</script>
+</body>
+</html>

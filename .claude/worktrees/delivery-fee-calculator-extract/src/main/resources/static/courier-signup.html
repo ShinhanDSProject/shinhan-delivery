@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>배송원 회원가입 - 신한 개척자</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/design-system.css">
+    <style>
+        :root {
+            --primary: var(--color-blue-100);
+            --primary-hover: var(--color-blue-500);
+            --bg-gradient: linear-gradient(135deg, #f0f4f9 0%, #e2e8f0 100%);
+            --card-bg: var(--color-white-100);
+            --text-main: var(--color-black-200);
+            --text-sub: var(--color-grey-300);
+            --border-color: var(--color-grey-50);
+            --border-focus: var(--color-blue-100);
+            --input-bg: var(--color-white-100);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .signup-card {
+            position: relative;
+            background: var(--card-bg);
+            width: 100%;
+            max-width: 520px;
+            padding: 40px 36px;
+            border-radius: 20px;
+            box-shadow: 0 12px 35px rgba(0, 70, 255, 0.1);
+        }
+
+        .back-button {
+            position: absolute;
+            top: 36px;
+            left: 28px;
+            width: 36px;
+            height: 36px;
+            padding: 0;
+            border: 0;
+            background: transparent;
+            color: #334155;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.15s ease, transform 0.15s ease;
+        }
+
+        .back-button:hover {
+            color: var(--primary);
+            transform: translateX(-2px);
+        }
+
+        .back-button::before {
+            content: '';
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-left: 2.5px solid currentColor;
+            border-bottom: 2.5px solid currentColor;
+            transform: rotate(45deg);
+        }
+
+        .signup-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .signup-header .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            background-color: rgba(0, 70, 255, 0.08);
+            color: var(--primary);
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .signup-header h1 {
+            font-size: 26px;
+            color: var(--text-main);
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .signup-header p {
+            font-size: 14px;
+            color: var(--text-sub);
+            margin-top: 6px;
+        }
+
+        .form-group {
+            margin-bottom: 22px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 8px;
+        }
+
+        .text-required {
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .text-optional {
+            color: #94a3b8;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        input[type="tel"] {
+            width: 100%;
+            padding: 13px 16px;
+            border: 1.5px solid var(--border-color);
+            border-radius: 10px;
+            font-size: 15px;
+            color: var(--text-main);
+            background-color: var(--input-bg);
+            outline: none;
+            transition: all 0.2s ease-in-out;
+        }
+
+        input:focus {
+            border-color: var(--border-focus);
+            background-color: #ffffff;
+            box-shadow: 0 0 0 3.5px rgba(0, 70, 255, 0.12);
+        }
+
+        .status-badge {
+            font-size: 13px;
+            margin-top: 6px;
+            font-weight: 500;
+        }
+
+        .status-badge.success {
+            color: #16a34a;
+        }
+
+        .status-badge.error {
+            color: #dc2626;
+        }
+
+        /* 커스텀 운송수단 드롭다운 (스크롤바 구현) */
+        .custom-dropdown {
+            position: relative;
+            user-select: none;
+        }
+
+        .dropdown-selected {
+            width: 100%;
+            padding: 13px 16px;
+            border: 1.5px solid var(--border-color);
+            border-radius: 10px;
+            font-size: 15px;
+            color: var(--text-main);
+            background-color: var(--input-bg);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s ease;
+        }
+
+        .dropdown-selected.placeholder {
+            color: #94a3b8;
+        }
+
+        .dropdown-selected:hover,
+        .custom-dropdown.active .dropdown-selected {
+            border-color: var(--primary);
+            background-color: #ffffff;
+            box-shadow: 0 0 0 3.5px rgba(0, 70, 255, 0.12);
+        }
+
+        .dropdown-arrow {
+            width: 8px;
+            height: 8px;
+            border-right: 2px solid #64748b;
+            border-bottom: 2px solid #64748b;
+            transform: rotate(45deg);
+            transition: transform 0.2s ease;
+        }
+
+        .custom-dropdown.active .dropdown-arrow {
+            transform: rotate(-135deg);
+            border-color: var(--primary);
+        }
+
+        /* 스크롤바가 나오는 옵션 메뉴 목록 */
+        .dropdown-menu {
+            position: absolute;
+            top: calc(100% + 6px);
+            left: 0;
+            right: 0;
+            max-height: 180px; /* 고정 높이 지정 */
+            overflow-y: auto;  /* 아래로 스크롤바가 생기도록 설정 */
+            background-color: #ffffff;
+            border: 1.5px solid var(--primary);
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+            z-index: 100;
+            display: none;
+            padding: 6px 0;
+        }
+
+        .custom-dropdown.active .dropdown-menu {
+            display: block;
+            animation: dropdownFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* 커스텀 스크롤바 스타일링 */
+        .dropdown-menu::-webkit-scrollbar {
+            width: 7px;
+        }
+        .dropdown-menu::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 0 12px 12px 0;
+        }
+        .dropdown-menu::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .dropdown-menu::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        .dropdown-item {
+            padding: 11px 16px;
+            font-size: 14.5px;
+            color: #334155;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: background 0.15s ease, color 0.15s ease;
+        }
+
+        .dropdown-item:hover {
+            background-color: #f0f5ff;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .dropdown-item.selected {
+            background-color: #e6efff;
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .dropdown-item .icon {
+            font-size: 16px;
+        }
+
+        /* 희망 배송 중량 칩 그룹 (5kg ~ 30kg) */
+        .weight-chips {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 6px;
+        }
+
+        .weight-chip {
+            padding: 12px;
+            border: 1.5px solid var(--border-color);
+            border-radius: 10px;
+            background-color: var(--input-bg);
+            color: #334155;
+            font-size: 14.5px;
+            font-weight: 600;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .weight-chip:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            background-color: #ffffff;
+        }
+
+        .weight-chip.active {
+            border-color: var(--primary);
+            background-color: #0046ff;
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(0, 70, 255, 0.25);
+        }
+
+        /* 약관 동의 */
+        .terms-section {
+            margin: 28px 0;
+            padding: 18px;
+            background-color: #f8fafc;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .terms-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+            cursor: pointer;
+        }
+
+        .terms-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .terms-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--primary);
+            cursor: pointer;
+            margin-right: 10px;
+        }
+
+        .terms-item label {
+            font-size: 14px;
+            color: #334155;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .terms-item.all-agree {
+            padding-bottom: 12px;
+            border-bottom: 1px solid #e2e8f0;
+            margin-bottom: 14px;
+            font-weight: 700;
+        }
+
+        .terms-item.all-agree label {
+            font-size: 15px;
+            color: var(--text-main);
+            font-weight: 700;
+        }
+
+        /* 가입 완료 버튼 */
+        .btn-submit {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #0046ff 0%, #0036cc 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 17px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 14px rgba(0, 70, 255, 0.3);
+            transition: all 0.25s ease;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(0, 70, 255, 0.4);
+        }
+
+        .btn-submit:active {
+            transform: translateY(0);
+        }
+
+        .result-toast {
+            margin-top: 20px;
+            padding: 14px;
+            border-radius: 10px;
+            font-size: 14px;
+            text-align: center;
+            display: none;
+            font-weight: 600;
+        }
+
+        .result-toast.success {
+            background-color: #dcfce7;
+            color: #15803d;
+            border: 1px solid #bbf7d0;
+            display: block;
+        }
+
+        .result-toast.error {
+            background-color: #fee2e2;
+            color: #b91c1c;
+            border: 1px solid #fecaca;
+            display: block;
+        }
+
+        @keyframes dropdownFadeIn {
+            from { opacity: 0; transform: translateY(-4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="signup-card">
+    <button class="back-button" type="button" aria-label="배송파트너 로그인 페이지로 이동" onclick="location.href='/courier-login.html'"></button>
+    
+    <div class="signup-header">
+        <span class="badge">Shinhan Delivery Partner</span>
+        <h1>배송원 회원가입</h1>
+        <p>신한 개척자 배송 파트너로 등록하여 수익을 창출하세요</p>
+    </div>
+
+    <form id="courierSignupForm">
+        <!-- 1. 이름 -->
+        <div class="form-group">
+            <label for="name">이름 <span class="text-required">*</span></label>
+            <input type="text" id="name" placeholder="홍길동" required>
+        </div>
+
+        <!-- 2. 이메일 주소 -->
+        <div class="form-group">
+            <label for="email">이메일 주소 (계정 ID) <span class="text-required">*</span></label>
+            <input type="email" id="email" placeholder="partner@shinhan.com" required>
+        </div>
+
+        <!-- 3. 비밀번호 -->
+        <div class="form-group">
+            <label for="password">비밀번호 <span class="text-required">*</span></label>
+            <input type="password" id="password" placeholder="8자 이상의 영문/숫자/특수문증 조합" required>
+        </div>
+
+        <!-- 4. 비밀번호 확인 -->
+        <div class="form-group">
+            <label for="confirmPassword">비밀번호 확인 <span class="text-required">*</span></label>
+            <input type="password" id="confirmPassword" placeholder="비밀번호를 다시 한 번 입력해 주세요" required>
+            <div id="pwMatchStatus" class="status-badge"></div>
+        </div>
+
+        <!-- 5. 휴대폰 번호 -->
+        <div class="form-group">
+            <label for="phoneNumber">휴대폰 번호 <span class="text-required">*</span></label>
+            <input type="tel" id="phoneNumber" placeholder="01012345678" required>
+        </div>
+
+        <!-- 6. 운송 수단 선택 (클릭 시 스크롤바가 나오는 커스텀 드롭다운) -->
+        <div class="form-group">
+            <label for="vehicleInput">운송 수단 선택 <span class="text-required">*</span></label>
+            <input type="hidden" id="vehicleInput" name="vehicle" required>
+            
+            <div class="custom-dropdown" id="vehicleDropdown">
+                <div class="dropdown-selected placeholder" id="dropdownSelectedText">
+                    <span>운송 수단을 선택해 주세요</span>
+                    <span class="dropdown-arrow"></span>
+                </div>
+                <div class="dropdown-menu" id="dropdownMenuList">
+                    <div class="dropdown-item" data-value="오토바이"><span class="icon">🏍️</span> 오토바이</div>
+                    <div class="dropdown-item" data-value="자전거"><span class="icon">🚲</span> 자전거</div>
+                    <div class="dropdown-item" data-value="드론"><span class="icon">🛸</span> 드론</div>
+                    <div class="dropdown-item" data-value="소형차"><span class="icon">🚗</span> 소형차</div>
+                    <div class="dropdown-item" data-value="중형차"><span class="icon">🚘</span> 중형차</div>
+                    <div class="dropdown-item" data-value="대형차"><span class="icon">🚙</span> 대형차</div>
+                    <div class="dropdown-item" data-value="트럭"><span class="icon">🚚</span> 트럭</div>
+                    <div class="dropdown-item" data-value="도보"><span class="icon">🏃</span> 도보</div>
+                    <div class="dropdown-item" data-value="전동 킥보드/스쿠터"><span class="icon">🛴</span> 전동 킥보드/스쿠터</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 7. 활동 희망 지역 -->
+        <div class="form-group">
+            <label for="activityRegion">활동 희망 지역 <span class="text-required">*</span></label>
+            <input type="text" id="activityRegion" placeholder="예: 서울특별시 강남구 / 경기 성남시" required>
+        </div>
+
+        <!-- 8. 희망 배송 중량 (5kg, 10kg, 15kg, 20kg, 25kg, 30kg) -->
+        <div class="form-group">
+            <label>희망 배송 중량 <span class="text-required">*</span></label>
+            <input type="hidden" id="preferredWeight" name="preferredWeight" required>
+            <div class="weight-chips" id="weightChips">
+                <button type="button" class="weight-chip" data-weight="5kg">5kg 이하</button>
+                <button type="button" class="weight-chip" data-weight="10kg">10kg 이하</button>
+                <button type="button" class="weight-chip" data-weight="15kg">15kg 이하</button>
+                <button type="button" class="weight-chip" data-weight="20kg">20kg 이하</button>
+                <button type="button" class="weight-chip" data-weight="25kg">25kg 이하</button>
+                <button type="button" class="weight-chip" data-weight="30kg">30kg 이하</button>
+            </div>
+            <div id="weightError" class="status-badge error" style="display:none;">희망 배송 중량을 선택해주세요.</div>
+        </div>
+
+        <!-- 9. 이용동의 -->
+        <div class="terms-section">
+            <div class="terms-item all-agree">
+                <input type="checkbox" id="checkAll">
+                <label for="checkAll">전체 동의하기</label>
+            </div>
+            <div class="terms-item">
+                <input type="checkbox" id="termsAgreed" class="term-check" required>
+                <label for="termsAgreed"><span class="text-required">[필수]</span> 배송원 서비스 이용약관 동의</label>
+            </div>
+            <div class="terms-item">
+                <input type="checkbox" id="privacyAgreed" class="term-check" required>
+                <label for="privacyAgreed"><span class="text-required">[필수]</span> 개인정보 수집 및 위치정보 제공 동의</label>
+            </div>
+            <div class="terms-item">
+                <input type="checkbox" id="safetyAgreed" class="term-check" required>
+                <label for="safetyAgreed"><span class="text-required">[필수]</span> 배송 안전수칙 및 정산 규정 동의</label>
+            </div>
+            <div class="terms-item">
+                <input type="checkbox" id="marketingAgreed" class="term-check">
+                <label for="marketingAgreed"><span class="text-optional">[선택]</span> 마케팅 및 단건 배송 알림 동의</label>
+            </div>
+        </div>
+
+        <!-- 10. 가입 완료 버튼 -->
+        <button type="submit" class="btn-submit">배송 파트너 가입 신청 완료</button>
+    </form>
+
+    <div id="resultToast" class="result-toast"></div>
+</div>
+
+<script>
+    // 1. 비밀번호 실시간 검사
+    const pwInput = document.getElementById('password');
+    const confirmPwInput = document.getElementById('confirmPassword');
+    const pwMatchStatus = document.getElementById('pwMatchStatus');
+
+    function checkPasswordMatch() {
+        if (!confirmPwInput.value) {
+            pwMatchStatus.textContent = '';
+            return;
+        }
+        if (pwInput.value === confirmPwInput.value) {
+            pwMatchStatus.className = 'status-badge success';
+            pwMatchStatus.textContent = '✓ 비밀번호가 일치합니다.';
+        } else {
+            pwMatchStatus.className = 'status-badge error';
+            pwMatchStatus.textContent = '✕ 비밀번호가 일치하지 않습니다.';
+        }
+    }
+
+    pwInput.addEventListener('input', checkPasswordMatch);
+    confirmPwInput.addEventListener('input', checkPasswordMatch);
+
+    // 2. 운송 수단 커스텀 드롭다운 (스크롤바 구현)
+    const vehicleDropdown = document.getElementById('vehicleDropdown');
+    const dropdownSelectedText = document.getElementById('dropdownSelectedText');
+    const dropdownMenuList = document.getElementById('dropdownMenuList');
+    const vehicleInput = document.getElementById('vehicleInput');
+
+    dropdownSelectedText.addEventListener('click', (e) => {
+        e.stopPropagation();
+        vehicleDropdown.classList.toggle('active');
+    });
+
+    document.querySelectorAll('.dropdown-item').forEach(item => {
+        item.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const value = item.getAttribute('data-value');
+            const iconAndText = item.innerHTML;
+            
+            vehicleInput.value = value;
+            dropdownSelectedText.innerHTML = `<span>${iconAndText}</span><span class="dropdown-arrow"></span>`;
+            dropdownSelectedText.classList.remove('placeholder');
+
+            document.querySelectorAll('.dropdown-item').forEach(i => i.classList.remove('selected'));
+            item.classList.add('selected');
+
+            vehicleDropdown.classList.remove('active');
+        });
+    });
+
+    document.addEventListener('click', () => {
+        vehicleDropdown.classList.remove('active');
+    });
+
+    // 3. 희망 배송 중량 칩 클릭 선택 (5kg ~ 30kg)
+    const weightChips = document.querySelectorAll('.weight-chip');
+    const preferredWeightInput = document.getElementById('preferredWeight');
+    const weightError = document.getElementById('weightError');
+
+    weightChips.forEach(chip => {
+        chip.addEventListener('click', () => {
+            weightChips.forEach(c => c.classList.remove('active'));
+            chip.classList.add('active');
+            preferredWeightInput.value = chip.getAttribute('data-weight');
+            weightError.style.display = 'none';
+        });
+    });
+
+    // 4. 약관 전체 선택 / 해제
+    const checkAll = document.getElementById('checkAll');
+    const termChecks = document.querySelectorAll('.term-check');
+
+    checkAll.addEventListener('change', function() {
+        termChecks.forEach(cb => cb.checked = checkAll.checked);
+    });
+
+    termChecks.forEach(cb => {
+        cb.addEventListener('change', function() {
+            const allChecked = Array.from(termChecks).every(c => c.checked);
+            checkAll.checked = allChecked;
+        });
+    });
+
+    // 5. 회원가입 Form 제출 이벤트
+    document.getElementById('courierSignupForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const resultToast = document.getElementById('resultToast');
+
+        const name = document.getElementById('name').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+        const phoneNumber = document.getElementById('phoneNumber').value.trim();
+        const vehicle = vehicleInput.value;
+        const activityRegion = document.getElementById('activityRegion').value.trim();
+        const preferredWeight = preferredWeightInput.value;
+        const termsAgreed = document.getElementById('termsAgreed').checked;
+        const privacyAgreed = document.getElementById('privacyAgreed').checked;
+        const safetyAgreed = document.getElementById('safetyAgreed').checked;
+        const marketingAgreed = document.getElementById('marketingAgreed').checked;
+
+        if (!vehicle) {
+            resultToast.className = 'result-toast error';
+            resultToast.textContent = '운송 수단을 선택해 주세요.';
+            vehicleDropdown.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return;
+        }
+
+        if (!preferredWeight) {
+            weightError.style.display = 'block';
+            resultToast.className = 'result-toast error';
+            resultToast.textContent = '희망 배송 중량을 선택해 주세요.';
+            return;
+        }
+
+        if (password !== confirmPassword) {
+            resultToast.className = 'result-toast error';
+            resultToast.textContent = '비밀번호와 비밀번호 확인이 일치하지 않습니다.';
+            return;
+        }
+
+        try {
+            // TODO: vehicle/activityRegion/preferredWeight는 아직 회원가입 API와 연결되어 있지 않다.
+            // 차량 등록은 회원가입과 별도로 POST /api/v1/vehicles 호출이 필요하다(ownerId 필요).
+            const res = await fetch('/api/v1/members', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name,
+                    email,
+                    password,
+                    phoneNumber,
+                    role: 'COURIER'
+                })
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+                resultToast.className = 'result-toast success';
+                resultToast.textContent = `🎉 배송 파트너 가입 완료! 축하합니다, ${data.name}님 (${data.email})`;
+                setTimeout(() => {
+                    location.href = '/courier-login.html';
+                }, 2000);
+            } else {
+                resultToast.className = 'result-toast error';
+                resultToast.textContent = data.message || '가입 처리 중 오류가 발생했습니다.';
+            }
+        } catch (err) {
+            resultToast.className = 'result-toast error';
+            resultToast.textContent = '서버 통신 오류가 발생했습니다.';
+        }
+    });
+</script>
+
+</body>
+</html>
