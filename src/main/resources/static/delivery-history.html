@@ -238,6 +238,9 @@
     let currentPage = 0;
     let isLastPage = false;
     let isLoading = false;
+    // 탭을 빠르게 전환하면 이전 탭의 느린 응답이 나중에 도착해 새 탭 화면을 덮어쓸 수 있어, 요청마다 세대를
+    // 매겨서 그 사이 탭이 바뀌었으면(=세대가 달라졌으면) 응답을 버린다.
+    let requestGeneration = 0;
 
     function authHeader() {
         const token = localStorage.getItem('accessToken');
@@ -304,39 +307,49 @@
     async function loadNextPage() {
         if (isLoading || isLastPage) return;
         isLoading = true;
+        const generation = requestGeneration;
+        const tab = currentTab;
+        const page = currentPage;
 
         const list = document.getElementById('list');
-        if (currentPage === 0) {
+        if (page === 0) {
             list.innerHTML = '<div class="loading-state">불러오는 중...</div>';
         }
 
-        const page = await fetchPage(currentTab, currentPage);
-        isLoading = false;
-        if (!page) return;
+        const response = await fetchPage(tab, page);
 
-        let items = page.content || [];
-        if (currentTab === 'IN_PROGRESS') {
+        if (generation !== requestGeneration) {
+            // 응답이 오는 사이 다른 탭으로 전환됨 — 오래된 응답이라 화면에 반영하지 않고 버린다.
+            return;
+        }
+        isLoading = false;
+        if (!response) return;
+
+        let items = response.content || [];
+        if (tab === 'IN_PROGRESS') {
             items = items.filter((item) => IN_PROGRESS_STATUSES.includes(item.status));
         }
 
-        if (currentPage === 0) {
+        if (page === 0) {
             list.innerHTML = '';
         }
 
-        if (currentPage === 0 && items.length === 0 && page.last) {
+        if (page === 0 && items.length === 0 && response.last) {
             list.innerHTML = '<div class="empty-state">표시할 배송 내역이 없어요.</div>';
         } else {
             items.forEach((item) => list.appendChild(renderCard(item)));
         }
 
-        isLastPage = page.last;
+        isLastPage = response.last;
         currentPage += 1;
     }
 
     function resetAndLoad(tab) {
+        requestGeneration += 1;
         currentTab = tab;
         currentPage = 0;
         isLastPage = false;
+        isLoading = false;
         loadNextPage();
     }
 
