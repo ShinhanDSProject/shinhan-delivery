@@ -26,6 +26,7 @@ import com.example.shinhandelivery.delivery.entity.ItemSize;
 import com.example.shinhandelivery.delivery.exception.InvalidDeliveryTransitionException;
 import com.example.shinhandelivery.delivery.exception.ProofPhotoNotFoundException;
 import com.example.shinhandelivery.delivery.service.DeliveryService;
+import com.example.shinhandelivery.member.service.MemberService;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import org.junit.jupiter.api.AfterEach;
@@ -48,6 +49,7 @@ class DeliveryControllerTest {
   @Autowired private ObjectMapper objectMapper;
 
   @MockitoBean private DeliveryService deliveryService;
+  @MockitoBean private MemberService memberService;
 
   @AfterEach
   void tearDown() {
@@ -113,6 +115,7 @@ class DeliveryControllerTest {
         .andExpect(jsonPath("$.remainingBalance").value(5000L))
         .andExpect(jsonPath("$.deliveryStatus").value("REQUESTED"));
 
+    verify(memberService).requirePaymentPinConfigured(1L);
     ArgumentCaptor<DeliveryPayRequest> requestCaptor =
         ArgumentCaptor.forClass(DeliveryPayRequest.class);
     verify(deliveryService).payDelivery(eq(1L), eq("idem-pay"), requestCaptor.capture());
@@ -342,6 +345,8 @@ class DeliveryControllerTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.proofPhotoUrl").value("https://example.com/proof.jpg"))
         .andExpect(jsonPath("$.completedAt").exists());
+
+    verify(memberService).requirePaymentPinConfigured(1L);
   }
 
   @Test

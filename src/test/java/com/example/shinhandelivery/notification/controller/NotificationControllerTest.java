@@ -10,6 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.example.shinhandelivery.common.security.JwtProvider;
+import com.example.shinhandelivery.member.service.MemberService;
 import com.example.shinhandelivery.notification.entity.Notification;
 import com.example.shinhandelivery.notification.exception.NotificationAccessDeniedException;
 import com.example.shinhandelivery.notification.service.NotificationService;
@@ -21,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -31,12 +33,14 @@ import org.springframework.test.web.servlet.MockMvc;
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc
+@ActiveProfiles("test")
 class NotificationControllerTest {
 
   @Autowired private MockMvc mockMvc;
   @Autowired private JwtProvider jwtProvider;
 
   @MockitoBean private NotificationService notificationService;
+  @MockitoBean private MemberService memberService;
 
   @Test
   @DisplayName("인증 토큰이 없으면 403을 반환한다")

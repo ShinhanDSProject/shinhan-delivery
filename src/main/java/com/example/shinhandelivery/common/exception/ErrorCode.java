@@ -22,10 +22,8 @@ public enum ErrorCode {
   DUPLICATE_EMAIL(HttpStatus.CONFLICT, "M002", "이미 가입된 이메일 주소입니다."),
   INVALID_CREDENTIALS(HttpStatus.UNAUTHORIZED, "M003", "이메일 또는 비밀번호가 일치하지 않습니다."),
   CURRENT_PASSWORD_MISMATCH(HttpStatus.BAD_REQUEST, "M004", "현재 비밀번호가 일치하지 않습니다."),
-  PASSWORD_CONFIRMATION_MISMATCH(
-      HttpStatus.BAD_REQUEST, "M005", "새 비밀번호와 비밀번호 확인이 일치하지 않습니다."),
-  PASSWORD_REUSE_NOT_ALLOWED(
-      HttpStatus.BAD_REQUEST, "M006", "현재 비밀번호와 다른 비밀번호를 입력해야 합니다."),
+  PASSWORD_CONFIRMATION_MISMATCH(HttpStatus.BAD_REQUEST, "M005", "새 비밀번호와 비밀번호 확인이 일치하지 않습니다."),
+  PASSWORD_REUSE_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "M006", "현재 비밀번호와 다른 비밀번호를 입력해야 합니다."),
   UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "A001", "인증 권한이 필요합니다."),
 
   // Vehicle Domain Errors
@@ -52,8 +50,7 @@ public enum ErrorCode {
   POINT_BALANCE_OVERFLOW(HttpStatus.BAD_REQUEST, "P004", "포인트 잔액 한도를 초과했습니다."),
   PIN_LOCKED(HttpStatus.CONFLICT, "P005", "결제 PIN을 3회 이상 실패하여 잠겼습니다."),
   CURRENT_PIN_MISMATCH(HttpStatus.BAD_REQUEST, "P006", "현재 결제 PIN이 일치하지 않습니다."),
-  PIN_CONFIRMATION_MISMATCH(
-      HttpStatus.BAD_REQUEST, "P007", "새 결제 PIN과 확인 PIN이 일치하지 않습니다."),
+  PIN_CONFIRMATION_MISMATCH(HttpStatus.BAD_REQUEST, "P007", "새 결제 PIN과 확인 PIN이 일치하지 않습니다."),
 
   // Notification Domain Errors
   NOTIFICATION_NOT_FOUND(HttpStatus.NOT_FOUND, "N001", "존재하지 않는 알림입니다."),

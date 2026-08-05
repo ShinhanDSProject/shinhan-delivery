@@ -7,6 +7,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.example.shinhandelivery.common.exception.BusinessException;
 import com.example.shinhandelivery.common.exception.EntityNotFoundException;
 import com.example.shinhandelivery.common.exception.ErrorCode;
 import com.example.shinhandelivery.member.entity.Member;
@@ -100,7 +101,7 @@ class PaymentServiceTest {
     request.setPin("654321");
 
     assertThatThrownBy(() -> paymentService.verifyPin(1L, request))
-        .isInstanceOf(com.example.shinhandelivery.common.exception.BusinessException.class)
+        .isInstanceOf(BusinessException.class)
         .hasMessageContaining(ErrorCode.PIN_LOCKED.getMessage());
     assertThat(member.getPinFailCount()).isEqualTo(3);
     assertThat(member.isPinLocked()).isTrue();
@@ -118,7 +119,7 @@ class PaymentServiceTest {
     request.setPin("123456");
 
     assertThatThrownBy(() -> paymentService.verifyPin(1L, request))
-        .isInstanceOf(com.example.shinhandelivery.common.exception.BusinessException.class)
+        .isInstanceOf(BusinessException.class)
         .hasMessageContaining(ErrorCode.PIN_LOCKED.getMessage());
   }
 

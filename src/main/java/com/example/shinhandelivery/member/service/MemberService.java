@@ -87,6 +87,15 @@ public class MemberService {
     return findMemberOrThrow(memberId);
   }
 
+  /** 결제 PIN이 설정된 회원만 후속 기능을 사용하도록 검증한다. */
+  @Transactional(readOnly = true)
+  public void requirePaymentPinConfigured(Long memberId) {
+    Member member = findMemberOrThrow(memberId);
+    if (member.getPinHash() == null || member.getPinHash().isBlank()) {
+      throw new BusinessException(ErrorCode.ACCESS_DENIED, "결제 PIN 설정 후 이용할 수 있습니다.");
+    }
+  }
+
   /** 로그인한 본인의 프로필 정보(이름, 연락처)를 수정한다. */
   @Transactional
   public Member updateMyProfile(Long memberId, MemberProfileUpdateRequestDto request) {
@@ -182,7 +191,7 @@ public class MemberService {
         .orElseThrow(() -> new EntityNotFoundException(ErrorCode.MEMBER_NOT_FOUND));
   }
 
-  @Transactional(readOnly = true)
+  @Transactional
   public Member getByIdForUpdate(Long memberId) {
     return findMemberForUpdateOrThrow(memberId);
   }

@@ -23,6 +23,7 @@ import com.example.shinhandelivery.delivery.entity.ItemSize;
 import com.example.shinhandelivery.delivery.exception.DeliveryAccessDeniedException;
 import com.example.shinhandelivery.delivery.exception.ProofPhotoNotFoundException;
 import com.example.shinhandelivery.delivery.service.DeliveryService;
+import com.example.shinhandelivery.member.service.MemberService;
 import com.example.shinhandelivery.vehicle.entity.VehicleType;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -51,6 +52,7 @@ class DeliveryHistoryControllerTest {
   @Autowired private ObjectMapper objectMapper;
 
   @MockitoBean private DeliveryService deliveryService;
+  @MockitoBean private MemberService memberService;
 
   @Test
   @DisplayName("인증 토큰이 없으면 403을 반환한다")

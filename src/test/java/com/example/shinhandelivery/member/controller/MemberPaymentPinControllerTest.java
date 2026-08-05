@@ -79,8 +79,7 @@ class MemberPaymentPinControllerTest {
         new UsernamePasswordAuthenticationToken(customUser, null, customUser.getAuthorities());
     SecurityContextHolder.getContext().setAuthentication(auth);
 
-    MemberPaymentPinUpdateRequest request =
-        new MemberPaymentPinUpdateRequest("", "12345", "12345");
+    MemberPaymentPinUpdateRequest request = new MemberPaymentPinUpdateRequest("", "12345", "12345");
 
     mockMvc
         .perform(

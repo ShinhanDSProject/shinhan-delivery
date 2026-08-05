@@ -58,7 +58,8 @@ public class PaymentService {
       throw new BusinessException(ErrorCode.PIN_LOCKED);
     }
 
-    if (member.getPinHash() == null || !passwordEncoder.matches(request.getPin(), member.getPinHash())) {
+    if (member.getPinHash() == null
+        || !passwordEncoder.matches(request.getPin(), member.getPinHash())) {
       member.recordPinFailure();
       if (member.isPinLocked()) {
         throw new BusinessException(ErrorCode.PIN_LOCKED);
