@@ -90,7 +90,6 @@ public class PaymentService {
       Long memberId, String idempotencyKey, PointUseRequest request) {
     memberService.getById(memberId);
 
-    PointWallet wallet = findWalletByMemberForUpdateOrThrow(memberId);
     PointHistory existing =
         pointHistoryRepository
             .findByMemberIdAndIdempotencyKey(memberId, idempotencyKey)
@@ -99,6 +98,8 @@ public class PaymentService {
       return new PointUseResultResponse(
           existing.getBalanceAfter(), existing.getAmount(), existing.getCreatedAt());
     }
+
+    PointWallet wallet = findWalletByMemberForUpdateOrThrow(memberId);
     if (wallet.getBalance() < request.getAmount()) {
       throw new InsufficientPointException(wallet.getId(), request.getAmount());
     }

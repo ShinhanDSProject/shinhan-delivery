@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -154,7 +155,7 @@ class DeliveryServiceTest {
     request.setWeight(10.0);
     request.setItemSize(ItemSize.MEDIUM);
 
-    when(paymentService.usePoint(1L, "idem-pay", any()))
+    when(paymentService.usePoint(eq(1L), eq("idem-pay"), any()))
         .thenReturn(new PointUseResultResponse(2000L, 3000L, LocalDateTime.now()));
     when(deliveryRequestRepository.findByCustomerIdAndPaymentIdempotencyKey(1L, "idem-pay"))
         .thenReturn(Optional.empty());
