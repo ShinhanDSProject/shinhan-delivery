@@ -171,7 +171,7 @@ erDiagram
 
 ## 검증 방법 (Reproducible Verification)
 
-이 문서의 FK·컬럼 정보가 실제 스키마 및 Entity 매핑과 어긋나지 않는지는 `spring.jpa.hibernate.ddl-auto: validate` 설정 덕분에 애플리케이션/테스트 구동 시점에 자동으로 검증됩니다. Entity에 선언된 컬럼·FK가 Flyway로 적용된 실제 테이블과 다르면 그 즉시 `SchemaManagementException`으로 기동이 실패합니다.
+아래 명령은 **Entity 코드와 실제 DB 스키마가 서로 어긋나지 않는지**만 검증합니다 — `spring.jpa.hibernate.ddl-auto: validate` 설정 덕분에 애플리케이션/테스트 구동 시점에 자동으로 확인됩니다. Entity에 선언된 컬럼·FK가 Flyway로 적용된 실제 테이블과 다르면 그 즉시 `SchemaManagementException`으로 기동이 실패합니다. **이 문서(erd.md)의 표·다이어그램 텍스트 자체가 코드와 일치하는지는 자동으로 검증되지 않으므로, Entity를 변경했다면 이 문서도 사람이 직접 함께 갱신해야 합니다** (§15 참고).
 
 ```bash
 ./scripts/verify.sh
@@ -179,8 +179,8 @@ erDiagram
 
 **기대 결과:** 마지막에 아래와 같이 전체 통과 메시지가 출력되고 종료 코드가 `0`이어야 합니다.
 
-```
+```text
 🎉 [Test Harness] 모든 검증 통과! 안전하게 커밋/PR 가능합니다.
 ```
 
-만약 Entity의 `@JoinColumn`/`@Column` 선언과 Flyway 마이그레이션(`src/main/resources/db/migration/`)이 어긋나 있다면, 이 명령이 `SchemaManagementException: Schema-validation`으로 실패합니다 — 이 경우 이 문서와 Entity 코드 중 어느 쪽이 실제 스키마와 다른지 먼저 확인하세요.
+만약 Entity의 `@JoinColumn`/`@Column` 선언과 Flyway 마이그레이션(`src/main/resources/db/migration/`)이 어긋나 있다면, 이 명령이 `SchemaManagementException: Schema-validation`으로 실패합니다 — 이 경우 Entity 코드와 실제 DB 스키마 중 어느 쪽이 잘못됐는지 먼저 확인하세요.
