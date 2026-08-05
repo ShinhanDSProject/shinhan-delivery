@@ -26,7 +26,7 @@ declare -A TARGET_FILES
 if [ "$NEW_FILES_ONLY" -eq 1 ]; then
   while IFS= read -r added_file; do
     [ -n "$added_file" ] && TARGET_FILES["$(basename "$added_file")"]=1
-  done < <(git diff --name-only --diff-filter=A "origin/$BASE_REF...HEAD" -- "$MIGRATION_DIR" 2>/dev/null || true)
+  done < <(git diff --name-only --diff-filter=A "origin/$BASE_REF" HEAD -- "$MIGRATION_DIR" 2>/dev/null || true)
 fi
 
 INVALID_COUNT=0
