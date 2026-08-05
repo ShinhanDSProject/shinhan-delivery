@@ -44,7 +44,7 @@ class MemberPaymentPinUpdateTest {
             .phoneNumber("010-1234-5678")
             .role(MemberRole.CUSTOMER)
             .build();
-    given(memberRepository.findById(1L)).willReturn(Optional.of(member));
+    given(memberRepository.findByIdForUpdate(1L)).willReturn(Optional.of(member));
   }
 
   @Test

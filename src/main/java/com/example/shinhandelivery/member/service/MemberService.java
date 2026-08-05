@@ -114,7 +114,7 @@ public class MemberService {
   /** 로그인한 회원의 결제 PIN을 설정하거나 변경한다. */
   @Transactional
   public void updatePaymentPin(Long memberId, MemberPaymentPinUpdateRequest request) {
-    Member member = findMemberOrThrow(memberId);
+    Member member = findMemberForUpdateOrThrow(memberId);
 
     if (!request.getNewPin().equals(request.getConfirmNewPin())) {
       throw new BusinessException(ErrorCode.PIN_CONFIRMATION_MISMATCH);
@@ -179,6 +179,17 @@ public class MemberService {
   private Member findMemberOrThrow(Long memberId) {
     return memberRepository
         .findById(memberId)
+        .orElseThrow(() -> new EntityNotFoundException(ErrorCode.MEMBER_NOT_FOUND));
+  }
+
+  @Transactional(readOnly = true)
+  public Member getByIdForUpdate(Long memberId) {
+    return findMemberForUpdateOrThrow(memberId);
+  }
+
+  private Member findMemberForUpdateOrThrow(Long memberId) {
+    return memberRepository
+        .findByIdForUpdate(memberId)
         .orElseThrow(() -> new EntityNotFoundException(ErrorCode.MEMBER_NOT_FOUND));
   }
 }

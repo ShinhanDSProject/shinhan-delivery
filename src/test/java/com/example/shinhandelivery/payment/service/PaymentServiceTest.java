@@ -54,7 +54,7 @@ class PaymentServiceTest {
     member.setId(1L);
     member.setPinHash("encoded-pin");
     member.setPinFailCount(2);
-    when(memberService.getById(1L)).thenReturn(member);
+    when(memberService.getByIdForUpdate(1L)).thenReturn(member);
     when(passwordEncoder.matches("123456", "encoded-pin")).thenReturn(true);
 
     PinVerifyRequestDto request = new PinVerifyRequestDto();
@@ -73,7 +73,7 @@ class PaymentServiceTest {
     Member member = new Member();
     member.setId(1L);
     member.setPinHash("encoded-pin");
-    when(memberService.getById(1L)).thenReturn(member);
+    when(memberService.getByIdForUpdate(1L)).thenReturn(member);
     when(passwordEncoder.matches("654321", "encoded-pin")).thenReturn(false);
 
     PinVerifyRequestDto request = new PinVerifyRequestDto();
@@ -93,7 +93,7 @@ class PaymentServiceTest {
     member.setId(1L);
     member.setPinHash("encoded-pin");
     member.setPinFailCount(2);
-    when(memberService.getById(1L)).thenReturn(member);
+    when(memberService.getByIdForUpdate(1L)).thenReturn(member);
     when(passwordEncoder.matches("654321", "encoded-pin")).thenReturn(false);
 
     PinVerifyRequestDto request = new PinVerifyRequestDto();
@@ -112,7 +112,7 @@ class PaymentServiceTest {
     Member member = new Member();
     member.setId(1L);
     member.setPinLocked(true);
-    when(memberService.getById(1L)).thenReturn(member);
+    when(memberService.getByIdForUpdate(1L)).thenReturn(member);
 
     PinVerifyRequestDto request = new PinVerifyRequestDto();
     request.setPin("123456");

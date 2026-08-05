@@ -36,7 +36,7 @@
 <body>
 <main class="page">
     <header class="top">
-        <button id="backButton" class="back-button" type="button" aria-label="뒤로가기"><</button>
+        <button id="backButton" class="back-button" type="button" aria-label="뒤로가기">&lt;</button>
         <h1>결제 PIN 설정</h1>
     </header>
 
@@ -153,6 +153,7 @@
         }
         history.back();
     });
+
     ['currentPin', 'newPin', 'confirmPin'].forEach((id) => {
         const input = document.getElementById(id);
         input.addEventListener('input', () => {

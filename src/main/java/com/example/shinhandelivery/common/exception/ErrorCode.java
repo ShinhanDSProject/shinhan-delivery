@@ -4,11 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
-/**
- * 프로젝트 전역에서 사용하는 표준 에러 코드 정의 Enum입니다.
- *
- * <p>HTTP 상태 코드, 시스템 고유 에러 코드, 사용자 안내 메시지를 일관성 있게 관리합니다.
- */
+/** 프로젝트 전역에서 사용하는 공통 에러 코드 Enum이다. */
 @Getter
 @AllArgsConstructor
 public enum ErrorCode {
@@ -17,7 +13,7 @@ public enum ErrorCode {
   METHOD_NOT_ALLOWED(HttpStatus.METHOD_NOT_ALLOWED, "C002", "지원하지 않는 HTTP 메서드입니다."),
   INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "C003", "서버 내부 오류가 발생했습니다."),
   ENTITY_NOT_FOUND(HttpStatus.NOT_FOUND, "C004", "존재하지 않는 리소스입니다."),
-  INVALID_FILE_TYPE(HttpStatus.BAD_REQUEST, "C005", "허용되지 않는 파일 형식입니다."),
+  INVALID_FILE_TYPE(HttpStatus.BAD_REQUEST, "C005", "허용하지 않는 파일 형식입니다."),
   FILE_TOO_LARGE(HttpStatus.BAD_REQUEST, "C006", "파일 크기가 허용 범위를 초과했습니다."),
   ACCESS_DENIED(HttpStatus.FORBIDDEN, "C007", "접근 권한이 없습니다."),
 
@@ -26,8 +22,10 @@ public enum ErrorCode {
   DUPLICATE_EMAIL(HttpStatus.CONFLICT, "M002", "이미 가입된 이메일 주소입니다."),
   INVALID_CREDENTIALS(HttpStatus.UNAUTHORIZED, "M003", "이메일 또는 비밀번호가 일치하지 않습니다."),
   CURRENT_PASSWORD_MISMATCH(HttpStatus.BAD_REQUEST, "M004", "현재 비밀번호가 일치하지 않습니다."),
-  PASSWORD_CONFIRMATION_MISMATCH(HttpStatus.BAD_REQUEST, "M005", "새 비밀번호와 비밀번호 확인이 일치하지 않습니다."),
-  PASSWORD_REUSE_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "M006", "현재 비밀번호와 다른 비밀번호를 입력해야 합니다."),
+  PASSWORD_CONFIRMATION_MISMATCH(
+      HttpStatus.BAD_REQUEST, "M005", "새 비밀번호와 비밀번호 확인이 일치하지 않습니다."),
+  PASSWORD_REUSE_NOT_ALLOWED(
+      HttpStatus.BAD_REQUEST, "M006", "현재 비밀번호와 다른 비밀번호를 입력해야 합니다."),
   UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "A001", "인증 권한이 필요합니다."),
 
   // Vehicle Domain Errors
@@ -39,8 +37,8 @@ public enum ErrorCode {
   ALREADY_MATCHED(HttpStatus.CONFLICT, "D003", "이미 처리된 배송 요청입니다."),
   INVALID_DELIVERY_WEIGHT(HttpStatus.BAD_REQUEST, "D004", "유효하지 않은 배송 무게입니다."),
   INVALID_DELIVERY_DISTANCE(HttpStatus.BAD_REQUEST, "D005", "유효하지 않은 배송 거리입니다."),
-  INVALID_MATCHING_TRANSITION(HttpStatus.CONFLICT, "D006", "허용되지 않는 매칭 상태 전이입니다."),
-  INVALID_DELIVERY_TRANSITION(HttpStatus.CONFLICT, "D007", "허용되지 않는 배송 상태 전이입니다."),
+  INVALID_MATCHING_TRANSITION(HttpStatus.CONFLICT, "D006", "허용하지 않는 매칭 상태 전이입니다."),
+  INVALID_DELIVERY_TRANSITION(HttpStatus.CONFLICT, "D007", "허용하지 않는 배송 상태 전이입니다."),
   PROOF_PHOTO_NOT_FOUND(HttpStatus.NOT_FOUND, "D008", "완료 증거 사진을 찾을 수 없습니다."),
 
   // Vehicle Domain Errors (continued)
@@ -52,11 +50,10 @@ public enum ErrorCode {
   INSUFFICIENT_BALANCE(HttpStatus.BAD_REQUEST, "P002", "포인트 잔액이 부족합니다."),
   INVALID_POINT_AMOUNT(HttpStatus.BAD_REQUEST, "P003", "포인트 금액은 0보다 커야 합니다."),
   POINT_BALANCE_OVERFLOW(HttpStatus.BAD_REQUEST, "P004", "포인트 잔액 한도를 초과했습니다."),
-
-  PIN_LOCKED(HttpStatus.CONFLICT, "P005", "寃곗젣 PIN??3???댁긽 ?ㅽ뙣濡?醫낅え?섏뿀?듬땲??"),
-
+  PIN_LOCKED(HttpStatus.CONFLICT, "P005", "결제 PIN을 3회 이상 실패하여 잠겼습니다."),
   CURRENT_PIN_MISMATCH(HttpStatus.BAD_REQUEST, "P006", "현재 결제 PIN이 일치하지 않습니다."),
-  PIN_CONFIRMATION_MISMATCH(HttpStatus.BAD_REQUEST, "P007", "새 결제 PIN과 확인 PIN이 일치하지 않습니다."),
+  PIN_CONFIRMATION_MISMATCH(
+      HttpStatus.BAD_REQUEST, "P007", "새 결제 PIN과 확인 PIN이 일치하지 않습니다."),
 
   // Notification Domain Errors
   NOTIFICATION_NOT_FOUND(HttpStatus.NOT_FOUND, "N001", "존재하지 않는 알림입니다."),

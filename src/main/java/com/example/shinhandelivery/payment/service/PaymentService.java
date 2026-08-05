@@ -1,5 +1,6 @@
 package com.example.shinhandelivery.payment.service;
 
+import com.example.shinhandelivery.common.exception.BusinessException;
 import com.example.shinhandelivery.common.exception.EntityNotFoundException;
 import com.example.shinhandelivery.common.exception.ErrorCode;
 import com.example.shinhandelivery.member.entity.Member;
@@ -50,17 +51,17 @@ public class PaymentService {
     return paymentRepository.findAll();
   }
 
-  @Transactional
+  @Transactional(noRollbackFor = BusinessException.class)
   public PinVerifyResponseDto verifyPin(Long memberId, PinVerifyRequestDto request) {
-    Member member = memberService.getById(memberId);
+    Member member = memberService.getByIdForUpdate(memberId);
     if (member.isPinLocked()) {
-      throw new com.example.shinhandelivery.common.exception.BusinessException(ErrorCode.PIN_LOCKED);
+      throw new BusinessException(ErrorCode.PIN_LOCKED);
     }
 
     if (member.getPinHash() == null || !passwordEncoder.matches(request.getPin(), member.getPinHash())) {
       member.recordPinFailure();
       if (member.isPinLocked()) {
-        throw new com.example.shinhandelivery.common.exception.BusinessException(ErrorCode.PIN_LOCKED);
+        throw new BusinessException(ErrorCode.PIN_LOCKED);
       }
       return new PinVerifyResponseDto(false);
     }
