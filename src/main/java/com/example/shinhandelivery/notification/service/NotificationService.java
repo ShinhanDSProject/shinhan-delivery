@@ -40,7 +40,6 @@ public class NotificationService {
       throw new NotificationAccessDeniedException(notificationId, memberId);
     }
 
-    notification.setRead(true);
-    return notification;
+    return notification.markAsRead();
   }
 }

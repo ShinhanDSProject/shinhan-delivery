@@ -16,7 +16,6 @@ import com.example.shinhandelivery.vehicle.entity.Vehicle;
 import com.example.shinhandelivery.vehicle.entity.VehicleStatus;
 import com.example.shinhandelivery.vehicle.entity.VehicleType;
 import com.example.shinhandelivery.vehicle.repository.VehicleRepository;
-import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
@@ -143,13 +142,6 @@ public class DataSeedInitializer implements CommandLineRunner {
 
   private void createNotification(
       Long memberId, String title, String message, String category, boolean isRead) {
-    Notification notification = new Notification();
-    notification.setMemberId(memberId);
-    notification.setTitle(title);
-    notification.setMessage(message);
-    notification.setCategory(category);
-    notification.setRead(isRead);
-    notification.setCreatedAt(LocalDateTime.now());
-    notificationRepository.save(notification);
+    notificationRepository.save(Notification.of(memberId, title, message, category, isRead));
   }
 }
