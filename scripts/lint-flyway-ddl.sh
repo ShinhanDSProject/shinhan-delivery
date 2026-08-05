@@ -24,9 +24,14 @@ fi
 
 declare -A TARGET_FILES
 if [ "$NEW_FILES_ONLY" -eq 1 ]; then
-  while IFS= read -r added_file; do
-    [ -n "$added_file" ] && TARGET_FILES["$(basename "$added_file")"]=1
-  done < <(git diff --name-only --diff-filter=A "origin/$BASE_REF" HEAD -- "$MIGRATION_DIR" 2>/dev/null || true)
+  if diff_output=$(git diff --no-renames --name-only --diff-filter=A "origin/$BASE_REF" HEAD -- "$MIGRATION_DIR" 2>/dev/null); then
+    while IFS= read -r added_file; do
+      [ -n "$added_file" ] && TARGET_FILES["$(basename "$added_file")"]=1
+    done <<< "$diff_output"
+  else
+    echo "⚠️ origin/$BASE_REF 대비 변경된 마이그레이션 파일 목록을 가져올 수 없어 전체 마이그레이션 파일을 검사합니다."
+    NEW_FILES_ONLY=0
+  fi
 fi
 
 INVALID_COUNT=0
