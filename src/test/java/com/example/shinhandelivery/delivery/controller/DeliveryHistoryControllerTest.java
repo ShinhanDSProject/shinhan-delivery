@@ -130,6 +130,7 @@ class DeliveryHistoryControllerTest {
             ItemSize.MEDIUM,
             "박배송",
             null,
+            null,
             createdAt,
             matchedAt,
             pickedUpAt,
