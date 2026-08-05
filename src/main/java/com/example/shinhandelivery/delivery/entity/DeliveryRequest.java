@@ -13,6 +13,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -87,6 +88,11 @@ public class DeliveryRequest {
 
   @Column(name = "created_at")
   private LocalDateTime createdAt;
+
+  @Version
+  @Column(name = "version", nullable = false)
+  @Builder.Default
+  private Long version = 0L;
 
   /** DeliveryCreateRequest DTO 수용 기반으로 REQUESTED 상태의 DeliveryRequest 엔티티를 생성하는 정적 팩토리 메서드. */
   public static DeliveryRequest of(

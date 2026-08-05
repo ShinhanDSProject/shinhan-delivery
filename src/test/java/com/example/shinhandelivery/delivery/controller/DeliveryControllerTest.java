@@ -25,6 +25,7 @@ import com.example.shinhandelivery.delivery.entity.DeliveryStatus;
 import com.example.shinhandelivery.delivery.entity.ItemSize;
 import com.example.shinhandelivery.delivery.exception.InvalidDeliveryTransitionException;
 import com.example.shinhandelivery.delivery.exception.ProofPhotoNotFoundException;
+import com.example.shinhandelivery.delivery.service.DeliveryMatchingService;
 import com.example.shinhandelivery.delivery.service.DeliveryService;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -48,6 +49,7 @@ class DeliveryControllerTest {
   @Autowired private ObjectMapper objectMapper;
 
   @MockitoBean private DeliveryService deliveryService;
+  @MockitoBean private DeliveryMatchingService deliveryMatchingService;
 
   @AfterEach
   void tearDown() {

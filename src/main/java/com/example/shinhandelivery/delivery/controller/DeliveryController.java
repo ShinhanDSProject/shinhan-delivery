@@ -8,18 +8,23 @@ import com.example.shinhandelivery.delivery.dto.request.DeliveryCreateRequest;
 import com.example.shinhandelivery.delivery.dto.request.DeliveryEstimateRequest;
 import com.example.shinhandelivery.delivery.dto.request.DeliveryPayRequest;
 import com.example.shinhandelivery.delivery.dto.request.DeliveryUpdateRequest;
+import com.example.shinhandelivery.delivery.dto.response.AvailableDeliveryResponse;
 import com.example.shinhandelivery.delivery.dto.response.DeliveryDetailResponseDto;
 import com.example.shinhandelivery.delivery.dto.response.DeliveryEstimateResponse;
 import com.example.shinhandelivery.delivery.dto.response.DeliveryListResponseDto;
 import com.example.shinhandelivery.delivery.dto.response.DeliveryPaymentResponse;
 import com.example.shinhandelivery.delivery.dto.response.DeliveryResponse;
+import com.example.shinhandelivery.delivery.dto.response.MatchingResponse;
 import com.example.shinhandelivery.delivery.dto.response.ProofPhotoResponse;
 import com.example.shinhandelivery.delivery.entity.DeliveryRequest;
 import com.example.shinhandelivery.delivery.entity.DeliveryStatus;
+import com.example.shinhandelivery.delivery.entity.Matching;
+import com.example.shinhandelivery.delivery.service.DeliveryMatchingService;
 import com.example.shinhandelivery.delivery.service.DeliveryService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -44,7 +49,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-/** DeliveryRequest CRUD API를 제공하는 컨트롤러. */
+/** DeliveryRequest CRUD 및 대기열/수락 API를 제공하는 컨트롤러. */
 @RestController
 @RequestMapping("/api/v1/delivery-requests")
 @RequiredArgsConstructor
@@ -52,6 +57,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class DeliveryController {
 
   private final DeliveryService deliveryService;
+  private final DeliveryMatchingService deliveryMatchingService;
 
   /** 로그인한 고객 본인 명의로 배송을 요청한다. */
   @PostMapping
@@ -107,6 +113,31 @@ public class DeliveryController {
             .getMyDeliveryRequests(resolveUserDetails().getId(), status, pageable)
             .map(DeliveryListResponseDto::from);
     return ResponseEntity.ok(responses);
+  }
+
+  /** 주변 3km 이내의 대기 중인(REQUESTED) 배송 요청 목록을 배송원 위치 기준으로 거리가 가까운 순으로 조회한다. */
+  @GetMapping("/available")
+  @PreAuthorize("isAuthenticated()")
+  public ResponseEntity<List<AvailableDeliveryResponse>> getAvailableDeliveries(
+      @AuthenticationPrincipal CustomUserDetails userDetails,
+      @RequestParam(required = false) Double latitude,
+      @RequestParam(required = false) Double longitude,
+      @RequestParam(required = false, defaultValue = "3.0") Double radiusKm) {
+    Long memberId = (userDetails != null) ? userDetails.getId() : resolveUserDetails().getId();
+    List<AvailableDeliveryResponse> responses =
+        deliveryMatchingService.getAvailableDeliveries(memberId, latitude, longitude, radiusKm);
+    return ResponseEntity.ok(responses);
+  }
+
+  /** 배송원이 특정 대기 중인 주문을 수락(Catch)한다. 동시 수락 시 단 1명만 성공하며, 패배 시 409 Conflict를 반환한다. */
+  @PostMapping("/{deliveryRequestId}/catch")
+  @PreAuthorize("isAuthenticated()")
+  public ResponseEntity<MatchingResponse> catchDelivery(
+      @AuthenticationPrincipal CustomUserDetails userDetails,
+      @PathVariable Long deliveryRequestId) {
+    Long memberId = (userDetails != null) ? userDetails.getId() : resolveUserDetails().getId();
+    Matching matching = deliveryMatchingService.catchDelivery(memberId, deliveryRequestId);
+    return ResponseEntity.status(HttpStatus.CREATED).body(MatchingResponse.from(matching));
   }
 
   private CustomUserDetails resolveUserDetails() {
