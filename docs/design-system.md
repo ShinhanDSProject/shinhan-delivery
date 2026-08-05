@@ -805,7 +805,7 @@
 
 ## 8. Card & Badge Components (카드 및 배지)
 
---
+---
 
 # Card (카드)
 
