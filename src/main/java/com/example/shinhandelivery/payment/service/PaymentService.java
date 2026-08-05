@@ -11,7 +11,6 @@ import com.example.shinhandelivery.payment.dto.response.PointUseResultResponse;
 import com.example.shinhandelivery.payment.entity.PointHistory;
 import com.example.shinhandelivery.payment.entity.PointHistoryType;
 import com.example.shinhandelivery.payment.entity.PointWallet;
-import com.example.shinhandelivery.payment.exception.InsufficientPointException;
 import com.example.shinhandelivery.payment.repository.PaymentRepository;
 import com.example.shinhandelivery.payment.repository.PointHistoryRepository;
 import java.time.LocalDateTime;
@@ -99,12 +98,7 @@ public class PaymentService {
           existing.getBalanceAfter(), existing.getAmount(), existing.getCreatedAt());
     }
 
-    PointWallet wallet = findWalletByMemberForUpdateOrThrow(memberId);
-    if (wallet.getBalance() < request.getAmount()) {
-      throw new InsufficientPointException(wallet.getId(), request.getAmount());
-    }
-
-    wallet.setBalance(wallet.getBalance() - request.getAmount());
+    PointWallet wallet = findWalletByMemberForUpdateOrThrow(memberId).use(request.getAmount());
     LocalDateTime paidAt = LocalDateTime.now();
     pointHistoryRepository.save(
         PointHistory.builder()
