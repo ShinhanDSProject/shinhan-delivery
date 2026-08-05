@@ -1,13 +1,17 @@
 package com.example.shinhandelivery.delivery.entity;
 
 import com.example.shinhandelivery.delivery.dto.request.MatchingCreateRequest;
+import com.example.shinhandelivery.vehicle.entity.Vehicle;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
@@ -33,8 +37,16 @@ public class Matching {
   @Column(name = "delivery_request_id", nullable = false, unique = true)
   private Long deliveryRequestId;
 
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "delivery_request_id", insertable = false, updatable = false)
+  private DeliveryRequest deliveryRequest;
+
   @Column(name = "vehicle_id", nullable = false)
   private Long vehicleId;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "vehicle_id", insertable = false, updatable = false)
+  private Vehicle vehicle;
 
   @Enumerated(EnumType.STRING)
   @Column(nullable = false, length = 20)

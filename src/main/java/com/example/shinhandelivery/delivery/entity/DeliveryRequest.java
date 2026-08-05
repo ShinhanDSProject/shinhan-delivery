@@ -5,13 +5,17 @@ import com.example.shinhandelivery.delivery.dto.request.DeliveryCreateRequest;
 import com.example.shinhandelivery.delivery.dto.request.DeliveryUpdateRequest;
 import com.example.shinhandelivery.delivery.exception.InvalidDeliveryDistanceException;
 import com.example.shinhandelivery.delivery.exception.InvalidDeliveryWeightException;
+import com.example.shinhandelivery.member.entity.Member;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
@@ -36,6 +40,10 @@ public class DeliveryRequest {
 
   @Column(name = "customer_id", nullable = false)
   private Long customerId;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "customer_id", insertable = false, updatable = false)
+  private Member customer;
 
   @Column(name = "pickup_address", nullable = false, length = 255)
   private String pickupAddress;
