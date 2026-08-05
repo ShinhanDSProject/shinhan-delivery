@@ -76,11 +76,6 @@ erDiagram
 - 삭제 정책 (Cascade / Restrict / Soft delete 등):
 - 기타 비즈니스 규칙 (예: 댓글은 물리 삭제 대신 status='deleted' 처리)
 
-## 8. 마이그레이션 영향 (Migration Impact)
-- 신규 테이블 생성인지 / 기존 테이블 컬럼 추가·변경인지
-- 기존 데이터에 미치는 영향 (백필 필요 여부 등)
-- 롤백 계획
-
-## 9. 오픈 이슈 (Open Questions)
+## 8. 오픈 이슈 (Open Questions)
 - [ ] 
 - [ ] 

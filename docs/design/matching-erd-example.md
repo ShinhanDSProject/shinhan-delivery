@@ -143,12 +143,6 @@ erDiagram
   - 매칭 상태 전이 규칙(`MatchingStatus`)은 DB CHECK 제약이 아니라 `MatchingService.validateTransition()`에서 코드로 검증한다.
   - 차량의 `max_weight`/`max_distance`가 배송 요청의 `weight`/`distance`를 감당할 수 있는지도 DB 제약이 아니라 `MatchingService.create()`/`update()`에서 코드로 검증한다.
 
-## 8. 마이그레이션 영향 (Migration Impact)
-- **신규 테이블 생성**: `matching`.
-- **기존 테이블 컬럼 추가**: `vehicle`에 위치 좌표·상태 컬럼, `delivery_request`에 좌표·물품 크기·증거 사진·타임스탬프·결제 멱등키 컬럼.
-- **기존 데이터 영향**: 신규 컬럼은 전부 `NOT NULL DEFAULT ...` 또는 `NULL` 허용으로 추가되어 기존 행에 대한 백필(backfill) 로직이 따로 필요하지 않다.
-- **롤백 계획**: Flyway는 기본적으로 전진 전용(forward-only)이다. 되돌릴 일이 생기면 새 마이그레이션 파일로 되돌린다 (`code-convention.md` §15, "이미 반영된 마이그레이션 파일은 절대 수정하지 않는다").
-
-## 9. 오픈 이슈 (Open Questions)
+## 8. 오픈 이슈 (Open Questions)
 - [ ] FK에 `ON DELETE RESTRICT`가 암묵적으로 걸려 있는데, 이게 의도된 정책인지 문서화가 안 되어 있다. `Member` 탈퇴 시나리오를 어떻게 처리할지(예: 소프트 삭제로 전환) 별도 논의가 필요해 보인다.
 - [ ] `matching.matched_at`은 `NOT NULL`인데, 매칭이 `CANCELLED`/`COMPLETED`로 바뀌어도 이 컬럼은 최초 매칭 시각 그대로 유지된다 — 상태별 시각(취소 시각, 완료 시각)을 따로 기록할 필요는 없는지 확인 필요.
