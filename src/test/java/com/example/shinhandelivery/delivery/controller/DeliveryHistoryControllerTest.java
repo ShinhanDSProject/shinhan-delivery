@@ -23,6 +23,7 @@ import com.example.shinhandelivery.delivery.entity.ItemSize;
 import com.example.shinhandelivery.delivery.exception.DeliveryAccessDeniedException;
 import com.example.shinhandelivery.delivery.exception.ProofPhotoNotFoundException;
 import com.example.shinhandelivery.delivery.service.DeliveryService;
+import com.example.shinhandelivery.vehicle.entity.VehicleType;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
@@ -129,7 +130,7 @@ class DeliveryHistoryControllerTest {
             127.0,
             ItemSize.MEDIUM,
             "박배송",
-            null,
+            VehicleType.CAR,
             null,
             createdAt,
             matchedAt,
@@ -141,6 +142,7 @@ class DeliveryHistoryControllerTest {
         .perform(get("/api/v1/delivery-requests/1").header("Authorization", "Bearer " + token))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.courierName").value("박배송"))
+        .andExpect(jsonPath("$.vehicleType").value("CAR"))
         .andExpect(jsonPath("$.createdAt").exists())
         .andExpect(jsonPath("$.matchedAt").exists())
         .andExpect(jsonPath("$.pickedUpAt").exists())
