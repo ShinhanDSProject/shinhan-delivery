@@ -592,7 +592,6 @@
 | **Border** | #E2E8F0 (1px) |
 | **배경** | 투명 |
 | **Placeholder 색상** | #94A3B8 |
-| **** | `#2C88FF` |
 | **Label → Input 간격** | 12px |
 
 ---
