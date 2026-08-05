@@ -287,6 +287,12 @@ class PaymentServiceTest {
     member.setId(1L);
     when(memberService.getById(1L)).thenReturn(member);
 
+    PointWallet wallet = new PointWallet();
+    wallet.setId(10L);
+    wallet.setMemberId(1L);
+    wallet.setBalance(9000L);
+    when(paymentRepository.findByMemberIdForUpdate(1L)).thenReturn(Optional.of(wallet));
+
     PointHistory history =
         PointHistory.builder()
             .memberId(1L)
