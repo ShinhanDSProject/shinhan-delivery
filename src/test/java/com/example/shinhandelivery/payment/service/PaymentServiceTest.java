@@ -18,6 +18,8 @@ import com.example.shinhandelivery.payment.entity.PointHistory;
 import com.example.shinhandelivery.payment.entity.PointHistoryType;
 import com.example.shinhandelivery.payment.entity.PointWallet;
 import com.example.shinhandelivery.payment.exception.InsufficientPointException;
+import com.example.shinhandelivery.payment.exception.InvalidPointAmountException;
+import com.example.shinhandelivery.payment.exception.PointBalanceOverflowException;
 import com.example.shinhandelivery.payment.repository.PaymentRepository;
 import com.example.shinhandelivery.payment.repository.PointHistoryRepository;
 import java.time.LocalDateTime;
@@ -102,6 +104,38 @@ class PaymentServiceTest {
     PointWallet response = paymentService.chargePoint(1L, request);
 
     assertThat(response.getBalance()).isEqualTo(1500L);
+  }
+
+  @Test
+  @DisplayName("충전 금액이 0 이하이면 InvalidPointAmountException을 던진다")
+  void chargePointNonPositiveAmountShouldThrowException() {
+    PointWallet wallet = new PointWallet();
+    wallet.setMemberId(1L);
+    wallet.setBalance(1000L);
+    when(paymentRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(wallet));
+
+    PointChargeRequest request = new PointChargeRequest();
+    request.setAmount(0L);
+    request.setPaymentMethod(PaymentMethod.CARD);
+
+    assertThatThrownBy(() -> paymentService.chargePoint(1L, request))
+        .isInstanceOf(InvalidPointAmountException.class);
+  }
+
+  @Test
+  @DisplayName("충전 후 잔액이 long 범위를 넘어서면 PointBalanceOverflowException을 던진다")
+  void chargePointOverflowShouldThrowException() {
+    PointWallet wallet = new PointWallet();
+    wallet.setMemberId(1L);
+    wallet.setBalance(Long.MAX_VALUE);
+    when(paymentRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(wallet));
+
+    PointChargeRequest request = new PointChargeRequest();
+    request.setAmount(1L);
+    request.setPaymentMethod(PaymentMethod.CARD);
+
+    assertThatThrownBy(() -> paymentService.chargePoint(1L, request))
+        .isInstanceOf(PointBalanceOverflowException.class);
   }
 
   @Test
@@ -191,5 +225,20 @@ class PaymentServiceTest {
 
     assertThatThrownBy(() -> paymentService.usePoint(1L, request))
         .isInstanceOf(InsufficientPointException.class);
+  }
+
+  @Test
+  @DisplayName("사용 금액이 0 이하이면 InvalidPointAmountException을 던진다")
+  void usePointNonPositiveAmountShouldThrowException() {
+    PointWallet wallet = new PointWallet();
+    wallet.setMemberId(1L);
+    wallet.setBalance(1000L);
+    when(paymentRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(wallet));
+
+    PointUseRequest request = new PointUseRequest();
+    request.setAmount(-1L);
+
+    assertThatThrownBy(() -> paymentService.usePoint(1L, request))
+        .isInstanceOf(InvalidPointAmountException.class);
   }
 }
