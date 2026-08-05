@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>포인트 지갑 - Shinhan Delivery</title>
+  <link rel="stylesheet" href="/css/design-system.css">
+  <style>
+    :root {
+      --wallet-bg: linear-gradient(160deg, #eff6ff 0%, #ffffff 62%);
+      --wallet-ink: var(--color-black-200);
+      --wallet-muted: var(--color-grey-300);
+      --wallet-line: var(--color-grey-50);
+    }
+    * { box-sizing: border-box; }
+    body {
+      min-height: 100vh;
+      margin: 0;
+      color: var(--wallet-ink);
+      background:
+          radial-gradient(circle at top left, rgba(47, 115, 224, 0.14), transparent 32%),
+          linear-gradient(180deg, #f7fbff 0%, #eef3f8 100%);
+      font-family: var(--font-family-base);
+    }
+    .shell {
+      width: min(100%, 430px);
+      min-height: 100vh;
+      margin: 0 auto;
+      padding: 24px 20px 120px;
+    }
+    .topbar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .icon-btn {
+      width: 42px;
+      height: 42px;
+      border: 1px solid var(--wallet-line);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.85);
+      color: var(--wallet-ink);
+      cursor: pointer;
+    }
+    .title-wrap small {
+      display: block;
+      color: var(--wallet-muted);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .title-wrap h1 {
+      margin: 4px 0 0;
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+    }
+    .wallet-card {
+      overflow: hidden;
+      padding: 24px;
+      border: 1px solid rgba(47, 115, 224, 0.12);
+      border-radius: 28px;
+      background: var(--wallet-bg);
+      box-shadow: 0 18px 40px rgba(44, 136, 255, 0.12);
+    }
+    .label {
+      color: var(--wallet-muted);
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .balance {
+      margin: 10px 0 14px;
+      font-size: 40px;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+    }
+    .hint {
+      color: var(--wallet-muted);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    .actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 20px;
+    }
+    .btn {
+      min-height: 54px;
+      border-radius: 16px;
+      font-size: 15px;
+      font-weight: 800;
+    }
+    .section {
+      margin-top: 28px;
+    }
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .section-head h2 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+    }
+    .section-head span {
+      color: var(--wallet-muted);
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .history-list {
+      display: grid;
+      gap: 12px;
+    }
+    .history-item,
+    .empty-state {
+      padding: 18px;
+      border: 1px solid var(--wallet-line);
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.92);
+    }
+    .history-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+    }
+    .history-title {
+      font-size: 15px;
+      font-weight: 800;
+    }
+    .history-subtitle {
+      margin-top: 6px;
+      color: var(--wallet-muted);
+      font-size: 13px;
+    }
+    .history-amount {
+      font-size: 16px;
+      font-weight: 800;
+      white-space: nowrap;
+      color: var(--color-blue-100);
+    }
+    .empty-state strong {
+      display: block;
+      font-size: 16px;
+      margin-bottom: 6px;
+    }
+    .empty-state p {
+      margin: 0;
+      color: var(--wallet-muted);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 32px;
+      transform: translateX(-50%);
+      min-width: 200px;
+      max-width: calc(100% - 32px);
+      padding: 12px 16px;
+      border-radius: 999px;
+      color: #fff;
+      background: rgba(17, 24, 39, 0.88);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+      text-align: center;
+      font-size: 13px;
+      z-index: 20;
+    }
+    .toast.is-visible { opacity: 1; }
+  </style>
+</head>
+<body>
+<main class="shell">
+  <div class="topbar">
+    <button class="icon-btn" type="button" onclick="location.href='/my-page.html'" aria-label="뒤로가기">‹</button>
+    <div class="title-wrap">
+      <small>Point Wallet</small>
+      <h1>포인트 지갑</h1>
+    </div>
+  </div>
+
+  <section class="wallet-card" aria-label="포인트 잔액">
+    <div class="label">현재 보유 포인트</div>
+    <div id="balance" class="balance">0 P</div>
+    <div id="walletHint" class="hint">지갑을 확인하는 중입니다.</div>
+    <div class="actions">
+      <button class="btn btn-primary" type="button" onclick="location.href='/point-charge.html'">포인트 충전</button>
+      <button class="btn" type="button" onclick="location.href='/home.html'" style="background:#fff;border:1px solid var(--wallet-line);color:var(--wallet-ink);">홈으로</button>
+    </div>
+  </section>
+
+  <section class="section" aria-label="최근 내역">
+    <div class="section-head">
+      <h2>최근 내역</h2>
+      <span id="historyCount">0건</span>
+    </div>
+    <div id="historyList" class="history-list"></div>
+  </section>
+</main>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<script src="/js/my-page-api.js"></script>
+<script>
+  let toastTimer = null;
+
+  function showToast(message) {
+    const toast = document.getElementById("toast");
+    toast.textContent = message;
+    toast.classList.add("is-visible");
+    window.clearTimeout(toastTimer);
+    toastTimer = window.setTimeout(() => toast.classList.remove("is-visible"), 2200);
+  }
+
+  function formatPoint(amount) {
+    return `${Number(amount || 0).toLocaleString()} P`;
+  }
+
+  function formatDate(value) {
+    if (!value) return "방금 전";
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return "기록 시각 없음";
+    return date.toLocaleString("ko-KR", {
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit"
+    });
+  }
+
+  async function resolveWallet(memberId) {
+    const wallets = await MyPageApi.request("/api/v1/point-wallets");
+    const existing = Array.isArray(wallets) ? wallets.find((wallet) => wallet.memberId === memberId) : null;
+    if (existing) return existing;
+    return MyPageApi.request("/api/v1/point-wallets", {
+      method: "POST",
+      body: JSON.stringify({ memberId })
+    });
+  }
+
+  function renderHistory(wallet, chargeSnapshot) {
+    const historyList = document.getElementById("historyList");
+    const historyCount = document.getElementById("historyCount");
+    const entries = [];
+
+    if (chargeSnapshot) {
+      entries.push({
+        title: "포인트 충전 완료",
+        subtitle: `${formatDate(chargeSnapshot.lastChargedAt)} · ${chargeSnapshot.methodLabel}`,
+        amountText: `+${formatPoint(chargeSnapshot.amount)}`
+      });
+    }
+
+    entries.push({
+      title: "현재 포인트 잔액",
+      subtitle: wallet.id ? `지갑 ID ${wallet.id}` : "지갑 정보",
+      amountText: formatPoint(wallet.balance)
+    });
+
+    historyCount.textContent = `${entries.length}건`;
+    historyList.innerHTML = entries.map((entry) => `
+      <article class="history-item">
+        <div class="history-row">
+          <div>
+            <div class="history-title">${entry.title}</div>
+            <div class="history-subtitle">${entry.subtitle}</div>
+          </div>
+          <div class="history-amount">${entry.amountText}</div>
+        </div>
+      </article>
+    `).join("");
+  }
+
+  async function init() {
+    if (!MyPageApi.requireToken()) return;
+    try {
+      const profile = await MyPageApi.request("/api/v1/members/me");
+      const wallet = await resolveWallet(profile.id);
+      const chargeSnapshotRaw = sessionStorage.getItem("pointChargeSnapshot");
+      const chargeSnapshot = chargeSnapshotRaw ? JSON.parse(chargeSnapshotRaw) : null;
+
+      document.getElementById("balance").textContent = formatPoint(wallet.balance);
+      document.getElementById("walletHint").textContent = chargeSnapshot
+        ? `최근 충전이 반영되었습니다. 마지막 충전 시각 ${formatDate(chargeSnapshot.lastChargedAt)}`
+        : "포인트를 충전하면 배송 결제에 바로 사용할 수 있습니다.";
+
+      renderHistory(wallet, chargeSnapshot);
+
+      if (chargeSnapshot) {
+        sessionStorage.removeItem("pointChargeSnapshot");
+        showToast("포인트 충전이 완료되었습니다.");
+      }
+    } catch (error) {
+      document.getElementById("walletHint").textContent = "포인트 지갑을 불러오지 못했습니다.";
+      document.getElementById("historyList").innerHTML = `
+        <div class="empty-state">
+          <strong>지갑 정보를 가져오지 못했습니다.</strong>
+          <p>${error.message}</p>
+        </div>
+      `;
+      showToast(error.message);
+    }
+  }
+
+  init();
+</script>
+</body>
+</html>
