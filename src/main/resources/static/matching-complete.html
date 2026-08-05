@@ -319,7 +319,8 @@
         }
         try {
             const response = await fetch(`/api/v1/delivery-requests/${deliveryId}`, {
-                headers: { Authorization: header }
+                headers: { Authorization: header },
+                cache: 'no-store'
             });
             if (response.status === 401) {
                 location.replace('/login.html');
