@@ -521,6 +521,10 @@
                 return;
             }
             const me = await meResponse.json();
+            if (!me.hasPaymentPin) {
+                location.replace('/payment-pin-settings.html?required=1&returnUrl=%2Fhome.html');
+                return;
+            }
             document.getElementById('greetingName').textContent = `${me.name} 님`;
 
             const activeStatuses = ['REQUESTED', 'MATCHED'];
