@@ -36,10 +36,14 @@ fi
 
 echo "🚀 [2/4] 변경사항 커밋 및 푸시..."
 git add .
-git commit -m "$COMMIT_MSG" || true
+if git diff --cached --quiet; then
+    echo "ℹ️ 커밋할 변경사항이 없어 커밋 단계를 건너뜁니다."
+else
+    git commit -m "$COMMIT_MSG"
+fi
 git push -u origin "$CURRENT_BRANCH"
 
 echo "🚀 [3/4] GitHub PR 자동 생성..."
-gh pr create --title "$COMMIT_MSG" --body-file .github/pull_request_template.md --web || true
+gh pr create --title "$COMMIT_MSG" --body-file .github/pull_request_template.md --web
 
 echo "🎉 작업이 완벽하게 처리되었습니다!"

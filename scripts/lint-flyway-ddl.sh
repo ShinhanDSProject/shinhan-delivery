@@ -44,10 +44,10 @@ for file_path in "$MIGRATION_DIR"/*; do
     continue
   fi
 
-  # 세미콜론(;)을 구분자로 사용하여 여러 줄로 작성된 개별 쿼리문 단위로 분할하여 읽어들입의다.
+  # 세미콜론(;)을 구분자로 사용하여 여러 줄로 작성된 개별 쿼리문 단위로 분할하여 읽어들입니다.
   # 이렇게 하면 줄바꿈 쿼리문 및 쿼리 윗줄의 주석이 하나의 단일 문자열 버퍼에 포함됩니다.
   while IFS= read -r -d ';' statement || [[ -n "$statement" ]]; do
-    # 공백 제거 및 대문자 변환
+    # 대문자 변환
     upper_statement=$(echo "$statement" | tr '[:lower:]' '[:upper:]')
 
     # 해당 쿼리 블록 내에 우회 주석이 포함되어 있다면 검사를 건너뜁니다.
