@@ -26,13 +26,16 @@
         .btn-secondary { background: transparent; color: var(--color-grey-300); border: 1px solid var(--color-grey-50); }
         @keyframes spin { from { transform: rotate(0); } to { transform: rotate(360deg); } }
         @keyframes bounce { 0%, 80%, 100% { transform: scale(0.7); opacity: 0.45; } 40% { transform: scale(1); opacity: 1; } }
+        @media (prefers-reduced-motion: reduce) {
+            .orb::after, .loading-dots span { animation: none; }
+        }
     </style>
 </head>
 <body>
 <main class="page">
     <div class="orb"></div>
-    <h1>배송원을 찾고 있습니다</h1>
-    <p>결제가 완료되어 매칭 요청이 접수되었습니다. 조건에 맞는 배송원을 탐색하는 동안 잠시만 기다려 주세요.</p>
+    <h1>배송자를 찾고 있습니다</h1>
+    <p>결제가 완료되어 매칭 요청이 접수되었습니다. 조건에 맞는 배송자를 탐색하는 동안 잠시만 기다려 주세요.</p>
 
     <section class="route">
         <strong id="routeSummary">출발지 → 도착지</strong>
@@ -54,6 +57,11 @@
 
     (function init() {
         const draft = loadDraft();
+        if (!draft.paymentResult || draft.paymentStatus !== 'COMPLETED') {
+            location.replace('/home.html');
+            return;
+        }
+
         const pickup = draft.pickup && draft.pickup.address ? draft.pickup.address : '출발지 미입력';
         const dropoff = draft.dropoff && draft.dropoff.address ? draft.dropoff.address : '도착지 미입력';
         document.getElementById('routeSummary').textContent = `${pickup} → ${dropoff}`;
