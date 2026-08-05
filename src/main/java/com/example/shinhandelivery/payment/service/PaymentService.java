@@ -7,10 +7,10 @@ import com.example.shinhandelivery.payment.dto.request.PointChargeRequest;
 import com.example.shinhandelivery.payment.dto.request.PointUseRequest;
 import com.example.shinhandelivery.payment.dto.request.PointWalletCreateRequest;
 import com.example.shinhandelivery.payment.dto.response.PointBalanceResponse;
+import com.example.shinhandelivery.payment.dto.response.PointUseResultResponse;
 import com.example.shinhandelivery.payment.entity.PointHistory;
 import com.example.shinhandelivery.payment.entity.PointHistoryType;
 import com.example.shinhandelivery.payment.entity.PointWallet;
-import com.example.shinhandelivery.payment.exception.InsufficientPointException;
 import com.example.shinhandelivery.payment.repository.PaymentRepository;
 import com.example.shinhandelivery.payment.repository.PointHistoryRepository;
 import java.time.LocalDateTime;
@@ -19,7 +19,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/** PointWallet 관련 유스케이스(생성/조회/충전/사용/삭제)를 담당하는 서비스. */
+/** PointWallet 관련 유스케이스를 담당하는 서비스. */
 @Service
 @RequiredArgsConstructor
 public class PaymentService {
@@ -28,38 +28,27 @@ public class PaymentService {
   private final MemberService memberService;
   private final PointHistoryRepository pointHistoryRepository;
 
-  /** 회원 존재 여부를 검증한 뒤 잔액 0인 포인트 지갑을 생성한다 (PointWallet Entity 리턴). */
   @Transactional
   public PointWallet create(PointWalletCreateRequest request) {
     memberService.getById(request.getMemberId());
-
     return paymentRepository.save(PointWallet.createEmpty(request.getMemberId()));
   }
 
-  /** id로 포인트 지갑 단건을 조회한다. 없으면 EntityNotFoundException. */
   @Transactional(readOnly = true)
   public PointWallet getById(Long walletId) {
     return findWalletOrThrow(walletId);
   }
 
-  /** 전체 포인트 지갑 목록을 조회한다. */
   @Transactional(readOnly = true)
   public List<PointWallet> list() {
     return paymentRepository.findAll();
   }
 
-  /**
-   * 포인트 지갑에 포인트를 충전한다. 동일 지갑에 대한 동시 충전/차감 요청이 잔액을 잃어버리지 않도록 비관적 쓰기 락으로 지갑을 조회해 트랜잭션이 끝날 때까지 해당 지갑
-   * 락을 점유한다.
-   */
   @Transactional
   public PointWallet chargePoint(Long walletId, PointChargeRequest request) {
-    PointWallet wallet = findWalletForUpdateOrThrow(walletId);
-    wallet.setBalance(wallet.getBalance() + request.getAmount());
-    return wallet;
+    return findWalletForUpdateOrThrow(walletId).charge(request.getAmount());
   }
 
-  /** 인증된 회원 기준으로 포인트를 충전하고, 동일 멱등 키 재호출 시 기존 결과를 재사용한다. */
   @Transactional
   public PointBalanceResponse chargePoint(
       Long memberId, String idempotencyKey, PointChargeRequest request) {
@@ -73,8 +62,7 @@ public class PaymentService {
       return new PointBalanceResponse(existing.getBalanceAfter(), existing.getCreatedAt());
     }
 
-    PointWallet wallet = findWalletByMemberForUpdateOrThrow(memberId);
-    wallet.setBalance(wallet.getBalance() + request.getAmount());
+    PointWallet wallet = findWalletByMemberForUpdateOrThrow(memberId).charge(request.getAmount());
 
     LocalDateTime chargedAt = LocalDateTime.now();
     pointHistoryRepository.save(
@@ -91,21 +79,44 @@ public class PaymentService {
     return new PointBalanceResponse(wallet.getBalance(), chargedAt);
   }
 
-  /**
-   * 다른 도메인 Service가 회원의 포인트를 차감할 때 사용한다. 잔액이 부족하면 InsufficientPointException. 동일 지갑에 대한 동시 차감 요청으로
-   * 잔액이 음수로 가지 않도록 비관적 쓰기 락으로 지갑을 조회한다.
-   */
   @Transactional
   public PointWallet usePoint(Long walletId, PointUseRequest request) {
-    PointWallet wallet = findWalletForUpdateOrThrow(walletId);
-    if (wallet.getBalance() < request.getAmount()) {
-      throw new InsufficientPointException(walletId, request.getAmount());
-    }
-    wallet.setBalance(wallet.getBalance() - request.getAmount());
-    return wallet;
+    return findWalletForUpdateOrThrow(walletId).use(request.getAmount());
   }
 
-  /** id로 포인트 지갑을 조회해 삭제한다. 없으면 EntityNotFoundException. */
+  @Transactional
+  public PointUseResultResponse usePoint(
+      Long memberId, String idempotencyKey, PointUseRequest request) {
+    memberService.getById(memberId);
+
+    PointWallet wallet = findWalletByMemberForUpdateOrThrow(memberId);
+    PointHistory existing =
+        pointHistoryRepository
+            .findByMemberIdAndIdempotencyKey(memberId, idempotencyKey)
+            .orElse(null);
+    if (existing != null) {
+      return new PointUseResultResponse(
+          existing.getBalanceAfter(), existing.getAmount(), existing.getCreatedAt());
+    }
+    if (wallet.getBalance() < request.getAmount()) {
+      throw new InsufficientPointException(wallet.getId(), request.getAmount());
+    }
+
+    wallet.setBalance(wallet.getBalance() - request.getAmount());
+    LocalDateTime paidAt = LocalDateTime.now();
+    pointHistoryRepository.save(
+        PointHistory.builder()
+            .memberId(memberId)
+            .walletId(wallet.getId())
+            .amount(request.getAmount())
+            .balanceAfter(wallet.getBalance())
+            .type(PointHistoryType.USE)
+            .idempotencyKey(idempotencyKey)
+            .createdAt(paidAt)
+            .build());
+    return new PointUseResultResponse(wallet.getBalance(), request.getAmount(), paidAt);
+  }
+
   @Transactional
   public void delete(Long walletId) {
     PointWallet wallet = findWalletOrThrow(walletId);

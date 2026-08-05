@@ -500,6 +500,7 @@
 
     let myMemberId = null;
     let myPointBalance = null;
+    let latestEstimate = null;
 
     async function loadMyPointBalance() {
         const header = authHeader();
@@ -521,6 +522,12 @@
 
     let estimateTimer = null;
 
+    function clearStoredEstimate() {
+        const draft = loadDraft();
+        delete draft.paymentEstimate;
+        saveDraft(draft);
+    }
+
     function maybeEstimateFee() {
         const draft = loadDraft();
         const feeCard = document.getElementById('feeCard');
@@ -530,6 +537,8 @@
         if (!draft.pickup || !draft.dropoff || !draft.itemSize || !draft.weight) {
             feeCard.classList.remove('visible');
             feeLoading.style.display = 'none';
+            latestEstimate = null;
+            clearStoredEstimate();
             nextButton.disabled = true;
             return;
         }
@@ -556,10 +565,13 @@
                 });
                 feeLoading.style.display = 'none';
                 if (!response.ok) {
+                    latestEstimate = null;
+                    clearStoredEstimate();
                     nextButton.disabled = true;
                     return;
                 }
                 const estimate = await response.json();
+                latestEstimate = estimate;
                 document.getElementById('feeValue').textContent =
                     `${Number(estimate.totalFee).toLocaleString()} Point`;
 
@@ -572,18 +584,35 @@
                 document.getElementById('feeBalance').textContent =
                     myPointBalance === null ? '보유 포인트 확인 불가' : `보유 ${myPointBalance.toLocaleString()} pt`;
 
+                const draftWithEstimate = loadDraft();
+                draftWithEstimate.paymentEstimate = {
+                    baseFee: Number(estimate.baseFee),
+                    distanceSurcharge: Number(estimate.distanceSurcharge),
+                    weightSurcharge: Number(estimate.weightSurcharge),
+                    sizeSurcharge: Number(estimate.sizeSurcharge),
+                    totalFee: Number(estimate.totalFee),
+                    walletBalance: myPointBalance ?? 0,
+                    estimatedDistanceKm: Number(km.toFixed(1))
+                };
+                saveDraft(draftWithEstimate);
+
                 feeCard.classList.add('visible');
                 nextButton.disabled = false;
             } catch (error) {
                 feeLoading.style.display = 'none';
+                latestEstimate = null;
+                clearStoredEstimate();
                 nextButton.disabled = true;
             }
         }, 300);
     }
 
     function onNext() {
-        // 결제/확인 화면(customer-payment-confirmation)은 별도 이슈 범위라 아직 연결하지 않는다.
-        notReady();
+        if (!latestEstimate) {
+            notReady();
+            return;
+        }
+        location.href = '/payment-confirmation.html';
     }
 
     (function init() {

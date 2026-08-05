@@ -311,25 +311,6 @@
         });
     }
 
-    async function findVehicleTypeForDelivery(header) {
-        try {
-            const matchingsResponse = await fetch('/api/v1/matchings', { headers: { Authorization: header } });
-            if (!matchingsResponse.ok) return null;
-            const matchings = await matchingsResponse.json();
-            const matching = matchings.find((m) => m.deliveryRequestId === Number(deliveryId));
-            if (!matching) return null;
-
-            const vehicleResponse = await fetch(`/api/v1/vehicles/${matching.vehicleId}`, {
-                headers: { Authorization: header }
-            });
-            if (!vehicleResponse.ok) return null;
-            const vehicle = await vehicleResponse.json();
-            return vehicle.type;
-        } catch (error) {
-            return null;
-        }
-    }
-
     async function load() {
         const header = authHeader();
         if (!header || !deliveryId) {
@@ -338,7 +319,8 @@
         }
         try {
             const response = await fetch(`/api/v1/delivery-requests/${deliveryId}`, {
-                headers: { Authorization: header }
+                headers: { Authorization: header },
+                cache: 'no-store'
             });
             if (response.status === 401) {
                 location.replace('/login.html');
@@ -362,8 +344,7 @@
                 return;
             }
 
-            const vehicleType = await findVehicleTypeForDelivery(header);
-            render(detail, vehicleType);
+            render(detail, detail.vehicleType);
         } catch (error) {
             showStatusMessage('배송 정보를 불러오지 못했어요.');
         }

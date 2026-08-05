@@ -141,6 +141,14 @@
             40% { opacity: 1; }
         }
 
+        @media (prefers-reduced-motion: reduce) {
+            .pulse-outer,
+            .pulse-inner,
+            .loading-dots span {
+                animation: none;
+            }
+        }
+
         .footer-action {
             display: flex;
             justify-content: center;
@@ -297,7 +305,8 @@
         }
         try {
             const response = await fetch(`/api/v1/delivery-requests/${deliveryId}`, {
-                headers: { Authorization: header }
+                headers: { Authorization: header },
+                cache: 'no-store'
             });
             if (response.status === 401) {
                 location.replace('/login.html');
@@ -306,6 +315,11 @@
             if (response.status === 403) {
                 stopPolling();
                 showStatusMessage('이 배송 요청을 볼 권한이 없어요.');
+                return;
+            }
+            if (response.status === 400 || response.status === 404) {
+                stopPolling();
+                showStatusMessage('배송 요청 정보를 확인할 수 없어요.');
                 return;
             }
             if (!response.ok) return;

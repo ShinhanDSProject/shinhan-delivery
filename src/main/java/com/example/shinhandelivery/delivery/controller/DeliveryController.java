@@ -1,27 +1,37 @@
 package com.example.shinhandelivery.delivery.controller;
 
+import com.example.shinhandelivery.common.exception.BusinessException;
+import com.example.shinhandelivery.common.exception.ErrorCode;
 import com.example.shinhandelivery.common.security.CustomUserDetails;
 import com.example.shinhandelivery.delivery.dto.request.DeliveryCompleteRequest;
 import com.example.shinhandelivery.delivery.dto.request.DeliveryCreateRequest;
 import com.example.shinhandelivery.delivery.dto.request.DeliveryEstimateRequest;
+import com.example.shinhandelivery.delivery.dto.request.DeliveryPayRequest;
 import com.example.shinhandelivery.delivery.dto.request.DeliveryUpdateRequest;
 import com.example.shinhandelivery.delivery.dto.response.DeliveryDetailResponseDto;
 import com.example.shinhandelivery.delivery.dto.response.DeliveryEstimateResponse;
 import com.example.shinhandelivery.delivery.dto.response.DeliveryListResponseDto;
+import com.example.shinhandelivery.delivery.dto.response.DeliveryPaymentResponse;
 import com.example.shinhandelivery.delivery.dto.response.DeliveryResponse;
 import com.example.shinhandelivery.delivery.dto.response.ProofPhotoResponse;
 import com.example.shinhandelivery.delivery.entity.DeliveryRequest;
 import com.example.shinhandelivery.delivery.entity.DeliveryStatus;
 import com.example.shinhandelivery.delivery.service.DeliveryService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -29,6 +39,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -37,6 +48,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/v1/delivery-requests")
 @RequiredArgsConstructor
+@Validated
 public class DeliveryController {
 
   private final DeliveryService deliveryService;
@@ -45,9 +57,9 @@ public class DeliveryController {
   @PostMapping
   @PreAuthorize("isAuthenticated()")
   public ResponseEntity<DeliveryResponse> requestDelivery(
-      @AuthenticationPrincipal CustomUserDetails principal,
       @RequestBody @Valid DeliveryCreateRequest request) {
-    DeliveryRequest created = deliveryService.requestDelivery(principal.getId(), request);
+    DeliveryRequest created =
+        deliveryService.requestDelivery(resolveUserDetails().getId(), request);
     return ResponseEntity.status(HttpStatus.CREATED).body(DeliveryResponse.from(created));
   }
 
@@ -58,27 +70,53 @@ public class DeliveryController {
     return ResponseEntity.ok(deliveryService.estimateFee(request));
   }
 
-  /** 배송 요청 상세를 조회한다(배송원 이름·증거사진 포함). 고객 본인 또는 배정된 배송원 본인만 조회할 수 있다. */
+  /** 배송 결제와 배송 요청 생성을 원자적으로 처리한다. */
+  @PostMapping("/pay")
+  @PreAuthorize("isAuthenticated()")
+  public ResponseEntity<DeliveryPaymentResponse> payDelivery(
+      @RequestHeader("Idempotency-Key")
+          @NotBlank(message = "Idempotency-Key는 필수입니다.")
+          @Size(max = 100, message = "Idempotency-Key는 100자 이하여야 합니다.")
+          String idempotencyKey,
+      @RequestBody @Valid DeliveryPayRequest request) {
+    return ResponseEntity.ok(
+        deliveryService.payDelivery(resolveUserDetails().getId(), idempotencyKey, request));
+  }
+
+  /**
+   * 배송 요청 상세를 조회한다(배송원 이름·증거사진 포함). 고객 본인 또는 배정된 배송원 본인만 조회할 수 있다. 매칭 대기·완료 화면이 실시간 상태 폴링에 이 API를
+   * 쓰므로, 캐시된 과거 상태를 다시 보여주지 않도록 Cache-Control: no-store를 응답에 명시한다.
+   */
   @GetMapping("/{deliveryRequestId}")
   @PreAuthorize("isAuthenticated()")
   public ResponseEntity<DeliveryDetailResponseDto> getDeliveryRequest(
       @AuthenticationPrincipal CustomUserDetails principal, @PathVariable Long deliveryRequestId) {
-    return ResponseEntity.ok(
-        deliveryService.getDeliveryRequestDetail(principal.getId(), deliveryRequestId));
+    return ResponseEntity.ok()
+        .cacheControl(CacheControl.noStore())
+        .body(deliveryService.getDeliveryRequestDetail(principal.getId(), deliveryRequestId));
   }
 
   /** 로그인 회원 본인의 배송 내역을 최신순으로 페이징 조회한다. status로 선택적 필터링이 가능하다. */
   @GetMapping
   @PreAuthorize("isAuthenticated()")
   public ResponseEntity<Page<DeliveryListResponseDto>> getDeliveryRequests(
-      @AuthenticationPrincipal CustomUserDetails principal,
       @RequestParam(required = false) DeliveryStatus status,
       @PageableDefault(size = 10) Pageable pageable) {
     Page<DeliveryListResponseDto> responses =
         deliveryService
-            .getMyDeliveryRequests(principal.getId(), status, pageable)
+            .getMyDeliveryRequests(resolveUserDetails().getId(), status, pageable)
             .map(DeliveryListResponseDto::from);
     return ResponseEntity.ok(responses);
+  }
+
+  private CustomUserDetails resolveUserDetails() {
+    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    if (auth != null
+        && auth.getPrincipal() instanceof CustomUserDetails customUser
+        && customUser.getId() != null) {
+      return customUser;
+    }
+    throw new BusinessException(ErrorCode.UNAUTHORIZED);
   }
 
   /** 배송 요청의 픽업지·도착지를 수정한다. */
@@ -114,8 +152,8 @@ public class DeliveryController {
   /** 배송 완료 증거 사진을 조회한다. 배송 요청의 고객 본인 또는 배정된 배송원 본인만 조회할 수 있다. */
   @GetMapping("/{deliveryRequestId}/proof-photo")
   @PreAuthorize("isAuthenticated()")
-  public ResponseEntity<ProofPhotoResponse> getProofPhoto(
-      @AuthenticationPrincipal CustomUserDetails principal, @PathVariable Long deliveryRequestId) {
-    return ResponseEntity.ok(deliveryService.getProofPhoto(principal.getId(), deliveryRequestId));
+  public ResponseEntity<ProofPhotoResponse> getProofPhoto(@PathVariable Long deliveryRequestId) {
+    return ResponseEntity.ok(
+        deliveryService.getProofPhoto(resolveUserDetails().getId(), deliveryRequestId));
   }
 }
