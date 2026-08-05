@@ -53,6 +53,11 @@ public enum ErrorCode {
   INVALID_POINT_AMOUNT(HttpStatus.BAD_REQUEST, "P003", "포인트 금액은 0보다 커야 합니다."),
   POINT_BALANCE_OVERFLOW(HttpStatus.BAD_REQUEST, "P004", "포인트 잔액 한도를 초과했습니다."),
 
+  PIN_LOCKED(HttpStatus.CONFLICT, "P005", "寃곗젣 PIN??3???댁긽 ?ㅽ뙣濡?醫낅え?섏뿀?듬땲??"),
+
+  CURRENT_PIN_MISMATCH(HttpStatus.BAD_REQUEST, "P006", "현재 결제 PIN이 일치하지 않습니다."),
+  PIN_CONFIRMATION_MISMATCH(HttpStatus.BAD_REQUEST, "P007", "새 결제 PIN과 확인 PIN이 일치하지 않습니다."),
+
   // Notification Domain Errors
   NOTIFICATION_NOT_FOUND(HttpStatus.NOT_FOUND, "N001", "존재하지 않는 알림입니다."),
 

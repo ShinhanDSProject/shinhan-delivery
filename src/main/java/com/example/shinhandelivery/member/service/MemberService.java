@@ -7,6 +7,7 @@ import com.example.shinhandelivery.common.security.JwtProvider;
 import com.example.shinhandelivery.member.dto.request.LoginRequest;
 import com.example.shinhandelivery.member.dto.request.MemberCreateRequest;
 import com.example.shinhandelivery.member.dto.request.MemberPasswordUpdateRequest;
+import com.example.shinhandelivery.member.dto.request.MemberPaymentPinUpdateRequest;
 import com.example.shinhandelivery.member.dto.request.MemberProfileUpdateRequestDto;
 import com.example.shinhandelivery.member.dto.request.MemberUpdateRequest;
 import com.example.shinhandelivery.member.dto.response.TokenResponse;
@@ -108,6 +109,25 @@ public class MemberService {
     }
 
     member.changePassword(passwordEncoder.encode(request.getNewPassword()));
+  }
+
+  /** 로그인한 회원의 결제 PIN을 설정하거나 변경한다. */
+  @Transactional
+  public void updatePaymentPin(Long memberId, MemberPaymentPinUpdateRequest request) {
+    Member member = findMemberOrThrow(memberId);
+
+    if (!request.getNewPin().equals(request.getConfirmNewPin())) {
+      throw new BusinessException(ErrorCode.PIN_CONFIRMATION_MISMATCH);
+    }
+
+    if (member.getPinHash() != null && !member.getPinHash().isBlank()) {
+      String currentPin = request.getCurrentPin() == null ? "" : request.getCurrentPin();
+      if (currentPin.isBlank() || !passwordEncoder.matches(currentPin, member.getPinHash())) {
+        throw new BusinessException(ErrorCode.CURRENT_PIN_MISMATCH);
+      }
+    }
+
+    member.changePaymentPin(passwordEncoder.encode(request.getNewPin()));
   }
 
   /** 회원의 이름과 연락처를 수정한다 (Member Entity 리턴). 이메일/비밀번호/역할은 변경하지 않는다. */

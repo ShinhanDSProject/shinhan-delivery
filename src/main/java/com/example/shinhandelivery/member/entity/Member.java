@@ -55,6 +55,15 @@ public class Member {
   @Column(name = "preferred_weight")
   private Double preferredWeight;
 
+  @Column(name = "pin_hash", length = 255)
+  private String pinHash;
+
+  @Column(name = "pin_fail_count", nullable = false)
+  private int pinFailCount;
+
+  @Column(name = "pin_locked", nullable = false)
+  private boolean pinLocked;
+
   /** 회원의 역할(CUSTOMER/COURIER)을 변경한다. ADMIN 권한 승격은 직접 변경을 불허한다. */
   public Member changeRole(MemberRole newRole) {
     if (newRole == null) {
@@ -87,6 +96,32 @@ public class Member {
   public Member updateProfileBy(MemberProfileUpdateRequestDto request) {
     this.name = request.getName();
     this.phoneNumber = request.getPhoneNumber();
+    return this;
+  }
+
+  /** PIN 검증 성공 시 실패 횟수를 초기화한다. */
+  public Member resetPinFailures() {
+    this.pinFailCount = 0;
+    return this;
+  }
+
+  /** PIN 검증 실패를 기록하고 3회 이상이면 잠금 처리한다. */
+  public Member recordPinFailure() {
+    this.pinFailCount += 1;
+    if (this.pinFailCount >= 3) {
+      this.pinLocked = true;
+    }
+    return this;
+  }
+
+  /** 결제 PIN을 저장하고 잠금/실패 횟수를 초기화한다. */
+  public Member changePaymentPin(String encodedPin) {
+    if (encodedPin == null || encodedPin.isBlank()) {
+      throw new IllegalArgumentException("인코딩된 결제 PIN은 필수입니다.");
+    }
+    this.pinHash = encodedPin;
+    this.pinFailCount = 0;
+    this.pinLocked = false;
     return this;
   }
 

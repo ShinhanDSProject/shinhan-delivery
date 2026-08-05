@@ -87,7 +87,8 @@ class MemberControllerTest {
                 .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.email").value("user@example.com"))
-        .andExpect(jsonPath("$.role").value("CUSTOMER"));
+        .andExpect(jsonPath("$.role").value("CUSTOMER"))
+        .andExpect(jsonPath("$.hasPaymentPin").value(false));
   }
 
   @Test

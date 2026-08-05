@@ -11,9 +11,11 @@ import com.example.shinhandelivery.common.exception.EntityNotFoundException;
 import com.example.shinhandelivery.common.exception.ErrorCode;
 import com.example.shinhandelivery.member.entity.Member;
 import com.example.shinhandelivery.member.service.MemberService;
+import com.example.shinhandelivery.payment.dto.request.PinVerifyRequestDto;
 import com.example.shinhandelivery.payment.dto.request.PointChargeRequest;
 import com.example.shinhandelivery.payment.dto.request.PointUseRequest;
 import com.example.shinhandelivery.payment.dto.request.PointWalletCreateRequest;
+import com.example.shinhandelivery.payment.dto.response.PinVerifyResponseDto;
 import com.example.shinhandelivery.payment.dto.response.PointBalanceResponse;
 import com.example.shinhandelivery.payment.dto.response.PointUseResultResponse;
 import com.example.shinhandelivery.payment.entity.PaymentMethod;
@@ -34,6 +36,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @ExtendWith(MockitoExtension.class)
 class PaymentServiceTest {
@@ -41,7 +44,83 @@ class PaymentServiceTest {
   @Mock private PaymentRepository paymentRepository;
   @Mock private MemberService memberService;
   @Mock private PointHistoryRepository pointHistoryRepository;
+  @Mock private PasswordEncoder passwordEncoder;
   @InjectMocks private PaymentService paymentService;
+
+  @Test
+  @DisplayName("올바른 PIN이면 verified=true를 반환하고 실패 횟수를 초기화한다")
+  void verifyPinSuccess() {
+    Member member = new Member();
+    member.setId(1L);
+    member.setPinHash("encoded-pin");
+    member.setPinFailCount(2);
+    when(memberService.getById(1L)).thenReturn(member);
+    when(passwordEncoder.matches("123456", "encoded-pin")).thenReturn(true);
+
+    PinVerifyRequestDto request = new PinVerifyRequestDto();
+    request.setPin("123456");
+
+    PinVerifyResponseDto response = paymentService.verifyPin(1L, request);
+
+    assertThat(response.verified()).isTrue();
+    assertThat(member.getPinFailCount()).isEqualTo(0);
+    assertThat(member.isPinLocked()).isFalse();
+  }
+
+  @Test
+  @DisplayName("잘못된 PIN이면 verified=false를 반환한다")
+  void verifyPinFailure() {
+    Member member = new Member();
+    member.setId(1L);
+    member.setPinHash("encoded-pin");
+    when(memberService.getById(1L)).thenReturn(member);
+    when(passwordEncoder.matches("654321", "encoded-pin")).thenReturn(false);
+
+    PinVerifyRequestDto request = new PinVerifyRequestDto();
+    request.setPin("654321");
+
+    PinVerifyResponseDto response = paymentService.verifyPin(1L, request);
+
+    assertThat(response.verified()).isFalse();
+    assertThat(member.getPinFailCount()).isEqualTo(1);
+    assertThat(member.isPinLocked()).isFalse();
+  }
+
+  @Test
+  @DisplayName("3회 연속 실패하면 PIN_LOCKED 예외를 던진다")
+  void verifyPinLocksAfterThreeFailures() {
+    Member member = new Member();
+    member.setId(1L);
+    member.setPinHash("encoded-pin");
+    member.setPinFailCount(2);
+    when(memberService.getById(1L)).thenReturn(member);
+    when(passwordEncoder.matches("654321", "encoded-pin")).thenReturn(false);
+
+    PinVerifyRequestDto request = new PinVerifyRequestDto();
+    request.setPin("654321");
+
+    assertThatThrownBy(() -> paymentService.verifyPin(1L, request))
+        .isInstanceOf(com.example.shinhandelivery.common.exception.BusinessException.class)
+        .hasMessageContaining(ErrorCode.PIN_LOCKED.getMessage());
+    assertThat(member.getPinFailCount()).isEqualTo(3);
+    assertThat(member.isPinLocked()).isTrue();
+  }
+
+  @Test
+  @DisplayName("이미 잠긴 회원은 즉시 PIN_LOCKED 예외를 던진다")
+  void verifyPinAlreadyLockedShouldThrowException() {
+    Member member = new Member();
+    member.setId(1L);
+    member.setPinLocked(true);
+    when(memberService.getById(1L)).thenReturn(member);
+
+    PinVerifyRequestDto request = new PinVerifyRequestDto();
+    request.setPin("123456");
+
+    assertThatThrownBy(() -> paymentService.verifyPin(1L, request))
+        .isInstanceOf(com.example.shinhandelivery.common.exception.BusinessException.class)
+        .hasMessageContaining(ErrorCode.PIN_LOCKED.getMessage());
+  }
 
   @Test
   @DisplayName("회원이 존재하면 잔액 0인 지갑을 생성한다")
