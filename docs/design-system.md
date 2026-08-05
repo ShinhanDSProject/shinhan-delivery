@@ -627,7 +627,6 @@
 ---
 ### 인증 버튼 포함 입력 필드
 
-```html
 <div class="input-group">
   <label class="input-label">휴대폰 번호</label>
   <div class="input-with-action">
