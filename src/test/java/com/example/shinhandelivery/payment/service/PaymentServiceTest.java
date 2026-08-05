@@ -308,7 +308,7 @@ class PaymentServiceTest {
     assertThat(response.balance()).isEqualTo(7000L);
     assertThat(response.usedAmount()).isEqualTo(2000L);
     assertThat(response.paidAt()).isEqualTo(LocalDateTime.of(2026, 8, 4, 10, 0));
-    verify(paymentRepository).findByMemberIdForUpdate(1L);
+    verify(paymentRepository, never()).findByMemberIdForUpdate(1L);
     verify(pointHistoryRepository, never()).save(any(PointHistory.class));
   }
 }
