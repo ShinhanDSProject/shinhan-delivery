@@ -135,6 +135,7 @@ com.company.delivery
 - 식별자는 `@Id @GeneratedValue(strategy = GenerationType.IDENTITY)`.
 - Enum 필드는 `@Enumerated(EnumType.STRING)` (`ORDINAL` 금지 — 순서 바뀌면 데이터가 깨짐).
 - 연관관계는 우선 FK 값(`Long memberId`)으로 두고, `@ManyToOne`/`@OneToMany` 같은 객체 연관관계는 실제로 조인 조회가 필요할 때만 추가한다 (N+1 문제 예방).
+- **다른 도메인(테이블)을 참조하는 Entity는 참조 대상의 PK를 가리키는 FK 필드(`Long xxxId`)를 반드시 포함해야 한다** — 예: `Address.memberId`, `Vehicle.ownerId`. FK 없이 문자열/코드값 등으로 도메인 간 관계를 암묵적으로 표현하지 않는다.
 
 ```java
 @Entity
@@ -594,6 +595,7 @@ void 도메인은_다른_도메인의_repository를_직접_참조하지_않는�
 - **이미 반영된 마이그레이션 파일은 절대 수정하지 않는다.** 로컬/서버 DB에 한 번이라도 적용된 파일을 고치면 Checksum 불일치로 다음 구동이 실패한다. 수정이 필요하면 버전을 올린 새 파일을 추가한다.
 - Entity에 필드를 추가/변경했다면, **같은 PR 안에 대응하는 마이그레이션 파일을 함께 커밋**한다. Entity만 바꾸고 마이그레이션을 빠뜨리면 `ddl-auto: validate`에 의해 애플리케이션이 기동 실패한다.
 - 여러 테이블을 함께 바꿔야 하면 파일 하나에 `ALTER TABLE` 여러 개를 순서대로 넣어도 되고, 논리적으로 성격이 다르면 파일을 나눠도 된다 — 팀 판단에 맡긴다.
+- **Entity를 새로 추가하거나 기존 Entity의 필드·FK·연관관계를 변경했다면, 같은 PR 안에 프로젝트 ERD 문서(`docs/erd.md`)도 함께 갱신한다.** ERD 문서는 전체 테이블의 컬럼과 FK 기반 연관관계도를 한눈에 파악할 수 있는 단일 원본(SSOT) 문서로 유지하며, 코드(Entity)와 ERD가 어긋나지 않도록 항상 동기화한다.
 
 ---
 
@@ -653,6 +655,8 @@ void 도메인은_다른_도메인의_repository를_직접_참조하지_않는�
 - [ ] ArchUnit 테스트(레이어 의존성 규칙)가 깨지지 않는가?
 - [ ] Spotless 포맷팅 검사를 통과하는가?
 - [ ] Entity 필드를 추가/변경했다면 대응하는 Flyway 마이그레이션 파일을 새로 추가했는가? (기존 마이그레이션 파일을 수정하지 않았는가?)
+- [ ] 다른 도메인을 참조하는 Entity에 FK 필드(`Long xxxId`)가 포함되어 있는가?
+- [ ] Entity를 추가/변경했다면 프로젝트 ERD 문서(`docs/erd.md`)의 컬럼·연관관계도도 함께 갱신했는가?
 - [ ] `main`을 대상으로 브랜치를 분기·PR 했는가?
 - [ ] 리뷰어를 지정하고, PR 템플릿의 요약/변경사항/리뷰 포인트/테스트 결과를 모두 작성했는가?
 - [ ] UI 개발 시 `/css/design-system.css` 토큰 및 `templates/fragments/components.html` Thymeleaf 프래그먼트를 100% 준수하였는가?
