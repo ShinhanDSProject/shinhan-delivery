@@ -5,9 +5,11 @@ import com.example.shinhandelivery.common.exception.ErrorCode;
 import com.example.shinhandelivery.delivery.dto.request.DeliveryCompleteRequest;
 import com.example.shinhandelivery.delivery.dto.request.DeliveryCreateRequest;
 import com.example.shinhandelivery.delivery.dto.request.DeliveryEstimateRequest;
+import com.example.shinhandelivery.delivery.dto.request.DeliveryPayRequest;
 import com.example.shinhandelivery.delivery.dto.request.DeliveryUpdateRequest;
 import com.example.shinhandelivery.delivery.dto.response.DeliveryDetailResponseDto;
 import com.example.shinhandelivery.delivery.dto.response.DeliveryEstimateResponse;
+import com.example.shinhandelivery.delivery.dto.response.DeliveryPaymentResponse;
 import com.example.shinhandelivery.delivery.dto.response.DeliveryResponse;
 import com.example.shinhandelivery.delivery.dto.response.ProofPhotoResponse;
 import com.example.shinhandelivery.delivery.entity.DeliveryRequest;
@@ -23,6 +25,9 @@ import com.example.shinhandelivery.delivery.helper.DeliveryFeeCalculator;
 import com.example.shinhandelivery.delivery.repository.DeliveryRequestRepository;
 import com.example.shinhandelivery.delivery.repository.MatchingRepository;
 import com.example.shinhandelivery.member.service.MemberService;
+import com.example.shinhandelivery.payment.dto.request.PointUseRequest;
+import com.example.shinhandelivery.payment.dto.response.PointUseResultResponse;
+import com.example.shinhandelivery.payment.service.PaymentService;
 import com.example.shinhandelivery.vehicle.entity.Vehicle;
 import com.example.shinhandelivery.vehicle.entity.VehicleType;
 import com.example.shinhandelivery.vehicle.service.VehicleService;
@@ -46,6 +51,7 @@ public class DeliveryService {
   private final MatchingRepository matchingRepository;
   private final ApplicationEventPublisher eventPublisher;
   private final DeliveryFeeCalculator deliveryFeeCalculator;
+  private final PaymentService paymentService;
 
   /**
    * 로그인한 고객 본인 명의로 배송을 요청한다. customerId는 요청 바디가 아니라 인증된 호출자에게서 받아, 다른 회원 명의로 배송을 대신 생성하지 못하게 한다.
@@ -69,15 +75,7 @@ public class DeliveryService {
     DeliveryRequest saved =
         deliveryRequestRepository.save(
             DeliveryRequest.of(customerId, request, distanceKm, fee.totalFee().longValueExact()));
-
-    List<Long> candidateVehicleIds =
-        vehicleService.findOfferCandidates(saved.getWeight(), saved.getDistance()).stream()
-            .map(Vehicle::getId)
-            .toList();
-    if (!candidateVehicleIds.isEmpty()) {
-      eventPublisher.publishEvent(
-          new DeliveryOfferBroadcastEvent(candidateVehicleIds, DeliveryResponse.from(saved)));
-    }
+    publishOfferIfCandidatesExist(saved);
     return saved;
   }
 
@@ -93,6 +91,47 @@ public class DeliveryService {
 
     return deliveryFeeCalculator.calculateFee(
         distanceKm, request.getWeight(), request.getItemSize());
+  }
+
+  /** 배송 결제와 배송 요청 생성을 하나의 트랜잭션으로 처리한다. */
+  @Transactional
+  public DeliveryPaymentResponse payDelivery(
+      Long customerId, String idempotencyKey, DeliveryPayRequest request) {
+    memberService.getById(customerId);
+
+    DeliveryEstimateResponse estimate = estimateFee(toEstimateRequest(request));
+
+    PointUseRequest pointUseRequest = new PointUseRequest();
+    pointUseRequest.setAmount(estimate.totalFee().longValueExact());
+    PointUseResultResponse pointResult =
+        paymentService.usePoint(customerId, idempotencyKey, pointUseRequest);
+
+    DeliveryRequest deliveryRequest =
+        deliveryRequestRepository
+            .findByCustomerIdAndPaymentIdempotencyKey(customerId, idempotencyKey)
+            .orElseGet(
+                () -> {
+                  double distanceKm =
+                      deliveryFeeCalculator.calculateDistanceKm(
+                          request.getPickup().getLat(),
+                          request.getPickup().getLng(),
+                          request.getDropoff().getLat(),
+                          request.getDropoff().getLng());
+
+                  DeliveryRequest created =
+                      DeliveryRequest.of(
+                          customerId,
+                          toCreateRequest(request),
+                          distanceKm,
+                          estimate.totalFee().longValueExact());
+                  created.setPaymentIdempotencyKey(idempotencyKey);
+                  DeliveryRequest saved = deliveryRequestRepository.save(created);
+                  publishOfferIfCandidatesExist(saved);
+                  return saved;
+                });
+
+    return DeliveryPaymentResponse.from(
+        deliveryRequest, pointResult.usedAmount(), pointResult.balance());
   }
 
   /** id로 배송 요청 단건을 조회한다 (DeliveryRequest Entity 리턴). 없으면 EntityNotFoundException. */
@@ -234,5 +273,43 @@ public class DeliveryService {
     return deliveryRequestRepository
         .findByIdForUpdate(deliveryRequestId)
         .orElseThrow(() -> new EntityNotFoundException(ErrorCode.DELIVERY_NOT_FOUND));
+  }
+
+  private DeliveryEstimateRequest toEstimateRequest(DeliveryPayRequest request) {
+    DeliveryEstimateRequest estimateRequest = new DeliveryEstimateRequest();
+    estimateRequest.setPickupLatitude(request.getPickup().getLat());
+    estimateRequest.setPickupLongitude(request.getPickup().getLng());
+    estimateRequest.setDestinationLatitude(request.getDropoff().getLat());
+    estimateRequest.setDestinationLongitude(request.getDropoff().getLng());
+    estimateRequest.setWeight(request.getWeight());
+    estimateRequest.setItemSize(request.getItemSize());
+    return estimateRequest;
+  }
+
+  private DeliveryCreateRequest toCreateRequest(DeliveryPayRequest request) {
+    DeliveryCreateRequest createRequest = new DeliveryCreateRequest();
+    createRequest.setPickupAddress(request.getPickup().getAddress());
+    createRequest.setDropoffAddress(request.getDropoff().getAddress());
+    createRequest.setPickupLatitude(request.getPickup().getLat());
+    createRequest.setPickupLongitude(request.getPickup().getLng());
+    createRequest.setDropoffLatitude(request.getDropoff().getLat());
+    createRequest.setDropoffLongitude(request.getDropoff().getLng());
+    createRequest.setWeight(request.getWeight());
+    createRequest.setItemSize(request.getItemSize());
+    return createRequest;
+  }
+
+  private void publishOfferIfCandidatesExist(DeliveryRequest deliveryRequest) {
+    List<Long> candidateVehicleIds =
+        vehicleService
+            .findOfferCandidates(deliveryRequest.getWeight(), deliveryRequest.getDistance())
+            .stream()
+            .map(Vehicle::getId)
+            .toList();
+    if (!candidateVehicleIds.isEmpty()) {
+      eventPublisher.publishEvent(
+          new DeliveryOfferBroadcastEvent(
+              candidateVehicleIds, DeliveryResponse.from(deliveryRequest)));
+    }
   }
 }

@@ -3,6 +3,8 @@ package com.example.shinhandelivery.payment.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.example.shinhandelivery.common.exception.EntityNotFoundException;
@@ -13,6 +15,7 @@ import com.example.shinhandelivery.payment.dto.request.PointChargeRequest;
 import com.example.shinhandelivery.payment.dto.request.PointUseRequest;
 import com.example.shinhandelivery.payment.dto.request.PointWalletCreateRequest;
 import com.example.shinhandelivery.payment.dto.response.PointBalanceResponse;
+import com.example.shinhandelivery.payment.dto.response.PointUseResultResponse;
 import com.example.shinhandelivery.payment.entity.PaymentMethod;
 import com.example.shinhandelivery.payment.entity.PointHistory;
 import com.example.shinhandelivery.payment.entity.PointHistoryType;
@@ -27,6 +30,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -240,5 +244,71 @@ class PaymentServiceTest {
 
     assertThatThrownBy(() -> paymentService.usePoint(1L, request))
         .isInstanceOf(InvalidPointAmountException.class);
+  }
+
+  @Test
+  @DisplayName("회원 기준 포인트 차감 시 사용 이력을 저장하고 결과를 반환한다")
+  void usePointByMemberCreatesHistory() {
+    Member member = new Member();
+    member.setId(1L);
+    when(memberService.getById(1L)).thenReturn(member);
+    when(pointHistoryRepository.findByMemberIdAndIdempotencyKey(1L, "pay-1"))
+        .thenReturn(Optional.empty());
+
+    PointWallet wallet = new PointWallet();
+    wallet.setId(10L);
+    wallet.setMemberId(1L);
+    wallet.setBalance(5000L);
+    when(paymentRepository.findByMemberIdForUpdate(1L)).thenReturn(Optional.of(wallet));
+    when(pointHistoryRepository.save(any(PointHistory.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
+
+    PointUseRequest request = new PointUseRequest();
+    request.setAmount(3000L);
+
+    PointUseResultResponse response = paymentService.usePoint(1L, "pay-1", request);
+
+    ArgumentCaptor<PointHistory> historyCaptor = ArgumentCaptor.forClass(PointHistory.class);
+    verify(pointHistoryRepository).save(historyCaptor.capture());
+    PointHistory savedHistory = historyCaptor.getValue();
+
+    assertThat(response.balance()).isEqualTo(2000L);
+    assertThat(response.usedAmount()).isEqualTo(3000L);
+    assertThat(response.paidAt()).isNotNull();
+    assertThat(savedHistory.getMemberId()).isEqualTo(1L);
+    assertThat(savedHistory.getIdempotencyKey()).isEqualTo("pay-1");
+    assertThat(savedHistory.getAmount()).isEqualTo(3000L);
+  }
+
+  @Test
+  @DisplayName("동일 멱등 키의 포인트 차감 재호출 시 기존 결과를 재사용한다")
+  void usePointByMemberDuplicateIdempotencyKeyReusesExistingHistory() {
+    Member member = new Member();
+    member.setId(1L);
+    when(memberService.getById(1L)).thenReturn(member);
+
+    PointHistory history =
+        PointHistory.builder()
+            .memberId(1L)
+            .walletId(10L)
+            .amount(2000L)
+            .balanceAfter(7000L)
+            .type(PointHistoryType.USE)
+            .idempotencyKey("pay-2")
+            .createdAt(LocalDateTime.of(2026, 8, 4, 10, 0))
+            .build();
+    when(pointHistoryRepository.findByMemberIdAndIdempotencyKey(1L, "pay-2"))
+        .thenReturn(Optional.of(history));
+
+    PointUseRequest request = new PointUseRequest();
+    request.setAmount(2000L);
+
+    PointUseResultResponse response = paymentService.usePoint(1L, "pay-2", request);
+
+    assertThat(response.balance()).isEqualTo(7000L);
+    assertThat(response.usedAmount()).isEqualTo(2000L);
+    assertThat(response.paidAt()).isEqualTo(LocalDateTime.of(2026, 8, 4, 10, 0));
+    verify(paymentRepository).findByMemberIdForUpdate(1L);
+    verify(pointHistoryRepository, never()).save(any(PointHistory.class));
   }
 }

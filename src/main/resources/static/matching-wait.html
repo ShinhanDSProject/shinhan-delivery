@@ -141,6 +141,14 @@
             40% { opacity: 1; }
         }
 
+        @media (prefers-reduced-motion: reduce) {
+            .pulse-outer,
+            .pulse-inner,
+            .loading-dots span {
+                animation: none;
+            }
+        }
+
         .footer-action {
             display: flex;
             justify-content: center;

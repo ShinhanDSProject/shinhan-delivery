@@ -34,4 +34,7 @@ public interface DeliveryRequestRepository extends JpaRepository<DeliveryRequest
   /** 로그인 회원 본인의 특정 상태 배송 요청만 최신순(id 2차 정렬 포함)으로 페이징 조회한다. */
   Page<DeliveryRequest> findByCustomerIdAndStatusOrderByCreatedAtDescIdDesc(
       Long customerId, DeliveryStatus status, Pageable pageable);
+
+  Optional<DeliveryRequest> findByCustomerIdAndPaymentIdempotencyKey(
+      Long customerId, String paymentIdempotencyKey);
 }
