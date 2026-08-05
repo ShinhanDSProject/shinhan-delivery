@@ -138,20 +138,6 @@ Body
 | 403 | C007 | 접근 권한이 없습니다 |
 | 401 | A001 | 인증 권한이 필요합니다 |
 
-## 6. 인증/권한 (Auth)
-- 토큰 발급: `POST /api/v1/members/login`이 `JwtProvider`로 Access/Refresh 토큰을 발급한다.
-- 인증 여부 검증: 컨트롤러 메서드에 `@PreAuthorize("isAuthenticated()")`를 붙인다(Spring Security 표현식). 이 프로젝트는 role 기반 `@PreAuthorize("hasRole(...)")`는 쓰지 않는다.
-- "본인 것만 수정/삭제 가능" 같은 소유권 검증은 Spring Security 표현식이 아니라 **Service 계층에서 코드로** 한다 (예: 로그인한 회원 id와 리소스의 소유자 id를 비교해 다르면 커스텀 예외를 던짐).
-
-## 7. Rate Limit / 정책
-- 호출 제한: 현재 구현되어 있지 않음 (도입 시 이 절에 추가)
-- 페이지네이션 방식: Spring Data `Pageable`/`Page<T>` — 쿼리 파라미터 `page`(0-base), `size`(기본값은 엔드포인트별 `@PageableDefault`로 지정), `sort`. 응답은 `content`/`totalElements`/`totalPages` 등을 포함하는 `Page<T>` 표준 구조를 그대로 반환한다 (offset/limit이나 cursor 방식이 아님).
-
-## 8. 변경 이력 (Changelog)
-| 버전 | 날짜 | 변경 내용 |
-|---|---|---|
-| v1.0 | | 최초 작성 |
-
-## 9. 오픈 이슈 (Open Questions)
+## 6. 오픈 이슈 (Open Questions)
 - [ ] 
 - [ ] 

@@ -15,17 +15,17 @@
 ## 1. 개요 (Overview)
 - 배송 요청과 차량을 연결(매칭)하는 CRUD API. 배송원이 열린 콜을 조회해 수락하거나, 매칭 상태를 변경/삭제한다.
 - Base URL: `/api/v1/matchings`
-- 인증 방식: `Authorization: Bearer {accessToken}` (JWT) — **다만 아래 §6에서 설명하듯, 이 컨트롤러는 실제로 인증 여부를 검증하지 않는다.**
+- 인증 방식: `Authorization: Bearer {accessToken}` (JWT)
 
 ## 2. 엔드포인트 목록 (Endpoint Summary)
 | Method | Endpoint | 설명 | 인증 필요 |
 |---|---|---|---|
-| POST | /api/v1/matchings | 매칭 생성 (콜 수락) | 명세상 Y, 실제로는 미검증 (§6) |
-| GET | /api/v1/matchings/calls | 열린 콜(배송 요청) 목록 조회 | 명세상 Y, 실제로는 미검증 (§6) |
-| GET | /api/v1/matchings/{matchingId} | 매칭 단건 조회 | 명세상 Y, 실제로는 미검증 (§6) |
-| GET | /api/v1/matchings | 매칭 전체 목록 조회 | 명세상 Y, 실제로는 미검증 (§6) |
-| PUT | /api/v1/matchings/{matchingId} | 매칭 상태 변경 | 명세상 Y, 실제로는 미검증 (§6) |
-| DELETE | /api/v1/matchings/{matchingId} | 매칭 삭제 | 명세상 Y, 실제로는 미검증 (§6) |
+| POST | /api/v1/matchings | 매칭 생성 (콜 수락) | 명세상 Y, 실제로는 미검증 |
+| GET | /api/v1/matchings/calls | 열린 콜(배송 요청) 목록 조회 | 명세상 Y, 실제로는 미검증 |
+| GET | /api/v1/matchings/{matchingId} | 매칭 단건 조회 | 명세상 Y, 실제로는 미검증 |
+| GET | /api/v1/matchings | 매칭 전체 목록 조회 | 명세상 Y, 실제로는 미검증 |
+| PUT | /api/v1/matchings/{matchingId} | 매칭 상태 변경 | 명세상 Y, 실제로는 미검증 |
+| DELETE | /api/v1/matchings/{matchingId} | 매칭 삭제 | 명세상 Y, 실제로는 미검증 |
 
 ---
 
@@ -167,7 +167,7 @@ Path Parameters
 ### 3.4 `GET /api/v1/matchings` — 매칭 전체 목록 조회
 
 **Request**
-- 파라미터 없음. (페이지네이션 미적용 — `List<MatchingResponse>`를 그대로 반환하며 `Page<T>`가 아니다. §7 참고)
+- 파라미터 없음. (페이지네이션 미적용 — `List<MatchingResponse>`를 그대로 반환하며 `Page<T>`가 아니다.)
 
 **Response**
 
@@ -250,21 +250,7 @@ Path Parameters
 | 400 | V002 | 차량이 배송 조건을 감당할 수 없습니다 |
 | 409 | V003 | 이미 배정되어 사용할 수 없는 차량입니다 |
 
-## 6. 인증/권한 (Auth)
-- **실제 코드 확인 결과, `MatchingController`의 6개 엔드포인트 전부에 `@PreAuthorize`가 붙어 있지 않다.** `SecurityConfig`가 `anyRequest().permitAll()`로 필터 체인 레벨의 기본 접근은 전부 허용해두고, 인증/인가는 컨트롤러 메서드별 `@PreAuthorize`로 개별 적용하는 구조인데(`DeliveryController`/`NotificationController` 등은 `@PreAuthorize("isAuthenticated()")`가 붙어 있음), `MatchingController`만 이게 빠져 있다.
-- 즉 지금은 **토큰 없이도 누구나 `POST /api/v1/matchings`로 아무 배송 요청이나 수락하거나, 다른 사람 매칭을 `PUT`/`DELETE`할 수 있다.** 위 §2 표의 "인증 필요" 열이 "명세상 Y"라고 적은 이유가 이것이다.
-- 소유권 검증(예: "이 차량이 진짜 내 차량인지")도 코드 어디에도 없다 — `MatchingCreateRequest.vehicleId`를 요청자가 그냥 아무 값이나 넣을 수 있다.
-
-## 7. Rate Limit / 정책
-- 호출 제한: 구현되어 있지 않음.
-- 페이지네이션: `GET /api/v1/matchings`는 페이지네이션 없이 전체 목록을 `List`로 반환한다 (다른 도메인의 목록 API가 쓰는 `Pageable`/`Page<T>` 패턴과 다르다 — 데이터가 많아지면 문제가 될 수 있음, §9 참고).
-
-## 8. 변경 이력 (Changelog)
-| 버전 | 날짜 | 변경 내용 |
-|---|---|---|
-| v1.0 | 2026-08-05 | 최초 작성 |
-
-## 9. 오픈 이슈 (Open Questions)
+## 6. 오픈 이슈 (Open Questions)
 - [ ] **(보안, 우선순위 높음)** `MatchingController`에 인증/소유권 검증이 전혀 없다. `@PreAuthorize("isAuthenticated()")` 추가와, "요청자 본인 소유 차량인지" 검증 로직이 필요해 보인다.
 - [ ] `GET /api/v1/matchings`가 페이지네이션 없이 전체 목록을 반환하는데, 매칭 건수가 늘어나면 다른 도메인처럼 `Pageable`로 바꿔야 하지 않을지 확인 필요.
 - [ ] 배송 요청 생성 시 후보 차량에게 WebSocket으로 오퍼가 푸시되는 별도 경로(`/topic/vehicles/{vehicleId}/offers`)가 있는데, 이건 REST가 아니라서 이 문서 범위 밖이다 — 별도 실시간 API 명세 문서가 필요한지 확인 필요.
