@@ -598,6 +598,7 @@
 
 ### 주소 입력 필드 (배송용)
 
+```html
 <!-- 출발지 -->
 <div class="input-group">
   <label class="input-label">출발지</label>
@@ -626,6 +627,7 @@
 ---
 ### 인증 버튼 포함 입력 필드
 
+```html
 <div class="input-group">
   <label class="input-label">휴대폰 번호</label>
   <div class="input-with-action">
@@ -645,6 +647,7 @@
 
 ### 드롭다운 (Select)
 
+```html
 <div class="input-group">
   <label class="input-label">운송 수단 선택</label>
   <div class="dropdown-trigger">
@@ -663,6 +666,7 @@
 
 ### 검색 바
 
+```html
 <!-- 모바일 -->
 <div class="search-bar">
   <span class="search-icon">🔍</span>
@@ -691,6 +695,7 @@
 
 ### 선택 칩 (Chip)
 
+```html
 <!-- 중량 선택 -->
 <div class="chip-group">
   <span class="chip">5kg</span>
@@ -717,6 +722,7 @@
 
 ### 라디오 버튼
 
+```html
 <div class="radio-group">
   <label class="radio-item">
     <input type="radio" name="method" class="radio-button" checked>
@@ -738,6 +744,7 @@
 
 ### 체크박스
 
+```html
 <label class="checkbox-item">
   <input type="checkbox" class="checkbox" checked>
   <span>오전 시간대</span>
@@ -753,6 +760,7 @@
 
 ### 토글 스위치
 
+```html
 <div class="toggle toggle-on">
   <div class="toggle-knob"></div>
 </div>
@@ -827,6 +835,7 @@
 
 ### 알림 카드
 
+```html
 <div class="card-noti">
   <span class="noti-title">배송원 배차가 완료되었습니다.</span>
   <span class="noti-desc">강남구 역삼동 → 서초구 반포동</span>
@@ -867,6 +876,7 @@
 
 ### 배송 알림 카드 (기사용)
 
+```html
 <div class="card-noti-delivery">
   <span class="noti-title">새 배송 요청</span>
   <span class="noti-route">강남구 → 서초구</span>
@@ -885,6 +895,7 @@
 
 ### 예상 요금 카드
 
+```html
 <div class="card-fee">
   <span class="fee-label">예상 배송료</span>
   <span class="fee-amount">12,000원</span>
@@ -903,6 +914,7 @@
 
 ### 배송기사 정보 카드
 
+```html
 <div class="card-courier">
   <div class="courier-avatar"></div>
   <div class="courier-info">
@@ -928,6 +940,7 @@
 
 ### 배송 히스토리 카드
 
+```html
 <div class="card-history">
   <div class="card-top">
     <span class="history-date">01.18</span>
@@ -954,6 +967,7 @@
 
 ### 상세 정보 카드
 
+```html
 <div class="card-details">
   <!-- 배송 상세 내역 -->
 </div>
@@ -975,6 +989,7 @@
 
 ### 잔액 / 포인트 카드
 
+```html
 <div class="card-balance">
   <div class="card-header">
     <span class="balance-label">내 포인트</span>
@@ -1002,6 +1017,7 @@
 
 ### Status Badge (상태 표시)
 
+```html
 <span class="status-badge badge-progress">진행중</span>
 <span class="status-badge badge-complete">완료</span>
 <span class="status-badge badge-cancel">취소</span>
@@ -1031,6 +1047,7 @@
 
 ### Label Badge (라벨 배치)
 
+```html
 <span class="badge-label">집</span>
 <span class="badge-label">회사</span>
 <span class="badge-label">어머니 댁</span>
@@ -1046,6 +1063,7 @@
 
 ### Location Chip (지역 칩)
 
+```html
 <span class="chip-location">강남구</span>
 <span class="chip-location">서초구</span>
 
@@ -1059,6 +1077,7 @@
 
 ### 기능 배치
 
+```html
 <span class="badge-gps">GPS</span>
 <span class="badge-change">변경</span>
 
@@ -1123,6 +1142,7 @@ Thymeleaf 템플릿에서 공통 프래그먼트를 불러와 손쉽게 조립�
 
 ### 입력 필드 프래그먼트
 
+```html
 <!-- 8. 기본 Input 필드 -->
 <div th:replace="~{fragments/components :: inputField('email', '이메일', 'email', 'email', '이메일을 입력하세요')}"></div>
 
@@ -1147,6 +1167,7 @@ Thymeleaf 템플릿에서 공통 프래그먼트를 불러와 손쉽게 조립�
 
 ### 선택 컴포넌트 프래그먼트
 
+```html
 <!-- 14. 선택 칩 (Chip) -->
 <div th:replace="~{fragments/components :: chipGroup(${weightOptions}, 'weight')}"></div>
 
@@ -1166,6 +1187,7 @@ Thymeleaf 템플릿에서 공통 프래그먼트를 불러와 손쉽게 조립�
 
 ### 카드 프래그먼트
 
+```html
 <!-- 19. 배송 요청 카드 -->
 <div th:replace="~{fragments/components :: bookingCard(${delivery})}"></div>
 
@@ -1192,6 +1214,7 @@ Thymeleaf 템플릿에서 공통 프래그먼트를 불러와 손쉽게 조립�
 
 ### 배치 프래그먼트
 
+```html
 <!-- 26. 상태 배치 -->
 <span th:replace="~{fragments/components :: statusBadge('매칭완료', 'success')}"></span>
 <span th:replace="~{fragments/components :: statusBadge('진행중', 'progress')}"></span>
