@@ -10,7 +10,6 @@ import com.example.shinhandelivery.payment.dto.response.PointBalanceResponse;
 import com.example.shinhandelivery.payment.entity.PointHistory;
 import com.example.shinhandelivery.payment.entity.PointHistoryType;
 import com.example.shinhandelivery.payment.entity.PointWallet;
-import com.example.shinhandelivery.payment.exception.InsufficientPointException;
 import com.example.shinhandelivery.payment.repository.PaymentRepository;
 import com.example.shinhandelivery.payment.repository.PointHistoryRepository;
 import java.time.LocalDateTime;
@@ -54,9 +53,7 @@ public class PaymentService {
    */
   @Transactional
   public PointWallet chargePoint(Long walletId, PointChargeRequest request) {
-    PointWallet wallet = findWalletForUpdateOrThrow(walletId);
-    wallet.setBalance(wallet.getBalance() + request.getAmount());
-    return wallet;
+    return findWalletForUpdateOrThrow(walletId).charge(request.getAmount());
   }
 
   /** 인증된 회원 기준으로 포인트를 충전하고, 동일 멱등 키 재호출 시 기존 결과를 재사용한다. */
@@ -73,8 +70,7 @@ public class PaymentService {
       return new PointBalanceResponse(existing.getBalanceAfter(), existing.getCreatedAt());
     }
 
-    PointWallet wallet = findWalletByMemberForUpdateOrThrow(memberId);
-    wallet.setBalance(wallet.getBalance() + request.getAmount());
+    PointWallet wallet = findWalletByMemberForUpdateOrThrow(memberId).charge(request.getAmount());
 
     LocalDateTime chargedAt = LocalDateTime.now();
     pointHistoryRepository.save(
@@ -97,12 +93,7 @@ public class PaymentService {
    */
   @Transactional
   public PointWallet usePoint(Long walletId, PointUseRequest request) {
-    PointWallet wallet = findWalletForUpdateOrThrow(walletId);
-    if (wallet.getBalance() < request.getAmount()) {
-      throw new InsufficientPointException(walletId, request.getAmount());
-    }
-    wallet.setBalance(wallet.getBalance() - request.getAmount());
-    return wallet;
+    return findWalletForUpdateOrThrow(walletId).use(request.getAmount());
   }
 
   /** id로 포인트 지갑을 조회해 삭제한다. 없으면 EntityNotFoundException. */

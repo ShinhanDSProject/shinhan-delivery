@@ -18,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -58,13 +59,17 @@ public class DeliveryController {
     return ResponseEntity.ok(deliveryService.estimateFee(request));
   }
 
-  /** 배송 요청 상세를 조회한다(배송원 이름·증거사진 포함). 고객 본인 또는 배정된 배송원 본인만 조회할 수 있다. */
+  /**
+   * 배송 요청 상세를 조회한다(배송원 이름·증거사진 포함). 고객 본인 또는 배정된 배송원 본인만 조회할 수 있다. 매칭 대기·완료 화면이 실시간 상태 폴링에 이 API를
+   * 쓰므로, 캐시된 과거 상태를 다시 보여주지 않도록 Cache-Control: no-store를 응답에 명시한다.
+   */
   @GetMapping("/{deliveryRequestId}")
   @PreAuthorize("isAuthenticated()")
   public ResponseEntity<DeliveryDetailResponseDto> getDeliveryRequest(
       @AuthenticationPrincipal CustomUserDetails principal, @PathVariable Long deliveryRequestId) {
-    return ResponseEntity.ok(
-        deliveryService.getDeliveryRequestDetail(principal.getId(), deliveryRequestId));
+    return ResponseEntity.ok()
+        .cacheControl(CacheControl.noStore())
+        .body(deliveryService.getDeliveryRequestDetail(principal.getId(), deliveryRequestId));
   }
 
   /** 로그인 회원 본인의 배송 내역을 최신순으로 페이징 조회한다. status로 선택적 필터링이 가능하다. */

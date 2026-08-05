@@ -14,6 +14,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -22,7 +24,9 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "delivery_request")
 public class DeliveryRequest {
 
@@ -66,6 +70,7 @@ public class DeliveryRequest {
 
   @Enumerated(EnumType.STRING)
   @Column(name = "item_size", nullable = false, length = 20)
+  @Builder.Default
   private ItemSize itemSize = ItemSize.MEDIUM;
 
   @Column(name = "proof_photo_url", length = 255)
@@ -90,21 +95,21 @@ public class DeliveryRequest {
       throw new InvalidDeliveryDistanceException(distanceKm);
     }
 
-    DeliveryRequest deliveryRequest = new DeliveryRequest();
-    deliveryRequest.setCustomerId(customerId);
-    deliveryRequest.setPickupAddress(request.getPickupAddress());
-    deliveryRequest.setDropoffAddress(request.getDropoffAddress());
-    deliveryRequest.setWeight(request.getWeight());
-    deliveryRequest.setDistance(distanceKm);
-    deliveryRequest.setPickupLatitude(request.getPickupLatitude());
-    deliveryRequest.setPickupLongitude(request.getPickupLongitude());
-    deliveryRequest.setDropoffLatitude(request.getDropoffLatitude());
-    deliveryRequest.setDropoffLongitude(request.getDropoffLongitude());
-    deliveryRequest.setItemSize(request.getItemSize());
-    deliveryRequest.setStatus(DeliveryStatus.REQUESTED);
-    deliveryRequest.setFeePoint(feePoint);
-    deliveryRequest.setCreatedAt(LocalDateTime.now());
-    return deliveryRequest;
+    return DeliveryRequest.builder()
+        .customerId(customerId)
+        .pickupAddress(request.getPickupAddress())
+        .dropoffAddress(request.getDropoffAddress())
+        .weight(request.getWeight())
+        .distance(distanceKm)
+        .pickupLatitude(request.getPickupLatitude())
+        .pickupLongitude(request.getPickupLongitude())
+        .dropoffLatitude(request.getDropoffLatitude())
+        .dropoffLongitude(request.getDropoffLongitude())
+        .itemSize(request.getItemSize())
+        .status(DeliveryStatus.REQUESTED)
+        .feePoint(feePoint)
+        .createdAt(LocalDateTime.now())
+        .build();
   }
 
   /** DeliveryUpdateRequest DTO 기반으로 픽업지·도착지를 수정하는 도메인 비즈니스 메서드. */

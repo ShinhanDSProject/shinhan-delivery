@@ -24,6 +24,7 @@ import com.example.shinhandelivery.delivery.repository.DeliveryRequestRepository
 import com.example.shinhandelivery.delivery.repository.MatchingRepository;
 import com.example.shinhandelivery.member.service.MemberService;
 import com.example.shinhandelivery.vehicle.entity.Vehicle;
+import com.example.shinhandelivery.vehicle.entity.VehicleType;
 import com.example.shinhandelivery.vehicle.service.VehicleService;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -112,19 +113,21 @@ public class DeliveryService {
 
   /**
    * 배송 요청 상세를 조회한다. 배송 요청의 고객 본인이거나 배정된 배송원 본인만 조회할 수 있고, 둘 다 아니면 DeliveryAccessDeniedException을
-   * 던진다. 매칭된 배송원이 있으면 차량 소유자(Member)의 이름을 courierName으로 함께 담고, 없으면 courierName은 null이다.
+   * 던진다. 매칭된 배송원이 있으면 차량 소유자(Member)의 이름과 차량 종류를 courierName·vehicleType으로 함께 담고, 없으면 둘 다 null이다.
    */
   @Transactional(readOnly = true)
   public DeliveryDetailResponseDto getDeliveryRequestDetail(Long callerId, Long deliveryRequestId) {
     DeliveryRequest deliveryRequest = findDeliveryRequestOrThrow(deliveryRequestId);
 
     Matching matching = matchingRepository.findByDeliveryRequestId(deliveryRequestId).orElse(null);
-    Long courierId = courierIdOf(matching);
+    Vehicle vehicle = matching == null ? null : vehicleService.getById(matching.getVehicleId());
+    Long courierId = vehicle == null ? null : vehicle.getOwnerId();
     assertCallerHasAccess(callerId, deliveryRequestId, deliveryRequest, courierId);
 
     String courierName = courierId == null ? null : memberService.getById(courierId).getName();
     LocalDateTime matchedAt = matching == null ? null : matching.getMatchedAt();
-    return DeliveryDetailResponseDto.from(deliveryRequest, courierName, matchedAt);
+    VehicleType vehicleType = vehicle == null ? null : vehicle.getType();
+    return DeliveryDetailResponseDto.from(deliveryRequest, courierName, matchedAt, vehicleType);
   }
 
   /**
