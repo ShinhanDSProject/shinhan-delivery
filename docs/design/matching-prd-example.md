@@ -9,8 +9,6 @@
 | 상태 | 확정 |
 | 관련 링크 | `MatchingController`, `MatchingService`, `Matching` Entity, `DeliveryService.publishOfferIfCandidatesExist`, `DeliveryOfferBroadcastEvent`, `DeliveryOfferBroadcastListener`, `StompAuthChannelInterceptor`, `TrackingService.assertCanSubscribeToOffers`, `docs/design/matching-design.md` |
 
----
-
 ## 1. 배경 및 문제 (Background & Problem)
 - 배송 요청(`DeliveryRequest`)이 `REQUESTED` 상태로 만들어져도, 그 요청을 실제로 수행할 차량(`Vehicle`)과 연결해주지 않으면 배송이 진행되지 않는다.
 - 지금은(이 기능이 없다면) 배송 요청과 차량을 이어주는 절차가 없어서, 요청이 아무리 쌓여도 "누가 이 배송을 맡을지"가 시스템 안에서 결정되지 않는다.
@@ -67,29 +65,6 @@
   - **매칭 생성**(`create`)은 배송 요청과 차량 **둘 다** `findByIdForUpdate` 비관적 락으로 조회한다 — 동시에 여러 차량이 같은 배송 요청을 수락하는 경쟁 상태(race condition)를 막기 위함.
   - **매칭 상태 변경**(`update`, 재매칭 포함)은 **차량만** `getVehicleForUpdate`로 락을 걸고, 배송 요청은 락 없이 조회한다(`findDeliveryRequestOrThrow`) — 생성 시와 잠금 범위가 다르다는 점에 주의.
 
-## 6. 사용자 흐름 (User Flow)
-
-**A. 오퍼 알림(푸시) — 배송 요청 생성 시점**
-1. 고객이 배송을 요청하면(`DeliveryService.requestDelivery`/`payDelivery`) 배송 요청이 `REQUESTED`로 저장된다.
-2. 트랜잭션이 커밋된 직후, 서버가 `AVAILABLE` + 용량 조건을 만족하는 후보 차량을 계산해 각 차량의 오퍼 채널(`/topic/vehicles/{vehicleId}/offers`)로 배송 요청 정보를 WebSocket 브로드캐스트한다.
-3. 그 채널을 구독 중인 배송원 클라이언트는 목록을 새로고침하지 않아도 실시간으로 새 콜을 받는다. (단, 실제로 이 채널을 구독하는 프론트엔드는 아직 없다 — §8 Out of Scope 참고. 지금은 백엔드가 오퍼를 쏴줘도 받는 화면이 없는 상태.)
-
-**B. 콜 조회 및 수락 — 풀(pull) 경로**
-4. 배송원이 `GET /api/v1/matchings/calls?vehicleId={id}`로 자기 차량이 수락 가능한 열린 콜 목록을 조회한다 — API는 있지만 이걸 호출하는 프론트엔드 화면은 아직 없다 (§8 참고).
-5. 배송원이 원하는 콜을 골라 `POST /api/v1/matchings`로 수락 요청을 보낸다 (`deliveryRequestId`, `vehicleId`) — 이 역시 API만 있고, 호출하는 화면은 아직 없다.
-6. 매칭이 생성되면 배송 요청은 `MATCHED`, 차량은 `BUSY`로 바뀌고, `DeliveryStatusChangedEvent`가 발행되어 실시간 트래킹(WebSocket)으로 전파된다.
-7. 배송 진행 중 상태를 바꿔야 하면 `PUT /api/v1/matchings/{matchingId}`로 `COMPLETED`/`CANCELLED`로 전이한다.
-
-- 에러/빈 상태/로딩 등 예외 흐름:
-  - 열린 콜이 하나도 없으면(차량이 `AVAILABLE`이 아니거나 조건에 맞는 배송 요청이 없으면) 빈 배열을 반환한다 (별도 에러 아님).
-  - 이미 다른 차량이 수락한 배송 요청에 또 수락 요청을 보내면 409 `AlreadyMatchedException`.
-  - 자기 차량이 아닌 오퍼 채널을 구독하려 하면 STOMP SUBSCRIBE 단계에서 `UnauthorizedOfferAccessException`으로 거부된다.
-  - 조건을 만족하는 후보 차량이 하나도 없으면 오퍼 이벤트 자체를 발행하지 않는다 (`candidateVehicleIds.isEmpty()` 체크).
-
-## 7. 범위 (Scope)
-- **In Scope**: 매칭 생성/조회(단건·목록)/상태 변경/삭제, 열린 콜 목록 조회(풀), 배송 요청 생성 시 오퍼 실시간 푸시 및 채널 구독 권한 검증, 배송 요청·차량 상태 동기화, 실시간 이벤트 발행
-- **Out of Scope**: 자동 배차(확정) 알고리즘, 매칭 이력 통계, **배송원 쪽 프론트엔드 전체(콜 목록/오퍼 수신/수락 화면 모두 없음)** — 오퍼 푸시·구독 인증·콜 조회·매칭 생성 API는 백엔드에 다 구현돼 있지만, 지금 배송원이 이 API들을 직접 호출하는 화면은 하나도 없다. 실제로 프론트엔드가 호출하는 건 `GET /api/v1/matchings`(전체 목록, `realtime-tracking.html`이 트래킹용 매칭 정보를 찾는 데 사용)뿐이고, `/calls`(콜 목록 조회)나 `POST /matchings`(수락)를 호출하는 화면은 없다. 고객 쪽은 `matching-wait.html`/`matching-complete.html`이 있지만 WebSocket이 아니라 `/api/v1/delivery-requests/{id}` REST 폴링 방식이다.
-
-## 8. 오픈 이슈 (Open Questions)
+## 6. 오픈 이슈 (Open Questions)
 - [ ] `Matching.status`가 `DeliveryRequest.status`와 사실상 중복 정보 아닌가? (1:1 구조라 굳이 두 곳에서 상태를 관리할 필요가 있는지 — 과거에 검토했으나 현재 설계 그대로 유지하기로 결론)
 - [ ] 재매칭(`CANCELLED` → `MATCHED`) 시 원래 차량이 아닌 다른 차량으로 배정을 바꾸는 흐름은 어떻게 되는가? (현재 `MatchingUpdateRequest`는 `status`만 받고 `vehicleId` 변경은 지원하지 않음)
