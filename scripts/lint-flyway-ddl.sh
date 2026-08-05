@@ -4,6 +4,7 @@
 set -euo pipefail
 
 MIGRATION_DIR="src/main/resources/db/migration"
+BASE_REF="${GITHUB_BASE_REF:-main}"
 
 echo "🔍 MariaDB 무중단 Online DDL 규격 검사 시작: $MIGRATION_DIR"
 
@@ -12,14 +13,34 @@ if [ ! -d "$MIGRATION_DIR" ]; then
   exit 0
 fi
 
+# 이미 base 브랜치에 병합되어 적용된 마이그레이션은 검사 대상에서 제외합니다.
+# (Flyway는 이미 적용된 마이그레이션 파일의 수정을 금지하므로, 뒤늦게 온라인 DDL
+#  옵션을 추가하려고 파일을 고치면 체크섬이 깨져 오히려 배포가 막힙니다.)
+NEW_FILES_ONLY=1
+if ! git fetch --depth=1 origin "$BASE_REF" >/dev/null 2>&1; then
+  echo "⚠️ origin/$BASE_REF 를 가져올 수 없어 전체 마이그레이션 파일을 검사합니다."
+  NEW_FILES_ONLY=0
+fi
+
+declare -A TARGET_FILES
+if [ "$NEW_FILES_ONLY" -eq 1 ]; then
+  while IFS= read -r added_file; do
+    [ -n "$added_file" ] && TARGET_FILES["$(basename "$added_file")"]=1
+  done < <(git diff --name-only --diff-filter=A "origin/$BASE_REF...HEAD" -- "$MIGRATION_DIR" 2>/dev/null || true)
+fi
+
 INVALID_COUNT=0
 
 # SQL 파일 탐색 (파일이 없을 경우 대비해 nullglob 활성화)
 shopt -s nullglob
 for file_path in "$MIGRATION_DIR"/*; do
   filename=$(basename "$file_path")
-  
+
   if [ -d "$file_path" ] || [[ ! "$filename" =~ \.sql$ ]]; then
+    continue
+  fi
+
+  if [ "$NEW_FILES_ONLY" -eq 1 ] && [ -z "${TARGET_FILES[$filename]:-}" ]; then
     continue
   fi
 
