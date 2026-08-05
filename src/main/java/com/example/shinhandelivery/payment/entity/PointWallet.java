@@ -1,5 +1,6 @@
 package com.example.shinhandelivery.payment.entity;
 
+import com.example.shinhandelivery.payment.exception.InsufficientPointException;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -38,5 +39,20 @@ public class PointWallet {
   /** 잔액 0인 새 포인트 지갑 엔티티를 생성하는 정적 팩토리 메서드. */
   public static PointWallet createEmpty(Long memberId) {
     return PointWallet.builder().memberId(memberId).balance(0L).build();
+  }
+
+  /** 지갑에 포인트를 충전하는 도메인 비즈니스 메서드. */
+  public PointWallet charge(long amount) {
+    this.balance += amount;
+    return this;
+  }
+
+  /** 지갑에서 포인트를 차감하는 도메인 비즈니스 메서드. 잔액이 부족하면 InsufficientPointException. */
+  public PointWallet use(long amount) {
+    if (this.balance < amount) {
+      throw new InsufficientPointException(this.id, amount);
+    }
+    this.balance -= amount;
+    return this;
   }
 }
