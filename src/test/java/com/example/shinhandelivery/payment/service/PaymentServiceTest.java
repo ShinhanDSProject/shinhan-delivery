@@ -3,6 +3,8 @@ package com.example.shinhandelivery.payment.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.example.shinhandelivery.common.exception.EntityNotFoundException;
@@ -26,6 +28,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -216,9 +219,16 @@ class PaymentServiceTest {
 
     PointUseResultResponse response = paymentService.usePoint(1L, "pay-1", request);
 
+    ArgumentCaptor<PointHistory> historyCaptor = ArgumentCaptor.forClass(PointHistory.class);
+    verify(pointHistoryRepository).save(historyCaptor.capture());
+    PointHistory savedHistory = historyCaptor.getValue();
+
     assertThat(response.balance()).isEqualTo(2000L);
     assertThat(response.usedAmount()).isEqualTo(3000L);
     assertThat(response.paidAt()).isNotNull();
+    assertThat(savedHistory.getMemberId()).isEqualTo(1L);
+    assertThat(savedHistory.getIdempotencyKey()).isEqualTo("pay-1");
+    assertThat(savedHistory.getAmount()).isEqualTo(3000L);
   }
 
   @Test
@@ -249,5 +259,7 @@ class PaymentServiceTest {
     assertThat(response.balance()).isEqualTo(7000L);
     assertThat(response.usedAmount()).isEqualTo(2000L);
     assertThat(response.paidAt()).isEqualTo(LocalDateTime.of(2026, 8, 4, 10, 0));
+    verify(paymentRepository).findByMemberIdForUpdate(1L);
+    verify(pointHistoryRepository, never()).save(any(PointHistory.class));
   }
 }

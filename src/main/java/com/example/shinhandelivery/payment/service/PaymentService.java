@@ -58,7 +58,9 @@ public class PaymentService {
     memberService.getById(memberId);
 
     PointHistory existing =
-        pointHistoryRepository.findByMemberIdAndIdempotencyKey(memberId, idempotencyKey).orElse(null);
+        pointHistoryRepository
+            .findByMemberIdAndIdempotencyKey(memberId, idempotencyKey)
+            .orElse(null);
     if (existing != null) {
       return new PointBalanceResponse(existing.getBalanceAfter(), existing.getCreatedAt());
     }
@@ -92,17 +94,19 @@ public class PaymentService {
   }
 
   @Transactional
-  public PointUseResultResponse usePoint(Long memberId, String idempotencyKey, PointUseRequest request) {
+  public PointUseResultResponse usePoint(
+      Long memberId, String idempotencyKey, PointUseRequest request) {
     memberService.getById(memberId);
 
+    PointWallet wallet = findWalletByMemberForUpdateOrThrow(memberId);
     PointHistory existing =
-        pointHistoryRepository.findByMemberIdAndIdempotencyKey(memberId, idempotencyKey).orElse(null);
+        pointHistoryRepository
+            .findByMemberIdAndIdempotencyKey(memberId, idempotencyKey)
+            .orElse(null);
     if (existing != null) {
       return new PointUseResultResponse(
           existing.getBalanceAfter(), existing.getAmount(), existing.getCreatedAt());
     }
-
-    PointWallet wallet = findWalletByMemberForUpdateOrThrow(memberId);
     if (wallet.getBalance() < request.getAmount()) {
       throw new InsufficientPointException(wallet.getId(), request.getAmount());
     }

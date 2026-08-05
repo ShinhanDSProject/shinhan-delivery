@@ -1,7 +1,9 @@
 package com.example.shinhandelivery.delivery.controller;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -29,6 +31,7 @@ import java.time.LocalDateTime;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
@@ -83,8 +86,7 @@ class DeliveryControllerTest {
   @Test
   @DisplayName("배송 결제 요청을 받으면 배송 요청 ID와 차감 결과를 반환한다")
   void payDeliverySuccess() throws Exception {
-    CustomUserDetails customUser =
-        new CustomUserDetails(1L, "pay@example.com", "pass", "CUSTOMER");
+    CustomUserDetails customUser = new CustomUserDetails(1L, "pay@example.com", "pass", "CUSTOMER");
     UsernamePasswordAuthenticationToken auth =
         new UsernamePasswordAuthenticationToken(customUser, null, customUser.getAuthorities());
     SecurityContextHolder.getContext().setAuthentication(auth);
@@ -96,7 +98,8 @@ class DeliveryControllerTest {
     request.setItemSize(ItemSize.MEDIUM);
 
     when(deliveryService.payDelivery(eq(1L), eq("idem-pay"), any()))
-        .thenReturn(new DeliveryPaymentResponse(55L, 78776L, 5000L, DeliveryStatus.REQUESTED, "MATCHING"));
+        .thenReturn(
+            new DeliveryPaymentResponse(55L, 78776L, 5000L, DeliveryStatus.REQUESTED, "MATCHING"));
 
     mockMvc
         .perform(
@@ -109,6 +112,67 @@ class DeliveryControllerTest {
         .andExpect(jsonPath("$.deliveryRequestId").value(55L))
         .andExpect(jsonPath("$.remainingBalance").value(5000L))
         .andExpect(jsonPath("$.deliveryStatus").value("REQUESTED"));
+
+    ArgumentCaptor<DeliveryPayRequest> requestCaptor =
+        ArgumentCaptor.forClass(DeliveryPayRequest.class);
+    verify(deliveryService).payDelivery(eq(1L), eq("idem-pay"), requestCaptor.capture());
+    DeliveryPayRequest captured = requestCaptor.getValue();
+    assertThat(captured.getPickup().getAddress()).isEqualTo(request.getPickup().getAddress());
+    assertThat(captured.getPickup().getLat()).isEqualTo(request.getPickup().getLat());
+    assertThat(captured.getPickup().getLng()).isEqualTo(request.getPickup().getLng());
+    assertThat(captured.getDropoff().getAddress()).isEqualTo(request.getDropoff().getAddress());
+    assertThat(captured.getDropoff().getLat()).isEqualTo(request.getDropoff().getLat());
+    assertThat(captured.getDropoff().getLng()).isEqualTo(request.getDropoff().getLng());
+    assertThat(captured.getWeight()).isEqualTo(request.getWeight());
+    assertThat(captured.getItemSize()).isEqualTo(request.getItemSize());
+  }
+
+  @Test
+  @DisplayName("공백 Idempotency-Key면 400을 반환한다")
+  void payDeliveryBlankIdempotencyKeyShouldReturn400() throws Exception {
+    CustomUserDetails customUser = new CustomUserDetails(1L, "pay@example.com", "pass", "CUSTOMER");
+    UsernamePasswordAuthenticationToken auth =
+        new UsernamePasswordAuthenticationToken(customUser, null, customUser.getAuthorities());
+    SecurityContextHolder.getContext().setAuthentication(auth);
+
+    DeliveryPayRequest request = new DeliveryPayRequest();
+    request.setPickup(createLocation("서울 강남구", 37.0, 127.0));
+    request.setDropoff(createLocation("서울 서초구", 38.0, 127.0));
+    request.setWeight(10.0);
+    request.setItemSize(ItemSize.MEDIUM);
+
+    mockMvc
+        .perform(
+            post("/api/v1/delivery-requests/pay")
+                .with(authentication(auth))
+                .header("Idempotency-Key", "   ")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  @DisplayName("101자 Idempotency-Key면 400을 반환한다")
+  void payDeliveryTooLongIdempotencyKeyShouldReturn400() throws Exception {
+    CustomUserDetails customUser = new CustomUserDetails(1L, "pay@example.com", "pass", "CUSTOMER");
+    UsernamePasswordAuthenticationToken auth =
+        new UsernamePasswordAuthenticationToken(customUser, null, customUser.getAuthorities());
+    SecurityContextHolder.getContext().setAuthentication(auth);
+
+    DeliveryPayRequest request = new DeliveryPayRequest();
+    request.setPickup(createLocation("서울 강남구", 37.0, 127.0));
+    request.setDropoff(createLocation("서울 서초구", 38.0, 127.0));
+    request.setWeight(10.0);
+    request.setItemSize(ItemSize.MEDIUM);
+
+    mockMvc
+        .perform(
+            post("/api/v1/delivery-requests/pay")
+                .with(authentication(auth))
+                .header("Idempotency-Key", "a".repeat(101))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isBadRequest());
   }
 
   @Test

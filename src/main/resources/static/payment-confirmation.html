@@ -67,11 +67,11 @@
             <div class="helper" id="remainingBalance">결제 후 잔액 0 P</div>
         </div>
 
-        <div class="status-banner ok" id="statusBanner">보유 포인트가 충분합니다. 결제를 진행할 수 있습니다.</div>
+        <div class="status-banner" id="statusBanner">결제 확인 중입니다.</div>
     </section>
 
     <div class="cta">
-        <button type="button" class="primary-btn" id="payButton" onclick="goToPin()">결제 PIN 입력하기</button>
+        <button type="button" class="primary-btn" id="payButton" onclick="goToPin()" disabled>결제 PIN 입력하기</button>
         <button type="button" class="secondary-btn" onclick="history.back()">배송 정보 다시 보기</button>
     </div>
 </main>
@@ -83,7 +83,11 @@
 
     function goToPin() {
         const draft = loadDraft();
-        if (!draft.paymentEstimate) {
+        const estimate = draft.paymentEstimate;
+        if (!estimate) {
+            return;
+        }
+        if (Number(estimate.walletBalance || 0) < Number(estimate.totalFee || 0)) {
             return;
         }
         location.href = '/payment-pin.html';

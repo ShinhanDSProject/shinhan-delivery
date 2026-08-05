@@ -14,9 +14,12 @@ import com.example.shinhandelivery.common.exception.ErrorCode;
 import com.example.shinhandelivery.delivery.dto.request.DeliveryCompleteRequest;
 import com.example.shinhandelivery.delivery.dto.request.DeliveryCreateRequest;
 import com.example.shinhandelivery.delivery.dto.request.DeliveryEstimateRequest;
+import com.example.shinhandelivery.delivery.dto.request.DeliveryPayLocationRequest;
+import com.example.shinhandelivery.delivery.dto.request.DeliveryPayRequest;
 import com.example.shinhandelivery.delivery.dto.request.DeliveryUpdateRequest;
 import com.example.shinhandelivery.delivery.dto.response.DeliveryDetailResponseDto;
 import com.example.shinhandelivery.delivery.dto.response.DeliveryEstimateResponse;
+import com.example.shinhandelivery.delivery.dto.response.DeliveryPaymentResponse;
 import com.example.shinhandelivery.delivery.dto.response.ProofPhotoResponse;
 import com.example.shinhandelivery.delivery.entity.DeliveryRequest;
 import com.example.shinhandelivery.delivery.entity.DeliveryStatus;
@@ -35,6 +38,8 @@ import com.example.shinhandelivery.delivery.repository.DeliveryRequestRepository
 import com.example.shinhandelivery.delivery.repository.MatchingRepository;
 import com.example.shinhandelivery.member.entity.Member;
 import com.example.shinhandelivery.member.service.MemberService;
+import com.example.shinhandelivery.payment.dto.response.PointUseResultResponse;
+import com.example.shinhandelivery.payment.service.PaymentService;
 import com.example.shinhandelivery.vehicle.entity.Vehicle;
 import com.example.shinhandelivery.vehicle.service.VehicleService;
 import java.math.BigDecimal;
@@ -63,6 +68,7 @@ class DeliveryServiceTest {
   @Mock private VehicleService vehicleService;
   @Mock private MatchingRepository matchingRepository;
   @Mock private ApplicationEventPublisher eventPublisher;
+  @Mock private PaymentService paymentService;
   @Spy private DeliveryFeeCalculator deliveryFeeCalculator = new DeliveryFeeCalculator();
   @InjectMocks private DeliveryService deliveryService;
 
@@ -137,6 +143,35 @@ class DeliveryServiceTest {
     deliveryService.requestDelivery(1L, request);
 
     verify(eventPublisher, never()).publishEvent(any(DeliveryOfferBroadcastEvent.class));
+  }
+
+  @Test
+  @DisplayName("배송 결제로 생성된 신규 요청도 오퍼 후보가 있으면 DeliveryOfferBroadcastEvent를 발행한다")
+  void payDeliveryWithCandidatesShouldPublishOfferEvent() {
+    DeliveryPayRequest request = new DeliveryPayRequest();
+    request.setPickup(createPayLocation("서울 강남구", 37.0, 127.0));
+    request.setDropoff(createPayLocation("서울 서초구", 38.0, 127.0));
+    request.setWeight(10.0);
+    request.setItemSize(ItemSize.MEDIUM);
+
+    when(paymentService.usePoint(1L, "idem-pay", any()))
+        .thenReturn(new PointUseResultResponse(2000L, 3000L, LocalDateTime.now()));
+    when(deliveryRequestRepository.findByCustomerIdAndPaymentIdempotencyKey(1L, "idem-pay"))
+        .thenReturn(Optional.empty());
+    when(deliveryRequestRepository.save(any(DeliveryRequest.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
+    Vehicle candidate = Vehicle.builder().id(2L).ownerId(20L).build();
+    when(vehicleService.findOfferCandidates(anyDouble(), anyDouble()))
+        .thenReturn(List.of(candidate));
+
+    DeliveryPaymentResponse response = deliveryService.payDelivery(1L, "idem-pay", request);
+
+    ArgumentCaptor<DeliveryOfferBroadcastEvent> eventCaptor =
+        ArgumentCaptor.forClass(DeliveryOfferBroadcastEvent.class);
+    verify(eventPublisher).publishEvent(eventCaptor.capture());
+    assertThat(response.deliveryStatus()).isEqualTo(DeliveryStatus.REQUESTED);
+    assertThat(eventCaptor.getValue().candidateVehicleIds()).containsExactly(2L);
+    assertThat(eventCaptor.getValue().offer().customerId()).isEqualTo(1L);
   }
 
   @Test
@@ -617,5 +652,13 @@ class DeliveryServiceTest {
 
     assertThatThrownBy(() -> deliveryService.getDeliveryRequestDetail(999L, 1L))
         .isInstanceOf(DeliveryAccessDeniedException.class);
+  }
+
+  private DeliveryPayLocationRequest createPayLocation(String address, double lat, double lng) {
+    DeliveryPayLocationRequest location = new DeliveryPayLocationRequest();
+    location.setAddress(address);
+    location.setLat(lat);
+    location.setLng(lng);
+    return location;
   }
 }

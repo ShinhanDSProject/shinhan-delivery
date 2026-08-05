@@ -522,6 +522,12 @@
 
     let estimateTimer = null;
 
+    function clearStoredEstimate() {
+        const draft = loadDraft();
+        delete draft.paymentEstimate;
+        saveDraft(draft);
+    }
+
     function maybeEstimateFee() {
         const draft = loadDraft();
         const feeCard = document.getElementById('feeCard');
@@ -531,6 +537,8 @@
         if (!draft.pickup || !draft.dropoff || !draft.itemSize || !draft.weight) {
             feeCard.classList.remove('visible');
             feeLoading.style.display = 'none';
+            latestEstimate = null;
+            clearStoredEstimate();
             nextButton.disabled = true;
             return;
         }
@@ -557,6 +565,8 @@
                 });
                 feeLoading.style.display = 'none';
                 if (!response.ok) {
+                    latestEstimate = null;
+                    clearStoredEstimate();
                     nextButton.disabled = true;
                     return;
                 }
@@ -591,14 +601,14 @@
             } catch (error) {
                 feeLoading.style.display = 'none';
                 latestEstimate = null;
+                clearStoredEstimate();
                 nextButton.disabled = true;
             }
         }, 300);
     }
 
     function onNext() {
-        const draft = loadDraft();
-        if (!draft.paymentEstimate && !latestEstimate) {
+        if (!latestEstimate) {
             notReady();
             return;
         }

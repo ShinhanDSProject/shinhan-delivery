@@ -74,15 +74,7 @@ public class DeliveryService {
     DeliveryRequest saved =
         deliveryRequestRepository.save(
             DeliveryRequest.of(customerId, request, distanceKm, fee.totalFee().longValueExact()));
-
-    List<Long> candidateVehicleIds =
-        vehicleService.findOfferCandidates(saved.getWeight(), saved.getDistance()).stream()
-            .map(Vehicle::getId)
-            .toList();
-    if (!candidateVehicleIds.isEmpty()) {
-      eventPublisher.publishEvent(
-          new DeliveryOfferBroadcastEvent(candidateVehicleIds, DeliveryResponse.from(saved)));
-    }
+    publishOfferIfCandidatesExist(saved);
     return saved;
   }
 
@@ -132,7 +124,9 @@ public class DeliveryService {
                           distanceKm,
                           estimate.totalFee().longValueExact());
                   created.setPaymentIdempotencyKey(idempotencyKey);
-                  return deliveryRequestRepository.save(created);
+                  DeliveryRequest saved = deliveryRequestRepository.save(created);
+                  publishOfferIfCandidatesExist(saved);
+                  return saved;
                 });
 
     return DeliveryPaymentResponse.from(
@@ -300,5 +294,19 @@ public class DeliveryService {
     createRequest.setWeight(request.getWeight());
     createRequest.setItemSize(request.getItemSize());
     return createRequest;
+  }
+
+  private void publishOfferIfCandidatesExist(DeliveryRequest deliveryRequest) {
+    List<Long> candidateVehicleIds =
+        vehicleService
+            .findOfferCandidates(deliveryRequest.getWeight(), deliveryRequest.getDistance())
+            .stream()
+            .map(Vehicle::getId)
+            .toList();
+    if (!candidateVehicleIds.isEmpty()) {
+      eventPublisher.publishEvent(
+          new DeliveryOfferBroadcastEvent(
+              candidateVehicleIds, DeliveryResponse.from(deliveryRequest)));
+    }
   }
 }

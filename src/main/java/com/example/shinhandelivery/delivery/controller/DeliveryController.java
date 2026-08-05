@@ -18,6 +18,8 @@ import com.example.shinhandelivery.delivery.entity.DeliveryRequest;
 import com.example.shinhandelivery.delivery.entity.DeliveryStatus;
 import com.example.shinhandelivery.delivery.service.DeliveryService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -27,6 +29,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -43,6 +46,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/v1/delivery-requests")
 @RequiredArgsConstructor
+@Validated
 public class DeliveryController {
 
   private final DeliveryService deliveryService;
@@ -50,8 +54,10 @@ public class DeliveryController {
   /** 로그인한 고객 본인 명의로 배송을 요청한다. */
   @PostMapping
   @PreAuthorize("isAuthenticated()")
-  public ResponseEntity<DeliveryResponse> requestDelivery(@RequestBody @Valid DeliveryCreateRequest request) {
-    DeliveryRequest created = deliveryService.requestDelivery(resolveUserDetails().getId(), request);
+  public ResponseEntity<DeliveryResponse> requestDelivery(
+      @RequestBody @Valid DeliveryCreateRequest request) {
+    DeliveryRequest created =
+        deliveryService.requestDelivery(resolveUserDetails().getId(), request);
     return ResponseEntity.status(HttpStatus.CREATED).body(DeliveryResponse.from(created));
   }
 
@@ -66,7 +72,10 @@ public class DeliveryController {
   @PostMapping("/pay")
   @PreAuthorize("isAuthenticated()")
   public ResponseEntity<DeliveryPaymentResponse> payDelivery(
-      @RequestHeader("Idempotency-Key") String idempotencyKey,
+      @RequestHeader("Idempotency-Key")
+          @NotBlank(message = "Idempotency-Key는 필수입니다.")
+          @Size(max = 100, message = "Idempotency-Key는 100자 이하여야 합니다.")
+          String idempotencyKey,
       @RequestBody @Valid DeliveryPayRequest request) {
     return ResponseEntity.ok(
         deliveryService.payDelivery(resolveUserDetails().getId(), idempotencyKey, request));
@@ -75,7 +84,8 @@ public class DeliveryController {
   /** 배송 요청 상세를 조회한다. */
   @GetMapping("/{deliveryRequestId}")
   @PreAuthorize("isAuthenticated()")
-  public ResponseEntity<DeliveryDetailResponseDto> getDeliveryRequest(@PathVariable Long deliveryRequestId) {
+  public ResponseEntity<DeliveryDetailResponseDto> getDeliveryRequest(
+      @PathVariable Long deliveryRequestId) {
     return ResponseEntity.ok(
         deliveryService.getDeliveryRequestDetail(resolveUserDetails().getId(), deliveryRequestId));
   }
