@@ -25,12 +25,12 @@ if [ ! -d "$STATIC_DIR" ]; then
 fi
 
 # 1. static 하위 HTML 파일에 design-system.css 연동 여부 검사
-for html_file in $(find "$STATIC_DIR" -type f -name "*.html"); do
+while IFS= read -r -d '' html_file; do
     if ! grep -q "design-system.css" "$html_file"; then
         echo -e "${RED}  ❌ [디자인 시스템 미비] ${html_file} 파일에 'design-system.css' 연동이 누락되었습니다.${RESET}"
         ERRORS=$((ERRORS + 1))
     fi
-done
+done < <(find "$STATIC_DIR" -type f -name "*.html" -print0)
 
 if [ $ERRORS -gt 0 ]; then
     echo -e "${RED}❌ 총 ${ERRORS}개의 디자인 시스템 규격 위반 사항이 발견되었습니다.${RESET}"

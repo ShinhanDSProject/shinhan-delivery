@@ -287,12 +287,6 @@ class PaymentServiceTest {
     member.setId(1L);
     when(memberService.getById(1L)).thenReturn(member);
 
-    PointWallet wallet = new PointWallet();
-    wallet.setId(10L);
-    wallet.setMemberId(1L);
-    wallet.setBalance(9000L);
-    when(paymentRepository.findByMemberIdForUpdate(1L)).thenReturn(Optional.of(wallet));
-
     PointHistory history =
         PointHistory.builder()
             .memberId(1L)
@@ -314,7 +308,7 @@ class PaymentServiceTest {
     assertThat(response.balance()).isEqualTo(7000L);
     assertThat(response.usedAmount()).isEqualTo(2000L);
     assertThat(response.paidAt()).isEqualTo(LocalDateTime.of(2026, 8, 4, 10, 0));
-    verify(paymentRepository).findByMemberIdForUpdate(1L);
+    verify(paymentRepository, never()).findByMemberIdForUpdate(1L);
     verify(pointHistoryRepository, never()).save(any(PointHistory.class));
   }
 }
