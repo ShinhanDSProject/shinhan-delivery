@@ -1,20 +1,20 @@
 #!/usr/bin/env bash
 
-# ?�러 발생 ??즉시 중단
+# 에러 발생 시 즉시 중단
 set -euo pipefail
 
 MIGRATION_DIR="src/main/resources/db/migration"
 
-echo "?�� MariaDB 무중??Online DDL 규격 검???�작: $MIGRATION_DIR"
+echo "🔍 MariaDB 무중단 Online DDL 규격 검사 시작: $MIGRATION_DIR"
 
 if [ ! -d "$MIGRATION_DIR" ]; then
-  echo "?�️ 마이그레?�션 ?�렉?�리가 존재?��? ?�습?�다. 검?��? 건너?�니??"
+  echo "⚠️ 마이그레이션 디렉토리가 존재하지 않습니다. 검사를 건너뜁니다."
   exit 0
 fi
 
 INVALID_COUNT=0
 
-# SQL ?�일 ?�색 (?�일???�을 경우 ?�비해 nullglob ?�성??
+# SQL 파일 탐색 (파일이 없을 경우 대비해 nullglob 활성화)
 shopt -s nullglob
 for file_path in "$MIGRATION_DIR"/*; do
   filename=$(basename "$file_path")
@@ -23,31 +23,31 @@ for file_path in "$MIGRATION_DIR"/*; do
     continue
   fi
 
-  # ?��?콜론(;)??구분?�로 ?�용?�여 ?�러 줄로 ?�성??개별 쿼리�??�위�?분할?�여 ?�어?�입?�다.
-  # ?�렇�??�면 줄바�?쿼리�?�?쿼리 ?�줄??주석???�나???�일 문자??버퍼???�함?�니??
+  # 세미콜론(;)을 구분자로 사용하여 여러 줄로 작성된 개별 쿼리문 단위로 분할하여 읽어들입의다.
+  # 이렇게 하면 줄바꿈 쿼리문 및 쿼리 윗줄의 주석이 하나의 단일 문자열 버퍼에 포함됩니다.
   while IFS= read -r -d ';' statement || [[ -n "$statement" ]]; do
-    # 공백 ?�거 �??�문자 변??
+    # 공백 제거 및 대문자 변환
     upper_statement=$(echo "$statement" | tr '[:lower:]' '[:upper:]')
 
-    # ?�당 쿼리 블록 ?�에 ?�회 주석???�함?�어 ?�다�?검?��? 건너?�니??
+    # 해당 쿼리 블록 내에 우회 주석이 포함되어 있다면 검사를 건너뜁니다.
     if [[ "$upper_statement" == *"LINTER:IGNORE-ONLINE-DDL"* ]] || [[ "$upper_statement" == *"SKIP-DDL-CHECK"* ]]; then
       continue
     fi
 
-    # ALTER TABLE, CREATE INDEX, DROP INDEX ?�워?��? ?�함?�어 ?�는지 ?��? ?�색
+    # ALTER TABLE, CREATE INDEX, DROP INDEX 키워드가 포함되어 있는지 정밀 탐색
     if [[ "$upper_statement" =~ ALTER[[:space:]]+TABLE || "$upper_statement" =~ CREATE[[:space:]]+INDEX || "$upper_statement" =~ DROP[[:space:]]+INDEX ]]; then
-      # ALGORITHM=INPLACE?� LOCK=NONE ?�션??????명시?�어 ?�는지 ?�인
+      # ALGORITHM=INPLACE와 LOCK=NONE 옵션이 둘 다 명시되어 있는지 확인
       if [[ "$upper_statement" == *"ALGORITHM=INPLACE"* ]] && [[ "$upper_statement" == *"LOCK=NONE"* ]]; then
         continue
       else
-        echo "??LOCK RISK DETECTED: 무중??DDL 규격 ?�배"
-        echo "   ?�� ?�일�? $filename"
-        # 출력 ???�무 �?공백?�나 개행?� ?�돈?�여 ?�출
+        echo "❌ LOCK RISK DETECTED: 무중단 DDL 규격 위배"
+        echo "   📍 파일명: $filename"
+        # 출력 시 너무 긴 공백이나 개행은 정돈하여 표출
         cleaned_statement=$(echo "$statement" | xargs)
-        echo "   ?�� 쿼리 ?�용: $cleaned_statement"
-        echo "   ?�� ?�결 가?�드:"
-        echo "      ?�?�량 ?�이�?DDL ????Lock)?�로 ?�한 ?�비???�애�?막기 ?�해 구문 ?�에 ', ALGORITHM=INPLACE, LOCK=NONE;'??추�???주세??"
-        echo "      (만약 ?�당 DDL ?�업??INPLACE ?�고리즘??지?�하지 ?�는 경우, 쿼리 바로 ?�줄?�나 ?�에 '-- linter:ignore-online-ddl' 주석???�아 ??경고�??�회?????�습?�다.)"
+        echo "   📝 쿼리 내용: $cleaned_statement"
+        echo "   💡 해결 가이드:"
+        echo "      대용량 테이블 DDL 시 락(Lock)으로 인한 서비스 장애를 막기 위해 구문 끝에 ', ALGORITHM=INPLACE, LOCK=NONE;'을 추가해 주세요."
+        echo "      (만약 해당 DDL 작업이 INPLACE 알고리즘을 지원하지 않는 경우, 쿼리 바로 윗줄이나 옆에 '-- linter:ignore-online-ddl' 주석을 달아 이 경고를 우회할 수 있습니다.)"
         echo ""
         INVALID_COUNT=$((INVALID_COUNT + 1))
       fi
@@ -56,12 +56,12 @@ for file_path in "$MIGRATION_DIR"/*; do
 done
 
 if [ "$INVALID_COUNT" -gt 0 ]; then
-  echo "??Online DDL Check Failed: �?$INVALID_COUNT 개의 ???�험 구문??발견?�었?�니??"
-  echo "?�� ?�바�??�시:"
+  echo "❌ Online DDL Check Failed: 총 $INVALID_COUNT 개의 락 위험 구문이 발견되었습니다!"
+  echo "📝 올바른 예시:"
   echo "   - ALTER TABLE member ADD COLUMN age INT, ALGORITHM=INPLACE, LOCK=NONE;"
   echo "   - CREATE INDEX idx_member_email ON member(email), ALGORITHM=INPLACE, LOCK=NONE;"
   exit 1
 else
-  echo "??모든 DDL 구문??무중??규격??준?�하�??�습?�다!"
+  echo "✅ 모든 DDL 구문이 무중단 규격을 준수하고 있습니다!"
   exit 0
 fi
