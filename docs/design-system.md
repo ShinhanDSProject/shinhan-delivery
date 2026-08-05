@@ -616,6 +616,7 @@
   <label class="input-label">상세 안내</label>
   <input type="text" class="input-field-white" placeholder="예: 공동현관 #1004 문 앞 고양이 서랍장 위">
 </div>
+```
 
 | 속성 | 값 |
 | :--- | :--- |
@@ -627,6 +628,7 @@
 ---
 ### 인증 버튼 포함 입력 필드
 
+```html
 <div class="input-group">
   <label class="input-label">휴대폰 번호</label>
   <div class="input-with-action">
@@ -634,6 +636,7 @@
     <button class="btn-action">인증번호 발송</button>
   </div>
 </div>
+```
 
 | 속성 | 값 |
 | :--- | :--- |
@@ -654,6 +657,7 @@
     <span class="dropdown-arrow">▼</span>
   </div>
 </div>
+```
 
 | 속성 | 값 |
 | :--- | :--- |
@@ -682,6 +686,7 @@
   <span>전체 보기</span>
   <span class="dropdown-arrow">▼</span>
 </div>
+```
 
 | 속성 | 모바일 | 어드민 |
 | :--- | :--- | :--- |
@@ -709,6 +714,7 @@
   <span class="size-tab size-tab-selected">중형 (기내 캐리어급)</span>
   <span class="size-tab">대형</span>
 </div>
+```
 
 | 속성 | 비활성 | 활성 |
 | :--- | :--- | :--- |
@@ -732,6 +738,7 @@
     <span>포인트 결제</span>
   </label>
 </div>
+```
 
 | 속성 | 값 |
 | :--- | :--- |
@@ -748,6 +755,7 @@
   <input type="checkbox" class="checkbox" checked>
   <span>오전 시간대</span>
 </label>
+```
 
 | 속성 | 값 |
 | :--- | :--- |
@@ -769,6 +777,7 @@
   <div class="toggle toggle-on"></div>
   <span>온라인</span>
 </div>
+```
 
 | 속성 | 값 |
 | :--- | :--- |
@@ -794,7 +803,7 @@
 
 ---
 
-## 8. Card & Badge Components (카드 및 배치)
+## 8. Card & Badge Components (카드 및 배지)
 
 --
 
@@ -820,6 +829,7 @@
     <p>물품을 배달하고 싶어요</p>
   </div>
 </div>
+```
 
 | 속성 | 비활성 | 활성 |
 | :--- | :--- | :--- |
@@ -840,6 +850,7 @@
   <span class="noti-desc">강남구 역삼동 → 서초구 반포동</span>
   <span class="noti-time">2분 전</span>
 </div>
+```
 
 | 속성 | 값 |
 | :--- | :--- |
@@ -880,6 +891,7 @@
   <span class="noti-title">새 배송 요청</span>
   <span class="noti-route">강남구 → 서초구</span>
 </div>
+```
 
 | 속성 | 값 |
 | :--- | :--- |
@@ -899,6 +911,7 @@
   <span class="fee-label">예상 배송료</span>
   <span class="fee-amount">12,000원</span>
 </div>
+```
 
 | 속성 | 값 |
 | :--- | :--- |
@@ -925,6 +938,7 @@
     <button class="btn-secondary-sm">메시지</button>
   </div>
 </div>
+```
 
 | 속성 | 값 |
 | :--- | :--- |
@@ -952,6 +966,7 @@
     <span class="history-time">14:10</span>
   </div>
 </div>
+```
 
 | 속성 | 값 |
 | :--- | :--- |
@@ -974,6 +989,7 @@
 <div class="card-info-sm">
   <!-- 간단 정보 요약 -->
 </div>
+```
 
 | 속성 | 	Details Card | Info Card |
 | :--- | :--- | :--- |
@@ -999,6 +1015,7 @@
     <button class="btn-secondary">출금하기</button>
   </div>
 </div>
+```
 
 | 속성 | 값 |
 | :--- | :--- |
@@ -1012,7 +1029,7 @@
 
 ---
 
-# Badge Components (상태 배치)
+# Badge Components (상태 배지)
 
 ### Status Badge (상태 표시)
 
@@ -1026,6 +1043,7 @@
 <span class="status-badge badge-matching">매칭중</span>
 <span class="status-badge badge-cancelled">주문취소</span>
 <span class="status-badge badge-cancel-done">취소 완료</span>
+```
 
 | 상태 | 크기 | Radius | 배경색 | 텍스트 색상 |
 | :--- | :--- | :--- | :--- | :--- |
@@ -1044,12 +1062,13 @@
 
 ---
 
-### Label Badge (라벨 배치)
+### Label Badge (라벨 배지)
 
 ```html
 <span class="badge-label">집</span>
 <span class="badge-label">회사</span>
 <span class="badge-label">어머니 댁</span>
+```
 
 | 속성 | 값 |
 | :--- | :--- |
@@ -1065,6 +1084,7 @@
 ```html
 <span class="chip-location">강남구</span>
 <span class="chip-location">서초구</span>
+```
 
 | 속성 | 값 |
 | :--- | :--- |
@@ -1074,11 +1094,12 @@
 | **텍스트 색상** | #2C88FF |
 
 
-### 기능 배치
+### 기능 배지
 
 ```html
 <span class="badge-gps">GPS</span>
 <span class="badge-change">변경</span>
+```
 
 | 이름 | 크기 | Radius | 배경 |
 | :--- | :--- | :--- | :--- | :--- |
@@ -1096,8 +1117,8 @@
 | **대형 카드 Radius** | 20~30px |
 | **기본 Padding** | 18~24px |
 | **강조 카드 배경** | #2C88FF (Primary) |
-| **배치 기본 Radius** | 6px |
-| **배치 Pill Radius** | 30px |
+| **배지 기본 Radius** | 6px |
+| **배지 Pill Radius** | 30px |
 
 ---
 
@@ -1136,6 +1157,7 @@ Thymeleaf 템플릿에서 공통 프래그먼트를 불러와 손쉽게 조립�
 <!-- 7. 빠른 금액 선택 버튼 -->
 <div th:replace="~{fragments/components :: quickAmountBtn('50000', '+ 5만', false)}"></div>
 <div th:replace="~{fragments/components :: quickAmountBtn('all', '전액 입력', true)}"></div>
+```
 
 ---
 
@@ -1161,6 +1183,7 @@ Thymeleaf 템플릿에서 공통 프래그먼트를 불러와 손쉽게 조립�
 <!-- 13. 검색 바 -->
 <div th:replace="~{fragments/components :: searchBar('도착지 주소를 검색하세요')}"></div>
 <div th:replace="~{fragments/components :: searchBarAdmin('이름, 이메일로 검색...')}"></div>
+```
 
 ---
 
@@ -1181,6 +1204,7 @@ Thymeleaf 템플릿에서 공통 프래그먼트를 불러와 손쉽게 조립�
 
 <!-- 18. 토글 스위치 -->
 <div th:replace="~{fragments/components :: toggle('online', '온라인', true)}"></div>
+```
 
 ---
 
@@ -1208,28 +1232,30 @@ Thymeleaf 템플릿에서 공통 프래그먼트를 불러와 손쉽게 조립�
 <!-- 25. 역할 선택 카드 -->
 <div th:replace="~{fragments/components :: roleCard('customer', '개인 고객', '물품을 보내고 싶어요', true)}"></div>
 <div th:replace="~{fragments/components :: roleCard('courier', '배송파트너', '물품을 배달하고 싶어요', false)}"></div>
+```
 
 ---
 
-### 배치 프래그먼트
+### 배지 프래그먼트
 
 ```html
-<!-- 26. 상태 배치 -->
+<!-- 26. 상태 배지 -->
 <span th:replace="~{fragments/components :: statusBadge('매칭완료', 'success')}"></span>
 <span th:replace="~{fragments/components :: statusBadge('진행중', 'progress')}"></span>
 <span th:replace="~{fragments/components :: statusBadge('취소', 'cancel')}"></span>
 <span th:replace="~{fragments/components :: statusBadge('접수대기', 'waiting')}"></span>
 
-<!-- 27. 라벨 배치 (주소 별칭) -->
+<!-- 27. 라벨 배지 (주소 별칭) -->
 <span th:replace="~{fragments/components :: labelBadge('집')}"></span>
 <span th:replace="~{fragments/components :: labelBadge('회사')}"></span>
 
 <!-- 28. 지역 칩 -->
 <span th:replace="~{fragments/components :: locationChip('강남구')}"></span>
 
-<!-- 29. 기능 배치 -->
+<!-- 29. 기능 배지 -->
 <span th:replace="~{fragments/components :: funcBadge('gps', 'GPS')}"></span>
 <span th:replace="~{fragments/components :: funcBadge('change', '변경')}"></span>
+```
 
 ---
 
