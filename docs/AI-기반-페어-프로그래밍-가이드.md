@@ -1,7 +1,7 @@
 ---
 metadata:
   version: "1.0.0"
-  ssot_owner: "docs/ai-paired-development-guide.md"
+  ssot_owner: "docs/AI-기반-페어-프로그래밍-가이드.md"
   last_updated: "2026-07-28"
   status: "APPROVED (SSOT Primary)"
 ---
@@ -11,7 +11,7 @@ metadata:
 이 문서는 `shinhan-delivery` 프로젝트의 **초급 개발자가 AI 에이전트(Antigravity, Cursor, Copilot 등)와 1:1 페어 프로그래머로 협업하며 5단계 순차 워크플로우에 따라 차근차근 무결점 코드를 완성하는 실전 가이드북**입니다.
 
 > [!NOTE]
-> 본 가이드북은 [docs/ssot-documentation-policy.md](./ssot-documentation-policy.md) 단일 원본 원칙과 [docs/beginner-crud-issue-template-guide.md](./beginner-crud-issue-template-guide.md) 초급자 CRUD 가이드를 100% 반영합니다.
+> 본 가이드북은 [docs/SSOT-문서화-정책-가이드.md](./SSOT-문서화-정책-가이드.md) 단일 원본 원칙과 [docs/초급자-CRUD-이슈-템플릿-가이드.md](./초급자-CRUD-이슈-템플릿-가이드.md) 초급자 CRUD 가이드를 100% 반영합니다.
 
 ---
 

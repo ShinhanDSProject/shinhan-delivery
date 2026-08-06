@@ -1,7 +1,7 @@
 ---
 metadata:
   version: "1.1.0"
-  ssot_owner: "docs/langchain-langgraph-deepdive.md"
+  ssot_owner: "docs/LangChain-LangGraph-심화-분석.md"
   last_updated: "2026-07-31"
   status: "APPROVED (SSOT Primary)"
 ---

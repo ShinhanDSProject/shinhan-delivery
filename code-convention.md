@@ -596,19 +596,19 @@ void 도메인은_다른_도메인의_repository를_직접_참조하지_않는�
 
 ## 15. 데이터베이스 마이그레이션 규칙
 
-스키마 변경은 Hibernate가 아니라 **Flyway**로만 관리한다 (`spring.jpa.hibernate.ddl-auto: validate`). 상세 작동 원리·IDE 활용법은 `docs/flyway-guide.md`를 참고하고, 여기서는 커밋 전 반드시 지켜야 할 핵심만 정리한다.
+스키마 변경은 Hibernate가 아니라 **Flyway**로만 관리한다 (`spring.jpa.hibernate.ddl-auto: validate`). 상세 작동 원리·IDE 활용법은 `docs/Flyway-마이그레이션-가이드.md`를 참고하고, 여기서는 커밋 전 반드시 지켜야 할 핵심만 정리한다.
 
 - **파일 위치/네이밍**: `src/main/resources/db/migration/V<버전번호>__<설명>.sql` (언더스코어 2개 필수). 예: `V7__add_location_to_vehicle.sql`
 - **이미 반영된 마이그레이션 파일은 절대 수정하지 않는다.** 로컬/서버 DB에 한 번이라도 적용된 파일을 고치면 Checksum 불일치로 다음 구동이 실패한다. 수정이 필요하면 버전을 올린 새 파일을 추가한다.
 - Entity에 필드를 추가/변경했다면, **같은 PR 안에 대응하는 마이그레이션 파일을 함께 커밋**한다. Entity만 바꾸고 마이그레이션을 빠뜨리면 `ddl-auto: validate`에 의해 애플리케이션이 기동 실패한다.
 - 여러 테이블을 함께 바꿔야 하면 파일 하나에 `ALTER TABLE` 여러 개를 순서대로 넣어도 되고, 논리적으로 성격이 다르면 파일을 나눠도 된다 — 팀 판단에 맡긴다.
-- **Entity를 새로 추가하거나 기존 Entity의 필드·FK·연관관계를 변경했다면, 같은 PR 안에 프로젝트 ERD 문서(`docs/erd.md`)도 함께 갱신한다.** ERD 문서는 전체 테이블의 컬럼과 FK 기반 연관관계도를 한눈에 파악할 수 있는 단일 원본(SSOT) 문서로 유지하며, 코드(Entity)와 ERD가 어긋나지 않도록 항상 동기화한다.
+- **Entity를 새로 추가하거나 기존 Entity의 필드·FK·연관관계를 변경했다면, 같은 PR 안에 프로젝트 ERD 문서(`docs/ERD-데이터베이스-연관관계도.md`)도 함께 갱신한다.** ERD 문서는 전체 테이블의 컬럼과 FK 기반 연관관계도를 한눈에 파악할 수 있는 단일 원본(SSOT) 문서로 유지하며, 코드(Entity)와 ERD가 어긋나지 않도록 항상 동기화한다.
 
 ---
 
 ## 16. Git 커밋 / 브랜치 / PR 컨벤션
 
-브랜치 전략·PR 규칙의 전체 내용은 `docs/git-flow-guide.md`가 기준 문서이며, 여기서는 코딩 전에 알아야 할 핵심만 요약한다.
+브랜치 전략·PR 규칙의 전체 내용은 `docs/Git-Flow-및-커밋-컨벤션.md`가 기준 문서이며, 여기서는 코딩 전에 알아야 할 핵심만 요약한다.
 
 ### 16.1 브랜치 전략
 
@@ -627,8 +627,8 @@ void 도메인은_다른_도메인의_repository를_직접_참조하지_않는�
 
 - 최소 형식: `type: 설명` (`feat`, `fix`, `refactor`, `test`, `docs`, `chore`, `style`)
   - 예: `feat: 배송 요금 산정 로직 추가`
-- 변경 배경까지 남기고 싶으면 `docs/git-flow-guide.md`의 확장 형식(`type(scope): subject` + 본문 + 푸터)을 써도 된다. 최소 형식과 상충하지 않는, 필요할 때만 쓰는 선택 사항이다.
-- 큰 단위로 한 번에 커밋하지 않고, DTO/Entity/Service/Controller/Test 등 레이어(서브태스크) 단위로 작업이 완성될 때마다 커밋 프리뷰를 제시하고 개발자가 `commit`(또는 `/commit`) 명령을 입력하면 `./scripts/verify.sh` 검증 통과 후 즉시 마이크로 커밋을 집행한다 (`AGENTS.md` Principle 9, `docs/ai-paired-development-guide.md` 참고).
+- 변경 배경까지 남기고 싶으면 `docs/Git-Flow-및-커밋-컨벤션.md`의 확장 형식(`type(scope): subject` + 본문 + 푸터)을 써도 된다. 최소 형식과 상충하지 않는, 필요할 때만 쓰는 선택 사항이다.
+- 큰 단위로 한 번에 커밋하지 않고, DTO/Entity/Service/Controller/Test 등 레이어(서브태스크) 단위로 작업이 완성될 때마다 커밋 프리뷰를 제시하고 개발자가 `commit`(또는 `/commit`) 명령을 입력하면 `./scripts/verify.sh` 검증 통과 후 즉시 마이크로 커밋을 집행한다 (`AGENTS.md` Principle 9, `docs/AI-기반-페어-프로그래밍-가이드.md` 참고).
 
 ### 16.3 PR 규칙
 
@@ -636,7 +636,7 @@ void 도메인은_다른_도메인의_repository를_직접_참조하지_않는�
 - 연관 이슈가 있으면 본문에 명시해 자동으로 닫히게 한다 (예: `Resolves: #45`).
 - `.github/pull_request_template.md`의 항목(요약 / 주요 변경 사항 / 리뷰 포인트 / 스크린샷·테스트 결과)을 빠짐없이 채운다 — UI 작업은 스크린샷, API 작업은 테스트 로그나 호출 결과를 첨부한다.
 - PR 단위는 도메인 하나 + 기능 하나 정도로 작게 유지하며, `Squash and Merge`로 병합한다.
-- 신규 기술 도입 및 핵심 아키텍처 결정 시 `docs/adr/` 규격에 따라 **ADR(Architecture Decision Record)**을 100% 필수 작성하며, PR 제출 시 `docs/pr-review-guide.md` 양식에 따라 **[리뷰어 3분 족보 가이드]** 및 **[Files changed 탭 핀포인트 인라인 댓글]**을 필수 작성/부착한다.
+- 신규 기술 도입 및 핵심 아키텍처 결정 시 `docs/adr/` 규격에 따라 **ADR(Architecture Decision Record)**을 100% 필수 작성하며, PR 제출 시 `docs/PR-리뷰어-3분-족보-가이드.md` 양식에 따라 **[리뷰어 3분 족보 가이드]** 및 **[Files changed 탭 핀포인트 인라인 댓글]**을 필수 작성/부착한다.
 
 ### 16.4 GitHub 이슈 규격
 
@@ -652,7 +652,7 @@ void 도메인은_다른_도메인의_repository를_직접_참조하지_않는�
 - [ ] 비즈니스 로직이 Controller가 아니라 Service에 있는가?
 - [ ] 예상 가능한 실패가 커스텀 예외로 표현되고, `GlobalExceptionHandler`에 매핑이 추가되어 있는가?
 - [ ] `@Transactional`이 Service 계층에만 붙어 있는가?
-- [ ] 잔액/배정처럼 동시 요청에 취약한 로직을 변경했다면 `findByIdForUpdate`(비관적 락)와 동시성 테스트(`docs/concurrency-control-guide.md`)를 추가했는가?
+- [ ] 잔액/배정처럼 동시 요청에 취약한 로직을 변경했다면 `findByIdForUpdate`(비관적 락)와 동시성 테스트(`docs/동시성-제어-가이드.md`)를 추가했는가?
 - [ ] `@Autowired` 필드 주입이 아니라 생성자 주입을 쓰는가?
 - [ ] Repository가 Entity 1개당 1개씩 대응되는가?
 - [ ] Service에서 Repository/Service 의존 없는 순수 계산·변환 로직을 새로 추출했다면 `helper` 서브패키지의 상태 없는 `@Component`로 분리했는가? (§5.1)
@@ -663,7 +663,7 @@ void 도메인은_다른_도메인의_repository를_직접_참조하지_않는�
 - [ ] Spotless 포맷팅 검사를 통과하는가?
 - [ ] Entity 필드를 추가/변경했다면 대응하는 Flyway 마이그레이션 파일을 새로 추가했는가? (기존 마이그레이션 파일을 수정하지 않았는가?)
 - [ ] 다른 도메인을 참조하는 Entity에 FK 필드(`Long xxxId`)가 포함되어 있는가?
-- [ ] Entity를 추가/변경했다면 프로젝트 ERD 문서(`docs/erd.md`)의 컬럼·연관관계도도 함께 갱신했는가?
+- [ ] Entity를 추가/변경했다면 프로젝트 ERD 문서(`docs/ERD-데이터베이스-연관관계도.md`)의 컬럼·연관관계도도 함께 갱신했는가?
 - [ ] `main`을 대상으로 브랜치를 분기·PR 했는가?
 - [ ] 리뷰어를 지정하고, PR 템플릿의 요약/변경사항/리뷰 포인트/테스트 결과를 모두 작성했는가?
 - [ ] UI 개발 시 `/css/design-system.css` 토큰 및 `templates/fragments/components.html` Thymeleaf 프래그먼트를 100% 준수하였는가?
@@ -680,4 +680,4 @@ void 도메인은_다른_도메인의_repository를_직접_참조하지_않는�
 3. **표준 기술 스택 준수 (Thymeleaf Core Stack):**
    - 본 프로젝트의 프론트엔드는 `HTML5 + Vanilla CSS + Vanilla JS + Thymeleaf` 기반의 서버 사이드 템플릿 아키텍처를 프로젝트 표준 스택으로 채택하여 개발합니다.
 4. **문서 및 라이브 가이드 세트 최신화:**
-   - 신규 UI 요소 추가나 디자인 스펙 수정 시 반드시 `docs/design-system.md` 가이드북과 `http://localhost:8080/style-guide.html` 라이브 가이드 페이지를 소스 코드와 세트로 최신화해야 합니다.
+   - 신규 UI 요소 추가나 디자인 스펙 수정 시 반드시 `docs/UI-공통-디자인-시스템.md` 가이드북과 `http://localhost:8080/style-guide.html` 라이브 가이드 페이지를 소스 코드와 세트로 최신화해야 합니다.

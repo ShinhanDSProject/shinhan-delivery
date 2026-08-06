@@ -1,7 +1,7 @@
 ---
 metadata:
   version: "1.0.0"
-  ssot_owner: "docs/methodologies/migration-driven-development.md"
+  ssot_owner: "docs/methodologies/마이그레이션-주도-DB-개발.md"
   last_updated: "2026-07-31"
   status: "APPROVED"
 ---
@@ -42,4 +42,4 @@ graph LR
 
 ## 💻 3. 우리 프로젝트 실천 가이드
 
-- [Flyway 데이터베이스 마이그레이션 가이드 (docs/flyway-guide.md)](../flyway-guide.md)
+- [Flyway 데이터베이스 마이그레이션 가이드 (docs/Flyway-마이그레이션-가이드.md)](../Flyway-마이그레이션-가이드.md)
