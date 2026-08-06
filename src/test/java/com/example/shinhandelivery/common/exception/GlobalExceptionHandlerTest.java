@@ -108,6 +108,26 @@ class GlobalExceptionHandlerTest {
   }
 
   @Test
+  @DisplayName("존재하지 않는 정적 리소스 요청 시(NoResourceFoundException) 404 상태와 C004 에러 코드가 반환된다.")
+  void handleNoResourceFoundExceptionReturns404() {
+    // given
+    org.springframework.web.servlet.resource.NoResourceFoundException exception =
+        new org.springframework.web.servlet.resource.NoResourceFoundException(
+            org.springframework.http.HttpMethod.GET, "unknown.js", "Static resource not found");
+
+    // when
+    ResponseEntity<ErrorResponse> responseEntity =
+        handler.handleNoResourceFoundException(exception);
+
+    // then
+    assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+    ErrorResponse body = responseEntity.getBody();
+    assertThat(body).isNotNull();
+    assertThat(body.getStatus()).isEqualTo(404);
+    assertThat(body.getCode()).isEqualTo("C004");
+  }
+
+  @Test
   @DisplayName("ConstraintViolationException 발생 시 400 상태와 C001 에러 코드가 반환된다.")
   void handleConstraintViolationExceptionReturns400() {
     // given

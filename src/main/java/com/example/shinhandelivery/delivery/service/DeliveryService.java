@@ -108,7 +108,7 @@ public class DeliveryService {
 
     DeliveryRequest deliveryRequest =
         deliveryRequestRepository
-            .findByCustomerIdAndPaymentIdempotencyKey(customerId, idempotencyKey)
+            .findByMemberIdAndPaymentIdempotencyKey(customerId, idempotencyKey)
             .orElseGet(
                 () -> {
                   double distanceKm =
@@ -145,8 +145,8 @@ public class DeliveryService {
   public Page<DeliveryRequest> getMyDeliveryRequests(
       Long customerId, DeliveryStatus status, Pageable pageable) {
     return status == null
-        ? deliveryRequestRepository.findByCustomerIdOrderByCreatedAtDescIdDesc(customerId, pageable)
-        : deliveryRequestRepository.findByCustomerIdAndStatusOrderByCreatedAtDescIdDesc(
+        ? deliveryRequestRepository.findByMemberIdOrderByCreatedAtDescIdDesc(customerId, pageable)
+        : deliveryRequestRepository.findByMemberIdAndStatusOrderByCreatedAtDescIdDesc(
             customerId, status, pageable);
   }
 
@@ -160,7 +160,7 @@ public class DeliveryService {
 
     Matching matching = matchingRepository.findByDeliveryRequestId(deliveryRequestId).orElse(null);
     Vehicle vehicle = matching == null ? null : vehicleService.getById(matching.getVehicleId());
-    Long courierId = vehicle == null ? null : vehicle.getOwnerId();
+    Long courierId = vehicle == null ? null : vehicle.getMemberId();
     assertCallerHasAccess(callerId, deliveryRequestId, deliveryRequest, courierId);
 
     String courierName = courierId == null ? null : memberService.getById(courierId).getName();
@@ -249,13 +249,13 @@ public class DeliveryService {
 
   /** 매칭이 있으면 그 차량 소유주(Member) id를, 매칭이 없으면(아직 아무도 안 맡았으면) null을 반환한다. */
   private Long courierIdOf(Matching matching) {
-    return matching == null ? null : vehicleService.getById(matching.getVehicleId()).getOwnerId();
+    return matching == null ? null : vehicleService.getById(matching.getVehicleId()).getMemberId();
   }
 
   /** 호출자가 배송 요청의 고객 본인이거나 배정된 배송원 본인이 아니면 DeliveryAccessDeniedException을 던진다. */
   private void assertCallerHasAccess(
       Long callerId, Long deliveryRequestId, DeliveryRequest deliveryRequest, Long courierId) {
-    boolean isOwner = callerId.equals(deliveryRequest.getCustomerId());
+    boolean isOwner = callerId.equals(deliveryRequest.getMemberId());
     boolean isAssignedCourier = callerId.equals(courierId);
     if (!isOwner && !isAssignedCourier) {
       throw new DeliveryAccessDeniedException(deliveryRequestId, callerId);

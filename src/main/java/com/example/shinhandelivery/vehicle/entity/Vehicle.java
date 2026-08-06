@@ -22,7 +22,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-/** 배송 운송수단(드론/오토바이/차량) 엔티티. owner_id는 Member를 가리키는 FK 값이다. */
+/** 배송 운송수단(드론/오토바이/차량) 엔티티. member_id는 Member를 가리키는 FK 값이다. */
 @Entity
 @Getter
 @Setter
@@ -36,12 +36,12 @@ public class Vehicle {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column(name = "owner_id", nullable = false)
-  private Long ownerId;
+  @Column(name = "member_id", nullable = false)
+  private Long memberId;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "owner_id", insertable = false, updatable = false)
-  private Member owner;
+  @JoinColumn(name = "member_id", insertable = false, updatable = false)
+  private Member member;
 
   @Enumerated(EnumType.STRING)
   @Column(nullable = false, length = 20)
@@ -67,7 +67,7 @@ public class Vehicle {
   public static Vehicle from(VehicleCreateRequest request) {
     Vehicle vehicle =
         Vehicle.builder()
-            .ownerId(request.getOwnerId())
+            .memberId(request.getMemberId())
             .type(request.getType())
             .maxWeight(request.getMaxWeight())
             .maxDistance(request.getMaxDistance())

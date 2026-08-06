@@ -86,7 +86,7 @@ class TrackingIntegrationTest {
     strangerId = createMember("stranger", MemberRole.CUSTOMER);
 
     Vehicle vehicle = new Vehicle();
-    vehicle.setOwnerId(courierId);
+    vehicle.setMemberId(courierId);
     vehicle.setType(VehicleType.CAR);
     vehicle.setMaxWeight(500);
     vehicle.setMaxDistance(500);
@@ -96,7 +96,7 @@ class TrackingIntegrationTest {
     vehicleId = vehicleRepository.save(vehicle).getId();
 
     DeliveryRequest deliveryRequest = new DeliveryRequest();
-    deliveryRequest.setCustomerId(customerId);
+    deliveryRequest.setMemberId(customerId);
     deliveryRequest.setPickupAddress("서울시 강남구");
     deliveryRequest.setDropoffAddress("서울시 서초구");
     deliveryRequest.setWeight(10);
@@ -254,7 +254,7 @@ class TrackingIntegrationTest {
 
   private Long createAvailableVehicle(Long ownerId) {
     Vehicle vehicle = new Vehicle();
-    vehicle.setOwnerId(ownerId);
+    vehicle.setMemberId(ownerId);
     vehicle.setType(VehicleType.CAR);
     vehicle.setMaxWeight(500);
     vehicle.setMaxDistance(500);

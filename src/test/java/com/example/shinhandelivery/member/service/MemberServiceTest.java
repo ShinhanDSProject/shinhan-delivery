@@ -170,7 +170,7 @@ class MemberServiceTest {
 
     Vehicle vehicle = new Vehicle();
     vehicle.setId(99L);
-    when(vehicleRepository.findAllByOwnerId(3L)).thenReturn(List.of(vehicle));
+    when(vehicleRepository.findAllByMemberId(3L)).thenReturn(List.of(vehicle));
 
     memberService.delete(3L);
 

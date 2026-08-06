@@ -22,11 +22,11 @@ if ! git fetch --depth=1 origin "$BASE_REF" >/dev/null 2>&1; then
   NEW_FILES_ONLY=0
 fi
 
-declare -A TARGET_FILES
+TARGET_FILES=""
 if [ "$NEW_FILES_ONLY" -eq 1 ]; then
   if diff_output=$(git diff --no-renames --name-only --diff-filter=A "origin/$BASE_REF" HEAD -- "$MIGRATION_DIR" 2>/dev/null); then
     while IFS= read -r added_file; do
-      [ -n "$added_file" ] && TARGET_FILES["$(basename "$added_file")"]=1
+      [ -n "$added_file" ] && TARGET_FILES="$TARGET_FILES $(basename "$added_file") "
     done <<< "$diff_output"
   else
     echo "⚠️ origin/$BASE_REF 대비 변경된 마이그레이션 파일 목록을 가져올 수 없어 전체 마이그레이션 파일을 검사합니다."
@@ -45,7 +45,7 @@ for file_path in "$MIGRATION_DIR"/*; do
     continue
   fi
 
-  if [ "$NEW_FILES_ONLY" -eq 1 ] && [ -z "${TARGET_FILES[$filename]:-}" ]; then
+  if [ "$NEW_FILES_ONLY" -eq 1 ] && [[ "$TARGET_FILES" != *" $filename "* ]]; then
     continue
   fi
 

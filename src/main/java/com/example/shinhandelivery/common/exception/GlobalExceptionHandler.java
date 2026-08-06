@@ -12,6 +12,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.NoHandlerFoundException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 /** 애플리케이션 전역에서 발생하는 예외를 포착하여 표준 에러 응답 객체(ErrorResponse)로 변환하는 컨트롤러 어드바이스입니다. */
 @RestControllerAdvice
@@ -79,6 +80,20 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(NoHandlerFoundException.class)
   protected ResponseEntity<ErrorResponse> handleNoHandlerFoundException(NoHandlerFoundException e) {
     log.warn("NoHandlerFoundException occurred: {} {}", e.getHttpMethod(), e.getRequestURL());
+    ErrorCode errorCode = ErrorCode.ENTITY_NOT_FOUND;
+    ErrorResponse response = ErrorResponse.of(errorCode);
+    return new ResponseEntity<>(response, errorCode.getHttpStatus());
+  }
+
+  /**
+   * 존재하지 않는 정적 리소스 요청 예외(NoResourceFoundException)를 처리합니다.
+   *
+   * <p>Spring Boot 3.2+ / Spring 6.1+에서 미존재 정적 리소스 요청 시 발생하며, 404 응답으로 변환합니다.
+   */
+  @ExceptionHandler(NoResourceFoundException.class)
+  protected ResponseEntity<ErrorResponse> handleNoResourceFoundException(
+      NoResourceFoundException e) {
+    log.warn("NoResourceFoundException occurred: {}", e.getResourcePath());
     ErrorCode errorCode = ErrorCode.ENTITY_NOT_FOUND;
     ErrorResponse response = ErrorResponse.of(errorCode);
     return new ResponseEntity<>(response, errorCode.getHttpStatus());
