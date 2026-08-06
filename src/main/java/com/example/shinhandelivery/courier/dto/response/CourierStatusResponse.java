@@ -1,5 +1,6 @@
-package com.example.shinhandelivery.courier.dto;
+package com.example.shinhandelivery.courier.dto.response;
 
+import com.example.shinhandelivery.courier.entity.WorkStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

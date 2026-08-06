@@ -1,5 +1,6 @@
-package com.example.shinhandelivery.courier.dto;
+package com.example.shinhandelivery.courier.dto.request;
 
+import com.example.shinhandelivery.courier.entity.WorkStatus;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -16,6 +17,6 @@ public class CourierStatusUpdateRequest {
   @NotNull(message = "영업 상태는 필수 입력 항목입니다.")
   private WorkStatus status;
 
-  private Double latitude;
-  private Double longitude;
+  private Double latitude; // 위도
+  private Double longitude; // 경도
 }

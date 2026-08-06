@@ -2,9 +2,9 @@ package com.example.shinhandelivery.courier.service;
 
 import com.example.shinhandelivery.common.exception.BusinessException;
 import com.example.shinhandelivery.common.exception.ErrorCode;
-import com.example.shinhandelivery.courier.dto.CourierStatusResponse;
-import com.example.shinhandelivery.courier.dto.CourierStatusUpdateRequest;
-import com.example.shinhandelivery.courier.dto.WorkStatus;
+import com.example.shinhandelivery.courier.dto.request.CourierStatusUpdateRequest;
+import com.example.shinhandelivery.courier.dto.response.CourierStatusResponse;
+import com.example.shinhandelivery.courier.entity.WorkStatus;
 import com.example.shinhandelivery.member.entity.Member;
 import com.example.shinhandelivery.member.entity.MemberRole;
 import com.example.shinhandelivery.member.service.MemberService;
