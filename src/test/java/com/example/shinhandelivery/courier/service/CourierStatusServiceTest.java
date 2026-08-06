@@ -40,7 +40,7 @@ class CourierStatusServiceTest {
     Vehicle vehicle =
         Vehicle.builder()
             .id(10L)
-            .ownerId(memberId)
+            .memberId(memberId)
             .type(VehicleType.MOTORCYCLE)
             .status(VehicleStatus.BUSY)
             .latitude(37.5)
@@ -48,7 +48,7 @@ class CourierStatusServiceTest {
             .build();
 
     given(memberService.getById(memberId)).willReturn(courier);
-    given(vehicleService.getVehiclesByOwnerId(memberId)).willReturn(List.of(vehicle));
+    given(vehicleService.getVehiclesByMemberId(memberId)).willReturn(List.of(vehicle));
 
     CourierStatusUpdateRequest request =
         new CourierStatusUpdateRequest(WorkStatus.ONLINE, 37.5665, 126.9780);

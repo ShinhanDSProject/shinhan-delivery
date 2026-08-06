@@ -53,7 +53,7 @@ class DeliveryMatchingConcurrencyTest {
 
     DeliveryRequest request =
         DeliveryRequest.builder()
-            .customerId(customer.getId())
+            .memberId(customer.getId())
             .pickupAddress("서울시 중구 을지로 100")
             .dropoffAddress("서울시 명동 20")
             .pickupLatitude(37.5665)
@@ -85,7 +85,7 @@ class DeliveryMatchingConcurrencyTest {
 
       vehicleRepository.save(
           Vehicle.builder()
-              .ownerId(courier.getId())
+              .memberId(courier.getId())
               .type(VehicleType.MOTORCYCLE)
               .maxWeight(10.0)
               .maxDistance(20.0)

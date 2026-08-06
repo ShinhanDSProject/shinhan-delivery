@@ -48,8 +48,8 @@ public class VehicleService {
 
   /** 소유자(MemberId) 기준 차량 목록을 조회한다. */
   @Transactional(readOnly = true)
-  public List<Vehicle> getVehiclesByOwnerId(Long ownerId) {
-    return vehicleRepository.findAllByOwnerId(ownerId);
+  public List<Vehicle> getVehiclesByMemberId(Long memberId) {
+    return vehicleRepository.findAllByMemberId(memberId);
   }
 
   /** 전체 Vehicle 목록을 조회한다. */

@@ -108,7 +108,7 @@ class DeliveryMatchingServiceTest {
     Vehicle vehicle =
         Vehicle.builder()
             .id(10L)
-            .ownerId(courierId)
+            .memberId(courierId)
             .type(VehicleType.MOTORCYCLE)
             .status(VehicleStatus.AVAILABLE)
             .build();
@@ -126,7 +126,7 @@ class DeliveryMatchingServiceTest {
             .build();
 
     given(memberService.getById(courierId)).willReturn(courier);
-    given(vehicleService.getVehiclesByOwnerId(courierId)).willReturn(List.of(vehicle));
+    given(vehicleService.getVehiclesByMemberId(courierId)).willReturn(List.of(vehicle));
     given(deliveryRequestRepository.findById(deliveryRequestId)).willReturn(Optional.of(request));
     given(matchingRepository.saveAndFlush(any(Matching.class))).willReturn(expectedMatching);
 
@@ -148,13 +148,13 @@ class DeliveryMatchingServiceTest {
 
     Member courier = Member.builder().id(courierId).role(MemberRole.COURIER).build();
     Vehicle vehicle =
-        Vehicle.builder().id(10L).ownerId(courierId).status(VehicleStatus.AVAILABLE).build();
+        Vehicle.builder().id(10L).memberId(courierId).status(VehicleStatus.AVAILABLE).build();
 
     DeliveryRequest alreadyMatched =
         DeliveryRequest.builder().id(deliveryRequestId).status(DeliveryStatus.MATCHED).build();
 
     given(memberService.getById(courierId)).willReturn(courier);
-    given(vehicleService.getVehiclesByOwnerId(courierId)).willReturn(List.of(vehicle));
+    given(vehicleService.getVehiclesByMemberId(courierId)).willReturn(List.of(vehicle));
     given(deliveryRequestRepository.findById(deliveryRequestId))
         .willReturn(Optional.of(alreadyMatched));
 

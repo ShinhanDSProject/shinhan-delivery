@@ -101,10 +101,10 @@ public class DataSeedInitializer implements CommandLineRunner {
   }
 
   private Vehicle createVehicle(
-      Long ownerId, VehicleType type, double maxWeight, double maxDistance) {
+      Long memberId, VehicleType type, double maxWeight, double maxDistance) {
     Vehicle vehicle =
         Vehicle.builder()
-            .memberId(ownerId)
+            .memberId(memberId)
             .type(type)
             .maxWeight(maxWeight)
             .maxDistance(maxDistance)

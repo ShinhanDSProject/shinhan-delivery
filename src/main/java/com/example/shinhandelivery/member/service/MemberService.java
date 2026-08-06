@@ -159,9 +159,9 @@ public class MemberService {
     memberRepository.delete(member);
   }
 
-  private Vehicle createDefaultVehicle(Long ownerId, MemberCreateRequest request) {
+  private Vehicle createDefaultVehicle(Long memberId, MemberCreateRequest request) {
     return Vehicle.builder()
-        .memberId(ownerId)
+        .memberId(memberId)
         .type(request.getVehicleType())
         .maxWeight(resolveMaxWeight(request.getPreferredWeight()))
         .maxDistance(resolveMaxDistance(request.getVehicleType()))

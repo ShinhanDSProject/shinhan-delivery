@@ -53,7 +53,7 @@ public class DeliveryMatchingService {
     double searchRadius = radiusKm != null ? radiusKm : 3.0;
 
     if (latitude == null || longitude == null) {
-      List<Vehicle> vehicles = vehicleService.getVehiclesByOwnerId(memberId);
+      List<Vehicle> vehicles = vehicleService.getVehiclesByMemberId(memberId);
       if (!vehicles.isEmpty()) {
         currentLat = vehicles.get(0).getLatitude();
         currentLon = vehicles.get(0).getLongitude();
@@ -108,7 +108,7 @@ public class DeliveryMatchingService {
       throw new BusinessException(ErrorCode.ACCESS_DENIED, "배송원(COURIER)만 주문을 수락할 수 있습니다.");
     }
 
-    List<Vehicle> vehicles = vehicleService.getVehiclesByOwnerId(memberId);
+    List<Vehicle> vehicles = vehicleService.getVehiclesByMemberId(memberId);
     if (vehicles.isEmpty()) {
       throw new BusinessException(ErrorCode.VEHICLE_NOT_FOUND, "등록된 운송수단이 없어 주문을 수락할 수 없습니다.");
     }

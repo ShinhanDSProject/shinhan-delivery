@@ -33,7 +33,7 @@ public class CourierStatusService {
       throw new BusinessException(ErrorCode.ACCESS_DENIED, "배송원(COURIER) 권한만 영업 상태를 설정할 수 있습니다.");
     }
 
-    List<Vehicle> vehicles = vehicleService.getVehiclesByOwnerId(memberId);
+    List<Vehicle> vehicles = vehicleService.getVehiclesByMemberId(memberId);
     if (vehicles.isEmpty()) {
       throw new BusinessException(ErrorCode.VEHICLE_NOT_FOUND, "등록된 차량(운송수단)이 없어 출근할 수 없습니다.");
     }
@@ -65,7 +65,7 @@ public class CourierStatusService {
   public CourierStatusResponse getWorkStatus(Long memberId) {
     Member member = memberService.getById(memberId);
 
-    List<Vehicle> vehicles = vehicleService.getVehiclesByOwnerId(memberId);
+    List<Vehicle> vehicles = vehicleService.getVehiclesByMemberId(memberId);
     if (vehicles.isEmpty()) {
       return CourierStatusResponse.builder()
           .memberId(memberId)
