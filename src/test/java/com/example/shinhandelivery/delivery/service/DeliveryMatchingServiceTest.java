@@ -45,7 +45,7 @@ class DeliveryMatchingServiceTest {
 
   @Test
   @DisplayName("반경 3km 이내의 대기 중인(REQUESTED) 주문만 거리순으로 조회된다")
-  void getAvailableDeliveries_FilterAndSortByDistance() {
+  void getAvailableDeliveriesFilterAndSortByDistance() {
     // given
     Long courierId = 1L;
     Member courier = Member.builder().id(courierId).role(MemberRole.COURIER).build();
@@ -99,7 +99,7 @@ class DeliveryMatchingServiceTest {
 
   @Test
   @DisplayName("정상적인 상태의 대기 주문을 수락(Catch)하면 Matching 엔티티가 생성된다")
-  void catchDelivery_Success() {
+  void catchDeliverySuccess() {
     // given
     Long courierId = 1L;
     Long deliveryRequestId = 100L;
@@ -141,7 +141,7 @@ class DeliveryMatchingServiceTest {
 
   @Test
   @DisplayName("이미 배정 완료된(MATCHED) 주문을 수락 시도 시 AlreadyMatchedException이 발생한다")
-  void catchDelivery_AlreadyMatched_ThrowsException() {
+  void catchDeliveryAlreadyMatchedThrowsException() {
     // given
     Long courierId = 1L;
     Long deliveryRequestId = 100L;

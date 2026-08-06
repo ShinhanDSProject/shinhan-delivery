@@ -33,7 +33,7 @@ class CourierStatusServiceTest {
 
   @Test
   @DisplayName("배송원이 ONLINE으로 출근 등록 시 vehicle.status가 AVAILABLE로 업데이트된다")
-  void updateWorkStatus_Online_Success() {
+  void updateWorkStatusOnlineSuccess() {
     // given
     Long memberId = 1L;
     Member courier = Member.builder().id(memberId).role(MemberRole.COURIER).build();
@@ -65,7 +65,7 @@ class CourierStatusServiceTest {
 
   @Test
   @DisplayName("일반 고객(CUSTOMER)이 출근 시도 시 ACCESS_DENIED 예외가 발생한다")
-  void updateWorkStatus_Customer_AccessDenied() {
+  void updateWorkStatusCustomerAccessDenied() {
     // given
     Long memberId = 2L;
     Member customer = Member.builder().id(memberId).role(MemberRole.CUSTOMER).build();

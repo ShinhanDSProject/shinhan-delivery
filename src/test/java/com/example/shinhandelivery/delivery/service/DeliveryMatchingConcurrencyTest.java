@@ -38,7 +38,7 @@ class DeliveryMatchingConcurrencyTest {
 
   @Test
   @DisplayName("1개의 주문에 10명의 배송원이 동시 수락 시도 시, 단 1명만 성공하고 9명은 409 Conflict 예외가 발생한다")
-  void catchDelivery_ConcurrencyTest_OptimisticLocking() throws InterruptedException {
+  void catchDeliveryConcurrencyTestOptimisticLocking() throws InterruptedException {
     // given: 고객 생성 및 1개의 대기 중인 주문 생성
     long time = System.currentTimeMillis();
     Member customer =
