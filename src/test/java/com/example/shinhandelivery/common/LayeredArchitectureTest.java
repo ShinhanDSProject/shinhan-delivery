@@ -44,4 +44,50 @@ class LayeredArchitectureTest {
         .resideInAnyPackage("..service..", "..controller..")
         .check(importedClasses);
   }
+
+  @Test
+  @DisplayName("도메인 서비스 계층은 다른 도메인의 Repository를 직접 참조하지 않고 해당 도메인의 Service를 거쳐야 한다.")
+  void domainServiceShouldNotDependOnOtherDomainRepository() {
+    noClasses()
+        .that()
+        .resideInAPackage("..delivery.service..")
+        .should()
+        .dependOnClassesThat()
+        .resideInAnyPackage(
+            "..member.repository..", "..vehicle.repository..", "..payment.repository..")
+        .allowEmptyShould(true)
+        .check(importedClasses);
+
+    noClasses()
+        .that()
+        .resideInAPackage("..payment.service..")
+        .should()
+        .dependOnClassesThat()
+        .resideInAnyPackage(
+            "..member.repository..", "..vehicle.repository..", "..delivery.repository..")
+        .allowEmptyShould(true)
+        .check(importedClasses);
+
+    noClasses()
+        .that()
+        .resideInAPackage("..vehicle.service..")
+        .should()
+        .dependOnClassesThat()
+        .resideInAnyPackage(
+            "..member.repository..", "..payment.repository..", "..delivery.repository..")
+        .allowEmptyShould(true)
+        .check(importedClasses);
+  }
+
+  @Test
+  @DisplayName("DTO 및 Entity 계층은 상위 Service나 Controller 계층을 참조하지 않아야 한다.")
+  void domainModelShouldNotDependOnUpperLayers() {
+    noClasses()
+        .that()
+        .resideInAnyPackage("..dto..", "..entity..")
+        .should()
+        .dependOnClassesThat()
+        .resideInAnyPackage("..service..", "..controller..")
+        .check(importedClasses);
+  }
 }
