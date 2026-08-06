@@ -135,7 +135,7 @@ com.company.delivery
 - `@Entity` + Lombok `@Getter` `@Setter` `@NoArgsConstructor`를 기본으로 사용한다.
 - 식별자는 `@Id @GeneratedValue(strategy = GenerationType.IDENTITY)`.
 - Enum 필드는 `@Enumerated(EnumType.STRING)` (`ORDINAL` 금지 — 순서 바뀌면 데이터가 깨짐).
-- **다른 도메인(테이블)을 참조하는 Entity는 참조 대상의 PK를 가리키는 FK 필드(`Long xxxId`)를 반드시 포함해야 한다** — 예: `Address.memberId`, `Vehicle.ownerId`. FK 없이 문자열/코드값 등으로 도메인 간 관계를 암묵적으로 표현하지 않는다.
+- **다른 도메인(테이블)을 참조하는 Entity는 참조 대상 엔티티 명칭 기반의 FK 필드(`Long xxxId`)를 통일되게 명명한다** — 예: `Address.memberId`, `Vehicle.memberId`, `DeliveryRequest.memberId`. 역할(Role) 표기 대신 참조 대상 엔티티 이름인 `memberId`(`member_id`)를 통일되게 사용하여 직관성과 일관성을 사수한다.
 - **연관관계는 FK 값(`Long memberId`)을 항상 유지한다.** 생성·수정은 오직 이 FK 필드로만 하며(정적 팩토리·`updateBy` 등), 다른 도메인을 참조하는 FK마다 읽기 전용 `@ManyToOne(fetch = FetchType.LAZY)` 객체 연관관계를 `@JoinColumn(name = "...", insertable = false, updatable = false)`로 함께 둔다. FK 필드가 쓰기의 유일한 진입점이고, 객체 연관관계는 조인 조회 전용 뷰다.
 - `@OneToMany` 컬렉션(부모 쪽에서 자식 목록을 들고 있는 방향)은 실제로 컬렉션 순회가 필요할 때만 추가한다 — 컬렉션은 캐스케이드·`orphanRemoval` 설정, N+1, 대량 데이터 시 메모리 문제까지 얽혀 있어 FK 하나당 `@ManyToOne` 하나를 추가하는 것보다 훨씬 신중해야 한다.
 
@@ -151,12 +151,12 @@ public class Vehicle {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column(name = "owner_id", nullable = false)
-  private Long ownerId; // Member의 FK, 쓰기는 이 필드로만
+  @Column(name = "member_id", nullable = false)
+  private Long memberId; // Member의 FK, 쓰기는 이 필드로만
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "owner_id", insertable = false, updatable = false)
-  private Member owner; // 조인 조회 전용 읽기 전용 뷰
+  @JoinColumn(name = "member_id", insertable = false, updatable = false)
+  private Member member; // 조인 조회 전용 읽기 전용 뷰
 
   @Enumerated(EnumType.STRING)
   private VehicleType type;

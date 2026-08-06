@@ -28,7 +28,7 @@ class TrackingServiceTest {
   @Test
   @DisplayName("차량 소유주는 그 차량의 오퍼 채널을 구독할 수 있다")
   void assertCanSubscribeToOffersOwnerShouldPass() {
-    Vehicle vehicle = Vehicle.builder().id(2L).ownerId(1L).build();
+    Vehicle vehicle = Vehicle.builder().id(2L).memberId(1L).build();
     when(vehicleService.getById(2L)).thenReturn(vehicle);
 
     trackingService.assertCanSubscribeToOffers(1L, 2L);
@@ -37,7 +37,7 @@ class TrackingServiceTest {
   @Test
   @DisplayName("차량 소유주가 아니면 오퍼 채널 구독 시 UnauthorizedOfferAccessException을 던진다")
   void assertCanSubscribeToOffersNonOwnerShouldThrowException() {
-    Vehicle vehicle = Vehicle.builder().id(2L).ownerId(1L).build();
+    Vehicle vehicle = Vehicle.builder().id(2L).memberId(1L).build();
     when(vehicleService.getById(2L)).thenReturn(vehicle);
 
     assertThatThrownBy(() -> trackingService.assertCanSubscribeToOffers(999L, 2L))

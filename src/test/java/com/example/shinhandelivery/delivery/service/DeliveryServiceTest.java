@@ -91,7 +91,7 @@ class DeliveryServiceTest {
 
     DeliveryRequest response = deliveryService.requestDelivery(1L, request);
 
-    assertThat(response.getCustomerId()).isEqualTo(1L);
+    assertThat(response.getMemberId()).isEqualTo(1L);
     assertThat(response.getFeePoint()).isEqualTo(78776L);
     assertThat(response.getStatus()).isEqualTo(DeliveryStatus.REQUESTED);
   }
@@ -111,7 +111,7 @@ class DeliveryServiceTest {
 
     when(deliveryRequestRepository.save(any(DeliveryRequest.class)))
         .thenAnswer(invocation -> invocation.getArgument(0));
-    Vehicle candidate = Vehicle.builder().id(2L).ownerId(20L).build();
+    Vehicle candidate = Vehicle.builder().id(2L).memberId(20L).build();
     when(vehicleService.findOfferCandidates(anyDouble(), anyDouble()))
         .thenReturn(List.of(candidate));
 
@@ -121,7 +121,7 @@ class DeliveryServiceTest {
         ArgumentCaptor.forClass(DeliveryOfferBroadcastEvent.class);
     verify(eventPublisher).publishEvent(eventCaptor.capture());
     assertThat(eventCaptor.getValue().candidateVehicleIds()).containsExactly(2L);
-    assertThat(eventCaptor.getValue().offer().customerId()).isEqualTo(1L);
+    assertThat(eventCaptor.getValue().offer().memberId()).isEqualTo(1L);
   }
 
   @Test
@@ -157,11 +157,11 @@ class DeliveryServiceTest {
 
     when(paymentService.usePoint(eq(1L), eq("idem-pay"), any()))
         .thenReturn(new PointUseResultResponse(2000L, 3000L, LocalDateTime.now()));
-    when(deliveryRequestRepository.findByCustomerIdAndPaymentIdempotencyKey(1L, "idem-pay"))
+    when(deliveryRequestRepository.findByMemberIdAndPaymentIdempotencyKey(1L, "idem-pay"))
         .thenReturn(Optional.empty());
     when(deliveryRequestRepository.save(any(DeliveryRequest.class)))
         .thenAnswer(invocation -> invocation.getArgument(0));
-    Vehicle candidate = Vehicle.builder().id(2L).ownerId(20L).build();
+    Vehicle candidate = Vehicle.builder().id(2L).memberId(20L).build();
     when(vehicleService.findOfferCandidates(anyDouble(), anyDouble()))
         .thenReturn(List.of(candidate));
 
@@ -172,7 +172,7 @@ class DeliveryServiceTest {
     verify(eventPublisher).publishEvent(eventCaptor.capture());
     assertThat(response.deliveryStatus()).isEqualTo(DeliveryStatus.REQUESTED);
     assertThat(eventCaptor.getValue().candidateVehicleIds()).containsExactly(2L);
-    assertThat(eventCaptor.getValue().offer().customerId()).isEqualTo(1L);
+    assertThat(eventCaptor.getValue().offer().memberId()).isEqualTo(1L);
   }
 
   @Test
@@ -231,13 +231,13 @@ class DeliveryServiceTest {
   @DisplayName("존재하는 배송 요청을 조회하면 DeliveryRequest를 반환한다")
   void getDeliveryRequestSuccess() {
     DeliveryRequest deliveryRequest = new DeliveryRequest();
-    deliveryRequest.setCustomerId(1L);
+    deliveryRequest.setMemberId(1L);
     deliveryRequest.setStatus(DeliveryStatus.REQUESTED);
     when(deliveryRequestRepository.findById(1L)).thenReturn(Optional.of(deliveryRequest));
 
     DeliveryRequest response = deliveryService.getDeliveryRequest(1L);
 
-    assertThat(response.getCustomerId()).isEqualTo(1L);
+    assertThat(response.getMemberId()).isEqualTo(1L);
   }
 
   @Test
@@ -475,7 +475,7 @@ class DeliveryServiceTest {
   void getProofPhotoSuccess() {
     LocalDateTime completedAt = LocalDateTime.of(2026, 7, 31, 10, 0);
     DeliveryRequest deliveryRequest = new DeliveryRequest();
-    deliveryRequest.setCustomerId(1L);
+    deliveryRequest.setMemberId(1L);
     deliveryRequest.setStatus(DeliveryStatus.COMPLETED);
     deliveryRequest.setProofPhotoUrl("https://example.com/proof.jpg");
     deliveryRequest.setCompletedAt(completedAt);
@@ -492,7 +492,7 @@ class DeliveryServiceTest {
   void getProofPhotoAssignedCourierSuccess() {
     LocalDateTime completedAt = LocalDateTime.of(2026, 7, 31, 10, 0);
     DeliveryRequest deliveryRequest = new DeliveryRequest();
-    deliveryRequest.setCustomerId(1L);
+    deliveryRequest.setMemberId(1L);
     deliveryRequest.setStatus(DeliveryStatus.COMPLETED);
     deliveryRequest.setProofPhotoUrl("https://example.com/proof.jpg");
     deliveryRequest.setCompletedAt(completedAt);
@@ -502,7 +502,7 @@ class DeliveryServiceTest {
     matching.setVehicleId(10L);
     when(matchingRepository.findByDeliveryRequestId(1L)).thenReturn(Optional.of(matching));
 
-    Vehicle vehicle = Vehicle.builder().id(10L).ownerId(20L).build();
+    Vehicle vehicle = Vehicle.builder().id(10L).memberId(20L).build();
     when(vehicleService.getById(10L)).thenReturn(vehicle);
 
     ProofPhotoResponse response = deliveryService.getProofPhoto(20L, 1L);
@@ -514,7 +514,7 @@ class DeliveryServiceTest {
   @DisplayName("고객 본인도 배정된 배송원도 아니면 DeliveryAccessDeniedException을 던진다")
   void getProofPhotoNonOwnerNonCourierShouldThrowException() {
     DeliveryRequest deliveryRequest = new DeliveryRequest();
-    deliveryRequest.setCustomerId(1L);
+    deliveryRequest.setMemberId(1L);
     deliveryRequest.setStatus(DeliveryStatus.COMPLETED);
     deliveryRequest.setProofPhotoUrl("https://example.com/proof.jpg");
     when(deliveryRequestRepository.findById(1L)).thenReturn(Optional.of(deliveryRequest));
@@ -527,7 +527,7 @@ class DeliveryServiceTest {
   @DisplayName("완료되지 않은 배송의 증거사진 조회 시 ProofPhotoNotFoundException을 던진다")
   void getProofPhotoNotCompletedShouldThrowException() {
     DeliveryRequest deliveryRequest = new DeliveryRequest();
-    deliveryRequest.setCustomerId(1L);
+    deliveryRequest.setMemberId(1L);
     deliveryRequest.setStatus(DeliveryStatus.MATCHED);
     when(deliveryRequestRepository.findById(1L)).thenReturn(Optional.of(deliveryRequest));
 
@@ -539,7 +539,7 @@ class DeliveryServiceTest {
   @DisplayName("완료된 배송이어도 증거사진 URL이 없으면 ProofPhotoNotFoundException을 던진다")
   void getProofPhotoMissingUrlShouldThrowException() {
     DeliveryRequest deliveryRequest = new DeliveryRequest();
-    deliveryRequest.setCustomerId(1L);
+    deliveryRequest.setMemberId(1L);
     deliveryRequest.setStatus(DeliveryStatus.COMPLETED);
     when(deliveryRequestRepository.findById(1L)).thenReturn(Optional.of(deliveryRequest));
 
@@ -553,7 +553,7 @@ class DeliveryServiceTest {
     Pageable pageable = PageRequest.of(0, 10);
     DeliveryRequest deliveryRequest = new DeliveryRequest();
     deliveryRequest.setStatus(DeliveryStatus.COMPLETED);
-    when(deliveryRequestRepository.findByCustomerIdOrderByCreatedAtDescIdDesc(1L, pageable))
+    when(deliveryRequestRepository.findByMemberIdOrderByCreatedAtDescIdDesc(1L, pageable))
         .thenReturn(new PageImpl<>(List.of(deliveryRequest)));
 
     Page<DeliveryRequest> result = deliveryService.getMyDeliveryRequests(1L, null, pageable);
@@ -561,14 +561,14 @@ class DeliveryServiceTest {
     assertThat(result.getContent()).hasSize(1);
     assertThat(result.getContent().get(0).getStatus()).isEqualTo(DeliveryStatus.COMPLETED);
     verify(deliveryRequestRepository, never())
-        .findByCustomerIdAndStatusOrderByCreatedAtDescIdDesc(any(), any(), any());
+        .findByMemberIdAndStatusOrderByCreatedAtDescIdDesc(any(), any(), any());
   }
 
   @Test
   @DisplayName("status가 있으면 그 상태로만 필터링해 조회한다")
   void getMyDeliveryRequestsWithStatusFiltersByStatus() {
     Pageable pageable = PageRequest.of(0, 10);
-    when(deliveryRequestRepository.findByCustomerIdAndStatusOrderByCreatedAtDescIdDesc(
+    when(deliveryRequestRepository.findByMemberIdAndStatusOrderByCreatedAtDescIdDesc(
             1L, DeliveryStatus.CANCELLED, pageable))
         .thenReturn(new PageImpl<>(List.of()));
 
@@ -577,14 +577,14 @@ class DeliveryServiceTest {
 
     assertThat(result.getContent()).isEmpty();
     verify(deliveryRequestRepository, never())
-        .findByCustomerIdOrderByCreatedAtDescIdDesc(any(), any());
+        .findByMemberIdOrderByCreatedAtDescIdDesc(any(), any());
   }
 
   @Test
   @DisplayName("고객 본인이 조회하고 매칭된 배송원이 있으면 상세조회에 배송원 이름이 담긴다")
   void getDeliveryRequestDetailWithCourierIncludesCourierName() {
     DeliveryRequest deliveryRequest = new DeliveryRequest();
-    deliveryRequest.setCustomerId(1L);
+    deliveryRequest.setMemberId(1L);
     deliveryRequest.setStatus(DeliveryStatus.MATCHED);
     when(deliveryRequestRepository.findById(1L)).thenReturn(Optional.of(deliveryRequest));
 
@@ -592,7 +592,7 @@ class DeliveryServiceTest {
     matching.setVehicleId(10L);
     when(matchingRepository.findByDeliveryRequestId(1L)).thenReturn(Optional.of(matching));
 
-    Vehicle vehicle = Vehicle.builder().id(10L).ownerId(20L).build();
+    Vehicle vehicle = Vehicle.builder().id(10L).memberId(20L).build();
     when(vehicleService.getById(10L)).thenReturn(vehicle);
 
     Member courier = new Member();
@@ -608,7 +608,7 @@ class DeliveryServiceTest {
   @DisplayName("고객 본인이 조회하고 매칭된 배송원이 없으면 상세조회의 배송원 이름은 null이다")
   void getDeliveryRequestDetailWithoutCourierHasNullCourierName() {
     DeliveryRequest deliveryRequest = new DeliveryRequest();
-    deliveryRequest.setCustomerId(1L);
+    deliveryRequest.setMemberId(1L);
     deliveryRequest.setStatus(DeliveryStatus.REQUESTED);
     when(deliveryRequestRepository.findById(1L)).thenReturn(Optional.of(deliveryRequest));
     when(matchingRepository.findByDeliveryRequestId(1L)).thenReturn(Optional.empty());
@@ -622,7 +622,7 @@ class DeliveryServiceTest {
   @DisplayName("배정된 배송원 본인이 조회하면 상세조회가 허용된다")
   void getDeliveryRequestDetailAssignedCourierCanView() {
     DeliveryRequest deliveryRequest = new DeliveryRequest();
-    deliveryRequest.setCustomerId(1L);
+    deliveryRequest.setMemberId(1L);
     deliveryRequest.setStatus(DeliveryStatus.MATCHED);
     when(deliveryRequestRepository.findById(1L)).thenReturn(Optional.of(deliveryRequest));
 
@@ -630,7 +630,7 @@ class DeliveryServiceTest {
     matching.setVehicleId(10L);
     when(matchingRepository.findByDeliveryRequestId(1L)).thenReturn(Optional.of(matching));
 
-    Vehicle vehicle = Vehicle.builder().id(10L).ownerId(20L).build();
+    Vehicle vehicle = Vehicle.builder().id(10L).memberId(20L).build();
     when(vehicleService.getById(10L)).thenReturn(vehicle);
 
     Member courier = new Member();
@@ -646,7 +646,7 @@ class DeliveryServiceTest {
   @DisplayName("고객 본인도 배정된 배송원도 아니면 DeliveryAccessDeniedException을 던진다")
   void getDeliveryRequestDetailNonOwnerNonCourierShouldThrowException() {
     DeliveryRequest deliveryRequest = new DeliveryRequest();
-    deliveryRequest.setCustomerId(1L);
+    deliveryRequest.setMemberId(1L);
     deliveryRequest.setStatus(DeliveryStatus.REQUESTED);
     when(deliveryRequestRepository.findById(1L)).thenReturn(Optional.of(deliveryRequest));
     when(matchingRepository.findByDeliveryRequestId(1L)).thenReturn(Optional.empty());

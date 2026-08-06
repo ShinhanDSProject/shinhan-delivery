@@ -33,8 +33,8 @@ metadata:
 ```mermaid
 erDiagram
     MEMBER ||--o{ ADDRESS : "memberId"
-    MEMBER ||--o{ VEHICLE : "ownerId"
-    MEMBER ||--o{ DELIVERY_REQUEST : "customerId"
+    MEMBER ||--o{ VEHICLE : "memberId"
+    MEMBER ||--o{ DELIVERY_REQUEST : "memberId"
     MEMBER ||--o{ NOTIFICATION : "memberId"
     MEMBER ||--o{ POINT_HISTORY : "memberId"
     MEMBER ||--|| POINT_WALLET : "memberId"
@@ -64,7 +64,7 @@ erDiagram
 
     VEHICLE {
         Long id PK
-        Long ownerId FK
+        Long memberId FK
         VehicleType type "MOTORCYCLE, DRONE, CAR"
         double maxWeight
         double maxDistance
@@ -75,7 +75,7 @@ erDiagram
 
     DELIVERY_REQUEST {
         Long id PK
-        Long customerId FK
+        Long memberId FK
         String pickupAddress
         String dropoffAddress
         double weight

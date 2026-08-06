@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 /** 배송 요청 상세 조회 응답 DTO. 목록용 {@link DeliveryListResponseDto}와 달리 배송원 이름·차량 종류·증거사진·타임라인 시각까지 포함한다. */
 public record DeliveryDetailResponseDto(
     Long id,
-    Long customerId,
+    Long memberId,
     String pickupAddress,
     String dropoffAddress,
     double weight,
@@ -40,7 +40,7 @@ public record DeliveryDetailResponseDto(
       VehicleType vehicleType) {
     return new DeliveryDetailResponseDto(
         entity.getId(),
-        entity.getCustomerId(),
+        entity.getMemberId(),
         entity.getPickupAddress(),
         entity.getDropoffAddress(),
         entity.getWeight(),

@@ -7,7 +7,7 @@ import com.example.shinhandelivery.delivery.entity.ItemSize;
 /** 배송 요청 응답 DTO. */
 public record DeliveryResponse(
     Long id,
-    Long customerId,
+    Long memberId,
     String pickupAddress,
     String dropoffAddress,
     double weight,
@@ -24,7 +24,7 @@ public record DeliveryResponse(
   public static DeliveryResponse from(DeliveryRequest entity) {
     return new DeliveryResponse(
         entity.getId(),
-        entity.getCustomerId(),
+        entity.getMemberId(),
         entity.getPickupAddress(),
         entity.getDropoffAddress(),
         entity.getWeight(),

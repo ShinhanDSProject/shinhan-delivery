@@ -24,7 +24,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-/** 배송 요청 엔티티. customer_id는 Member를 가리키는 FK 값이다. */
+/** 배송 요청 엔티티. member_id는 Member를 가리키는 FK 값이다. */
 @Entity
 @Getter
 @Setter
@@ -38,12 +38,12 @@ public class DeliveryRequest {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column(name = "customer_id", nullable = false)
-  private Long customerId;
+  @Column(name = "member_id", nullable = false)
+  private Long memberId;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "customer_id", insertable = false, updatable = false)
-  private Member customer;
+  @JoinColumn(name = "member_id", insertable = false, updatable = false)
+  private Member member;
 
   @Column(name = "pickup_address", nullable = false, length = 255)
   private String pickupAddress;
@@ -98,7 +98,7 @@ public class DeliveryRequest {
 
   /** DeliveryCreateRequest DTO 수용 기반으로 REQUESTED 상태의 DeliveryRequest 엔티티를 생성하는 정적 팩토리 메서드. */
   public static DeliveryRequest of(
-      Long customerId, DeliveryCreateRequest request, double distanceKm, long feePoint) {
+      Long memberId, DeliveryCreateRequest request, double distanceKm, long feePoint) {
     if (request.getWeight() <= 0) {
       throw new InvalidDeliveryWeightException(request.getWeight());
     }
@@ -107,7 +107,7 @@ public class DeliveryRequest {
     }
 
     return DeliveryRequest.builder()
-        .customerId(customerId)
+        .memberId(memberId)
         .pickupAddress(request.getPickupAddress())
         .dropoffAddress(request.getDropoffAddress())
         .weight(request.getWeight())

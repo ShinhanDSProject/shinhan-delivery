@@ -25,7 +25,7 @@ public class VehicleService {
   /** 소유자(Member) 존재 여부와 무게/거리 유효성을 검증한 뒤 Vehicle을 등록한다 (Entity 리턴). */
   @Transactional
   public Vehicle create(VehicleCreateRequest request) {
-    memberService.getById(request.getOwnerId());
+    memberService.getById(request.getMemberId());
     return vehicleRepository.save(Vehicle.from(request));
   }
 

@@ -155,13 +155,13 @@ public class MemberService {
   @Transactional
   public void delete(Long memberId) {
     Member member = findMemberOrThrow(memberId);
-    vehicleRepository.findAllByOwnerId(memberId).forEach(vehicleRepository::delete);
+    vehicleRepository.findAllByMemberId(memberId).forEach(vehicleRepository::delete);
     memberRepository.delete(member);
   }
 
   private Vehicle createDefaultVehicle(Long ownerId, MemberCreateRequest request) {
     return Vehicle.builder()
-        .ownerId(ownerId)
+        .memberId(ownerId)
         .type(request.getVehicleType())
         .maxWeight(resolveMaxWeight(request.getPreferredWeight()))
         .maxDistance(resolveMaxDistance(request.getVehicleType()))

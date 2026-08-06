@@ -239,7 +239,7 @@ class DeliveryControllerTest {
     request.setProofPhotoUrl("https://example.com/proof.jpg");
 
     DeliveryRequest completedEntity = new DeliveryRequest();
-    completedEntity.setCustomerId(1L);
+    completedEntity.setMemberId(1L);
     completedEntity.setStatus(DeliveryStatus.COMPLETED);
     completedEntity.setFeePoint(78776L);
     completedEntity.setItemSize(ItemSize.MEDIUM);
@@ -304,7 +304,7 @@ class DeliveryControllerTest {
   @DisplayName("픽업 완료 요청을 받으면 PICKED_UP 상태의 배송 요청을 반환한다")
   void confirmPickupProcessRequest() throws Exception {
     DeliveryRequest pickedUpEntity = new DeliveryRequest();
-    pickedUpEntity.setCustomerId(1L);
+    pickedUpEntity.setMemberId(1L);
     pickedUpEntity.setStatus(DeliveryStatus.PICKED_UP);
     pickedUpEntity.setFeePoint(78776L);
     pickedUpEntity.setItemSize(ItemSize.MEDIUM);

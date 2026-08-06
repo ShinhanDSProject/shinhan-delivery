@@ -28,13 +28,12 @@ public interface DeliveryRequestRepository extends JpaRepository<DeliveryRequest
    * 로그인 회원 본인의 배송 요청을 최신순으로 페이징 조회한다(배송 내역 목록용). created_at이 동률(백필된 레거시 행 등)이어도 페이징이 흔들리지 않도록 id를
    * 2차 정렬 기준으로 사용한다.
    */
-  Page<DeliveryRequest> findByCustomerIdOrderByCreatedAtDescIdDesc(
-      Long customerId, Pageable pageable);
+  Page<DeliveryRequest> findByMemberIdOrderByCreatedAtDescIdDesc(Long memberId, Pageable pageable);
 
   /** 로그인 회원 본인의 특정 상태 배송 요청만 최신순(id 2차 정렬 포함)으로 페이징 조회한다. */
-  Page<DeliveryRequest> findByCustomerIdAndStatusOrderByCreatedAtDescIdDesc(
-      Long customerId, DeliveryStatus status, Pageable pageable);
+  Page<DeliveryRequest> findByMemberIdAndStatusOrderByCreatedAtDescIdDesc(
+      Long memberId, DeliveryStatus status, Pageable pageable);
 
-  Optional<DeliveryRequest> findByCustomerIdAndPaymentIdempotencyKey(
-      Long customerId, String paymentIdempotencyKey);
+  Optional<DeliveryRequest> findByMemberIdAndPaymentIdempotencyKey(
+      Long memberId, String paymentIdempotencyKey);
 }
