@@ -190,6 +190,7 @@
   }
 
   async function deleteNotice() {
+    elements.confirmDeleteButton.disabled = true;
     try {
       await parseResponse(await fetch(`${API_PATH}/${state.selected.id}`, {
         method: "DELETE",
@@ -202,6 +203,8 @@
     } catch (error) {
       elements.deleteDialog.close();
       showStatus(error.message);
+    } finally {
+      elements.confirmDeleteButton.disabled = false;
     }
   }
 
