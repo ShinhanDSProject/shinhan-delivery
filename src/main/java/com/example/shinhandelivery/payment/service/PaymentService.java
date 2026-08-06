@@ -1,22 +1,26 @@
 package com.example.shinhandelivery.payment.service;
 
+import com.example.shinhandelivery.common.exception.BusinessException;
 import com.example.shinhandelivery.common.exception.EntityNotFoundException;
 import com.example.shinhandelivery.common.exception.ErrorCode;
+import com.example.shinhandelivery.member.entity.Member;
 import com.example.shinhandelivery.member.service.MemberService;
+import com.example.shinhandelivery.payment.dto.request.PinVerifyRequestDto;
 import com.example.shinhandelivery.payment.dto.request.PointChargeRequest;
 import com.example.shinhandelivery.payment.dto.request.PointUseRequest;
 import com.example.shinhandelivery.payment.dto.request.PointWalletCreateRequest;
+import com.example.shinhandelivery.payment.dto.response.PinVerifyResponseDto;
 import com.example.shinhandelivery.payment.dto.response.PointBalanceResponse;
 import com.example.shinhandelivery.payment.dto.response.PointUseResultResponse;
 import com.example.shinhandelivery.payment.entity.PointHistory;
 import com.example.shinhandelivery.payment.entity.PointHistoryType;
 import com.example.shinhandelivery.payment.entity.PointWallet;
-import com.example.shinhandelivery.payment.exception.InsufficientPointException;
 import com.example.shinhandelivery.payment.repository.PaymentRepository;
 import com.example.shinhandelivery.payment.repository.PointHistoryRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +32,7 @@ public class PaymentService {
   private final PaymentRepository paymentRepository;
   private final MemberService memberService;
   private final PointHistoryRepository pointHistoryRepository;
+  private final PasswordEncoder passwordEncoder;
 
   @Transactional
   public PointWallet create(PointWalletCreateRequest request) {
@@ -43,6 +48,26 @@ public class PaymentService {
   @Transactional(readOnly = true)
   public List<PointWallet> list() {
     return paymentRepository.findAll();
+  }
+
+  @Transactional(noRollbackFor = BusinessException.class)
+  public PinVerifyResponseDto verifyPin(Long memberId, PinVerifyRequestDto request) {
+    Member member = memberService.getByIdForUpdate(memberId);
+    if (member.isPinLocked()) {
+      throw new BusinessException(ErrorCode.PIN_LOCKED);
+    }
+
+    if (member.getPinHash() == null
+        || !passwordEncoder.matches(request.getPin(), member.getPinHash())) {
+      member.recordPinFailure();
+      if (member.isPinLocked()) {
+        throw new BusinessException(ErrorCode.PIN_LOCKED);
+      }
+      return new PinVerifyResponseDto(false);
+    }
+
+    member.resetPinFailures();
+    return new PinVerifyResponseDto(true);
   }
 
   @Transactional
@@ -99,12 +124,7 @@ public class PaymentService {
           existing.getBalanceAfter(), existing.getAmount(), existing.getCreatedAt());
     }
 
-    PointWallet wallet = findWalletByMemberForUpdateOrThrow(memberId);
-    if (wallet.getBalance() < request.getAmount()) {
-      throw new InsufficientPointException(wallet.getId(), request.getAmount());
-    }
-
-    wallet.setBalance(wallet.getBalance() - request.getAmount());
+    PointWallet wallet = findWalletByMemberForUpdateOrThrow(memberId).use(request.getAmount());
     LocalDateTime paidAt = LocalDateTime.now();
     pointHistoryRepository.save(
         PointHistory.builder()

@@ -27,6 +27,7 @@ import com.example.shinhandelivery.delivery.exception.InvalidDeliveryTransitionE
 import com.example.shinhandelivery.delivery.exception.ProofPhotoNotFoundException;
 import com.example.shinhandelivery.delivery.service.DeliveryMatchingService;
 import com.example.shinhandelivery.delivery.service.DeliveryService;
+import com.example.shinhandelivery.member.service.MemberService;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import org.junit.jupiter.api.AfterEach;
@@ -115,6 +116,7 @@ class DeliveryControllerTest {
         .andExpect(jsonPath("$.remainingBalance").value(5000L))
         .andExpect(jsonPath("$.deliveryStatus").value("REQUESTED"));
 
+    verify(memberService).requirePaymentPinConfigured(1L);
     ArgumentCaptor<DeliveryPayRequest> requestCaptor =
         ArgumentCaptor.forClass(DeliveryPayRequest.class);
     verify(deliveryService).payDelivery(eq(1L), eq("idem-pay"), requestCaptor.capture());
@@ -238,7 +240,7 @@ class DeliveryControllerTest {
     request.setProofPhotoUrl("https://example.com/proof.jpg");
 
     DeliveryRequest completedEntity = new DeliveryRequest();
-    completedEntity.setCustomerId(1L);
+    completedEntity.setMemberId(1L);
     completedEntity.setStatus(DeliveryStatus.COMPLETED);
     completedEntity.setFeePoint(78776L);
     completedEntity.setItemSize(ItemSize.MEDIUM);
@@ -303,7 +305,7 @@ class DeliveryControllerTest {
   @DisplayName("픽업 완료 요청을 받으면 PICKED_UP 상태의 배송 요청을 반환한다")
   void confirmPickupProcessRequest() throws Exception {
     DeliveryRequest pickedUpEntity = new DeliveryRequest();
-    pickedUpEntity.setCustomerId(1L);
+    pickedUpEntity.setMemberId(1L);
     pickedUpEntity.setStatus(DeliveryStatus.PICKED_UP);
     pickedUpEntity.setFeePoint(78776L);
     pickedUpEntity.setItemSize(ItemSize.MEDIUM);
@@ -344,6 +346,8 @@ class DeliveryControllerTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.proofPhotoUrl").value("https://example.com/proof.jpg"))
         .andExpect(jsonPath("$.completedAt").exists());
+
+    verify(memberService).requirePaymentPinConfigured(1L);
   }
 
   @Test

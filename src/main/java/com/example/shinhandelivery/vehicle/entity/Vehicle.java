@@ -1,5 +1,6 @@
 package com.example.shinhandelivery.vehicle.entity;
 
+import com.example.shinhandelivery.member.entity.Member;
 import com.example.shinhandelivery.vehicle.dto.request.VehicleCreateRequest;
 import com.example.shinhandelivery.vehicle.dto.request.VehicleUpdateRequest;
 import com.example.shinhandelivery.vehicle.exception.InvalidWeightException;
@@ -8,9 +9,12 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,7 +22,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-/** 배송 운송수단(드론/오토바이/차량) 엔티티. owner_id는 Member를 가리키는 FK 값이다. */
+/** 배송 운송수단(드론/오토바이/차량) 엔티티. member_id는 Member를 가리키는 FK 값이다. */
 @Entity
 @Getter
 @Setter
@@ -32,8 +36,12 @@ public class Vehicle {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column(name = "owner_id", nullable = false)
-  private Long ownerId;
+  @Column(name = "member_id", nullable = false)
+  private Long memberId;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "member_id", insertable = false, updatable = false)
+  private Member member;
 
   @Enumerated(EnumType.STRING)
   @Column(nullable = false, length = 20)
@@ -59,7 +67,7 @@ public class Vehicle {
   public static Vehicle from(VehicleCreateRequest request) {
     Vehicle vehicle =
         Vehicle.builder()
-            .ownerId(request.getOwnerId())
+            .memberId(request.getMemberId())
             .type(request.getType())
             .maxWeight(request.getMaxWeight())
             .maxDistance(request.getMaxDistance())

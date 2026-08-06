@@ -40,6 +40,7 @@ metadata:
 | 지식 영역 (Knowledge Domain) | 단일 원본 문서 (Single Primary Owner) | 파생 참조 문서 (Referencing Docs) |
 | :--- | :--- | :--- |
 | **코딩 규약 & 아키텍처 규칙** | [`code-convention.md`](../code-convention.md) | `AGENTS.md`, `harness-decision-framework.md` |
+| **데이터베이스 ERD & 테이블 연관관계도** | [`docs/erd.md`](./erd.md) | `code-convention.md` |
 | **AI 에이전트 작업 8대 원칙** | [`AGENTS.md`](../AGENTS.md) | `README.md`, `code-convention.md` |
 | **아키텍처 의사결정 기록 (ADR)** | [`docs/adr/README.md`](./adr/README.md) | `docs/security-jwt-guide.md`, `README.md` |
 | **PR 리뷰 & 인라인 댓글 작성 규격** | [`docs/pr-review-guide.md`](./pr-review-guide.md) | `code-convention.md`, `AGENTS.md` |

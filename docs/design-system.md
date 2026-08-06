@@ -243,8 +243,6 @@
 
 ## 4. Typography System (타이포그래피)
 
-## 4. Typography System (타이포그래피)
-
 ---
 
 ### Display / Header
@@ -476,24 +474,102 @@
 
 ## 6. Button Components (버튼 컴포넌트)
 
-```html
-<!-- Primary 버튼 -->
-<button class="btn btn-primary">확인</button>
+---
 
-<!-- 소셜 로그인 버튼 세트 -->
-<button class="btn btn-kakao">카카오로 시작하기</button>
-<button class="btn btn-naver">네이버로 시작하기</button>
-<button class="btn btn-apple">Apple로 로그인</button>
-<button class="btn btn-google">Google로 로그인</button>
+### Primary 버튼 (메인 CTA)
 
-<!-- 위험/취소 버튼 -->
-<button class="btn btn-danger">삭제하기</button>
-<button class="btn btn-cancel">취소</button>
-```
+| Class | 텍스트 예시 | 크기 | Radius | 배경색 | 설명 |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| `.btn-primary` | "다음으로", "다음" | 350 × 60 | 15px | `#2C88FF` | 메인 액션 버튼 (하단 고정) |
+| `.btn-primary-confirm` | "확인", "선택 완료" | 350 × 60 | 15px | `#2C88FF` | 확인/완료 버튼 |
+| `.btn-primary-save` | "저장하기" | 350 × 60 | 15px | `#2C88FF` | 저장 버튼 |
+| `.btn-primary-submit` | "출금 신청" | 350 × 60 | 15px | `#2C88FF` | 제출/신청 버튼 |
+
+---
+
+### 소셜 로그인 버튼
+
+| Class | 텍스트 예시 | 크기 | Radius | 배경색 | 설명 |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| `.btn-kakao` | "카카오 시작하기" | 350 × 60 | 15px | `#F7E600` | 카카오 로그인 |
+| `.btn-naver` | "NAVER 시작하기" | 350 × 60 | 15px | `#03C75A` | 네이버 로그인 |
+| `.btn-apple` | "Apple 시작하기" | 350 × 60 | 15px | `#333333` | 애플 로그인 |
+| `.btn-google` | "Google 시작하기" | 350 × 60 | 15px | `#F0F0F0` | 구글 로그인 |
+
+---
+
+### Secondary 버튼 (보조)
+
+| Class | 텍스트 예시 | 크기 | Radius | 배경색 | 설명 |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| `.btn-secondary` | "충전하기" | 324 × 41 | 10px | `#FFFFFF` | 보조 액션 버튼 (외곽선) |
+| `.btn-secondary-sm` | "전화하기", "메시지" | 156 × 41 | 10px | 투명 | 반반 분할 보조 버튼 |
+| `.btn-add` | "새 주소 추가" | 372 × 50 | 12px | `#FFFFFF` | 추가 버튼 (외곽선) |
+| `.btn-action` | "인증번호 발송" | 113 × 52 | 12px | `#EBF3FF` | 인라인 액션 버튼 (입력 필드 옆) |
+
+---
+
+### 모달/다이얼로그 버튼
+
+| Class | 텍스트 예시 | 크기 | Radius | 배경색 | 설명 |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| `.btn-modal-confirm` | "충전하기" | 146 × 50 | 12px | `#2C88FF` | 모달 확인 버튼 |
+| `.btn-modal-cancel` | "취소" | 146 × 50 | 12px | 투명 | 모달 취소 버튼 |
+
+---
+
+### 어드민 버튼
+
+| Class | 텍스트 예시 | 크기 | Radius | 배경색 | 설명 |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| `.btn-approve` | "승인" | 148 × 41 | 8px | `#2C88FF` | 승인 버튼 |
+| `.btn-reject` | "반려" | 148 × 41 | 8px | `#FFFFFF` | 반려 버튼 (외곽선) |
+| `.btn-edit` | "수정" | 39 × 23 | 4px | 투명 | 테이블 수정 버튼 |
+| `.btn-delete` | "삭제" | 39 × 23 | 4px | `#FFEBEE` | 테이블 삭제 버튼 |
+| `.btn-toolbar` | (아이콘) | 26 × 26 | 4px | `#E0E0E0` | 툴바 아이콘 버튼 |
+
+---
+
+### 빠른 금액 선택 버튼
+
+| Class | 텍스트 예시 | 크기 | Radius | 배경색 | 설명 |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| `.btn-quick` | "+ 5만", "+ 10만" | 119 × 44 | 12px | `#FFFFFF` | 금액 빠른 입력 (비활성) |
+| `.btn-quick-active` | "전액 입력" | 119 × 44 | 12px | `#2C88FF` | 금액 빠른 입력 (활성) |
+
+---
+
+### 아이콘 버튼 (원형)
+
+| Class | 텍스트 예시 | 크기 | Radius | 배경색 | 설명 |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| `.btn-icon-lg` | (뒤로가기 화살표) | 36 × 36 | 18px | 투명 | 뒤로가기 버튼 (큰) |
+| `.btn-icon-md` | (뒤로가기 화살표) | 32 × 32 | 100% | `#000000` | 뒤로가기 버튼 (중간) |
+| `.btn-icon-send` | (전송 아이콘) | 44 × 44 | 22px | `#2C88FF` | 채팅 전송 버튼 |
+
+---
+
+### 버튼 공통 스펙 요약
+
+| 항목 | 값 |
+| :--- | :--- |
+| **기본 CTA 크기** | 350 × 60px |
+| **보조 버튼 크기** | 324 × 41px 또는 156 × 41px |
+| **모달 버튼 크기** | 146 × 50px |
+| **어드민 버튼 크기** | 148 × 41px |
+| **기본 Radius** | 15px (CTA) / 12px (보조) / 8px (어드민) / 4px (테이블) |
+| **Primary 배경색** | `#2C88FF` |
+| **버튼 내부 여백** | 상하 16px, 좌우 24px |
+| **버튼 간 간격** | 20px |
+
 
 ---
 
 ## 7. Form & Input Components (입력창 컴포넌트)
+
+---
+
+### 기본 텍스트 입력 필드
 
 ```html
 <div class="input-group">
@@ -509,9 +585,285 @@
 </div>
 ```
 
+| 속성 | 값 |
+| :--- | :--- |
+| **기본 CTA 크기** | 364 × 52px |
+| **Radius** | 12px |
+| **Border** | #E2E8F0 (1px) |
+| **배경** | 투명 |
+| **Placeholder 색상** | #94A3B8 |
+| **Label → Input 간격** | 12px |
+
 ---
 
-## 8. Card & Badge Components (카드 및 배치)
+### 주소 입력 필드 (배송용)
+
+```html
+<!-- 출발지 -->
+<div class="input-group">
+  <label class="input-label">출발지</label>
+  <input type="text" class="input-field-filled" value="서울 강남구 테헤란로 123 (내 위치)">
+</div>
+
+<!-- 도착지 검색 -->
+<div class="input-group">
+  <label class="input-label">도착지</label>
+  <input type="text" class="input-field-filled" placeholder="도착지 주소를 검색하세요">
+</div>
+
+<!-- 상세 안내 -->
+<div class="input-group">
+  <label class="input-label">상세 안내</label>
+  <input type="text" class="input-field-white" placeholder="예: 공동현관 #1004 문 앞 고양이 서랍장 위">
+</div>
+```
+
+| 속성 | 값 |
+| :--- | :--- |
+| **기본 CTA 크기** | 380 × 52px |
+| **Radius** | 16px |
+| **Border** | 없음 |
+| **배경** | #F8F8F8 (filled) / #FFFFFF (white) |
+
+---
+### 인증 버튼 포함 입력 필드
+
+```html
+<div class="input-group">
+  <label class="input-label">휴대폰 번호</label>
+  <div class="input-with-action">
+    <input type="tel" class="input-field">
+    <button class="btn-action">인증번호 발송</button>
+  </div>
+</div>
+```
+
+| 속성 | 값 |
+| :--- | :--- |
+| **기본 CTA 크기** | 113 × 52px |
+| **버튼 Radius** | 12px |
+| **Border** | 없음 |
+| **버튼 배경** | #EBF3FF |
+
+---
+
+### 드롭다운 (Select)
+
+```html
+<div class="input-group">
+  <label class="input-label">운송 수단 선택</label>
+  <div class="dropdown-trigger">
+    <span>오토바이 (이륜차)</span>
+    <span class="dropdown-arrow">▼</span>
+  </div>
+</div>
+```
+
+| 속성 | 값 |
+| :--- | :--- |
+| **기본 CTA 크기** | 364 × 52px |
+| **버튼 Radius** | 12px |
+| **Border** | #E2E8F0 (1px) |
+
+---
+
+### 검색 바
+
+```html
+<!-- 모바일 -->
+<div class="search-bar">
+  <span class="search-icon">🔍</span>
+  <input type="text" class="search-input" placeholder="도착지 주소를 검색하세요">
+</div>
+
+<!-- 어드민 -->
+<div class="search-bar-admin">
+  <input type="text" class="search-input-admin" placeholder="이름, 이메일로 검색...">
+</div>
+
+<!-- 어드민 필터 드롭다운 -->
+<div class="filter-dropdown">
+  <span>전체 보기</span>
+  <span class="dropdown-arrow">▼</span>
+</div>
+```
+
+| 속성 | 모바일 | 어드민 |
+| :--- | :--- | :--- |
+| **크기** | 380px x 52px | 320px x 40px |
+| **Radius** | 16px | 8px |
+| **Border** | 없음 | #EBEBEB (1px) |
+| **배경** | #F8F8F8 | #FFFFFF |
+
+---
+
+### 선택 칩 (Chip)
+
+```html
+<!-- 중량 선택 -->
+<div class="chip-group">
+  <span class="chip">5kg</span>
+  <span class="chip">10kg</span>
+  <span class="chip chip-selected">15kg</span>
+  <span class="chip">20kg</span>
+</div>
+
+<!-- 사이즈 탭 -->
+<div class="size-tabs">
+  <span class="size-tab">소형</span>
+  <span class="size-tab size-tab-selected">중형 (기내 캐리어급)</span>
+  <span class="size-tab">대형</span>
+</div>
+```
+
+| 속성 | 비활성 | 활성 |
+| :--- | :--- | :--- |
+| **높이** | 36px | 36px |
+| **Radius** | pill (100%) | pill (100%) |
+| **배경** | #F8F8F8 | #2C88FF |
+| **텍스트** | #555555 | #FFFFFF |
+
+---
+
+### 라디오 버튼
+
+```html
+<div class="radio-group">
+  <label class="radio-item">
+    <input type="radio" name="method" class="radio-button" checked>
+    <span>신용카드</span>
+  </label>
+  <label class="radio-item">
+    <input type="radio" name="method" class="radio-button">
+    <span>포인트 결제</span>
+  </label>
+</div>
+```
+
+| 속성 | 값 |
+| :--- | :--- |
+| **기본 CTA 크기** | 22 × 22px |
+| **Radius** | 100% (원형) |
+| **선택 시 Border** | #2C88FF |
+
+---
+
+### 체크박스
+
+```html
+<label class="checkbox-item">
+  <input type="checkbox" class="checkbox" checked>
+  <span>오전 시간대</span>
+</label>
+```
+
+| 속성 | 값 |
+| :--- | :--- |
+| **기본 CTA 크기** | 24 × 24px |
+| **Radius** | 12px (원형) |
+| **선택 시 배경** | #2C88FF |
+
+---
+
+### 토글 스위치
+
+```html
+<div class="toggle toggle-on">
+  <div class="toggle-knob"></div>
+</div>
+
+<!-- 온라인 상태 토글 -->
+<div class="toggle-status">
+  <div class="toggle toggle-on"></div>
+  <span>온라인</span>
+</div>
+```
+
+| 속성 | 값 |
+| :--- | :--- |
+| **기본 CTA 크기** | 52 × 28px |
+| **Radius** | 16px |
+| **활성 배경** | #4A90FF |
+
+---
+
+### 폼 레이아웃 요약
+
+| 항목 | 값 |
+| :--- | :--- |
+| **Label -> input 간격** | 12px |
+| **input -> input 간격** | 16px |
+| **기본 input 크기** | 364 x 52px |
+| **배송 input 크기** | 380 x 52px |
+| **기본 input Radius** | 12px |
+| **배송 input Radius** | 16px |
+| **기본 Border 색상** | #E2E8F0 |
+| **기본 Border 색상** | #EF4444 |
+| **Placeholder 색상** | #94A3B8 |
+
+---
+
+## 8. Card & Badge Components (카드 및 배지)
+
+---
+
+# Card (카드)
+
+### 역할 선택 카드 (온보딩)
+
+```html
+<!-- 고객 카드 (활성) -->
+<div class="card-role card-role-active">
+  <div class="card-icon-box"><img src="customer-icon.svg"></div>
+  <div class="card-info">
+    <h3>개인 고객</h3>
+    <p>물품을 보내고 싶어요</p>
+  </div>
+</div>
+
+<!-- 배송파트너 카드 (비활성) -->
+<div class="card-role card-role-default">
+  <div class="card-icon-box"><img src="courier-icon.svg"></div>
+  <div class="card-info">
+    <h3>배송파트너</h3>
+    <p>물품을 배달하고 싶어요</p>
+  </div>
+</div>
+```
+
+| 속성 | 비활성 | 활성 |
+| :--- | :--- | :--- |
+| **크기** | 360px x 220px | 360px x 220px |
+| **Radius** | 30px | 30px |
+| **배경** | #FFFFFF | #2C88FF |
+| **Border** | #DBDBDB | #2C88FF |
+| **Padding** | 24px | 24px |
+| **아이콘 박스** | 100 x 100px, radius 20px | 100 × 100px, radius 20px, 배경 #FFFFFF |
+
+---
+
+### 알림 카드
+
+```html
+<div class="card-noti">
+  <span class="noti-title">배송원 배차가 완료되었습니다.</span>
+  <span class="noti-desc">강남구 역삼동 → 서초구 반포동</span>
+  <span class="noti-time">2분 전</span>
+</div>
+```
+
+| 속성 | 값 |
+| :--- | :--- |
+| **기본 CTA 크기** | 364 x 95~113px |
+| **Radius** | 16px |
+| **배경** | #FFFFFF |
+| **Border** | #4A90FF |
+| **Padding** | #E2E8F0 (1px) |
+| **Item Spacing** | 8px |
+
+---
+
+### 배송 요청 카드
 
 ```html
 <div class="card-box">
@@ -521,25 +873,408 @@
 </div>
 ```
 
+| 속성 | New booking | Matching Wait |
+| :--- | :--- | :--- |
+| **크기** | 360px x 120px | 360px x 123px |
+| **Radius** | 20px | 20px |
+| **배경** | #FFFFFF | #FFFFFF |
+| **Border** | #E2E8F0 | #E2E8F0 |
+| **Padding** | 24px | 24px |
+| **Item Spacing** | 0px | 20px |
+
+---
+
+### 배송 알림 카드 (기사용)
+
+```html
+<div class="card-noti-delivery">
+  <span class="noti-title">새 배송 요청</span>
+  <span class="noti-route">강남구 → 서초구</span>
+</div>
+```
+
+| 속성 | 값 |
+| :--- | :--- |
+| **기본 CTA 크기** | 362 x 82px |
+| **Radius** | 16px |
+| **배경** | #F8F8F8 |
+| **Border** | #E2E8F0 |
+| **Padding** | 12px 16px |
+| **Item Spacing** | 4px |
+
+---
+
+### 예상 요금 카드
+
+```html
+<div class="card-fee">
+  <span class="fee-label">예상 배송료</span>
+  <span class="fee-amount">12,000원</span>
+</div>
+```
+
+| 속성 | 값 |
+| :--- | :--- |
+| **기본 CTA 크기** | 380 x 80px |
+| **Radius** | 20px |
+| **배경** | #FFFFFF |
+| **Border** | #2C88FF (강조) |
+| **Padding** | 0px 16px |
+| **Item Spacing** | 12px |
+
+---
+
+### 배송기사 정보 카드
+
+```html
+<div class="card-courier">
+  <div class="courier-avatar"></div>
+  <div class="courier-info">
+    <span class="courier-name">김이현 기사님</span>
+    <span class="courier-vehicle">전기 스쿠터 · 활동중</span>
+  </div>
+  <div class="courier-actions">
+    <button class="btn-secondary-sm">전화하기</button>
+    <button class="btn-secondary-sm">메시지</button>
+  </div>
+</div>
+```
+
+| 속성 | 값 |
+| :--- | :--- |
+| **기본 CTA 크기** | 364 x 161px |
+| **Radius** | 16px |
+| **배경** | #FFFFFF |
+| **Border** | #E2E8F0 |
+| **Padding** | 20px |
+| **Item Spacing** | 20px |
+
+---
+
+### 배송 히스토리 카드
+
+```html
+<div class="card-history">
+  <div class="card-top">
+    <span class="history-date">01.18</span>
+    <span class="status-badge badge-progress">진행중</span>
+  </div>
+  <div class="card-mid">
+    <span class="history-route">강남구 역삼동 → 서초구 반포동</span>
+  </div>
+  <div class="card-bottom">
+    <span class="history-time">14:10</span>
+  </div>
+</div>
+```
+
+| 속성 | 값 |
+| :--- | :--- |
+| **기본 CTA 크기** | 372 x 143px |
+| **Radius** | 12px |
+| **배경** | #FFFFFF |
+| **Border** | #E2E8F0 |
+| **Padding** | 18px |
+| **Item Spacing** | 14px |
+
+---
+
+### 상세 정보 카드
+
+```html
+<div class="card-details">
+  <!-- 배송 상세 내역 -->
+</div>
+
+<div class="card-info-sm">
+  <!-- 간단 정보 요약 -->
+</div>
+```
+
+| 속성 | 	Details Card | Info Card |
+| :--- | :--- | :--- |
+| **크기** | 372px x 286px | 372px x 82px |
+| **Radius** | 12px | 12px |
+| **배경** | #FFFFFF | #FFFFFF |
+| **Border** | #E2E8F0 | #E2E8F0 |
+| **Padding** | 18px | 18px |
+| **Item Spacing** | 16px | 12px |
+
+---
+
+### 잔액 / 포인트 카드
+
+```html
+<div class="card-balance">
+  <div class="card-header">
+    <span class="balance-label">내 포인트</span>
+    <span class="balance-amount">100,000 P</span>
+  </div>
+  <div class="card-actions">
+    <button class="btn-secondary">충전하기</button>
+    <button class="btn-secondary">출금하기</button>
+  </div>
+</div>
+```
+
+| 속성 | 값 |
+| :--- | :--- |
+| **기본 CTA 크기** | 372 x 173px |
+| **Radius** | 16px |
+| **배경** | #2C88FF (Primary) |
+| **Border** | 없음 |
+| **Padding** | 24px |
+| **Item Spacing** | 24px |
+| **텍스트 색상** | #FFFFFF |
+
+---
+
+# Badge Components (상태 배지)
+
+### Status Badge (상태 표시)
+
+```html
+<span class="status-badge badge-progress">진행중</span>
+<span class="status-badge badge-complete">완료</span>
+<span class="status-badge badge-cancel">취소</span>
+<span class="status-badge badge-delivering">배달중</span>
+<span class="status-badge badge-delivered">배달완료</span>
+<span class="status-badge badge-waiting">접수대기</span>
+<span class="status-badge badge-matching">매칭중</span>
+<span class="status-badge badge-cancelled">주문취소</span>
+<span class="status-badge badge-cancel-done">취소 완료</span>
+```
+
+| 상태 | 크기 | Radius | 배경색 | 텍스트 색상 |
+| :--- | :--- | :--- | :--- | :--- |
+| **진행중** | 47 x 21px | 6px | #EBF3FF | #2C88FF |
+| **완료** | 37 x 21px | 6px | #D1FAE5 | #10B981 |
+| **취소** | 37 x 21px | 6px | #F1F5F9 | #666666 |
+| **배달중** | 54 x 23px | 6px | #2C88FF | #FFFFFF |
+| **배달 완료** | 65 x 23px | 6px | #2EA44F | #FFFFFF |
+| **접수 대기** | 65 x 23px | 6px | #FA9200 | #FFFFFF |
+| **매칭중** | 54 x 23px | 6px | #FA9200 | #FFFFFF |
+| **주문 취소** | 65 x 23px | 6px | #FFECEC | #EF4444 |
+| **취소완료** | 75 x 28px | 6px | #FEE2E2 | #EF4444 |
+| **매칭 성공** | 75 x 28px | 30px | #FFFFFF | #2C88FF |
+| **배송 완료 (어드민)** | 67 x 23px | 6px | #2C88FF | #FFFFFF |
+| **촬영 완료** | 71 x 27px | 6px | #000000 | #FFFFFF |
+
+---
+
+### Label Badge (라벨 배지)
+
+```html
+<span class="badge-label">집</span>
+<span class="badge-label">회사</span>
+<span class="badge-label">어머니 댁</span>
+```
+
+| 속성 | 값 |
+| :--- | :--- |
+| **높이** | 23px |
+| **Radius** | 6px |
+| **배경** | #EBF3FF |
+| **텍스트 색상** | #2C88FF |
+
+---
+
+### Location Chip (지역 칩)
+
+```html
+<span class="chip-location">강남구</span>
+<span class="chip-location">서초구</span>
+```
+
+| 속성 | 값 |
+| :--- | :--- |
+| **높이** | 33px |
+| **Radius** | 30px (Pill) |
+| **배경** | #EBF3FF |
+| **텍스트 색상** | #2C88FF |
+
+---
+
+### 기능 배지
+
+```html
+<span class="badge-gps">GPS</span>
+<span class="badge-change">변경</span>
+```
+
+| 이름 | 크기 | Radius | 배경 |
+| :--- | :--- | :--- | :--- |
+| **GPS** | 53 x 25px | 20px | #EBF3FF |
+| **변경** | 41 x 25px | 8px | #F8F8F8 |
+
+---
+
+### 카드 공통 스펙 요약
+
+| 항목 | 값 |
+| :--- | :--- |
+| **기본 카드 배경** | #FFFFFF |
+| **기본 카드 Border** | #E2E8F0 (1px) |
+| **소형 카드 Radius** | 12px |
+| **중형 카드 Radius** | 16px |
+| **대형 카드 Radius** | 20~30px |
+| **기본 Padding** | 18~24px |
+| **강조 카드 배경** | #2C88FF (Primary) |
+| **배지 기본 Radius** | 6px |
+| **배지 Pill Radius** | 30px |
+
 ---
 
 ## 9. Thymeleaf Fragment 사용법 (공통 컴포넌트)
 
 Thymeleaf 템플릿에서 공통 프래그먼트를 불러와 손쉽게 조립할 수 있습니다:
 
+---
+
+### 버튼 프래그먼트
+
 ```html
-<!-- 1. Primary 버튼 프래그먼트 -->
+<!-- 1. Primary 버튼 -->
 <div th:replace="~{fragments/components :: primaryBtn('로그인하기')}"></div>
 
-<!-- 2. 소셜 버튼 프래그먼트 -->
-<div th:replace="~{fragments/components :: socialBtn('kakao', '카카오 로그인')}"></div>
+<!-- 2. Secondary 버튼 (외곽선) -->
+<div th:replace="~{fragments/components :: secondaryBtn('충전하기')}"></div>
 
-<!-- 3. Input 필드 프래그먼트 -->
+<!-- 3. 소셜 버튼 -->
+<div th:replace="~{fragments/components :: socialBtn('kakao', '카카오 로그인')}"></div>
+<div th:replace="~{fragments/components :: socialBtn('naver', 'NAVER 시작하기')}"></div>
+<div th:replace="~{fragments/components :: socialBtn('apple', 'Apple 시작하기')}"></div>
+<div th:replace="~{fragments/components :: socialBtn('google', 'Google 시작하기')}"></div>
+
+<!-- 4. 모달 버튼 (확인/취소) -->
+<div th:replace="~{fragments/components :: modalBtnGroup('충전하기', '취소')}"></div>
+
+<!-- 5. 어드민 승인/반려 버튼 -->
+<div th:replace="~{fragments/components :: adminActionBtn('approve', '승인')}"></div>
+<div th:replace="~{fragments/components :: adminActionBtn('reject', '반려')}"></div>
+
+<!-- 6. 아이콘 버튼 -->
+<div th:replace="~{fragments/components :: iconBtn('back', 'lg')}"></div>
+<div th:replace="~{fragments/components :: iconBtn('send', 'md')}"></div>
+
+<!-- 7. 빠른 금액 선택 버튼 -->
+<div th:replace="~{fragments/components :: quickAmountBtn('50000', '+ 5만', false)}"></div>
+<div th:replace="~{fragments/components :: quickAmountBtn('all', '전액 입력', true)}"></div>
+```
+
+---
+
+### 입력 필드 프래그먼트
+
+```html
+<!-- 8. 기본 Input 필드 -->
 <div th:replace="~{fragments/components :: inputField('email', '이메일', 'email', 'email', '이메일을 입력하세요')}"></div>
 
-<!-- 4. 상태 배지 프래그먼트 -->
-<span th:replace="~{fragments/components :: badge('매칭완료', 'success')}"></span>
+<!-- 9. 에러 상태 Input 필드 -->
+<div th:replace="~{fragments/components :: inputFieldError('password', '비밀번호', 'password', '비밀번호가 일치하지 않습니다.')}"></div>
+
+<!-- 10. 인증 버튼 포함 Input 필드 -->
+<div th:replace="~{fragments/components :: inputWithAction('phone', '휴대폰 번호', 'tel', '010-0000-0000', '인증번호 발송')}"></div>
+
+<!-- 11. 주소 입력 필드 (배송용) -->
+<div th:replace="~{fragments/components :: addressInput('departure', '출발지', '서울 강남구 테헤란로 123')}"></div>
+<div th:replace="~{fragments/components :: addressInput('destination', '도착지', '도착지 주소를 검색하세요')}"></div>
+
+<!-- 12. 드롭다운 (Select) -->
+<div th:replace="~{fragments/components :: dropdown('vehicle', '운송 수단 선택', '오토바이 (이륜차)')}"></div>
+
+<!-- 13. 검색 바 -->
+<div th:replace="~{fragments/components :: searchBar('도착지 주소를 검색하세요')}"></div>
+<div th:replace="~{fragments/components :: searchBarAdmin('이름, 이메일로 검색...')}"></div>
 ```
+
+---
+
+### 선택 컴포넌트 프래그먼트
+
+```html
+<!-- 14. 선택 칩 (Chip) -->
+<div th:replace="~{fragments/components :: chipGroup(${weightOptions}, 'weight')}"></div>
+
+<!-- 15. 사이즈 탭 -->
+<div th:replace="~{fragments/components :: sizeTab(${sizeOptions}, 'size')}"></div>
+
+<!-- 16. 체크박스 -->
+<div th:replace="~{fragments/components :: checkbox('morning', '오전 시간대', true)}"></div>
+
+<!-- 17. 라디오 버튼 그룹 -->
+<div th:replace="~{fragments/components :: radioGroup('payment', ${paymentOptions})}"></div>
+
+<!-- 18. 토글 스위치 -->
+<div th:replace="~{fragments/components :: toggle('online', '온라인', true)}"></div>
+```
+
+---
+
+### 카드 프래그먼트
+
+```html
+<!-- 19. 배송 요청 카드 -->
+<div th:replace="~{fragments/components :: bookingCard(${delivery})}"></div>
+
+<!-- 20. 알림 카드 -->
+<div th:replace="~{fragments/components :: notiCard(${notification})}"></div>
+
+<!-- 21. 배송 히스토리 카드 -->
+<div th:replace="~{fragments/components :: historyCard(${history})}"></div>
+
+<!-- 22. 배송기사 정보 카드 -->
+<div th:replace="~{fragments/components :: courierCard(${courier})}"></div>
+
+<!-- 23. 잔액/포인트 카드 -->
+<div th:replace="~{fragments/components :: balanceCard(${point})}"></div>
+
+<!-- 24. 예상 요금 카드 -->
+<div th:replace="~{fragments/components :: feeCard(${estimatedFee})}"></div>
+
+<!-- 25. 역할 선택 카드 -->
+<div th:replace="~{fragments/components :: roleCard('customer', '개인 고객', '물품을 보내고 싶어요', true)}"></div>
+<div th:replace="~{fragments/components :: roleCard('courier', '배송파트너', '물품을 배달하고 싶어요', false)}"></div>
+```
+
+---
+
+### 배지 프래그먼트
+
+```html
+<!-- 26. 상태 배지 -->
+<span th:replace="~{fragments/components :: statusBadge('매칭완료', 'success')}"></span>
+<span th:replace="~{fragments/components :: statusBadge('진행중', 'progress')}"></span>
+<span th:replace="~{fragments/components :: statusBadge('취소', 'cancel')}"></span>
+<span th:replace="~{fragments/components :: statusBadge('접수대기', 'waiting')}"></span>
+
+<!-- 27. 라벨 배지 (주소 별칭) -->
+<span th:replace="~{fragments/components :: labelBadge('집')}"></span>
+<span th:replace="~{fragments/components :: labelBadge('회사')}"></span>
+
+<!-- 28. 지역 칩 -->
+<span th:replace="~{fragments/components :: locationChip('강남구')}"></span>
+
+<!-- 29. 기능 배지 -->
+<span th:replace="~{fragments/components :: funcBadge('gps', 'GPS')}"></span>
+<span th:replace="~{fragments/components :: funcBadge('change', '변경')}"></span>
+```
+
+---
+
+### 프래그먼트 상태 참조표
+
+| 프래그먼트 | variant 값 | 설명 |
+| :--- | :--- | :--- |
+| **SocialBtn** | kakao, naver, apple, goolgle | 소셜 로그인 종류 |
+| **adminActionBtn** | approve, reject | 승인/반려 |
+| **statusBadge** | success, progress, cancel, waiting, delivering, delivered, matching | 배송 상태 |
+| **iconBtn** | back, send, close | 아이콘 종류 |
+| **funcBadge** | gps, change | 기능 배지 종류 |
+| **roleCard** | customer, courier | 역할 선택 |
+
+
+
 
 > 💡 **Spring Form 바인딩 팁 (th:field)**  
 > Spring DTO 바인딩이 필요한 폼 개발 시, `<input class="input-field" th:field="*{email}">` 형태로 `th:field`를 직접 사용하면 `id`, `name`, `value`가 바인딩 객체 사양에 따라 자동 생성됩니다.

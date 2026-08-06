@@ -7,7 +7,7 @@ import com.example.shinhandelivery.vehicle.entity.VehicleType;
 /** 운송수단 응답 DTO. */
 public record VehicleResponse(
     Long id,
-    Long ownerId,
+    Long memberId,
     VehicleType type,
     double maxWeight,
     double maxDistance,
@@ -19,7 +19,7 @@ public record VehicleResponse(
   public static VehicleResponse from(Vehicle entity) {
     return new VehicleResponse(
         entity.getId(),
-        entity.getOwnerId(),
+        entity.getMemberId(),
         entity.getType(),
         entity.getMaxWeight(),
         entity.getMaxDistance(),

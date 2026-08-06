@@ -7,6 +7,7 @@ import com.example.shinhandelivery.common.security.JwtProvider;
 import com.example.shinhandelivery.member.dto.request.LoginRequest;
 import com.example.shinhandelivery.member.dto.request.MemberCreateRequest;
 import com.example.shinhandelivery.member.dto.request.MemberPasswordUpdateRequest;
+import com.example.shinhandelivery.member.dto.request.MemberPaymentPinUpdateRequest;
 import com.example.shinhandelivery.member.dto.request.MemberProfileUpdateRequestDto;
 import com.example.shinhandelivery.member.dto.request.MemberUpdateRequest;
 import com.example.shinhandelivery.member.dto.response.TokenResponse;
@@ -86,6 +87,15 @@ public class MemberService {
     return findMemberOrThrow(memberId);
   }
 
+  /** 결제 PIN이 설정된 회원만 후속 기능을 사용하도록 검증한다. */
+  @Transactional(readOnly = true)
+  public void requirePaymentPinConfigured(Long memberId) {
+    Member member = findMemberOrThrow(memberId);
+    if (member.getPinHash() == null || member.getPinHash().isBlank()) {
+      throw new BusinessException(ErrorCode.ACCESS_DENIED, "결제 PIN 설정 후 이용할 수 있습니다.");
+    }
+  }
+
   /** 로그인한 본인의 프로필 정보(이름, 연락처)를 수정한다. */
   @Transactional
   public Member updateMyProfile(Long memberId, MemberProfileUpdateRequestDto request) {
@@ -110,6 +120,25 @@ public class MemberService {
     member.changePassword(passwordEncoder.encode(request.getNewPassword()));
   }
 
+  /** 로그인한 회원의 결제 PIN을 설정하거나 변경한다. */
+  @Transactional
+  public void updatePaymentPin(Long memberId, MemberPaymentPinUpdateRequest request) {
+    Member member = findMemberForUpdateOrThrow(memberId);
+
+    if (!request.getNewPin().equals(request.getConfirmNewPin())) {
+      throw new BusinessException(ErrorCode.PIN_CONFIRMATION_MISMATCH);
+    }
+
+    if (member.getPinHash() != null && !member.getPinHash().isBlank()) {
+      String currentPin = request.getCurrentPin() == null ? "" : request.getCurrentPin();
+      if (currentPin.isBlank() || !passwordEncoder.matches(currentPin, member.getPinHash())) {
+        throw new BusinessException(ErrorCode.CURRENT_PIN_MISMATCH);
+      }
+    }
+
+    member.changePaymentPin(passwordEncoder.encode(request.getNewPin()));
+  }
+
   /** 회원의 이름과 연락처를 수정한다 (Member Entity 리턴). 이메일/비밀번호/역할은 변경하지 않는다. */
   @Transactional
   public Member update(Long memberId, MemberUpdateRequest request) {
@@ -126,13 +155,13 @@ public class MemberService {
   @Transactional
   public void delete(Long memberId) {
     Member member = findMemberOrThrow(memberId);
-    vehicleRepository.findAllByOwnerId(memberId).forEach(vehicleRepository::delete);
+    vehicleRepository.findAllByMemberId(memberId).forEach(vehicleRepository::delete);
     memberRepository.delete(member);
   }
 
   private Vehicle createDefaultVehicle(Long ownerId, MemberCreateRequest request) {
     return Vehicle.builder()
-        .ownerId(ownerId)
+        .memberId(ownerId)
         .type(request.getVehicleType())
         .maxWeight(resolveMaxWeight(request.getPreferredWeight()))
         .maxDistance(resolveMaxDistance(request.getVehicleType()))
@@ -159,6 +188,17 @@ public class MemberService {
   private Member findMemberOrThrow(Long memberId) {
     return memberRepository
         .findById(memberId)
+        .orElseThrow(() -> new EntityNotFoundException(ErrorCode.MEMBER_NOT_FOUND));
+  }
+
+  @Transactional
+  public Member getByIdForUpdate(Long memberId) {
+    return findMemberForUpdateOrThrow(memberId);
+  }
+
+  private Member findMemberForUpdateOrThrow(Long memberId) {
+    return memberRepository
+        .findByIdForUpdate(memberId)
         .orElseThrow(() -> new EntityNotFoundException(ErrorCode.MEMBER_NOT_FOUND));
   }
 }

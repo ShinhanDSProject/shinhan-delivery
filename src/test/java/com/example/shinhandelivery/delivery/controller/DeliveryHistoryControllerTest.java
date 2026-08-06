@@ -23,6 +23,7 @@ import com.example.shinhandelivery.delivery.entity.ItemSize;
 import com.example.shinhandelivery.delivery.exception.DeliveryAccessDeniedException;
 import com.example.shinhandelivery.delivery.exception.ProofPhotoNotFoundException;
 import com.example.shinhandelivery.delivery.service.DeliveryService;
+import com.example.shinhandelivery.member.service.MemberService;
 import com.example.shinhandelivery.vehicle.entity.VehicleType;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -51,6 +52,7 @@ class DeliveryHistoryControllerTest {
   @Autowired private ObjectMapper objectMapper;
 
   @MockitoBean private DeliveryService deliveryService;
+  @MockitoBean private MemberService memberService;
 
   @Test
   @DisplayName("인증 토큰이 없으면 403을 반환한다")
@@ -261,7 +263,7 @@ class DeliveryHistoryControllerTest {
     request.setItemSize(ItemSize.MEDIUM);
 
     DeliveryRequest created = new DeliveryRequest();
-    created.setCustomerId(1L);
+    created.setMemberId(1L);
     created.setStatus(DeliveryStatus.REQUESTED);
     when(deliveryService.requestDelivery(eq(1L), any())).thenReturn(created);
 
@@ -272,7 +274,7 @@ class DeliveryHistoryControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isCreated())
-        .andExpect(jsonPath("$.customerId").value(1L));
+        .andExpect(jsonPath("$.memberId").value(1L));
   }
 
   @Test
@@ -321,13 +323,13 @@ class DeliveryHistoryControllerTest {
   }
 
   @Test
-  @DisplayName("요청 바디에 customerId를 끼워 보내도 무시되고 로그인한 회원 id로 생성된다")
+  @DisplayName("요청 바디에 memberId를 끼워 보내도 무시되고 로그인한 회원 id로 생성된다")
   void requestDeliveryIgnoresSpoofedCustomerIdInRawJson() throws Exception {
     String token = jwtProvider.createAccessToken(1L, "user@test.com", "CUSTOMER");
     String rawJsonWithSpoofedCustomerId =
         """
         {
-          "customerId": 999,
+          "memberId": 999,
           "pickupAddress": "서울시 강남구",
           "dropoffAddress": "서울시 서초구",
           "weight": 10,
@@ -340,7 +342,7 @@ class DeliveryHistoryControllerTest {
         """;
 
     DeliveryRequest created = new DeliveryRequest();
-    created.setCustomerId(1L);
+    created.setMemberId(1L);
     created.setStatus(DeliveryStatus.REQUESTED);
     when(deliveryService.requestDelivery(eq(1L), any())).thenReturn(created);
 
@@ -351,7 +353,7 @@ class DeliveryHistoryControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(rawJsonWithSpoofedCustomerId))
         .andExpect(status().isCreated())
-        .andExpect(jsonPath("$.customerId").value(1L));
+        .andExpect(jsonPath("$.memberId").value(1L));
 
     verify(deliveryService).requestDelivery(eq(1L), any());
     verify(deliveryService, never()).requestDelivery(eq(999L), any());

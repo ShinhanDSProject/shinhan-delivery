@@ -21,6 +21,7 @@ import com.example.shinhandelivery.delivery.entity.DeliveryStatus;
 import com.example.shinhandelivery.delivery.entity.Matching;
 import com.example.shinhandelivery.delivery.service.DeliveryMatchingService;
 import com.example.shinhandelivery.delivery.service.DeliveryService;
+import com.example.shinhandelivery.member.service.MemberService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -85,8 +86,9 @@ public class DeliveryController {
           @Size(max = 100, message = "Idempotency-Key는 100자 이하여야 합니다.")
           String idempotencyKey,
       @RequestBody @Valid DeliveryPayRequest request) {
-    return ResponseEntity.ok(
-        deliveryService.payDelivery(resolveUserDetails().getId(), idempotencyKey, request));
+    Long memberId = resolveUserDetails().getId();
+    memberService.requirePaymentPinConfigured(memberId);
+    return ResponseEntity.ok(deliveryService.payDelivery(memberId, idempotencyKey, request));
   }
 
   /**
@@ -97,6 +99,7 @@ public class DeliveryController {
   @PreAuthorize("isAuthenticated()")
   public ResponseEntity<DeliveryDetailResponseDto> getDeliveryRequest(
       @AuthenticationPrincipal CustomUserDetails principal, @PathVariable Long deliveryRequestId) {
+    memberService.requirePaymentPinConfigured(principal.getId());
     return ResponseEntity.ok()
         .cacheControl(CacheControl.noStore())
         .body(deliveryService.getDeliveryRequestDetail(principal.getId(), deliveryRequestId));
@@ -108,9 +111,11 @@ public class DeliveryController {
   public ResponseEntity<Page<DeliveryListResponseDto>> getDeliveryRequests(
       @RequestParam(required = false) DeliveryStatus status,
       @PageableDefault(size = 10) Pageable pageable) {
+    Long memberId = resolveUserDetails().getId();
+    memberService.requirePaymentPinConfigured(memberId);
     Page<DeliveryListResponseDto> responses =
         deliveryService
-            .getMyDeliveryRequests(resolveUserDetails().getId(), status, pageable)
+            .getMyDeliveryRequests(memberId, status, pageable)
             .map(DeliveryListResponseDto::from);
     return ResponseEntity.ok(responses);
   }
@@ -184,7 +189,8 @@ public class DeliveryController {
   @GetMapping("/{deliveryRequestId}/proof-photo")
   @PreAuthorize("isAuthenticated()")
   public ResponseEntity<ProofPhotoResponse> getProofPhoto(@PathVariable Long deliveryRequestId) {
-    return ResponseEntity.ok(
-        deliveryService.getProofPhoto(resolveUserDetails().getId(), deliveryRequestId));
+    Long memberId = resolveUserDetails().getId();
+    memberService.requirePaymentPinConfigured(memberId);
+    return ResponseEntity.ok(deliveryService.getProofPhoto(memberId, deliveryRequestId));
   }
 }

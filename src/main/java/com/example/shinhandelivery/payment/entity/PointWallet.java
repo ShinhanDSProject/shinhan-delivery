@@ -1,13 +1,17 @@
 package com.example.shinhandelivery.payment.entity;
 
+import com.example.shinhandelivery.member.entity.Member;
 import com.example.shinhandelivery.payment.exception.InsufficientPointException;
 import com.example.shinhandelivery.payment.exception.InvalidPointAmountException;
 import com.example.shinhandelivery.payment.exception.PointBalanceOverflowException;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 import lombok.AllArgsConstructor;
@@ -32,6 +36,10 @@ public class PointWallet {
 
   @Column(name = "member_id", nullable = false, unique = true)
   private Long memberId;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "member_id", insertable = false, updatable = false)
+  private Member member;
 
   @Column(nullable = false)
   private long balance;

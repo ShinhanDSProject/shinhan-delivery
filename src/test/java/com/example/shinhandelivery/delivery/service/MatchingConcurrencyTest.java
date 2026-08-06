@@ -76,7 +76,7 @@ class MatchingConcurrencyTest {
     courierId = createMember("courier", MemberRole.COURIER);
 
     DeliveryRequest deliveryRequest = new DeliveryRequest();
-    deliveryRequest.setCustomerId(customerId);
+    deliveryRequest.setMemberId(customerId);
     deliveryRequest.setPickupAddress("서울시 강남구");
     deliveryRequest.setDropoffAddress("서울시 서초구");
     deliveryRequest.setWeight(10);
@@ -89,7 +89,7 @@ class MatchingConcurrencyTest {
 
     for (int i = 0; i < VEHICLE_COUNT; i++) {
       Vehicle vehicle = new Vehicle();
-      vehicle.setOwnerId(courierId);
+      vehicle.setMemberId(courierId);
       vehicle.setType(VehicleType.CAR);
       vehicle.setMaxWeight(500);
       vehicle.setMaxDistance(500);

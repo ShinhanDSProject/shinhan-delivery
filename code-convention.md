@@ -106,6 +106,7 @@ com.company.delivery
 - 패키지명 = 도메인명 (`member`, `vehicle`, `delivery`, `payment`). 각 도메인 패키지 안에서만 `entity/repository/service/controller/dto/exception`으로 다시 나눈다.
 - **다른 도메인의 Repository나 Entity를 직접 참조하지 않는다.** 다른 도메인의 데이터가 필요하면 그 도메인의 Service를 호출한다.
   - 예: `DeliveryService`가 결제를 처리해야 하면 `PaymentRepository`를 직접 호출하지 않고 `PaymentService.charge(...)`를 호출한다.
+  - 예외: §4에서 규정하는, FK 필드를 쓰기의 유일한 진입점으로 유지하는 읽기 전용 `@ManyToOne(insertable = false, updatable = false)` Entity 간 연관관계는 이 금지 규칙의 대상이 아니다.
 - 도메인 간에 공통으로 쓰는 것(전역 예외 처리기, 설정 클래스 등)만 `common` 패키지에 둔다. `common`이 특정 도메인 전용 로직을 담는 곳이 되지 않도록 주의한다.
 - 도메인 하나 안의 파일이 너무 많아지면(예: `delivery`가 계속 커지면) `delivery.request`, `delivery.matching`처럼 도메인을 더 잘게 쪼갠다.
 - Repository는 Entity 1개당 1개씩 만든다 (`MemberRepository` ↔ `Member`, ...).
@@ -134,7 +135,9 @@ com.company.delivery
 - `@Entity` + Lombok `@Getter` `@Setter` `@NoArgsConstructor`를 기본으로 사용한다.
 - 식별자는 `@Id @GeneratedValue(strategy = GenerationType.IDENTITY)`.
 - Enum 필드는 `@Enumerated(EnumType.STRING)` (`ORDINAL` 금지 — 순서 바뀌면 데이터가 깨짐).
-- 연관관계는 우선 FK 값(`Long memberId`)으로 두고, `@ManyToOne`/`@OneToMany` 같은 객체 연관관계는 실제로 조인 조회가 필요할 때만 추가한다 (N+1 문제 예방).
+- **다른 도메인(테이블)을 참조하는 Entity는 참조 대상 엔티티 명칭 기반의 FK 필드(`Long xxxId`)를 통일되게 명명한다** — 예: `Address.memberId`, `Vehicle.memberId`, `DeliveryRequest.memberId`. 역할(Role) 표기 대신 참조 대상 엔티티 이름인 `memberId`(`member_id`)를 통일되게 사용하여 직관성과 일관성을 사수한다.
+- **연관관계는 FK 값(`Long memberId`)을 항상 유지한다.** 생성·수정은 오직 이 FK 필드로만 하며(정적 팩토리·`updateBy` 등), 다른 도메인을 참조하는 FK마다 읽기 전용 `@ManyToOne(fetch = FetchType.LAZY)` 객체 연관관계를 `@JoinColumn(name = "...", insertable = false, updatable = false)`로 함께 둔다. FK 필드가 쓰기의 유일한 진입점이고, 객체 연관관계는 조인 조회 전용 뷰다.
+- `@OneToMany` 컬렉션(부모 쪽에서 자식 목록을 들고 있는 방향)은 실제로 컬렉션 순회가 필요할 때만 추가한다 — 컬렉션은 캐스케이드·`orphanRemoval` 설정, N+1, 대량 데이터 시 메모리 문제까지 얽혀 있어 FK 하나당 `@ManyToOne` 하나를 추가하는 것보다 훨씬 신중해야 한다.
 
 ```java
 @Entity
@@ -144,17 +147,22 @@ com.company.delivery
 @Table(name = "vehicle")
 public class Vehicle {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    private Long ownerId; // Member의 FK
+  @Column(name = "member_id", nullable = false)
+  private Long memberId; // Member의 FK, 쓰기는 이 필드로만
 
-    @Enumerated(EnumType.STRING)
-    private VehicleType type;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "member_id", insertable = false, updatable = false)
+  private Member member; // 조인 조회 전용 읽기 전용 뷰
 
-    private double maxWeight;
-    private double maxDistance;
+  @Enumerated(EnumType.STRING)
+  private VehicleType type;
+
+  private double maxWeight;
+  private double maxDistance;
 }
 ```
 
@@ -594,6 +602,7 @@ void 도메인은_다른_도메인의_repository를_직접_참조하지_않는�
 - **이미 반영된 마이그레이션 파일은 절대 수정하지 않는다.** 로컬/서버 DB에 한 번이라도 적용된 파일을 고치면 Checksum 불일치로 다음 구동이 실패한다. 수정이 필요하면 버전을 올린 새 파일을 추가한다.
 - Entity에 필드를 추가/변경했다면, **같은 PR 안에 대응하는 마이그레이션 파일을 함께 커밋**한다. Entity만 바꾸고 마이그레이션을 빠뜨리면 `ddl-auto: validate`에 의해 애플리케이션이 기동 실패한다.
 - 여러 테이블을 함께 바꿔야 하면 파일 하나에 `ALTER TABLE` 여러 개를 순서대로 넣어도 되고, 논리적으로 성격이 다르면 파일을 나눠도 된다 — 팀 판단에 맡긴다.
+- **Entity를 새로 추가하거나 기존 Entity의 필드·FK·연관관계를 변경했다면, 같은 PR 안에 프로젝트 ERD 문서(`docs/erd.md`)도 함께 갱신한다.** ERD 문서는 전체 테이블의 컬럼과 FK 기반 연관관계도를 한눈에 파악할 수 있는 단일 원본(SSOT) 문서로 유지하며, 코드(Entity)와 ERD가 어긋나지 않도록 항상 동기화한다.
 
 ---
 
@@ -647,12 +656,14 @@ void 도메인은_다른_도메인의_repository를_직접_참조하지_않는�
 - [ ] `@Autowired` 필드 주입이 아니라 생성자 주입을 쓰는가?
 - [ ] Repository가 Entity 1개당 1개씩 대응되는가?
 - [ ] Service에서 Repository/Service 의존 없는 순수 계산·변환 로직을 새로 추출했다면 `helper` 서브패키지의 상태 없는 `@Component`로 분리했는가? (§5.1)
-- [ ] 다른 도메인의 Repository/Entity를 직접 참조하지 않고, 필요하면 그 도메인의 Service를 거쳤는가?
+- [ ] 다른 도메인의 Repository/Entity를 직접 참조하지 않고, 필요하면 그 도메인의 Service를 거쳤는가? (§4의 읽기 전용 `@ManyToOne` 연관관계는 예외)
 - [ ] Enum 필드에 `@Enumerated(EnumType.STRING)`을 썼는가? (`ORDINAL` 금지)
 - [ ] 새로 추가한 서비스 로직에 단위 테스트가 있는가? (영문 메서드명 + `@DisplayName` 사용)
 - [ ] ArchUnit 테스트(레이어 의존성 규칙)가 깨지지 않는가?
 - [ ] Spotless 포맷팅 검사를 통과하는가?
 - [ ] Entity 필드를 추가/변경했다면 대응하는 Flyway 마이그레이션 파일을 새로 추가했는가? (기존 마이그레이션 파일을 수정하지 않았는가?)
+- [ ] 다른 도메인을 참조하는 Entity에 FK 필드(`Long xxxId`)가 포함되어 있는가?
+- [ ] Entity를 추가/변경했다면 프로젝트 ERD 문서(`docs/erd.md`)의 컬럼·연관관계도도 함께 갱신했는가?
 - [ ] `main`을 대상으로 브랜치를 분기·PR 했는가?
 - [ ] 리뷰어를 지정하고, PR 템플릿의 요약/변경사항/리뷰 포인트/테스트 결과를 모두 작성했는가?
 - [ ] UI 개발 시 `/css/design-system.css` 토큰 및 `templates/fragments/components.html` Thymeleaf 프래그먼트를 100% 준수하였는가?

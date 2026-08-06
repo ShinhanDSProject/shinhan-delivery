@@ -461,7 +461,7 @@
         });
         const vehicle = await vehicleResponse.json();
 
-        const memberResponse = await fetch(`/api/v1/members/${vehicle.ownerId}`, {
+        const memberResponse = await fetch(`/api/v1/members/${vehicle.memberId}`, {
             headers: { Authorization: header }
         });
         if (memberResponse.ok) {
