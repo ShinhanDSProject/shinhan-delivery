@@ -22,5 +22,5 @@ public interface VehicleRepository extends JpaRepository<Vehicle, Long> {
   List<Vehicle> findByStatusAndMaxWeightGreaterThanEqualAndMaxDistanceGreaterThanEqual(
       VehicleStatus status, double weight, double distance);
 
-  List<Vehicle> findAllByOwnerId(Long ownerId);
+  List<Vehicle> findAllByMemberId(Long memberId);
 }

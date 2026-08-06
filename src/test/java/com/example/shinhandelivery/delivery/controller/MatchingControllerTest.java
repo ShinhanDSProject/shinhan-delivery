@@ -62,7 +62,7 @@ class MatchingControllerTest {
   void getOpenCallsSuccess() throws Exception {
     DeliveryRequest deliveryRequest = new DeliveryRequest();
     deliveryRequest.setId(1L);
-    deliveryRequest.setCustomerId(1L);
+    deliveryRequest.setMemberId(1L);
     deliveryRequest.setPickupAddress("서울시 강남구");
     deliveryRequest.setDropoffAddress("서울시 서초구");
     deliveryRequest.setWeight(10);

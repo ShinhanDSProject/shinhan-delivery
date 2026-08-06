@@ -63,7 +63,7 @@ class DeliveryPickupConcurrencyTest {
     customerId = memberRepository.save(customer).getId();
 
     DeliveryRequest deliveryRequest = new DeliveryRequest();
-    deliveryRequest.setCustomerId(customerId);
+    deliveryRequest.setMemberId(customerId);
     deliveryRequest.setPickupAddress("서울시 강남구");
     deliveryRequest.setDropoffAddress("서울시 서초구");
     deliveryRequest.setWeight(10);

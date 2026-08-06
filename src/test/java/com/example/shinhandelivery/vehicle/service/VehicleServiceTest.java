@@ -36,7 +36,7 @@ class VehicleServiceTest {
   @DisplayName("소유자가 존재하고 무게 거리가 유효하면 차량을 등록한다")
   void registerVehicleSuccess() {
     VehicleCreateRequest request = new VehicleCreateRequest();
-    request.setOwnerId(1L);
+    request.setMemberId(1L);
     request.setType(VehicleType.CAR);
     request.setMaxWeight(500);
     request.setMaxDistance(100);
@@ -52,7 +52,7 @@ class VehicleServiceTest {
     Vehicle response = vehicleService.create(request);
 
     assertThat(response.getId()).isEqualTo(1L);
-    assertThat(response.getOwnerId()).isEqualTo(1L);
+    assertThat(response.getMemberId()).isEqualTo(1L);
     assertThat(response.getType()).isEqualTo(VehicleType.CAR);
     assertThat(response.getStatus()).isEqualTo(VehicleStatus.AVAILABLE);
   }
@@ -61,7 +61,7 @@ class VehicleServiceTest {
   @DisplayName("존재하지 않는 소유자면 EntityNotFoundException을 던진다")
   void registerVehicleOwnerNotFoundShouldThrowException() {
     VehicleCreateRequest request = new VehicleCreateRequest();
-    request.setOwnerId(999L);
+    request.setMemberId(999L);
     request.setType(VehicleType.CAR);
     request.setMaxWeight(500);
     request.setMaxDistance(100);
@@ -77,7 +77,7 @@ class VehicleServiceTest {
   @DisplayName("무게가 0이하면 InvalidWeightException을 던진다")
   void registerVehicleInvalidWeightShouldThrowException() {
     VehicleCreateRequest request = new VehicleCreateRequest();
-    request.setOwnerId(1L);
+    request.setMemberId(1L);
     request.setType(VehicleType.CAR);
     request.setMaxWeight(-5);
     request.setMaxDistance(100);
@@ -90,7 +90,7 @@ class VehicleServiceTest {
   @DisplayName("최대거리가 0이하면 OverMaxDistanceException을 던진다")
   void registerVehicleOverMaxDistanceShouldThrowException() {
     VehicleCreateRequest request = new VehicleCreateRequest();
-    request.setOwnerId(1L);
+    request.setMemberId(1L);
     request.setType(VehicleType.CAR);
     request.setMaxWeight(500);
     request.setMaxDistance(0);
@@ -112,7 +112,7 @@ class VehicleServiceTest {
   @DisplayName("존재하는 차량을 조회하면 Vehicle을 반환한다")
   void getVehicleSuccess() {
     Vehicle vehicle = new Vehicle();
-    vehicle.setOwnerId(1L);
+    vehicle.setMemberId(1L);
     vehicle.setType(VehicleType.DRONE);
     vehicle.setMaxWeight(10);
     vehicle.setMaxDistance(20);
@@ -136,7 +136,7 @@ class VehicleServiceTest {
   @DisplayName("비관적 락으로 존재하는 차량을 조회하면 Vehicle을 반환한다")
   void getVehicleForUpdateSuccess() {
     Vehicle vehicle = new Vehicle();
-    vehicle.setOwnerId(1L);
+    vehicle.setMemberId(1L);
     vehicle.setType(VehicleType.DRONE);
     vehicle.setMaxWeight(10);
     vehicle.setMaxDistance(20);

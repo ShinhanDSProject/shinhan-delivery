@@ -6,6 +6,7 @@ import com.example.shinhandelivery.common.security.CustomUserDetails;
 import com.example.shinhandelivery.member.dto.request.LoginRequest;
 import com.example.shinhandelivery.member.dto.request.MemberCreateRequest;
 import com.example.shinhandelivery.member.dto.request.MemberPasswordUpdateRequest;
+import com.example.shinhandelivery.member.dto.request.MemberPaymentPinUpdateRequest;
 import com.example.shinhandelivery.member.dto.request.MemberProfileUpdateRequestDto;
 import com.example.shinhandelivery.member.dto.request.MemberRoleUpdateRequest;
 import com.example.shinhandelivery.member.dto.request.MemberUpdateRequest;
@@ -80,6 +81,16 @@ public class MemberController {
       @Valid @RequestBody MemberPasswordUpdateRequest request) {
     CustomUserDetails resolved = resolveUserDetails(userDetails);
     memberService.updatePassword(resolved.getId(), request);
+    return ResponseEntity.noContent().build();
+  }
+
+  /** 인증된 본인의 결제 PIN을 설정하거나 변경한다. */
+  @PatchMapping("/payment-pin")
+  public ResponseEntity<Void> updatePaymentPin(
+      @AuthenticationPrincipal CustomUserDetails userDetails,
+      @Valid @RequestBody MemberPaymentPinUpdateRequest request) {
+    CustomUserDetails resolved = resolveUserDetails(userDetails);
+    memberService.updatePaymentPin(resolved.getId(), request);
     return ResponseEntity.noContent().build();
   }
 

@@ -1,6 +1,7 @@
 package com.example.shinhandelivery.notification.controller;
 
 import com.example.shinhandelivery.common.security.CustomUserDetails;
+import com.example.shinhandelivery.member.service.MemberService;
 import com.example.shinhandelivery.notification.dto.response.NotificationResponse;
 import com.example.shinhandelivery.notification.service.NotificationService;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class NotificationController {
 
   private final NotificationService notificationService;
+  private final MemberService memberService;
 
   /** 로그인 회원 본인의 알림을 최신순으로 페이징 조회한다. category로 선택적 필터링이 가능하다. */
   @GetMapping
@@ -32,6 +34,7 @@ public class NotificationController {
       @AuthenticationPrincipal CustomUserDetails principal,
       @RequestParam(required = false) String category,
       @PageableDefault(size = 10) Pageable pageable) {
+    memberService.requirePaymentPinConfigured(principal.getId());
     Page<NotificationResponse> responses =
         notificationService
             .list(principal.getId(), category, pageable)
@@ -43,6 +46,7 @@ public class NotificationController {
   @PatchMapping("/{id}/read")
   public ResponseEntity<NotificationResponse> markAsRead(
       @AuthenticationPrincipal CustomUserDetails principal, @PathVariable Long id) {
+    memberService.requirePaymentPinConfigured(principal.getId());
     return ResponseEntity.ok(
         NotificationResponse.from(notificationService.markAsRead(principal.getId(), id)));
   }
