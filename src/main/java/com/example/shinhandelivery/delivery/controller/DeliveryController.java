@@ -59,6 +59,7 @@ public class DeliveryController {
 
   private final DeliveryService deliveryService;
   private final DeliveryMatchingService deliveryMatchingService;
+  private final MemberService memberService;
 
   /** 로그인한 고객 본인 명의로 배송을 요청한다. */
   @PostMapping

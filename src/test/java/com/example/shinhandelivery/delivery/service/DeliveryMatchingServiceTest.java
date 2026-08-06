@@ -108,7 +108,7 @@ class DeliveryMatchingServiceTest {
     Vehicle vehicle =
         Vehicle.builder()
             .id(10L)
-            .ownerId(courierId)
+            .memberId(courierId)
             .type(VehicleType.MOTORCYCLE)
             .status(VehicleStatus.AVAILABLE)
             .build();
@@ -148,7 +148,7 @@ class DeliveryMatchingServiceTest {
 
     Member courier = Member.builder().id(courierId).role(MemberRole.COURIER).build();
     Vehicle vehicle =
-        Vehicle.builder().id(10L).ownerId(courierId).status(VehicleStatus.AVAILABLE).build();
+        Vehicle.builder().id(10L).memberId(courierId).status(VehicleStatus.AVAILABLE).build();
 
     DeliveryRequest alreadyMatched =
         DeliveryRequest.builder().id(deliveryRequestId).status(DeliveryStatus.MATCHED).build();

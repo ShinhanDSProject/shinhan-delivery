@@ -51,6 +51,7 @@ class DeliveryControllerTest {
 
   @MockitoBean private DeliveryService deliveryService;
   @MockitoBean private DeliveryMatchingService deliveryMatchingService;
+  @MockitoBean private MemberService memberService;
 
   @AfterEach
   void tearDown() {

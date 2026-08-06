@@ -8,7 +8,7 @@
 
 > [!IMPORTANT]
 > **동시성 제어 방식 및 DB 컬럼 추가 결정**
-> 1. **낙관적 락 (`@Version`) 도입**: 동시 수락 시 0.1초 차이의 경합 상황에서 단 1명에게만 배정을 허용하고 정합성을 사수하기 위해 `delivery_request` 테이블에 `version` (BIGINT DEFAULT 0) 컬럼을 추가합니다. (`V24__add_version_to_delivery_request.sql`)
+> 1. **낙관적 락 (`@Version`) 도입**: 동시 수락 시 0.1초 차이의 경합 상황에서 단 1명에게만 배정을 허용하고 정합성을 사수하기 위해 `delivery_request` 테이블에 `version` (BIGINT DEFAULT 0) 컬럼을 추가합니다. (`V26__add_version_to_delivery_request.sql`)
 > 2. **예외 및 응답 코드**: 이미 타 배송원에게 배정된 콜 수락 시 `409 Conflict`와 메시지 `"이미 다른 배송원에게 배차된 주문입니다."`를 반환합니다.
 
 ---
@@ -16,7 +16,7 @@
 ## 🛠️ Proposed Changes
 
 ### 1. Database Migration
-- `src/main/resources/db/migration/V24__add_version_to_delivery_request.sql`:
+- `src/main/resources/db/migration/V26__add_version_to_delivery_request.sql`:
   - `delivery_request` 테이블에 `version BIGINT NOT NULL DEFAULT 0` 컬럼 추가
 
 ### 2. Domain & Entity
