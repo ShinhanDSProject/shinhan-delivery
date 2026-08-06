@@ -95,7 +95,7 @@ class CourierStatusServiceTest {
             .longitude(127.2)
             .build();
     given(memberService.getById(memberId)).willReturn(courier);
-    given(vehicleService.getVehiclesByOwnerId(memberId)).willReturn(List.of(vehicle));
+    given(vehicleService.getVehiclesByMemberId(memberId)).willReturn(List.of(vehicle));
 
     CourierStatusUpdateRequest request =
         new CourierStatusUpdateRequest(WorkStatus.OFFLINE, null, null);
@@ -114,7 +114,7 @@ class CourierStatusServiceTest {
     Long memberId = 4L;
     Member courier = Member.builder().id(memberId).role(MemberRole.COURIER).build();
     given(memberService.getById(memberId)).willReturn(courier);
-    given(vehicleService.getVehiclesByOwnerId(memberId)).willReturn(List.of());
+    given(vehicleService.getVehiclesByMemberId(memberId)).willReturn(List.of());
 
     CourierStatusUpdateRequest request =
         new CourierStatusUpdateRequest(WorkStatus.ONLINE, 37.5, 127.0);
@@ -130,7 +130,7 @@ class CourierStatusServiceTest {
     Long memberId = 5L;
     Member courier = Member.builder().id(memberId).role(MemberRole.COURIER).build();
     given(memberService.getById(memberId)).willReturn(courier);
-    given(vehicleService.getVehiclesByOwnerId(memberId)).willReturn(List.of());
+    given(vehicleService.getVehiclesByMemberId(memberId)).willReturn(List.of());
 
     CourierStatusResponse response = courierStatusService.getWorkStatus(memberId);
 
