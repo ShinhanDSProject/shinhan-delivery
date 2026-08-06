@@ -37,7 +37,7 @@ graph LR
 
 ## 💻 3. 우리 프로젝트 사전 API 명세 계약 예시
 
-[docs/rest-api-guide.md](../rest-api-guide.md) 및 Swagger 아노테이션으로 계약을 명시합니다.
+[docs/REST-API-설계-규격-가이드.md](../REST-API-설계-규격-가이드.md) 및 Swagger 아노테이션으로 계약을 명시합니다.
 
 ```java
 // DTO 계약 명세

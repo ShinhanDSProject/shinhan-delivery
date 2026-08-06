@@ -44,5 +44,5 @@ Migration checksum mismatch for migration version 2
 ### 4. 재발 방지책 (Prevention)
 나뿐만 아니라 **우리 팀 전체가 앞으로 동일한 실수를 저지르지 않도록 방지하는 자동화나 프로세스 개선책**을 고안합니다.
 *   **개선 방안 (자동화/가이드):**
-    *   *예: README.md 및 트러블슈팅 가이드(`docs/troubleshooting.md`)에 'Flyway 체크섬 오류 대처법'을 추가 기재하여 전파.*
+    *   *예: README.md 및 트러블슈팅 가이드(`docs/트러블슈팅-가이드.md`)에 'Flyway 체크섬 오류 대처법'을 추가 기재하여 전파.*
     *   *예: 로컬 Git Hook(Lefthook)에 이미 커밋된 이전 버전의 V*.sql 파일이 수정되어 커밋되지 못하게 사전 통제 스크립트 결합 고려.*

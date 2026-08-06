@@ -6,9 +6,9 @@
 * 모든 코드 작성 및 수정 전 `code-convention.md`와 `CLAUDE.md`를 필독하세요.
 * 의존성 방향은 항상 단방향(`Controller -> Service -> Repository`)을 유지해야 합니다.
 * **Getter, Setter 작성 시 수동 코딩을 금지하고 무조건 Lombok 라이브러리(`@Getter`, `@Setter`)를 100% 사용하여 개발해야 합니다.**
-* **UI 개발 시 반드시 공통 디자인 시스템(`/css/design-system.css`, `docs/design-system.md`) 토큰과 Thymeleaf 프래그먼트(`templates/fragments/components.html`)를 100% 사용하여 개발해야 합니다.**
+* **UI 개발 시 반드시 공통 디자인 시스템(`/css/design-system.css`, `docs/UI-공통-디자인-시스템.md`) 토큰과 Thymeleaf 프래그먼트(`templates/fragments/components.html`)를 100% 사용하여 개발해야 합니다.**
 * **신규 기술 도입 및 핵심 아키텍처 결정 시 `docs/adr/` 규격에 따라 공식 ADR(Architecture Decision Record) 문서를 필수 작성해야 합니다.**
-* **PR 생성 시 리뷰어(관리자)의 검토 소요 시간을 단축하기 위해 `docs/pr-review-guide.md` 및 `.github/pull_request_template.md` 규격에 따라 [리뷰어 3분 족보 가이드 5대 표준 구성 요소(1분 서머리, Mermaid 읽기 순서, 파일별 체크포인트, 리뷰어 1초 체크리스트, Files changed 핀포인트 인라인 댓글 3개)] 전체를 절대로 1줄 요약으로 축약하지 말고 100% 원본 서식 그대로 본문에 필수 작성/부착해야 합니다.**
+* **PR 생성 시 리뷰어(관리자)의 검토 소요 시간을 단축하기 위해 `docs/PR-리뷰어-3분-족보-가이드.md` 및 `.github/pull_request_template.md` 규격에 따라 [리뷰어 3분 족보 가이드 5대 표준 구성 요소(1분 서머리, Mermaid 읽기 순서, 파일별 체크포인트, 리뷰어 1초 체크리스트, Files changed 핀포인트 인라인 댓글 3개)] 전체를 절대로 1줄 요약으로 축약하지 말고 100% 원본 서식 그대로 본문에 필수 작성/부착해야 합니다.**
 
 
 ## 2. AI Pre-Flight Self-Review & Test Harness 자가 치유 피드백 루프
@@ -17,7 +17,7 @@
 1. **AI 사전 셀프 코드 리뷰 (Pre-Flight Self-Review):**
    - 수정한 코드에 미사용 import, 불필요한 `System.out.println` 콘솔 출력, 명명 규칙 위반, 주석 누락이 없는지 스스로 1차 검토 후 보정하세요.
 2. **Test Harness 자가 치유 피드백 루프:**
-   - `./scripts/verify.sh` (또는 `./pr`)를 실행하여 린트, 코드 포맷팅(Spotless), ArchUnit 아키텍처 규칙, 단위 테스트 실패 시 에러 로그를 읽고 수초 내로 자가 치유(Auto-Fix)하여 0 exit code 상태를 확보하세요. (`docs/harness-decision-framework.md` 6대 통제 정책 준수)
+   - `./scripts/verify.sh` (또는 `./pr`)를 실행하여 린트, 코드 포맷팅(Spotless), ArchUnit 아키텍처 규칙, 단위 테스트 실패 시 에러 로그를 읽고 수초 내로 자가 치유(Auto-Fix)하여 0 exit code 상태를 확보하세요. (`docs/테스트-하네스-판단-및-통제-정책.md` 6대 통제 정책 준수)
 3. **Multi-Pass Project Audit 피드백 루프:**
    - 1차 검증을 통과했더라도 아래 **6대 프로젝트 맞춤형 관점**에서 2차, 3차 다각도로 재검토하여 안전성과 완성도를 100% 확보하세요:
      1) 아키텍처 순수성 (`Controller`에서 `Entity` 반환 금지)
@@ -35,7 +35,7 @@
 2. **KISS & Clean Architecture (클래스 폭발 차단):**
    - 불필요하게 예외 클래스나 유틸리티를 무분별하게 늘리지 않고, 공통 `EntityNotFoundException` + `ErrorCode`처럼 명쾌하고 간결한 아키텍처(KISS 원칙)와 단방향 의존성만 사수합니다.
 3. **초급자 튜터링 문서 동기화 (100% 지식 자산화 및 SSOT/전문 문서화 규격 사수):**
-   - 기능 및 패턴 변경 시 신입 개발자도 이해할 수 있는 초급자 눈높이 문서(`docs/`) 및 `code-convention.md`를 소스 코드와 세트로 100% 최신화하며, `docs/ssot-documentation-policy.md` 규격에 따라 단일 원본(SSOT) 원칙과 **전문 기술 문서화 5대 작성 규격(메타데이터 헤더, Mermaid 다이어그램, 캘아웃 블록, WHY/Trade-off 명시, 실증 검증 명령어)**을 엄격히 준수합니다.
+   - 기능 및 패턴 변경 시 신입 개발자도 이해할 수 있는 초급자 눈높이 문서(`docs/`) 및 `code-convention.md`를 소스 코드와 세트로 100% 최신화하며, `docs/SSOT-문서화-정책-가이드.md` 규격에 따라 단일 원본(SSOT) 원칙과 **전문 기술 문서화 5대 작성 규격(메타데이터 헤더, Mermaid 다이어그램, 캘아웃 블록, WHY/Trade-off 명시, 실증 검증 명령어)**을 엄격히 준수합니다.
 4. **AI 사전 셀프 리뷰 & 다회차 교정 (Multi-Pass Self-Correction):**
    - 1차 코드 생성에 만족하지 않고, 스스로 6대 프로젝트 관점(아키텍처, 예외, DB, 보안, DX, 테스트 유의미성)에서 사전 3차례 셀프 검토를 거쳐 결함을 완벽히 보완한 결과만 제공합니다.
 5. **무상태성 및 멱등성 사수 (Stateless & Idempotency):**

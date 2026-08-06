@@ -46,5 +46,5 @@ graph TD
 
 ## 💻 3. 우리 프로젝트 실천 도구 연동
 
-- **AI 페어 프로그래밍 지원:** [docs/ai-paired-development-guide.md](../ai-paired-development-guide.md)
+- **AI 페어 프로그래밍 지원:** [docs/AI-기반-페어-프로그래밍-가이드.md](../AI-기반-페어-프로그래밍-가이드.md)
 - **로컬 자동화 통합 빌드 하네스:** `./scripts/verify.sh` 및 `./pr` 커맨드로 통합 자동화 사수.

@@ -44,5 +44,5 @@ graph TD
 
 ## 💻 3. 우리 프로젝트 실천 가이드
 
-- [LLM 기반 현대 SW 엔지니어링 입문서 (docs/llm-software-engineering-guide.md)](../llm-software-engineering-guide.md)
+- [LLM 기반 현대 SW 엔지니어링 입문서 (docs/LLM-소프트웨어-엔지니어링-가이드.md)](../LLM-소프트웨어-엔지니어링-가이드.md)
 - [AI 에이전트 행동 지침 및 8대 수칙 (AGENTS.md)](../../AGENTS.md)

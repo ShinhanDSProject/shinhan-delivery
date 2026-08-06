@@ -39,24 +39,24 @@ metadata:
 
 | 지식 영역 (Knowledge Domain) | 단일 원본 문서 (Single Primary Owner) | 파생 참조 문서 (Referencing Docs) |
 | :--- | :--- | :--- |
-| **코딩 규약 & 아키텍처 규칙** | [`code-convention.md`](../code-convention.md) | `AGENTS.md`, `harness-decision-framework.md` |
-| **데이터베이스 ERD & 테이블 연관관계도** | [`docs/erd.md`](./erd.md) | `code-convention.md` |
+| **코딩 규약 & 아키텍처 규칙** | [`code-convention.md`](../code-convention.md) | `AGENTS.md`, `테스트-하네스-판단-및-통제-정책.md` |
+| **데이터베이스 ERD & 테이블 연관관계도** | [`docs/ERD-데이터베이스-연관관계도.md`](./ERD-데이터베이스-연관관계도.md) | `code-convention.md` |
 | **AI 에이전트 작업 8대 원칙** | [`AGENTS.md`](../AGENTS.md) | `README.md`, `code-convention.md` |
-| **아키텍처 의사결정 기록 (ADR)** | [`docs/adr/README.md`](./adr/README.md) | `docs/security-jwt-guide.md`, `README.md` |
-| **PR 리뷰 & 인라인 댓글 작성 규격** | [`docs/pr-review-guide.md`](./pr-review-guide.md) | `code-convention.md`, `AGENTS.md` |
-| **테스트 하네스 판단 & 통제 정책** | [`docs/harness-decision-framework.md`](./harness-decision-framework.md) | `AGENTS.md`, `README.md` |
-| **기능 개발 전 설계 2단계 PR 절차** | [`docs/design-phase-guide.md`](./design-phase-guide.md) | `README.md` |
-| **Git Flow & 커밋 컨벤션** | [`docs/git-flow-guide.md`](./git-flow-guide.md) | `README.md` |
-| **REST API 설계 규격** | [`docs/rest-api-guide.md`](./rest-api-guide.md) | `README.md` |
-| **전역 예외 처리 규격** | [`docs/exception-handling-guide.md`](./exception-handling-guide.md) | `README.md` |
-| **프로젝트 전체 기능 명세 & 스프린트 로드맵** | [`docs/project-spec-and-task-breakdown.md`](./project-spec-and-task-breakdown.md) | `README.md` |
-| **팀 리더십 & 프로젝트 운용 프레임워크** | [`docs/team-operating-model-guide.md`](./team-operating-model-guide.md) | `README.md` |
-| **팀 개발 문화 & 일하는 방식 7대 철학** | [`docs/engineering-culture-and-working-style.md`](./engineering-culture-and-working-style.md) | `README.md` |
-| **초급 개발자 7단계 태스크 분할 가이드** | [`docs/junior-developer-task-guide.md`](./junior-developer-task-guide.md) | `README.md` |
-| **학습형 3단계 GitHub Issue 작성 규격** | [`docs/learning-oriented-issue-guide.md`](./learning-oriented-issue-guide.md) | `README.md` |
-| **AI 기반 초급자 페어 프로그래밍 가이드** | [`docs/ai-paired-development-guide.md`](./ai-paired-development-guide.md) | `README.md` |
-| **초급자 CRUD & 레이어별 이슈 분할 템플릿** | [`docs/beginner-crud-issue-template-guide.md`](./beginner-crud-issue-template-guide.md) | `README.md` |
-| **프로젝트 착수 전 6대 사전 리스크 감사** | [`docs/pre-launch-risk-and-governance-guide.md`](./pre-launch-risk-and-governance-guide.md) | `README.md` |
+| **아키텍처 의사결정 기록 (ADR)** | [`docs/adr/README.md`](./adr/README.md) | `docs/보안-및-JWT-가이드.md`, `README.md` |
+| **PR 리뷰 & 인라인 댓글 작성 규격** | [`docs/PR-리뷰어-3분-족보-가이드.md`](./PR-리뷰어-3분-족보-가이드.md) | `code-convention.md`, `AGENTS.md` |
+| **테스트 하네스 판단 & 통제 정책** | [`docs/테스트-하네스-판단-및-통제-정책.md`](./테스트-하네스-판단-및-통제-정책.md) | `AGENTS.md`, `README.md` |
+| **기능 개발 전 설계 2단계 PR 절차** | [`docs/기능-설계-2단계-PR-절차-가이드.md`](./기능-설계-2단계-PR-절차-가이드.md) | `README.md` |
+| **Git Flow & 커밋 컨벤션** | [`docs/Git-Flow-및-커밋-컨벤션.md`](./Git-Flow-및-커밋-컨벤션.md) | `README.md` |
+| **REST API 설계 규격** | [`docs/REST-API-설계-규격-가이드.md`](./REST-API-설계-규격-가이드.md) | `README.md` |
+| **전역 예외 처리 규격** | [`docs/전역-예외-처리-규격-가이드.md`](./전역-예외-처리-규격-가이드.md) | `README.md` |
+| **프로젝트 전체 기능 명세 & 스프린트 로드맵** | [`docs/프로젝트-스펙-및-태스크-분할.md`](./프로젝트-스펙-및-태스크-분할.md) | `README.md` |
+| **팀 리더십 & 프로젝트 운용 프레임워크** | [`docs/팀-운용-프레임워크-가이드.md`](./팀-운용-프레임워크-가이드.md) | `README.md` |
+| **팀 개발 문화 & 일하는 방식 7대 철학** | [`docs/엔지니어링-문화-및-일하는-방식.md`](./엔지니어링-문화-및-일하는-방식.md) | `README.md` |
+| **초급 개발자 7단계 태스크 분할 가이드** | [`docs/초급-개발자-태스크-분할-가이드.md`](./초급-개발자-태스크-분할-가이드.md) | `README.md` |
+| **학습형 3단계 GitHub Issue 작성 규격** | [`docs/학습형-이슈-작성-규격-가이드.md`](./학습형-이슈-작성-규격-가이드.md) | `README.md` |
+| **AI 기반 초급자 페어 프로그래밍 가이드** | [`docs/AI-기반-페어-프로그래밍-가이드.md`](./AI-기반-페어-프로그래밍-가이드.md) | `README.md` |
+| **초급자 CRUD & 레이어별 이슈 분할 템플릿** | [`docs/초급자-CRUD-이슈-템플릿-가이드.md`](./초급자-CRUD-이슈-템플릿-가이드.md) | `README.md` |
+| **프로젝트 착수 전 6대 사전 리스크 감사** | [`docs/사전-리스크-감사-및-거버넌스-가이드.md`](./사전-리스크-감사-및-거버넌스-가이드.md) | `README.md` |
 
 ---
 

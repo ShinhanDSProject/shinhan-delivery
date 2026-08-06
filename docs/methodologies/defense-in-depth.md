@@ -44,5 +44,5 @@ graph TD
 
 ## 💻 3. 우리 프로젝트 실천 가이드
 
-- [보안 & JWT 인증 가이드 (docs/security-jwt-guide.md)](../security-jwt-guide.md)
+- [보안 & JWT 인증 가이드 (docs/보안-및-JWT-가이드.md)](../보안-및-JWT-가이드.md)
 - [ADR-0001: JWT 기반 무상태 인증 체계 채택 (docs/adr/0001-stateless-jwt-authentication.md)](../adr/0001-stateless-jwt-authentication.md)
