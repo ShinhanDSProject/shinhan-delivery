@@ -54,7 +54,7 @@ jobs:
 
           if [ $MISSING -eq 1 ]; then
             echo "❌ ERROR: PR Body must include the Reviewer 3-Minute Walkthrough Guide template!"
-            echo "Please refer to docs/pr-review-guide.md or .github/PULL_REQUEST_TEMPLATE.md"
+            echo "Please refer to docs/PR-리뷰어-3분-족보-가이드.md or .github/PULL_REQUEST_TEMPLATE.md"
             exit 1
           fi
 

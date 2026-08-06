@@ -36,7 +36,7 @@ class VehicleControllerTest {
   @DisplayName("차량 생성 요청을 받으면 생성된 차량을 반환한다")
   void registerVehicleSuccess() throws Exception {
     VehicleCreateRequest request = new VehicleCreateRequest();
-    request.setOwnerId(1L);
+    request.setMemberId(1L);
     request.setType(VehicleType.CAR);
     request.setMaxWeight(500);
     request.setMaxDistance(100);
@@ -44,7 +44,7 @@ class VehicleControllerTest {
     Vehicle vehicle =
         Vehicle.builder()
             .id(1L)
-            .ownerId(1L)
+            .memberId(1L)
             .type(VehicleType.CAR)
             .maxWeight(500)
             .maxDistance(100)
@@ -60,7 +60,7 @@ class VehicleControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isCreated())
-        .andExpect(jsonPath("$.ownerId").value(1L))
+        .andExpect(jsonPath("$.memberId").value(1L))
         .andExpect(jsonPath("$.type").value("CAR"));
   }
 
@@ -68,7 +68,7 @@ class VehicleControllerTest {
   @DisplayName("경도가 범위를 벗어나면 400을 반환한다")
   void registerVehicleLongitudeOutOfRangeShouldReturn400() throws Exception {
     VehicleCreateRequest request = new VehicleCreateRequest();
-    request.setOwnerId(1L);
+    request.setMemberId(1L);
     request.setType(VehicleType.CAR);
     request.setMaxWeight(500);
     request.setMaxDistance(100);

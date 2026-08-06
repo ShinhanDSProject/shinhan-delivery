@@ -14,8 +14,8 @@ import lombok.Setter;
 @NoArgsConstructor
 public class VehicleCreateRequest {
 
-  @NotNull(message = "소유자 id는 필수입니다.")
-  private Long ownerId;
+  @NotNull(message = "회원 id는 필수입니다.")
+  private Long memberId;
 
   @NotNull(message = "운송수단 종류는 필수입니다.")
   private VehicleType type;

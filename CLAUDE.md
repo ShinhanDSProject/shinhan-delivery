@@ -4,7 +4,7 @@
 
 ## 프로젝트 개요
 
-`shinhan-delivery`는 Spring Boot 4.1.0 / Java 17 기반 백엔드(Gradle 빌드)입니다. Flyway로 데이터베이스 스키마를 버전 관리합니다(`docs/flyway-guide.md` 참고).
+`shinhan-delivery`는 Spring Boot 4.1.0 / Java 17 기반 백엔드(Gradle 빌드)입니다. Flyway로 데이터베이스 스키마를 버전 관리합니다(`docs/Flyway-마이그레이션-가이드.md` 참고).
 
 ## 코딩 컨벤션 (필독)
 
@@ -14,7 +14,7 @@
 
 - 레이어(기술적 역할) 기준으로 패키지를 나눕니다: `controller`, `service`, `repository`, `entity`, `dto/{request,response}`, `exception`, `config`. 의존 방향은 항상 위에서 아래로만(`Controller → Service → Repository`) — 역방향 의존은 금지입니다.
 - `Entity`는 JPA 표준 방식(`@Entity`, Lombok `@Getter`/`@Setter`/`@NoArgsConstructor`)을 그대로 사용합니다. Value Object나 `Result` 타입 같은 함수형 패턴은 쓰지 않습니다.
-- 프론트엔드/UI 개발 시 프로젝트 표준 스택인 `HTML5 + Vanilla CSS + Thymeleaf`를 사용하며, 공통 디자인 시스템(`/css/design-system.css`, `docs/design-system.md`) 토큰 및 Thymeleaf 프래그먼트(`templates/fragments/components.html`)를 100% 사용하여 개발합니다.
+- 프론트엔드/UI 개발 시 프로젝트 표준 스택인 `HTML5 + Vanilla CSS + Thymeleaf`를 사용하며, 공통 디자인 시스템(`/css/design-system.css`, `docs/UI-공통-디자인-시스템.md`) 토큰 및 Thymeleaf 프래그먼트(`templates/fragments/components.html`)를 100% 사용하여 개발합니다.
 - 비즈니스 로직은 전부 `Service` 계층에 모읍니다. 생성자 주입(`@RequiredArgsConstructor`)만 쓰고 필드 주입(`@Autowired` on field)은 금지입니다. 하나의 public 메서드가 하나의 유스케이스입니다.
 - 예상 가능한 실패는 커스텀 `RuntimeException`을 던지고, `@RestControllerAdvice`인 `GlobalExceptionHandler` 한 곳에서만 HTTP 응답으로 변환합니다(컨벤션 §6). Controller에서 개별적으로 `try-catch`하지 않습니다.
 - `@Transactional`은 `Service` 계층에만 붙입니다. Controller는 DTO만 다루고 Entity를 직접 반환하지 않습니다.
@@ -52,7 +52,7 @@ gradlew.bat spotlessApply      # 컨벤션에 맞게 자동 포맷팅
      5. **초보자 개발자 경험 (DX):** Mac/Windows 크로스 플랫폼 지원 및 오류 메시지의 친절한 해설 여부
      6. **실질적 테스트 가치:** 단순 통과용 깡통 테스트가 아닌 실제 회귀 버그를 잡는 유의미한 검증인가?
 
-로컬 DB 연결(`.env`)과 Flyway 마이그레이션 작성법은 `README.md`, `docs/flyway-guide.md`를 참고하세요.
+로컬 DB 연결(`.env`)과 Flyway 마이그레이션 작성법은 `README.md`, `docs/Flyway-마이그레이션-가이드.md`를 참고하세요.
 
 ## 아키텍처
 

@@ -30,7 +30,7 @@ public class TrackingService {
   @Transactional(readOnly = true)
   public void assertCanSubscribe(Long memberId, Long deliveryId) {
     DeliveryRequest delivery = deliveryService.getDeliveryRequest(deliveryId);
-    if (delivery.getCustomerId().equals(memberId)) {
+    if (delivery.getMemberId().equals(memberId)) {
       return;
     }
     if (isMatchedVehicleOwner(memberId, deliveryId)) {
@@ -83,6 +83,6 @@ public class TrackingService {
 
   private boolean isOwner(Long memberId, Long vehicleId) {
     Vehicle vehicle = vehicleService.getById(vehicleId);
-    return vehicle.getOwnerId().equals(memberId);
+    return vehicle.getMemberId().equals(memberId);
   }
 }

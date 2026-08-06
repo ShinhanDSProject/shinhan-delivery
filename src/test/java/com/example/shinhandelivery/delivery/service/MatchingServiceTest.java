@@ -50,7 +50,7 @@ class MatchingServiceTest {
   private Vehicle availableVehicle(Long id) {
     Vehicle vehicle = new Vehicle();
     vehicle.setId(id);
-    vehicle.setOwnerId(1L);
+    vehicle.setMemberId(1L);
     vehicle.setType(VehicleType.CAR);
     vehicle.setMaxWeight(500);
     vehicle.setMaxDistance(100);
@@ -64,7 +64,7 @@ class MatchingServiceTest {
       Long id, VehicleStatus status, double weight, double distance) {
     Vehicle vehicle = new Vehicle();
     vehicle.setId(id);
-    vehicle.setOwnerId(1L);
+    vehicle.setMemberId(1L);
     vehicle.setType(VehicleType.CAR);
     vehicle.setMaxWeight(weight);
     vehicle.setMaxDistance(distance);
@@ -77,7 +77,7 @@ class MatchingServiceTest {
   private DeliveryRequest deliveryRequest(Long id) {
     DeliveryRequest deliveryRequest = new DeliveryRequest();
     deliveryRequest.setId(id);
-    deliveryRequest.setCustomerId(1L);
+    deliveryRequest.setMemberId(1L);
     deliveryRequest.setWeight(10);
     deliveryRequest.setDistance(5);
     deliveryRequest.setStatus(DeliveryStatus.REQUESTED);

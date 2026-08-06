@@ -44,8 +44,11 @@ public class SecurityConfig {
                         HttpMethod.DELETE, "/api/v1/notices/{id}", "/api/v1/notices/{id}/**")
                     .hasRole("ADMIN")
                     .requestMatchers(
+                        "/swagger-ui",
+                        "/swagger-ui/",
                         "/swagger-ui/**",
                         "/swagger-ui.html",
+                        "/v3/api-docs",
                         "/v3/api-docs/**",
                         "/actuator/health",
                         "/error")

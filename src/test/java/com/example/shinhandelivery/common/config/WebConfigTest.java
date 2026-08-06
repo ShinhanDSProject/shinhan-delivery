@@ -25,4 +25,13 @@ class WebConfigTest {
         .andExpect(status().is3xxRedirection())
         .andExpect(redirectedUrl("/home.html"));
   }
+
+  @Test
+  @DisplayName("index.html 경로(\"/index.html\")로 접속하면 홈 화면(/home.html)으로 리다이렉트된다")
+  void indexPathRedirectsToHomePage() throws Exception {
+    mockMvc
+        .perform(get("/index.html"))
+        .andExpect(status().is3xxRedirection())
+        .andExpect(redirectedUrl("/home.html"));
+  }
 }
