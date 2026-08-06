@@ -5,9 +5,9 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
 
 import com.example.shinhandelivery.common.exception.BusinessException;
-import com.example.shinhandelivery.courier.dto.CourierStatusResponse;
-import com.example.shinhandelivery.courier.dto.CourierStatusUpdateRequest;
-import com.example.shinhandelivery.courier.dto.WorkStatus;
+import com.example.shinhandelivery.courier.dto.request.CourierStatusUpdateRequest;
+import com.example.shinhandelivery.courier.dto.response.CourierStatusResponse;
+import com.example.shinhandelivery.courier.entity.WorkStatus;
 import com.example.shinhandelivery.member.entity.Member;
 import com.example.shinhandelivery.member.entity.MemberRole;
 import com.example.shinhandelivery.member.service.MemberService;
@@ -78,5 +78,64 @@ class CourierStatusServiceTest {
     assertThatThrownBy(() -> courierStatusService.updateWorkStatus(memberId, request))
         .isInstanceOf(BusinessException.class)
         .hasMessageContaining("배송원(COURIER) 권한만");
+  }
+
+  @Test
+  @DisplayName("배송원이 OFFLINE으로 퇴근 등록 시 vehicle.status가 BUSY로 업데이트된다")
+  void updateWorkStatusOfflineSuccess() {
+    Long memberId = 3L;
+    Member courier = Member.builder().id(memberId).role(MemberRole.COURIER).build();
+    Vehicle vehicle =
+        Vehicle.builder()
+            .id(30L)
+            .memberId(memberId)
+            .type(VehicleType.CAR)
+            .status(VehicleStatus.AVAILABLE)
+            .latitude(37.7)
+            .longitude(127.2)
+            .build();
+    given(memberService.getById(memberId)).willReturn(courier);
+    given(vehicleService.getVehiclesByOwnerId(memberId)).willReturn(List.of(vehicle));
+
+    CourierStatusUpdateRequest request =
+        new CourierStatusUpdateRequest(WorkStatus.OFFLINE, null, null);
+
+    CourierStatusResponse response = courierStatusService.updateWorkStatus(memberId, request);
+
+    assertThat(response.getWorkStatus()).isEqualTo(WorkStatus.OFFLINE);
+    assertThat(vehicle.getStatus()).isEqualTo(VehicleStatus.BUSY);
+    assertThat(response.getLatitude()).isEqualTo(37.7);
+    assertThat(response.getLongitude()).isEqualTo(127.2);
+  }
+
+  @Test
+  @DisplayName("등록된 차량이 없으면 출근 상태를 변경할 수 없다")
+  void updateWorkStatusWithoutVehicleShouldThrow() {
+    Long memberId = 4L;
+    Member courier = Member.builder().id(memberId).role(MemberRole.COURIER).build();
+    given(memberService.getById(memberId)).willReturn(courier);
+    given(vehicleService.getVehiclesByOwnerId(memberId)).willReturn(List.of());
+
+    CourierStatusUpdateRequest request =
+        new CourierStatusUpdateRequest(WorkStatus.ONLINE, 37.5, 127.0);
+
+    assertThatThrownBy(() -> courierStatusService.updateWorkStatus(memberId, request))
+        .isInstanceOf(BusinessException.class)
+        .hasMessageContaining("등록된 차량");
+  }
+
+  @Test
+  @DisplayName("등록 차량이 없으면 조회 상태는 OFFLINE 기본 좌표를 반환한다")
+  void getWorkStatusWithoutVehicleReturnsOffline() {
+    Long memberId = 5L;
+    Member courier = Member.builder().id(memberId).role(MemberRole.COURIER).build();
+    given(memberService.getById(memberId)).willReturn(courier);
+    given(vehicleService.getVehiclesByOwnerId(memberId)).willReturn(List.of());
+
+    CourierStatusResponse response = courierStatusService.getWorkStatus(memberId);
+
+    assertThat(response.getWorkStatus()).isEqualTo(WorkStatus.OFFLINE);
+    assertThat(response.getLatitude()).isZero();
+    assertThat(response.getLongitude()).isZero();
   }
 }
