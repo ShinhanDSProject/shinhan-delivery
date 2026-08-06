@@ -137,4 +137,16 @@ public class Member {
         .preferredWeight(request.getPreferredWeight())
         .build();
   }
+
+  /** 환경변수 기반 로컬 관리자 시더에서 사용할 관리자 회원을 생성합니다. */
+  public static Member createAdmin(
+      String email, String encodedPassword, String name, String phoneNumber) {
+    return Member.builder()
+        .email(email)
+        .password(encodedPassword)
+        .name(name)
+        .phoneNumber(phoneNumber)
+        .role(MemberRole.ADMIN)
+        .build();
+  }
 }

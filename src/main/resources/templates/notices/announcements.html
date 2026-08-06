@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>공지사항 - Shinhan Delivery</title>
+  <link rel="stylesheet" href="/css/design-system.css">
+  <link rel="stylesheet" href="/css/notice-admin.css">
+</head>
+<body class="notice-page">
+<main class="notice-shell">
+  <header class="notice-header">
+    <a class="btn btn-outline btn-sm" href="/my-page.html" aria-label="마이페이지로 돌아가기">돌아가기</a>
+    <h1 class="typo-title-xs">공지사항</h1>
+    <div id="createAction" class="admin-only" hidden>
+      <th:block th:replace="~{fragments/components :: actionBtn('createButton', '공지 작성', 'btn-primary btn-sm', 'button')}"></th:block>
+    </div>
+  </header>
+
+  <p id="statusMessage" class="notice-status" role="status" aria-live="polite"></p>
+
+  <section id="listView" aria-label="공지사항 목록">
+    <div id="noticeList" class="notice-list" aria-live="polite">
+      <div class="card-box">공지사항을 불러오는 중입니다.</div>
+    </div>
+  </section>
+
+  <article id="detailView" class="card-box notice-detail" hidden aria-live="polite">
+    <div class="notice-detail__heading">
+      <div>
+        <span id="detailCategory" class="badge badge-primary"></span>
+        <h2 id="detailTitle" class="typo-subtitle-md"></h2>
+        <p id="detailMeta" class="notice-meta"></p>
+      </div>
+      <div id="detailActions" class="btn-group admin-only" hidden>
+        <th:block th:replace="~{fragments/components :: actionBtn('editButton', '수정', 'btn-outline btn-sm', 'button')}"></th:block>
+        <th:block th:replace="~{fragments/components :: actionBtn('deleteButton', '삭제', 'btn-danger btn-sm', 'button')}"></th:block>
+      </div>
+    </div>
+    <p id="detailContent" class="notice-content"></p>
+    <th:block th:replace="~{fragments/components :: actionBtn('closeDetailButton', '목록으로', 'btn-outline', 'button')}"></th:block>
+  </article>
+
+  <section id="formView" class="card-box notice-form" hidden aria-labelledby="formTitle">
+    <h2 id="formTitle" class="typo-subtitle-md">공지 작성</h2>
+    <form id="noticeForm" novalidate>
+      <th:block th:replace="~{fragments/components :: inputField('noticeTitle', '제목', 'text', 'title', '공지사항 제목을 입력하세요')}"></th:block>
+      <p id="titleError" class="input-error-text" aria-live="polite"></p>
+      <th:block th:replace="~{fragments/components :: categorySelect('noticeCategory', '카테고리', 'category')}"></th:block>
+      <th:block th:replace="~{fragments/components :: textareaField('noticeContent', '본문', 'content', '공지사항 내용을 입력하세요')}"></th:block>
+      <p id="contentError" class="input-error-text" aria-live="polite"></p>
+      <th:block th:replace="~{fragments/components :: checkboxField('noticePinned', '목록 상단에 고정', 'isPinned')}"></th:block>
+      <div class="btn-group notice-form__actions">
+        <th:block th:replace="~{fragments/components :: primaryBtn('저장')}"></th:block>
+        <th:block th:replace="~{fragments/components :: secondaryBtn('취소')}"></th:block>
+      </div>
+    </form>
+  </section>
+
+  <dialog id="deleteDialog" class="notice-dialog" aria-labelledby="deleteDialogTitle">
+    <h2 id="deleteDialogTitle" class="typo-subtitle-md">공지사항을 삭제할까요?</h2>
+    <p><strong id="deleteNoticeTitle"></strong></p>
+    <p class="notice-meta">삭제한 공지사항은 복구할 수 없습니다.</p>
+    <div class="btn-group">
+      <th:block th:replace="~{fragments/components :: actionBtn('confirmDeleteButton', '삭제', 'btn-danger', 'button')}"></th:block>
+      <th:block th:replace="~{fragments/components :: actionBtn('cancelDeleteButton', '취소', 'btn-outline', 'button')}"></th:block>
+    </div>
+  </dialog>
+</main>
+<script src="/js/notice-admin.js"></script>
+</body>
+</html>

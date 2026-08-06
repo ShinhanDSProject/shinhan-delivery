@@ -32,7 +32,9 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(MethodArgumentNotValidException.class)
   protected ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(
       MethodArgumentNotValidException e) {
-    log.warn("MethodArgumentNotValidException occurred: {}", e.getMessage());
+    log.info(
+        "MethodArgumentNotValidException occurred: fieldErrorCount={}",
+        e.getBindingResult().getFieldErrorCount());
     ErrorCode errorCode = ErrorCode.INVALID_INPUT_VALUE;
     ErrorResponse response = ErrorResponse.of(errorCode, e.getBindingResult());
     return new ResponseEntity<>(response, errorCode.getHttpStatus());
@@ -52,7 +54,7 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(HttpMessageNotReadableException.class)
   protected ResponseEntity<ErrorResponse> handleHttpMessageNotReadableException(
       HttpMessageNotReadableException e) {
-    log.warn("HttpMessageNotReadableException occurred: {}", e.getMessage());
+    log.info("HttpMessageNotReadableException occurred");
     ErrorCode errorCode = ErrorCode.INVALID_INPUT_VALUE;
     ErrorResponse response = ErrorResponse.of(errorCode, "요청 본문의 JSON 형식이 올바르지 않습니다.");
     return new ResponseEntity<>(response, errorCode.getHttpStatus());

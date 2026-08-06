@@ -1,16 +1,14 @@
 package com.example.shinhandelivery.notice.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import java.time.LocalDateTime;
+import com.example.shinhandelivery.notice.dto.request.NoticeCreateRequest;
+import com.example.shinhandelivery.notice.dto.request.NoticeUpdateRequest;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
 
 /** 공지사항 정보 엔티티 클래스입니다. */
 @Entity
@@ -42,4 +40,27 @@ public class Notice {
 
   @Column(nullable = false)
   private LocalDateTime updatedAt;
+
+  /** 관리자 생성 요청을 공지사항 엔티티로 변환합니다. */
+  public static Notice from(NoticeCreateRequest request) {
+    LocalDateTime now = LocalDateTime.now();
+    return Notice.builder()
+        .title(request.getTitle().trim())
+        .content(request.getContent().trim())
+        .category(request.getCategory().trim())
+        .isPinned(request.getIsPinned())
+        .createdAt(now)
+        .updatedAt(now)
+        .build();
+  }
+
+  /** 관리자 수정 요청을 반영하고 최초 생성일시는 유지합니다. */
+  public Notice updateBy(NoticeUpdateRequest request) {
+    this.title = request.getTitle().trim();
+    this.content = request.getContent().trim();
+    this.category = request.getCategory().trim();
+    this.isPinned = request.getIsPinned();
+    this.updatedAt = LocalDateTime.now();
+    return this;
+  }
 }

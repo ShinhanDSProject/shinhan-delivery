@@ -1127,6 +1127,20 @@
 
 ## 9. Thymeleaf Fragment 사용법 (공통 컴포넌트)
 
+공지사항 관리 화면처럼 공통 입력·작업 요소가 필요한 경우 다음 프래그먼트를 사용한다.
+
+```html
+<th:block th:replace="~{fragments/components :: actionBtn('saveButton', '저장', 'btn-primary', 'submit')}"></th:block>
+<th:block th:replace="~{fragments/components :: textareaField('content', '본문', 'content', '내용을 입력하세요')}"></th:block>
+<th:block th:replace="~{fragments/components :: categorySelect('category', '카테고리', 'category')}"></th:block>
+<th:block th:replace="~{fragments/components :: checkboxField('pinned', '상단 고정', 'isPinned')}"></th:block>
+```
+
+- `actionBtn`: ID, 문구, 디자인 시스템 버튼 클래스, HTML 버튼 타입을 받는다.
+- `textareaField`: 공통 레이블과 `.input-field`를 사용하는 여러 줄 입력이다.
+- `categorySelect`: 공지사항 표준 카테고리를 제공하는 선택 입력이다.
+- `checkboxField`: 레이블 전체를 클릭할 수 있는 체크 입력이다.
+
 Thymeleaf 템플릿에서 공통 프래그먼트를 불러와 손쉽게 조립할 수 있습니다:
 
 ---
@@ -1278,4 +1292,3 @@ Thymeleaf 템플릿에서 공통 프래그먼트를 불러와 손쉽게 조립�
 
 > 💡 **Spring Form 바인딩 팁 (th:field)**  
 > Spring DTO 바인딩이 필요한 폼 개발 시, `<input class="input-field" th:field="*{email}">` 형태로 `th:field`를 직접 사용하면 `id`, `name`, `value`가 바인딩 객체 사양에 따라 자동 생성됩니다.
-

@@ -28,6 +28,12 @@ spring:
 app:
   data-seed:
     enabled: ${DATA_SEED_ENABLED:false}
+  admin-seed:
+    enabled: ${ADMIN_SEED_ENABLED:false}
+    email: ${ADMIN_EMAIL:}
+    password: ${ADMIN_PASSWORD:}
+    name: ${ADMIN_NAME:로컬 관리자}
+    phone-number: ${ADMIN_PHONE_NUMBER:010-0000-0000}
   upload:
     dir: ${UPLOAD_DIR:uploads}
     base-url: /uploads

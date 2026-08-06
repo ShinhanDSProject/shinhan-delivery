@@ -1,5 +1,7 @@
 package com.example.shinhandelivery.notice.service;
 
+import com.example.shinhandelivery.notice.dto.request.NoticeCreateRequest;
+import com.example.shinhandelivery.notice.dto.request.NoticeUpdateRequest;
 import com.example.shinhandelivery.notice.entity.Notice;
 import com.example.shinhandelivery.notice.exception.NoticeNotFoundException;
 import com.example.shinhandelivery.notice.repository.NoticeRepository;
@@ -28,5 +30,23 @@ public class NoticeService {
   /** 공지사항 단건 상세 정보를 조회합니다. */
   public Notice getById(Long noticeId) {
     return noticeRepository.findById(noticeId).orElseThrow(NoticeNotFoundException::new);
+  }
+
+  /** 관리자 요청으로 공지사항을 생성합니다. */
+  @Transactional
+  public Notice create(NoticeCreateRequest request) {
+    return noticeRepository.save(Notice.from(request));
+  }
+
+  /** 관리자 요청으로 기존 공지사항을 수정합니다. */
+  @Transactional
+  public Notice update(Long noticeId, NoticeUpdateRequest request) {
+    return getById(noticeId).updateBy(request);
+  }
+
+  /** 관리자 요청으로 기존 공지사항을 물리 삭제합니다. */
+  @Transactional
+  public void delete(Long noticeId) {
+    noticeRepository.delete(getById(noticeId));
   }
 }

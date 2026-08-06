@@ -19,6 +19,14 @@
     취소
   </button>
 
+  <button th:fragment="actionBtn(id, text, variant, type)"
+          th:id="${id}"
+          th:type="${type}"
+          th:class="'btn ' + ${variant}"
+          th:text="${text}">
+    작업
+  </button>
+
   <!-- ==================================================================== -->
   <!-- 2. Social Login Buttons Fragment                                    -->
   <!-- ==================================================================== -->
@@ -40,6 +48,30 @@
            class="input-field"
            th:placeholder="${placeholder}" />
   </div>
+
+  <div th:fragment="textareaField(id, label, name, placeholder)" class="input-group">
+    <label th:for="${id}" class="input-label" th:text="${label}">라벨</label>
+    <textarea th:id="${id}"
+              th:name="${name}"
+              class="input-field"
+              rows="8"
+              th:placeholder="${placeholder}"></textarea>
+  </div>
+
+  <div th:fragment="categorySelect(id, label, name)" class="input-group">
+    <label th:for="${id}" class="input-label" th:text="${label}">카테고리</label>
+    <select th:id="${id}" th:name="${name}" class="input-field">
+      <option value="SYSTEM">시스템</option>
+      <option value="EVENT">이벤트</option>
+      <option value="SERVICE">서비스</option>
+      <option value="ANNOUNCEMENT">일반 공지</option>
+    </select>
+  </div>
+
+  <label th:fragment="checkboxField(id, text, name)" class="checkbox-field">
+    <input th:id="${id}" th:name="${name}" type="checkbox" />
+    <span th:text="${text}">선택</span>
+  </label>
 
   <!-- ==================================================================== -->
   <!-- 4. Card Box Fragment                                                 -->
