@@ -1,7 +1,7 @@
 ---
 metadata:
   version: "1.0.0"
-  ssot_owner: "docs/methodologies/llm-driven-development.md"
+  ssot_owner: "docs/methodologies/LLM-주도-개발.md"
   last_updated: "2026-07-31"
   status: "APPROVED"
 ---

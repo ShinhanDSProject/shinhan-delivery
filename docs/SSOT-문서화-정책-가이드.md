@@ -1,7 +1,7 @@
 ---
 metadata:
   version: "1.1.0"
-  ssot_owner: "docs/ssot-documentation-policy.md"
+  ssot_owner: "docs/SSOT-문서화-정책-가이드.md"
   last_updated: "2026-07-28"
   status: "APPROVED (SSOT Primary)"
 ---
@@ -85,7 +85,7 @@ graph TD
 ---
 metadata:
   version: "1.0.0"
-  ssot_owner: "docs/xxx-guide.md"
+  ssot_owner: "docs/SSOT-문서화-정책-가이드.md"
   last_updated: "2026-07-28"
   status: "APPROVED"
 ---
