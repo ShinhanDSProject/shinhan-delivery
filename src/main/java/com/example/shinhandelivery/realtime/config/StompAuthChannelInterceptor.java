@@ -18,7 +18,8 @@ import org.springframework.util.AntPathMatcher;
 
 /**
  * STOMP CONNECT 시 JWT를 검증해 인증 주체를 세션에 설정하고, SUBSCRIBE 시 채널 접근 권한을 검증한다. 위치(`/location`)와 상태
- * 변경(`/status`) 브로드캐스트 채널은 배송 소유자·배정 배송원 검증을, 오퍼(`/offers`) 채널은 그 차량 소유주 검증을 거친다.
+ * 변경(`/status`) 브로드캐스트 채널은 배송 소유자·배정 배송원 검증을, 오퍼(`/offers`) 채널은 그 차량 소유주 검증을, 알림(`/notifications`)
+ * 채널은 본인 검증을 거친다.
  */
 @Component
 @RequiredArgsConstructor
@@ -26,6 +27,8 @@ public class StompAuthChannelInterceptor implements ChannelInterceptor {
 
   private static final String DELIVERY_DESTINATION_PATTERN = "/topic/delivery/{deliveryId}/**";
   private static final String OFFER_DESTINATION_PATTERN = "/topic/vehicles/{vehicleId}/offers";
+  private static final String NOTIFICATION_DESTINATION_PATTERN =
+      "/topic/members/{memberId}/notifications";
   private static final AntPathMatcher PATH_MATCHER = new AntPathMatcher();
 
   private final JwtProvider jwtProvider;
@@ -80,6 +83,13 @@ public class StompAuthChannelInterceptor implements ChannelInterceptor {
               .get("vehicleId");
       trackingService.assertCanSubscribeToOffers(
           extractMemberId(accessor.getUser()), parseId(rawVehicleId, "오퍼 채널"));
+    } else if (PATH_MATCHER.match(NOTIFICATION_DESTINATION_PATTERN, destination)) {
+      String rawMemberId =
+          PATH_MATCHER
+              .extractUriTemplateVariables(NOTIFICATION_DESTINATION_PATTERN, destination)
+              .get("memberId");
+      trackingService.assertCanSubscribeToNotifications(
+          extractMemberId(accessor.getUser()), parseId(rawMemberId, "알림 채널"));
     }
   }
 
