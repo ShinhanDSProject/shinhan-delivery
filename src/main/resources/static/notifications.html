@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>알림 - Shinhan Delivery</title>
     <link rel="stylesheet" href="/css/design-system.css">
+    <script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@7.0.0/bundles/stomp.umd.min.js"></script>
+    <script src="/js/notification-badge.js"></script>
     <style>
         :root {
             --primary: var(--color-blue-100);
@@ -344,6 +346,23 @@
         location.replace('/login.html');
     } else {
         loadTab(currentTab);
+        subscribeToNotifications((notification) => {
+            if (currentTab !== 'ALL' && currentTab !== 'DELIVERY') {
+                return;
+            }
+            const item = {
+                source: 'notification',
+                id: notification.id,
+                category: notification.category,
+                title: notification.title,
+                body: notification.message,
+                read: notification.read,
+                createdAt: notification.createdAt
+            };
+            const list = document.getElementById('list');
+            list.querySelector('.empty-state')?.remove();
+            list.prepend(renderCard(item));
+        });
     }
 </script>
 </body>
