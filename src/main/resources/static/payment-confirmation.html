@@ -52,6 +52,7 @@
         .modal-actions .secondary-btn, .modal-actions .primary-btn { flex: 1; height: 48px; }
         .toast { position: fixed; left: 50%; bottom: 32px; transform: translateX(-50%); min-width: 200px; max-width: calc(100% - 32px); padding: 12px 16px; border-radius: 999px; color: #fff; background: rgba(17, 24, 39, 0.88); opacity: 0; pointer-events: none; transition: opacity 0.2s ease; text-align: center; font-size: 13px; z-index: 40; }
         .toast.is-visible { opacity: 1; }
+        .hidden { display: none; }
     </style>
 </head>
 <body>
@@ -90,7 +91,7 @@
 
     <div class="cta">
         <button type="button" class="primary-btn" id="payButton" onclick="goToPin()" disabled>결제 PIN 입력하기</button>
-        <button type="button" class="primary-btn" id="chargeButton" onclick="openChargeModal()" style="display:none;">부족한 포인트 충전하기</button>
+        <button type="button" class="primary-btn hidden" id="chargeButton" onclick="openChargeModal()">부족한 포인트 충전하기</button>
         <button type="button" class="secondary-btn" onclick="history.back()">배송 정보 다시 보기</button>
     </div>
 </main>
@@ -204,13 +205,15 @@
                 body: JSON.stringify({ amount, paymentMethod })
             });
 
-            const draft = loadDraft();
-            draft.paymentEstimate.walletBalance = Number(response.balance);
-            saveDraft(draft);
-
-            closeChargeModal();
-            renderState();
             MyPageApi.showToast('포인트 충전이 완료되었습니다.');
+            closeChargeModal();
+
+            const draft = loadDraft();
+            if (draft.paymentEstimate) {
+                draft.paymentEstimate.walletBalance = Number(response.balance);
+                saveDraft(draft);
+            }
+            renderState();
         } catch (error) {
             MyPageApi.showToast(error.message);
         } finally {
@@ -244,15 +247,15 @@
         if (enough) {
             banner.className = 'status-banner ok';
             banner.textContent = '보유 포인트가 충분합니다. 결제를 진행할 수 있습니다.';
-            payButton.style.display = '';
+            payButton.classList.remove('hidden');
             payButton.disabled = false;
-            chargeButton.style.display = 'none';
+            chargeButton.classList.add('hidden');
         } else {
             const shortfall = Math.abs(remaining);
             banner.className = 'status-banner fail';
             banner.textContent = `보유 포인트가 ${formatPoint(shortfall)} 부족합니다. 포인트를 충전한 뒤 결제를 진행해 주세요.`;
-            payButton.style.display = 'none';
-            chargeButton.style.display = '';
+            payButton.classList.add('hidden');
+            chargeButton.classList.remove('hidden');
         }
     }
 
