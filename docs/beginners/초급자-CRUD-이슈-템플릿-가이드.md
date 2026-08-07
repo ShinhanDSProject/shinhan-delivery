@@ -1,7 +1,7 @@
 ---
 metadata:
   version: "1.0.0"
-  ssot_owner: "docs/초급자-CRUD-이슈-템플릿-가이드.md"
+  ssot_owner: "docs/beginners/초급자-CRUD-이슈-템플릿-가이드.md"
   last_updated: "2026-07-28"
   status: "APPROVED (SSOT Primary)"
 ---
@@ -11,7 +11,7 @@ metadata:
 이 문서는 `shinhan-delivery` 프로젝트에서 **개발 초급자가 DTO, Entity, Repository, Service, Controller를 헤매지 않고 라인 바이 라인으로 따라 하며 개발할 수 있도록 제공하는 초상세 이슈 분할 및 템플릿 가이드북**입니다.
 
 > [!NOTE]
-> 본 가이드북은 [docs/SSOT-문서화-정책-가이드.md](./SSOT-문서화-정책-가이드.md) 단일 원본 원칙과 [code-convention.md](../code-convention.md) 단방향 의존성 규칙을 100% 준수합니다.
+> 본 가이드북은 [docs/architecture/SSOT-문서화-정책-가이드.md](./SSOT-문서화-정책-가이드.md) 단일 원본 원칙과 [code-convention.md](../code-convention.md) 단방향 의존성 규칙을 100% 준수합니다.
 
 ---
 
@@ -80,9 +80,9 @@ graph TD
 
 ## 📖 3. 참고할 SSOT 가이드북 마크다운 링크
 * [코딩 컨벤션 수칙 (code-convention.md)](../code-convention.md)
-* [전역 예외 처리 가이드 (docs/전역-예외-처리-규격-가이드.md)](./전역-예외-처리-규격-가이드.md)
-* [PR 리뷰어 3분 족보 가이드 (docs/PR-리뷰어-3분-족보-가이드.md)](./PR-리뷰어-3분-족보-가이드.md)
-* [초급 개발자 7단계 태스크 가이드 (docs/초급-개발자-태스크-분할-가이드.md)](./초급-개발자-태스크-분할-가이드.md)
+* [전역 예외 처리 가이드 (docs/architecture/전역-예외-처리-규격-가이드.md)](./전역-예외-처리-규격-가이드.md)
+* [PR 리뷰어 3분 족보 가이드 (docs/harness/PR-리뷰어-3분-족보-가이드.md)](./PR-리뷰어-3분-족보-가이드.md)
+* [초급 개발자 7단계 태스크 가이드 (docs/beginners/초급-개발자-태스크-분할-가이드.md)](./초급-개발자-태스크-분할-가이드.md)
 ```
 
 ---

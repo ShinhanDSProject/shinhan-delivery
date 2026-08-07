@@ -1,7 +1,7 @@
 ---
 metadata:
   version: "1.1.0"
-  ssot_owner: "docs/보안-및-JWT-가이드.md"
+  ssot_owner: "docs/architecture/보안-및-JWT-가이드.md"
   last_updated: "2026-07-28"
   status: "APPROVED (SSOT Primary)"
 ---
