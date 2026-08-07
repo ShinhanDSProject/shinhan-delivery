@@ -13,11 +13,9 @@ import com.example.shinhandelivery.payment.dto.response.PinVerifyResponseDto;
 import com.example.shinhandelivery.payment.dto.response.PointBalanceResponse;
 import com.example.shinhandelivery.payment.dto.response.PointUseResultResponse;
 import com.example.shinhandelivery.payment.entity.PointHistory;
-import com.example.shinhandelivery.payment.entity.PointHistoryType;
 import com.example.shinhandelivery.payment.entity.PointWallet;
 import com.example.shinhandelivery.payment.repository.PaymentRepository;
 import com.example.shinhandelivery.payment.repository.PointHistoryRepository;
-import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -90,19 +88,16 @@ public class PaymentService {
 
     PointWallet wallet = findWalletByMemberForUpdateOrThrow(memberId).charge(request.getAmount());
 
-    LocalDateTime chargedAt = LocalDateTime.now();
-    pointHistoryRepository.save(
-        PointHistory.builder()
-            .memberId(memberId)
-            .walletId(wallet.getId())
-            .amount(request.getAmount())
-            .balanceAfter(wallet.getBalance())
-            .type(PointHistoryType.CHARGE)
-            .paymentMethod(request.getPaymentMethod())
-            .idempotencyKey(idempotencyKey)
-            .createdAt(chargedAt)
-            .build());
-    return new PointBalanceResponse(wallet.getBalance(), chargedAt);
+    PointHistory history =
+        pointHistoryRepository.save(
+            PointHistory.ofCharge(
+                memberId,
+                wallet.getId(),
+                request.getAmount(),
+                wallet.getBalance(),
+                request.getPaymentMethod(),
+                idempotencyKey));
+    return new PointBalanceResponse(wallet.getBalance(), history.getCreatedAt());
   }
 
   @Transactional
@@ -125,18 +120,16 @@ public class PaymentService {
     }
 
     PointWallet wallet = findWalletByMemberForUpdateOrThrow(memberId).use(request.getAmount());
-    LocalDateTime paidAt = LocalDateTime.now();
-    pointHistoryRepository.save(
-        PointHistory.builder()
-            .memberId(memberId)
-            .walletId(wallet.getId())
-            .amount(request.getAmount())
-            .balanceAfter(wallet.getBalance())
-            .type(PointHistoryType.USE)
-            .idempotencyKey(idempotencyKey)
-            .createdAt(paidAt)
-            .build());
-    return new PointUseResultResponse(wallet.getBalance(), request.getAmount(), paidAt);
+    PointHistory history =
+        pointHistoryRepository.save(
+            PointHistory.ofUse(
+                memberId,
+                wallet.getId(),
+                request.getAmount(),
+                wallet.getBalance(),
+                idempotencyKey));
+    return new PointUseResultResponse(
+        wallet.getBalance(), request.getAmount(), history.getCreatedAt());
   }
 
   @Transactional

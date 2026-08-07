@@ -8,6 +8,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.example.shinhandelivery.common.domain.Location;
 import com.example.shinhandelivery.common.exception.EntityNotFoundException;
 import com.example.shinhandelivery.common.exception.ErrorCode;
 import com.example.shinhandelivery.vehicle.dto.request.VehicleCreateRequest;
@@ -48,8 +49,7 @@ class VehicleControllerTest {
             .type(VehicleType.CAR)
             .maxWeight(500)
             .maxDistance(100)
-            .latitude(37.5)
-            .longitude(127.0)
+            .location(Location.of(37.5, 127.0))
             .status(VehicleStatus.AVAILABLE)
             .build();
     when(vehicleService.create(any())).thenReturn(vehicle);

@@ -1,5 +1,6 @@
 package com.example.shinhandelivery.delivery.service;
 
+import com.example.shinhandelivery.common.domain.Location;
 import com.example.shinhandelivery.common.exception.EntityNotFoundException;
 import com.example.shinhandelivery.common.exception.ErrorCode;
 import com.example.shinhandelivery.delivery.dto.request.DeliveryCompleteRequest;
@@ -64,10 +65,7 @@ public class DeliveryService {
 
     double distanceKm =
         deliveryFeeCalculator.calculateDistanceKm(
-            request.getPickupLatitude(),
-            request.getPickupLongitude(),
-            request.getDropoffLatitude(),
-            request.getDropoffLongitude());
+            request.getPickupLocation(), request.getDropoffLocation());
 
     DeliveryEstimateResponse fee =
         deliveryFeeCalculator.calculateFee(distanceKm, request.getWeight(), request.getItemSize());
@@ -84,10 +82,7 @@ public class DeliveryService {
   public DeliveryEstimateResponse estimateFee(DeliveryEstimateRequest request) {
     double distanceKm =
         deliveryFeeCalculator.calculateDistanceKm(
-            request.getPickupLatitude(),
-            request.getPickupLongitude(),
-            request.getDestinationLatitude(),
-            request.getDestinationLongitude());
+            request.getPickupLocation(), request.getDestinationLocation());
 
     return deliveryFeeCalculator.calculateFee(
         distanceKm, request.getWeight(), request.getItemSize());
@@ -113,10 +108,9 @@ public class DeliveryService {
                 () -> {
                   double distanceKm =
                       deliveryFeeCalculator.calculateDistanceKm(
-                          request.getPickup().getLat(),
-                          request.getPickup().getLng(),
-                          request.getDropoff().getLat(),
-                          request.getDropoff().getLng());
+                          Location.of(request.getPickup().getLat(), request.getPickup().getLng()),
+                          Location.of(
+                              request.getDropoff().getLat(), request.getDropoff().getLng()));
 
                   DeliveryRequest created =
                       DeliveryRequest.of(

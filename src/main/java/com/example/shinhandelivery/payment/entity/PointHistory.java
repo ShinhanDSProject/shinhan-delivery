@@ -66,4 +66,38 @@ public class PointHistory {
 
   @Column(name = "created_at", nullable = false)
   private LocalDateTime createdAt;
+
+  /** 포인트 충전 이력을 생성하는 정적 팩토리 메서드. */
+  public static PointHistory ofCharge(
+      Long memberId,
+      Long walletId,
+      long amount,
+      long balanceAfter,
+      PaymentMethod paymentMethod,
+      String idempotencyKey) {
+    return PointHistory.builder()
+        .memberId(memberId)
+        .walletId(walletId)
+        .amount(amount)
+        .balanceAfter(balanceAfter)
+        .type(PointHistoryType.CHARGE)
+        .paymentMethod(paymentMethod)
+        .idempotencyKey(idempotencyKey)
+        .createdAt(LocalDateTime.now())
+        .build();
+  }
+
+  /** 포인트 차감/사용 이력을 생성하는 정적 팩토리 메서드. */
+  public static PointHistory ofUse(
+      Long memberId, Long walletId, long amount, long balanceAfter, String idempotencyKey) {
+    return PointHistory.builder()
+        .memberId(memberId)
+        .walletId(walletId)
+        .amount(amount)
+        .balanceAfter(balanceAfter)
+        .type(PointHistoryType.USE)
+        .idempotencyKey(idempotencyKey)
+        .createdAt(LocalDateTime.now())
+        .build();
+  }
 }

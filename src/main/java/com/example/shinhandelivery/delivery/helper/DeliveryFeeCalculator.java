@@ -1,5 +1,6 @@
 package com.example.shinhandelivery.delivery.helper;
 
+import com.example.shinhandelivery.common.domain.Location;
 import com.example.shinhandelivery.delivery.dto.response.DeliveryEstimateResponse;
 import com.example.shinhandelivery.delivery.entity.ItemSize;
 import java.math.BigDecimal;
@@ -13,25 +14,18 @@ import org.springframework.stereotype.Component;
 @Component
 public class DeliveryFeeCalculator {
 
-  private static final double EARTH_RADIUS_KM = 6371.0;
   private static final BigDecimal ESTIMATE_BASE_FEE = BigDecimal.valueOf(3000);
   private static final BigDecimal ESTIMATE_FEE_PER_KM = BigDecimal.valueOf(500);
   private static final BigDecimal ESTIMATE_FEE_PER_KG = BigDecimal.valueOf(200);
   private static final BigDecimal SIZE_SURCHARGE_RATE_MEDIUM = BigDecimal.valueOf(0.30);
   private static final BigDecimal SIZE_SURCHARGE_RATE_LARGE = BigDecimal.valueOf(0.60);
 
-  /** 두 좌표(위도/경도) 간의 대권 거리를 하버사인 공식으로 계산한다(단위: km). */
-  public double calculateDistanceKm(double lat1, double lon1, double lat2, double lon2) {
-    double dLat = Math.toRadians(lat2 - lat1);
-    double dLon = Math.toRadians(lon2 - lon1);
-    double a =
-        Math.sin(dLat / 2) * Math.sin(dLat / 2)
-            + Math.cos(Math.toRadians(lat1))
-                * Math.cos(Math.toRadians(lat2))
-                * Math.sin(dLon / 2)
-                * Math.sin(dLon / 2);
-    double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return EARTH_RADIUS_KM * c;
+  /** Location 값 객체를 받아 두 좌표 간의 대권 거리를 계산한다(단위: km). */
+  public double calculateDistanceKm(Location start, Location destination) {
+    if (start == null || destination == null) {
+      throw new IllegalArgumentException("출발지(start)와 목적지(destination) 위치는 null일 수 없습니다.");
+    }
+    return start.distanceToKm(destination);
   }
 
   /**

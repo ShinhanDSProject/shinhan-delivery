@@ -55,14 +55,19 @@ public class Matching {
   @Column(name = "matched_at", nullable = false)
   private LocalDateTime matchedAt;
 
-  /** MatchingCreateRequest DTO 기반으로 MATCHED 상태의 Matching 엔티티를 생성하는 정적 팩토리 메서드. */
-  public static Matching from(MatchingCreateRequest request) {
+  /** deliveryRequestId와 vehicleId를 받아 MATCHED 상태의 Matching 엔티티를 생성하는 정적 팩토리 메서드. */
+  public static Matching of(Long deliveryRequestId, Long vehicleId) {
     return Matching.builder()
-        .deliveryRequestId(request.getDeliveryRequestId())
-        .vehicleId(request.getVehicleId())
+        .deliveryRequestId(deliveryRequestId)
+        .vehicleId(vehicleId)
         .status(MatchingStatus.MATCHED)
         .matchedAt(LocalDateTime.now())
         .build();
+  }
+
+  /** MatchingCreateRequest DTO 기반으로 MATCHED 상태의 Matching 엔티티를 생성하는 정적 팩토리 메서드. */
+  public static Matching from(MatchingCreateRequest request) {
+    return of(request.getDeliveryRequestId(), request.getVehicleId());
   }
 
   /** 매칭 상태를 변경하는 도메인 비즈니스 메서드. */

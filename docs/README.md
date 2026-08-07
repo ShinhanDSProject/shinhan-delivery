@@ -43,7 +43,7 @@ graph TD
 
 ---
 
-### 2. 🏛️ [`docs/architecture/`](./architecture/) — 핵심 시스템 아키텍처 & 유저플로우 (11종)
+### 2. 🏛️ [`docs/architecture/`](./architecture/) — 핵심 시스템 아키텍처 & 유저플로우 (14종)
 서버, 데이터베이스, 보안, REST API, 프론트엔드 디자인 시스템 및 E2E 유저 플로우의 표준 규격입니다.
 * 📖 [**전체 E2E 유저 플로우 & 화면-서비스 매핑 가이드**](./architecture/전체-유저-플로우-가이드.md) — E2E 여정 및 7대 도메인 딥다이브 맵
 * 📖 [**RESTful API 설계 규격 가이드**](./architecture/REST-API-설계-규격-가이드.md) — REST API 자원/행위 매핑 및 HTTP 상태 응답 규격
@@ -56,10 +56,13 @@ graph TD
 * 📖 [**프로젝트 스펙 및 태스크 분할**](./architecture/프로젝트-스펙-및-태스크-분할.md) — 10대 모듈 30+ REST API 스펙
 * 📖 [**프로젝트 지식 그래프**](./architecture/프로젝트-지식-그래프.md) — 기술 스택 및 지식 노드 관계도
 * 📖 [**단일 원본(SSOT) 문서화 정책 가이드**](./architecture/SSOT-문서화-정책-가이드.md) — 지식 자산 일원화 및 매핑 레지스트리
+* 📖 [**배송원 API 표준 명세서**](./architecture/courier-api-specification.md) — 배송원 워크스페이스 & 배송 매칭 API 명세서
+* 📖 [**배송원 ERD 명세서**](./architecture/courier-erd-specification.md) — 배송원 및 매칭 시스템 데이터 모델 명세서
+* 📖 [**배송원 매칭 가이드**](./architecture/rider-matching-guide.md) — 배송원 출근 및 동시성 제어 주문 매칭 가이드
 
 ---
 
-### 3. 🛡️ [`docs/harness/`](./harness/) — 품질 검증 하네스 & DevOps (8종)
+### 3. 🛡️ [`docs/harness/`](./harness/) — 품질 검증 하네스 & DevOps (9종)
 결함 0개를 사수하기 위한 자동화 테스트 하네스, CI/CD 및 Git 커밋/PR 절칙입니다.
 * 📖 [**테스트 하네스 판단 및 통제 정책**](./harness/테스트-하네스-판단-및-통제-정책.md) — 6대 통제 정책 및 자가 치유 피드백 루프
 * 📖 [**테스트 하네스 & LLM 가이드**](./harness/테스트-하네스-및-LLM-가이드.md) — AI 에이전트 자동 검증 프로세스
@@ -69,6 +72,7 @@ graph TD
 * 📖 [**기능 설계 2단계 PR 절차 가이드**](./harness/기능-설계-2단계-PR-절차-가이드.md) — 2단계 PR 전략 및 사전 산출물
 * 📖 [**개발자 환경 설정 가이드**](./harness/개발자-환경-설정-가이드.md) — 로컬 개발 환경 및 도구 세팅
 * 📖 [**트러블슈팅 가이드**](./harness/트러블슈팅-가이드.md) — 자주 발생하는 빌드 및 DB 마이그레이션 에러 해결집
+* 📖 [**이슈 구현 계획서**](./harness/implementation_plan.md) — Phase 1 출근 및 배송 매칭 구현 계획서
 
 ---
 

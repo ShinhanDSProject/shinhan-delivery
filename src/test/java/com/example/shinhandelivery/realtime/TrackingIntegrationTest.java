@@ -252,9 +252,9 @@ class TrackingIntegrationTest {
     }
   }
 
-  private Long createAvailableVehicle(Long ownerId) {
+  private Long createAvailableVehicle(Long memberId) {
     Vehicle vehicle = new Vehicle();
-    vehicle.setMemberId(ownerId);
+    vehicle.setMemberId(memberId);
     vehicle.setType(VehicleType.CAR);
     vehicle.setMaxWeight(500);
     vehicle.setMaxDistance(500);

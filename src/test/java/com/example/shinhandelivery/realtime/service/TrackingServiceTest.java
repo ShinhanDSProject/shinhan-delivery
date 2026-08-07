@@ -5,6 +5,7 @@ import static org.mockito.Mockito.when;
 
 import com.example.shinhandelivery.delivery.service.DeliveryService;
 import com.example.shinhandelivery.delivery.service.MatchingService;
+import com.example.shinhandelivery.realtime.exception.UnauthorizedNotificationAccessException;
 import com.example.shinhandelivery.realtime.exception.UnauthorizedOfferAccessException;
 import com.example.shinhandelivery.vehicle.entity.Vehicle;
 import com.example.shinhandelivery.vehicle.service.VehicleService;
@@ -42,5 +43,18 @@ class TrackingServiceTest {
 
     assertThatThrownBy(() -> trackingService.assertCanSubscribeToOffers(999L, 2L))
         .isInstanceOf(UnauthorizedOfferAccessException.class);
+  }
+
+  @Test
+  @DisplayName("본인은 자신의 알림 채널을 구독할 수 있다")
+  void assertCanSubscribeToNotificationsSelfShouldPass() {
+    trackingService.assertCanSubscribeToNotifications(1L, 1L);
+  }
+
+  @Test
+  @DisplayName("본인이 아니면 알림 채널 구독 시 UnauthorizedNotificationAccessException을 던진다")
+  void assertCanSubscribeToNotificationsNonSelfShouldThrowException() {
+    assertThatThrownBy(() -> trackingService.assertCanSubscribeToNotifications(1L, 999L))
+        .isInstanceOf(UnauthorizedNotificationAccessException.class);
   }
 }
