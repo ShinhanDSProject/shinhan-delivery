@@ -50,3 +50,4 @@ public class NoticeService {
     noticeRepository.delete(getById(noticeId));
   }
 }
+
