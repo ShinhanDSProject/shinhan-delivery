@@ -8,7 +8,6 @@ import com.example.shinhandelivery.courier.entity.WorkStatus;
 import com.example.shinhandelivery.member.entity.MemberRole;
 import com.example.shinhandelivery.vehicle.entity.Vehicle;
 import com.example.shinhandelivery.vehicle.entity.VehicleStatus;
-import com.example.shinhandelivery.vehicle.repository.VehicleRepository;
 import com.example.shinhandelivery.vehicle.service.VehicleService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -20,13 +19,12 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class CourierStatusService {
 
-  private final VehicleRepository vehicleRepository;
   private final VehicleService vehicleService;
 
   /** 배송원 영업 상태(ONLINE/OFFLINE) 및 GPS 위치를 변경한다. (Fetch Join 1개 쿼리로 처리) */
   @Transactional
   public CourierStatusResponse updateWorkStatus(Long memberId, CourierStatusUpdateRequest request) {
-    List<Vehicle> vehicles = vehicleRepository.findAllByMemberIdWithMember(memberId);
+    List<Vehicle> vehicles = vehicleService.getVehiclesWithMemberByMemberId(memberId);
     if (vehicles.isEmpty()) {
       throw new BusinessException(ErrorCode.VEHICLE_NOT_FOUND, "등록된 차량(운송수단)이 없어 출근할 수 없습니다.");
     }

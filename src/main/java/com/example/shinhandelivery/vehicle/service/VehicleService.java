@@ -52,6 +52,12 @@ public class VehicleService {
     return vehicleRepository.findAllByMemberId(memberId);
   }
 
+  /** 소유자(MemberId) 기준 차량과 Member 정보를 Fetch Join으로 한 번에 조회한다. */
+  @Transactional(readOnly = true)
+  public List<Vehicle> getVehiclesWithMemberByMemberId(Long memberId) {
+    return vehicleRepository.findAllByMemberIdWithMember(memberId);
+  }
+
   /** 전체 Vehicle 목록을 조회한다. */
   @Transactional(readOnly = true)
   public List<Vehicle> list() {
