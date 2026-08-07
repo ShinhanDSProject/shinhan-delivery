@@ -20,6 +20,9 @@ public interface DeliveryRequestRepository extends JpaRepository<DeliveryRequest
   @Query("select d from DeliveryRequest d where d.id = :id")
   Optional<DeliveryRequest> findByIdForUpdate(@Param("id") Long id);
 
+  /** 주어진 상태의 배송 요청 목록을 DB 조회 시점에 필터링하여 가져온다. */
+  List<DeliveryRequest> findAllByStatus(DeliveryStatus status);
+
   /** 주어진 상태이면서 무게·거리를 모두 그 값 이하로 감당 가능한 배송 요청 목록을 조회한다(차량의 콜 목록용). */
   List<DeliveryRequest> findByStatusAndWeightLessThanEqualAndDistanceLessThanEqual(
       DeliveryStatus status, double weight, double distance);

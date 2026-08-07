@@ -1,5 +1,6 @@
 package com.example.shinhandelivery.delivery.service;
 
+import com.example.shinhandelivery.common.domain.Location;
 import com.example.shinhandelivery.common.exception.BusinessException;
 import com.example.shinhandelivery.common.exception.EntityNotFoundException;
 import com.example.shinhandelivery.common.exception.ErrorCode;
@@ -7,7 +8,6 @@ import com.example.shinhandelivery.delivery.dto.response.AvailableDeliveryRespon
 import com.example.shinhandelivery.delivery.entity.DeliveryRequest;
 import com.example.shinhandelivery.delivery.entity.DeliveryStatus;
 import com.example.shinhandelivery.delivery.entity.Matching;
-import com.example.shinhandelivery.delivery.entity.MatchingStatus;
 import com.example.shinhandelivery.delivery.exception.AlreadyMatchedException;
 import com.example.shinhandelivery.delivery.helper.DeliveryFeeCalculator;
 import com.example.shinhandelivery.delivery.repository.DeliveryRequestRepository;
@@ -18,12 +18,10 @@ import com.example.shinhandelivery.member.service.MemberService;
 import com.example.shinhandelivery.vehicle.entity.Vehicle;
 import com.example.shinhandelivery.vehicle.entity.VehicleStatus;
 import com.example.shinhandelivery.vehicle.service.VehicleService;
-import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -64,16 +62,15 @@ public class DeliveryMatchingService {
     final double refLon = currentLon;
 
     List<DeliveryRequest> requestedDeliveries =
-        deliveryRequestRepository.findAll().stream()
-            .filter(d -> d.getStatus() == DeliveryStatus.REQUESTED)
-            .toList();
+        deliveryRequestRepository.findAllByStatus(DeliveryStatus.REQUESTED);
+
+    Location courierLocation = Location.of(refLat, refLon);
 
     return requestedDeliveries.stream()
         .map(
             d -> {
               double distanceToPickup =
-                  feeCalculator.calculateDistanceKm(
-                      refLat, refLon, d.getPickupLatitude(), d.getPickupLongitude());
+                  feeCalculator.calculateDistanceKm(courierLocation, d.getPickupLocation());
               return AvailableDeliveryResponse.builder()
                   .deliveryRequestId(d.getId())
                   .pickupAddress(d.getPickupAddress())
@@ -122,7 +119,7 @@ public class DeliveryMatchingService {
     try {
       DeliveryRequest deliveryRequest =
           deliveryRequestRepository
-              .findById(deliveryRequestId)
+              .findByIdForUpdate(deliveryRequestId)
               .orElseThrow(() -> new EntityNotFoundException(ErrorCode.DELIVERY_NOT_FOUND));
 
       if (deliveryRequest.getStatus() != DeliveryStatus.REQUESTED) {
@@ -132,17 +129,11 @@ public class DeliveryMatchingService {
       deliveryRequest.setStatus(DeliveryStatus.MATCHED);
       deliveryRequestRepository.saveAndFlush(deliveryRequest);
 
-      Matching matching =
-          Matching.builder()
-              .deliveryRequestId(deliveryRequestId)
-              .vehicleId(vehicle.getId())
-              .status(MatchingStatus.MATCHED)
-              .matchedAt(LocalDateTime.now())
-              .build();
+      Matching matching = Matching.of(deliveryRequestId, vehicle.getId());
 
       return matchingRepository.saveAndFlush(matching);
 
-    } catch (OptimisticLockingFailureException | DataIntegrityViolationException e) {
+    } catch (DataIntegrityViolationException e) {
       throw new AlreadyMatchedException(deliveryRequestId, DeliveryStatus.MATCHED);
     }
   }

@@ -5,11 +5,10 @@ import com.example.shinhandelivery.common.exception.ErrorCode;
 import com.example.shinhandelivery.courier.dto.request.CourierStatusUpdateRequest;
 import com.example.shinhandelivery.courier.dto.response.CourierStatusResponse;
 import com.example.shinhandelivery.courier.entity.WorkStatus;
-import com.example.shinhandelivery.member.entity.Member;
 import com.example.shinhandelivery.member.entity.MemberRole;
-import com.example.shinhandelivery.member.service.MemberService;
 import com.example.shinhandelivery.vehicle.entity.Vehicle;
 import com.example.shinhandelivery.vehicle.entity.VehicleStatus;
+import com.example.shinhandelivery.vehicle.repository.VehicleRepository;
 import com.example.shinhandelivery.vehicle.service.VehicleService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -21,24 +20,22 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class CourierStatusService {
 
-  private final MemberService memberService;
+  private final VehicleRepository vehicleRepository;
   private final VehicleService vehicleService;
 
-  /** 배송원 영업 상태(ONLINE/OFFLINE) 및 GPS 위치를 변경한다. */
+  /** 배송원 영업 상태(ONLINE/OFFLINE) 및 GPS 위치를 변경한다. (Fetch Join 1개 쿼리로 처리) */
   @Transactional
   public CourierStatusResponse updateWorkStatus(Long memberId, CourierStatusUpdateRequest request) {
-    Member member = memberService.getById(memberId);
-
-    if (member.getRole() != MemberRole.COURIER) {
-      throw new BusinessException(ErrorCode.ACCESS_DENIED, "배송원(COURIER) 권한만 영업 상태를 설정할 수 있습니다.");
-    }
-
-    List<Vehicle> vehicles = vehicleService.getVehiclesByMemberId(memberId);
+    List<Vehicle> vehicles = vehicleRepository.findAllByMemberIdWithMember(memberId);
     if (vehicles.isEmpty()) {
       throw new BusinessException(ErrorCode.VEHICLE_NOT_FOUND, "등록된 차량(운송수단)이 없어 출근할 수 없습니다.");
     }
 
     Vehicle vehicle = vehicles.get(0);
+    if (vehicle.getMember().getRole() != MemberRole.COURIER) {
+      throw new BusinessException(ErrorCode.ACCESS_DENIED, "배송원(COURIER) 권한만 영업 상태를 설정할 수 있습니다.");
+    }
+
     WorkStatus workStatus = request.getStatus();
 
     if (workStatus == WorkStatus.ONLINE) {
@@ -47,9 +44,8 @@ public class CourierStatusService {
       vehicle.setStatus(VehicleStatus.BUSY);
     }
 
-    if (request.getLatitude() != null && request.getLongitude() != null) {
-      vehicle.setLatitude(request.getLatitude());
-      vehicle.setLongitude(request.getLongitude());
+    if (request.getLocation() != null) {
+      vehicle.setLocation(request.getLocation());
     }
 
     return CourierStatusResponse.builder()
@@ -60,11 +56,9 @@ public class CourierStatusService {
         .build();
   }
 
-  /** 배송원의 현재 영업 상태를 조회한다. */
+  /** 배송원의 현재 영업 상태를 조회한다. (미사용 Member 조회 삭제) */
   @Transactional(readOnly = true)
   public CourierStatusResponse getWorkStatus(Long memberId) {
-    Member member = memberService.getById(memberId);
-
     List<Vehicle> vehicles = vehicleService.getVehiclesByMemberId(memberId);
     if (vehicles.isEmpty()) {
       return CourierStatusResponse.builder()

@@ -4,16 +4,17 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
 
+import com.example.shinhandelivery.common.domain.Location;
 import com.example.shinhandelivery.common.exception.BusinessException;
 import com.example.shinhandelivery.courier.dto.request.CourierStatusUpdateRequest;
 import com.example.shinhandelivery.courier.dto.response.CourierStatusResponse;
 import com.example.shinhandelivery.courier.entity.WorkStatus;
 import com.example.shinhandelivery.member.entity.Member;
 import com.example.shinhandelivery.member.entity.MemberRole;
-import com.example.shinhandelivery.member.service.MemberService;
 import com.example.shinhandelivery.vehicle.entity.Vehicle;
 import com.example.shinhandelivery.vehicle.entity.VehicleStatus;
 import com.example.shinhandelivery.vehicle.entity.VehicleType;
+import com.example.shinhandelivery.vehicle.repository.VehicleRepository;
 import com.example.shinhandelivery.vehicle.service.VehicleService;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
@@ -26,7 +27,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class CourierStatusServiceTest {
 
-  @Mock private MemberService memberService;
+  @Mock private VehicleRepository vehicleRepository;
   @Mock private VehicleService vehicleService;
 
   @InjectMocks private CourierStatusService courierStatusService;
@@ -41,14 +42,13 @@ class CourierStatusServiceTest {
         Vehicle.builder()
             .id(10L)
             .memberId(memberId)
+            .member(courier)
             .type(VehicleType.MOTORCYCLE)
             .status(VehicleStatus.BUSY)
-            .latitude(37.5)
-            .longitude(127.0)
+            .location(Location.of(37.5, 127.0))
             .build();
 
-    given(memberService.getById(memberId)).willReturn(courier);
-    given(vehicleService.getVehiclesByMemberId(memberId)).willReturn(List.of(vehicle));
+    given(vehicleRepository.findAllByMemberIdWithMember(memberId)).willReturn(List.of(vehicle));
 
     CourierStatusUpdateRequest request =
         new CourierStatusUpdateRequest(WorkStatus.ONLINE, 37.5665, 126.9780);
@@ -69,8 +69,17 @@ class CourierStatusServiceTest {
     // given
     Long memberId = 2L;
     Member customer = Member.builder().id(memberId).role(MemberRole.CUSTOMER).build();
+    Vehicle vehicle =
+        Vehicle.builder()
+            .id(20L)
+            .memberId(memberId)
+            .member(customer)
+            .type(VehicleType.CAR)
+            .status(VehicleStatus.BUSY)
+            .location(Location.of(37.5, 127.0))
+            .build();
 
-    given(memberService.getById(memberId)).willReturn(customer);
+    given(vehicleRepository.findAllByMemberIdWithMember(memberId)).willReturn(List.of(vehicle));
     CourierStatusUpdateRequest request =
         new CourierStatusUpdateRequest(WorkStatus.ONLINE, 37.5, 127.0);
 
@@ -89,13 +98,13 @@ class CourierStatusServiceTest {
         Vehicle.builder()
             .id(30L)
             .memberId(memberId)
+            .member(courier)
             .type(VehicleType.CAR)
             .status(VehicleStatus.AVAILABLE)
-            .latitude(37.7)
-            .longitude(127.2)
+            .location(Location.of(37.7, 127.2))
             .build();
-    given(memberService.getById(memberId)).willReturn(courier);
-    given(vehicleService.getVehiclesByMemberId(memberId)).willReturn(List.of(vehicle));
+
+    given(vehicleRepository.findAllByMemberIdWithMember(memberId)).willReturn(List.of(vehicle));
 
     CourierStatusUpdateRequest request =
         new CourierStatusUpdateRequest(WorkStatus.OFFLINE, null, null);
@@ -112,9 +121,7 @@ class CourierStatusServiceTest {
   @DisplayName("등록된 차량이 없으면 출근 상태를 변경할 수 없다")
   void updateWorkStatusWithoutVehicleShouldThrow() {
     Long memberId = 4L;
-    Member courier = Member.builder().id(memberId).role(MemberRole.COURIER).build();
-    given(memberService.getById(memberId)).willReturn(courier);
-    given(vehicleService.getVehiclesByMemberId(memberId)).willReturn(List.of());
+    given(vehicleRepository.findAllByMemberIdWithMember(memberId)).willReturn(List.of());
 
     CourierStatusUpdateRequest request =
         new CourierStatusUpdateRequest(WorkStatus.ONLINE, 37.5, 127.0);
@@ -128,8 +135,6 @@ class CourierStatusServiceTest {
   @DisplayName("등록 차량이 없으면 조회 상태는 OFFLINE 기본 좌표를 반환한다")
   void getWorkStatusWithoutVehicleReturnsOffline() {
     Long memberId = 5L;
-    Member courier = Member.builder().id(memberId).role(MemberRole.COURIER).build();
-    given(memberService.getById(memberId)).willReturn(courier);
     given(vehicleService.getVehiclesByMemberId(memberId)).willReturn(List.of());
 
     CourierStatusResponse response = courierStatusService.getWorkStatus(memberId);

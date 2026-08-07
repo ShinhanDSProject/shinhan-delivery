@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 
+import com.example.shinhandelivery.common.domain.Location;
 import com.example.shinhandelivery.delivery.dto.response.AvailableDeliveryResponse;
 import com.example.shinhandelivery.delivery.entity.DeliveryRequest;
 import com.example.shinhandelivery.delivery.entity.DeliveryStatus;
@@ -54,8 +55,8 @@ class DeliveryMatchingServiceTest {
         DeliveryRequest.builder()
             .id(101L)
             .pickupAddress("가까운 픽업지")
-            .pickupLatitude(37.5670)
-            .pickupLongitude(126.9785)
+            .pickupLocation(Location.of(37.5670, 126.9785))
+            .dropoffLocation(Location.of(37.5600, 126.9800))
             .dropoffAddress("도착지1")
             .weight(2.0)
             .distance(1.5)
@@ -69,8 +70,8 @@ class DeliveryMatchingServiceTest {
         DeliveryRequest.builder()
             .id(102L)
             .pickupAddress("먼 픽업지")
-            .pickupLatitude(37.6000)
-            .pickupLongitude(127.1000)
+            .pickupLocation(Location.of(37.6000, 127.1000))
+            .dropoffLocation(Location.of(37.5600, 126.9800))
             .dropoffAddress("도착지2")
             .weight(3.0)
             .distance(5.0)
@@ -81,11 +82,18 @@ class DeliveryMatchingServiceTest {
             .build();
 
     given(memberService.getById(courierId)).willReturn(courier);
-    given(deliveryRequestRepository.findAll()).willReturn(List.of(nearRequest, farRequest));
+    given(deliveryRequestRepository.findAllByStatus(DeliveryStatus.REQUESTED))
+        .willReturn(List.of(nearRequest, farRequest));
 
     // 가까운 주문은 1.0km, 먼 주문은 10.0km로 모킹
-    given(feeCalculator.calculateDistanceKm(37.5665, 126.9780, 37.5670, 126.9785)).willReturn(1.0);
-    given(feeCalculator.calculateDistanceKm(37.5665, 126.9780, 37.6000, 127.1000)).willReturn(10.0);
+    given(
+            feeCalculator.calculateDistanceKm(
+                Location.of(37.5665, 126.9780), nearRequest.getPickupLocation()))
+        .willReturn(1.0);
+    given(
+            feeCalculator.calculateDistanceKm(
+                Location.of(37.5665, 126.9780), farRequest.getPickupLocation()))
+        .willReturn(10.0);
 
     // when
     List<AvailableDeliveryResponse> result =
@@ -127,7 +135,8 @@ class DeliveryMatchingServiceTest {
 
     given(memberService.getById(courierId)).willReturn(courier);
     given(vehicleService.getVehiclesByMemberId(courierId)).willReturn(List.of(vehicle));
-    given(deliveryRequestRepository.findById(deliveryRequestId)).willReturn(Optional.of(request));
+    given(deliveryRequestRepository.findByIdForUpdate(deliveryRequestId))
+        .willReturn(Optional.of(request));
     given(matchingRepository.saveAndFlush(any(Matching.class))).willReturn(expectedMatching);
 
     // when
@@ -155,7 +164,7 @@ class DeliveryMatchingServiceTest {
 
     given(memberService.getById(courierId)).willReturn(courier);
     given(vehicleService.getVehiclesByMemberId(courierId)).willReturn(List.of(vehicle));
-    given(deliveryRequestRepository.findById(deliveryRequestId))
+    given(deliveryRequestRepository.findByIdForUpdate(deliveryRequestId))
         .willReturn(Optional.of(alreadyMatched));
 
     // when & then

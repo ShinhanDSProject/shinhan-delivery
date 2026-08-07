@@ -1,6 +1,8 @@
 package com.example.shinhandelivery.courier.dto.request;
 
+import com.example.shinhandelivery.common.domain.Location;
 import com.example.shinhandelivery.courier.entity.WorkStatus;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -19,4 +21,12 @@ public class CourierStatusUpdateRequest {
 
   private Double latitude; // 위도
   private Double longitude; // 경도
+
+  @JsonIgnore
+  public Location getLocation() {
+    if (latitude == null || longitude == null) {
+      return null;
+    }
+    return Location.of(latitude, longitude);
+  }
 }

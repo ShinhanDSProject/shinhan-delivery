@@ -2,6 +2,7 @@ package com.example.shinhandelivery.delivery.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.example.shinhandelivery.common.domain.Location;
 import com.example.shinhandelivery.delivery.entity.DeliveryRequest;
 import com.example.shinhandelivery.delivery.entity.DeliveryStatus;
 import com.example.shinhandelivery.delivery.entity.ItemSize;
@@ -56,10 +57,8 @@ class DeliveryMatchingConcurrencyTest {
             .memberId(customer.getId())
             .pickupAddress("서울시 중구 을지로 100")
             .dropoffAddress("서울시 명동 20")
-            .pickupLatitude(37.5665)
-            .pickupLongitude(126.9780)
-            .dropoffLatitude(37.5600)
-            .dropoffLongitude(126.9800)
+            .pickupLocation(Location.of(37.5665, 126.9780))
+            .dropoffLocation(Location.of(37.5600, 126.9800))
             .weight(2.5)
             .distance(1.2)
             .feePoint(5000L)
@@ -89,8 +88,7 @@ class DeliveryMatchingConcurrencyTest {
               .type(VehicleType.MOTORCYCLE)
               .maxWeight(10.0)
               .maxDistance(20.0)
-              .latitude(37.5665)
-              .longitude(126.9780)
+              .location(Location.of(37.5665, 126.9780))
               .status(VehicleStatus.AVAILABLE)
               .build());
 
