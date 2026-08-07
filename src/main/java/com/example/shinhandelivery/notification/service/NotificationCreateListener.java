@@ -15,6 +15,8 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
@@ -35,6 +37,7 @@ public class NotificationCreateListener {
   private final SimpMessagingTemplate messagingTemplate;
 
   @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
   public void onDeliveryStatusChanged(DeliveryStatusChangedEvent event) {
     Copy customerCopy = customerCopyOf(event.status());
     if (customerCopy == null) {
