@@ -18,7 +18,7 @@ import com.example.shinhandelivery.member.repository.MemberRepository;
 import com.example.shinhandelivery.vehicle.entity.Vehicle;
 import com.example.shinhandelivery.vehicle.entity.VehicleStatus;
 import com.example.shinhandelivery.vehicle.entity.VehicleType;
-import com.example.shinhandelivery.vehicle.repository.VehicleRepository;
+import com.example.shinhandelivery.vehicle.service.VehicleService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -33,7 +33,7 @@ public class MemberService {
   private final MemberRepository memberRepository;
   private final PasswordEncoder passwordEncoder;
   private final JwtProvider jwtProvider;
-  private final VehicleRepository vehicleRepository;
+  private final VehicleService vehicleService;
 
   /** 이메일 중복을 검증하고 비밀번호를 암호화해 회원을 생성한다 (Entity 리턴). */
   @Transactional
@@ -45,7 +45,7 @@ public class MemberService {
     String encodedPassword = passwordEncoder.encode(request.getPassword());
     Member created = memberRepository.save(Member.from(request, encodedPassword));
     if (created.getRole() == MemberRole.COURIER) {
-      vehicleRepository.save(createDefaultVehicle(created.getId(), request));
+      vehicleService.save(createDefaultVehicle(created.getId(), request));
     }
     return created;
   }
@@ -155,7 +155,7 @@ public class MemberService {
   @Transactional
   public void delete(Long memberId) {
     Member member = findMemberOrThrow(memberId);
-    vehicleRepository.findAllByMemberId(memberId).forEach(vehicleRepository::delete);
+    vehicleService.deleteAllByMemberId(memberId);
     memberRepository.delete(member);
   }
 
