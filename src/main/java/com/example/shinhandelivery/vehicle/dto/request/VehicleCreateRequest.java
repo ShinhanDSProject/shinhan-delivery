@@ -1,6 +1,8 @@
 package com.example.shinhandelivery.vehicle.dto.request;
 
+import com.example.shinhandelivery.common.domain.Location;
 import com.example.shinhandelivery.vehicle.entity.VehicleType;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
@@ -33,4 +35,9 @@ public class VehicleCreateRequest {
   @DecimalMin(value = "-180.0", message = "경도는 -180 이상이어야 합니다.")
   @DecimalMax(value = "180.0", message = "경도는 180 이하이어야 합니다.")
   private double longitude;
+
+  @JsonIgnore
+  public Location getLocation() {
+    return Location.of(latitude, longitude);
+  }
 }

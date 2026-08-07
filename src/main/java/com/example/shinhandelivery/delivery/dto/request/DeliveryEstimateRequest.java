@@ -1,6 +1,8 @@
 package com.example.shinhandelivery.delivery.dto.request;
 
+import com.example.shinhandelivery.common.domain.Location;
 import com.example.shinhandelivery.delivery.entity.ItemSize;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
@@ -40,4 +42,20 @@ public class DeliveryEstimateRequest {
 
   @NotNull(message = "물품 크기는 필수입니다.")
   private ItemSize itemSize;
+
+  @JsonIgnore
+  public Location getPickupLocation() {
+    if (pickupLatitude == null || pickupLongitude == null) {
+      return null;
+    }
+    return Location.of(pickupLatitude, pickupLongitude);
+  }
+
+  @JsonIgnore
+  public Location getDestinationLocation() {
+    if (destinationLatitude == null || destinationLongitude == null) {
+      return null;
+    }
+    return Location.of(destinationLatitude, destinationLongitude);
+  }
 }

@@ -16,7 +16,6 @@ import com.example.shinhandelivery.member.entity.MemberRole;
 import com.example.shinhandelivery.member.exception.DuplicateMemberException;
 import com.example.shinhandelivery.member.repository.MemberRepository;
 import com.example.shinhandelivery.vehicle.entity.Vehicle;
-import com.example.shinhandelivery.vehicle.entity.VehicleStatus;
 import com.example.shinhandelivery.vehicle.entity.VehicleType;
 import com.example.shinhandelivery.vehicle.service.VehicleService;
 import java.util.List;
@@ -159,16 +158,12 @@ public class MemberService {
     memberRepository.delete(member);
   }
 
-  private Vehicle createDefaultVehicle(Long ownerId, MemberCreateRequest request) {
-    return Vehicle.builder()
-        .memberId(ownerId)
-        .type(request.getVehicleType())
-        .maxWeight(resolveMaxWeight(request.getPreferredWeight()))
-        .maxDistance(resolveMaxDistance(request.getVehicleType()))
-        .latitude(0)
-        .longitude(0)
-        .status(VehicleStatus.AVAILABLE)
-        .build();
+  private Vehicle createDefaultVehicle(Long memberId, MemberCreateRequest request) {
+    return Vehicle.createDefault(
+        memberId,
+        request.getVehicleType(),
+        resolveMaxWeight(request.getPreferredWeight()),
+        resolveMaxDistance(request.getVehicleType()));
   }
 
   private double resolveMaxWeight(Double preferredWeight) {

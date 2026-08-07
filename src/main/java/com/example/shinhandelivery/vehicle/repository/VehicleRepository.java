@@ -23,4 +23,8 @@ public interface VehicleRepository extends JpaRepository<Vehicle, Long> {
       VehicleStatus status, double weight, double distance);
 
   List<Vehicle> findAllByMemberId(Long memberId);
+
+  /** 회원(배송원) 정보까지 한 번의 DB 쿼리로 조인 조회하는 Fetch Join 메서드. */
+  @Query("select v from Vehicle v join fetch v.member where v.memberId = :memberId")
+  List<Vehicle> findAllByMemberIdWithMember(@Param("memberId") Long memberId);
 }

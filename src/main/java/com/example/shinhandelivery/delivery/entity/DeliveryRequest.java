@@ -1,12 +1,16 @@
 package com.example.shinhandelivery.delivery.entity;
 
+import com.example.shinhandelivery.common.domain.Location;
 import com.example.shinhandelivery.delivery.dto.request.DeliveryCompleteRequest;
 import com.example.shinhandelivery.delivery.dto.request.DeliveryCreateRequest;
 import com.example.shinhandelivery.delivery.dto.request.DeliveryUpdateRequest;
 import com.example.shinhandelivery.delivery.exception.InvalidDeliveryDistanceException;
 import com.example.shinhandelivery.delivery.exception.InvalidDeliveryWeightException;
 import com.example.shinhandelivery.member.entity.Member;
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.AttributeOverrides;
 import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -67,17 +71,29 @@ public class DeliveryRequest {
   @Column(name = "payment_idempotency_key", length = 100)
   private String paymentIdempotencyKey;
 
-  @Column(name = "pickup_latitude", nullable = false)
-  private double pickupLatitude;
+  @Embedded
+  @AttributeOverrides({
+    @AttributeOverride(
+        name = "latitude",
+        column = @Column(name = "pickup_latitude", nullable = false)),
+    @AttributeOverride(
+        name = "longitude",
+        column = @Column(name = "pickup_longitude", nullable = false))
+  })
+  @Builder.Default
+  private Location pickupLocation = Location.of(0.0, 0.0);
 
-  @Column(name = "pickup_longitude", nullable = false)
-  private double pickupLongitude;
-
-  @Column(name = "dropoff_latitude", nullable = false)
-  private double dropoffLatitude;
-
-  @Column(name = "dropoff_longitude", nullable = false)
-  private double dropoffLongitude;
+  @Embedded
+  @AttributeOverrides({
+    @AttributeOverride(
+        name = "latitude",
+        column = @Column(name = "dropoff_latitude", nullable = false)),
+    @AttributeOverride(
+        name = "longitude",
+        column = @Column(name = "dropoff_longitude", nullable = false))
+  })
+  @Builder.Default
+  private Location dropoffLocation = Location.of(0.0, 0.0);
 
   @Enumerated(EnumType.STRING)
   @Column(name = "item_size", nullable = false, length = 20)
@@ -96,6 +112,42 @@ public class DeliveryRequest {
   @Column(name = "created_at")
   private LocalDateTime createdAt;
 
+  public double getPickupLatitude() {
+    return pickupLocation != null ? pickupLocation.getLatitude() : 0.0;
+  }
+
+  public double getPickupLongitude() {
+    return pickupLocation != null ? pickupLocation.getLongitude() : 0.0;
+  }
+
+  public double getDropoffLatitude() {
+    return dropoffLocation != null ? dropoffLocation.getLatitude() : 0.0;
+  }
+
+  public double getDropoffLongitude() {
+    return dropoffLocation != null ? dropoffLocation.getLongitude() : 0.0;
+  }
+
+  public void setPickupLatitude(double latitude) {
+    double currentLon = pickupLocation != null ? pickupLocation.getLongitude() : 0.0;
+    this.pickupLocation = Location.of(latitude, currentLon);
+  }
+
+  public void setPickupLongitude(double longitude) {
+    double currentLat = pickupLocation != null ? pickupLocation.getLatitude() : 0.0;
+    this.pickupLocation = Location.of(currentLat, longitude);
+  }
+
+  public void setDropoffLatitude(double latitude) {
+    double currentLon = dropoffLocation != null ? dropoffLocation.getLongitude() : 0.0;
+    this.dropoffLocation = Location.of(latitude, currentLon);
+  }
+
+  public void setDropoffLongitude(double longitude) {
+    double currentLat = dropoffLocation != null ? dropoffLocation.getLatitude() : 0.0;
+    this.dropoffLocation = Location.of(currentLat, longitude);
+  }
+
   /** DeliveryCreateRequest DTO 수용 기반으로 REQUESTED 상태의 DeliveryRequest 엔티티를 생성하는 정적 팩토리 메서드. */
   public static DeliveryRequest of(
       Long memberId, DeliveryCreateRequest request, double distanceKm, long feePoint) {
@@ -112,10 +164,8 @@ public class DeliveryRequest {
         .dropoffAddress(request.getDropoffAddress())
         .weight(request.getWeight())
         .distance(distanceKm)
-        .pickupLatitude(request.getPickupLatitude())
-        .pickupLongitude(request.getPickupLongitude())
-        .dropoffLatitude(request.getDropoffLatitude())
-        .dropoffLongitude(request.getDropoffLongitude())
+        .pickupLocation(request.getPickupLocation())
+        .dropoffLocation(request.getDropoffLocation())
         .itemSize(request.getItemSize())
         .status(DeliveryStatus.REQUESTED)
         .feePoint(feePoint)

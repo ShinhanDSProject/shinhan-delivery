@@ -300,7 +300,10 @@
 
             localStorage.setItem('accessToken', data.accessToken);
             localStorage.setItem('tokenType', data.tokenType || 'Bearer');
-            showMessage('배송파트너 로그인에 성공했습니다.', true);
+            showMessage('배송파트너 로그인에 성공했습니다. 이동 중...', true);
+            setTimeout(() => {
+                location.assign('/courier-home.html');
+            }, 500);
         } catch (error) {
             showMessage('서버 통신 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
         } finally {

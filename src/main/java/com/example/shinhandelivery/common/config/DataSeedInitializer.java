@@ -13,7 +13,6 @@ import com.example.shinhandelivery.notification.repository.NotificationRepositor
 import com.example.shinhandelivery.payment.entity.PointWallet;
 import com.example.shinhandelivery.payment.repository.PaymentRepository;
 import com.example.shinhandelivery.vehicle.entity.Vehicle;
-import com.example.shinhandelivery.vehicle.entity.VehicleStatus;
 import com.example.shinhandelivery.vehicle.entity.VehicleType;
 import com.example.shinhandelivery.vehicle.repository.VehicleRepository;
 import lombok.RequiredArgsConstructor;
@@ -101,15 +100,8 @@ public class DataSeedInitializer implements CommandLineRunner {
   }
 
   private Vehicle createVehicle(
-      Long ownerId, VehicleType type, double maxWeight, double maxDistance) {
-    Vehicle vehicle =
-        Vehicle.builder()
-            .memberId(ownerId)
-            .type(type)
-            .maxWeight(maxWeight)
-            .maxDistance(maxDistance)
-            .status(VehicleStatus.AVAILABLE)
-            .build();
+      Long memberId, VehicleType type, double maxWeight, double maxDistance) {
+    Vehicle vehicle = Vehicle.createDefault(memberId, type, maxWeight, maxDistance);
     return vehicleRepository.save(vehicle);
   }
 
