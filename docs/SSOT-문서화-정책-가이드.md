@@ -39,6 +39,7 @@ metadata:
 
 | 지식 영역 (Knowledge Domain) | 단일 원본 문서 (Single Primary Owner) | 파생 참조 문서 (Referencing Docs) |
 | :--- | :--- | :--- |
+| **전체 E2E 유저 플로우 & 화면-API 매핑** | [`docs/전체-유저-플로우-가이드.md`](./전체-유저-플로우-가이드.md) | `README.md` |
 | **코딩 규약 & 아키텍처 규칙** | [`code-convention.md`](../code-convention.md) | `AGENTS.md`, `테스트-하네스-판단-및-통제-정책.md` |
 | **데이터베이스 ERD & 테이블 연관관계도** | [`docs/ERD-데이터베이스-연관관계도.md`](./ERD-데이터베이스-연관관계도.md) | `code-convention.md` |
 | **AI 에이전트 작업 8대 원칙** | [`AGENTS.md`](../AGENTS.md) | `README.md`, `code-convention.md` |
