@@ -107,6 +107,7 @@ com.company.delivery
 - **다른 도메인의 Repository나 Entity를 직접 참조하지 않는다.** 다른 도메인의 데이터가 필요하면 그 도메인의 Service를 호출한다.
   - 예: `DeliveryService`가 결제를 처리해야 하면 `PaymentRepository`를 직접 호출하지 않고 `PaymentService.charge(...)`를 호출한다.
   - 예외: §4에서 규정하는, FK 필드를 쓰기의 유일한 진입점으로 유지하는 읽기 전용 `@ManyToOne(insertable = false, updatable = false)` Entity 간 연관관계는 이 금지 규칙의 대상이 아니다.
+- **다른 도메인 객체 목록 조회 시 인덱스 수동 조작 금지:** 타 도메인의 Entity 리스트를 받아와 `list.get(0)`처럼 수동으로 인덱스를 꺼내지 않고, 해당 도메인의 Service/Repository에 대표 객체 전용 조회 메서드(예: `findFirstByMemberId`, `findPrimaryXxx`)를 캡슐화하여 호출한다.
 - 도메인 간에 공통으로 쓰는 것(전역 예외 처리기, 설정 클래스 등)만 `common` 패키지에 둔다. `common`이 특정 도메인 전용 로직을 담는 곳이 되지 않도록 주의한다.
 - 도메인 하나 안의 파일이 너무 많아지면(예: `delivery`가 계속 커지면) `delivery.request`, `delivery.matching`처럼 도메인을 더 잘게 쪼갠다.
 - Repository는 Entity 1개당 1개씩 만든다 (`MemberRepository` ↔ `Member`, ...).
@@ -657,6 +658,7 @@ void 도메인은_다른_도메인의_repository를_직접_참조하지_않는�
 - [ ] Repository가 Entity 1개당 1개씩 대응되는가?
 - [ ] Service에서 Repository/Service 의존 없는 순수 계산·변환 로직을 새로 추출했다면 `helper` 서브패키지의 상태 없는 `@Component`로 분리했는가? (§5.1)
 - [ ] 다른 도메인의 Repository/Entity를 직접 참조하지 않고, 필요하면 그 도메인의 Service를 거쳤는가? (§4의 읽기 전용 `@ManyToOne` 연관관계는 예외)
+- [ ] 다른 도메인 객체 목록을 조회할 때 `list.get(0)` 등 인덱스 수동 조작 대신 해당 도메인 Service/Repository의 캡슐화된 전용 조회 메서드를 활용했는가? (§2)
 - [ ] Enum 필드에 `@Enumerated(EnumType.STRING)`을 썼는가? (`ORDINAL` 금지)
 - [ ] 새로 추가한 서비스 로직에 단위 테스트가 있는가? (영문 메서드명 + `@DisplayName` 사용)
 - [ ] ArchUnit 테스트(레이어 의존성 규칙)가 깨지지 않는가?

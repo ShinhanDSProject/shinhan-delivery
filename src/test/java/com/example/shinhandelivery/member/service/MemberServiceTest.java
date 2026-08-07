@@ -15,7 +15,7 @@ import com.example.shinhandelivery.member.exception.DuplicateMemberException;
 import com.example.shinhandelivery.member.repository.MemberRepository;
 import com.example.shinhandelivery.vehicle.entity.Vehicle;
 import com.example.shinhandelivery.vehicle.entity.VehicleType;
-import com.example.shinhandelivery.vehicle.repository.VehicleRepository;
+import com.example.shinhandelivery.vehicle.service.VehicleService;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
@@ -31,7 +31,7 @@ class MemberServiceTest {
 
   @Mock private MemberRepository memberRepository;
   @Mock private PasswordEncoder passwordEncoder;
-  @Mock private VehicleRepository vehicleRepository;
+  @Mock private VehicleService vehicleService;
   @InjectMocks private MemberService memberService;
 
   @Test
@@ -82,20 +82,21 @@ class MemberServiceTest {
               member.setId(10L);
               return member;
             });
-    when(vehicleRepository.save(any(Vehicle.class)))
+    when(vehicleService.save(any(Vehicle.class)))
         .thenAnswer(invocation -> invocation.getArgument(0));
 
     Member response = memberService.create(request);
 
     assertThat(response.getRole()).isEqualTo(MemberRole.COURIER);
-    verify(vehicleRepository).save(any(Vehicle.class));
+    verify(vehicleService).save(any(Vehicle.class));
   }
 
   @Test
   @DisplayName("이메일이 중복되면 DuplicateMemberException을 던진다")
-  void createMemberDuplicateEmailShouldThrowException() {
+  void createMemberDuplicateEmailThrowsException() {
     MemberCreateRequest request = new MemberCreateRequest();
     request.setEmail("dup@example.com");
+
     when(memberRepository.existsByEmail("dup@example.com")).thenReturn(true);
 
     assertThatThrownBy(() -> memberService.create(request))
@@ -103,59 +104,52 @@ class MemberServiceTest {
   }
 
   @Test
-  @DisplayName("존재하지 않는 회원을 조회하면 EntityNotFoundException을 던진다")
-  void getMemberNotFoundShouldThrowException() {
-    when(memberRepository.findById(1L)).thenReturn(Optional.empty());
-
-    assertThatThrownBy(() -> memberService.getById(1L)).isInstanceOf(EntityNotFoundException.class);
-  }
-
-  @Test
-  @DisplayName("존재하는 회원을 조회하면 Member를 반환한다")
-  void getMemberSuccess() {
+  @DisplayName("id로 회원 단건을 조회한다")
+  void getByIdSuccess() {
     Member member = new Member();
-    member.setEmail("user@example.com");
-    member.setName("홍길동");
-    member.setPhoneNumber("010-1234-5678");
-    member.setRole(MemberRole.COURIER);
+    member.setId(1L);
+
     when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
 
     Member response = memberService.getById(1L);
 
-    assertThat(response.getEmail()).isEqualTo("user@example.com");
+    assertThat(response.getId()).isEqualTo(1L);
   }
 
   @Test
-  @DisplayName("로그인한 본인의 프로필을 조회한다")
-  void getMyProfileSuccess() {
-    Member member = new Member();
-    member.setEmail("my@example.com");
-    member.setName("김철수");
-    member.setPhoneNumber("010-9876-5432");
-    member.setRole(MemberRole.CUSTOMER);
-    when(memberRepository.findById(2L)).thenReturn(Optional.of(member));
+  @DisplayName("존재하지 않는 회원 id 조회 시 EntityNotFoundException을 던진다")
+  void getByIdNotFoundThrowsException() {
+    when(memberRepository.findById(99L)).thenReturn(Optional.empty());
 
-    Member response = memberService.getMyProfile(2L);
-
-    assertThat(response.getEmail()).isEqualTo("my@example.com");
-    assertThat(response.getName()).isEqualTo("김철수");
-    assertThat(response.getPhoneNumber()).isEqualTo("010-9876-5432");
+    assertThatThrownBy(() -> memberService.getById(99L))
+        .isInstanceOf(EntityNotFoundException.class);
   }
 
   @Test
-  @DisplayName("로그인한 본인의 프로필 이름과 연락처를 수정한다")
-  void updateMyProfileSuccess() {
+  @DisplayName("전체 회원 목록을 조회한다")
+  void listSuccess() {
+    when(memberRepository.findAll()).thenReturn(List.of(new Member(), new Member()));
+
+    List<Member> response = memberService.list();
+
+    assertThat(response).hasSize(2);
+  }
+
+  @Test
+  @DisplayName("회원 프로필(이름, 전화번호)을 수정한다")
+  void updateProfileSuccess() {
     Member member = new Member();
-    member.setEmail("my@example.com");
+    member.setId(1L);
     member.setName("김철수");
-    member.setPhoneNumber("010-9876-5432");
-    member.setRole(MemberRole.CUSTOMER);
-    when(memberRepository.findById(2L)).thenReturn(Optional.of(member));
+    member.setPhoneNumber("010-0000-0000");
 
-    MemberProfileUpdateRequestDto request =
-        new MemberProfileUpdateRequestDto("김영희", "010-1111-2222");
+    when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
 
-    Member response = memberService.updateMyProfile(2L, request);
+    MemberProfileUpdateRequestDto request = new MemberProfileUpdateRequestDto();
+    request.setName("김영희");
+    request.setPhoneNumber("010-1111-2222");
+
+    Member response = memberService.updateMyProfile(1L, request);
 
     assertThat(response.getName()).isEqualTo("김영희");
     assertThat(response.getPhoneNumber()).isEqualTo("010-1111-2222");
@@ -168,13 +162,9 @@ class MemberServiceTest {
     member.setId(3L);
     when(memberRepository.findById(3L)).thenReturn(Optional.of(member));
 
-    Vehicle vehicle = new Vehicle();
-    vehicle.setId(99L);
-    when(vehicleRepository.findAllByMemberId(3L)).thenReturn(List.of(vehicle));
-
     memberService.delete(3L);
 
-    verify(vehicleRepository).delete(vehicle);
+    verify(vehicleService).deleteAllByMemberId(3L);
     verify(memberRepository).delete(member);
   }
 }

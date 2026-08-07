@@ -10,17 +10,21 @@ import com.example.shinhandelivery.vehicle.entity.VehicleStatus;
 import com.example.shinhandelivery.vehicle.exception.VehicleNotAvailableException;
 import com.example.shinhandelivery.vehicle.repository.VehicleRepository;
 import java.util.List;
-import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /** Vehicle 관련 유스케이스(등록/조회/수정/삭제)를 담당하는 서비스. */
 @Service
-@RequiredArgsConstructor
 public class VehicleService {
 
   private final VehicleRepository vehicleRepository;
   private final MemberService memberService;
+
+  public VehicleService(VehicleRepository vehicleRepository, @Lazy MemberService memberService) {
+    this.vehicleRepository = vehicleRepository;
+    this.memberService = memberService;
+  }
 
   /** 소유자(Member) 존재 여부와 무게/거리 유효성을 검증한 뒤 Vehicle을 등록한다 (Entity 리턴). */
   @Transactional
@@ -89,6 +93,18 @@ public class VehicleService {
   public void delete(Long vehicleId) {
     Vehicle vehicle = findVehicleOrThrow(vehicleId);
     vehicleRepository.delete(vehicle);
+  }
+
+  /** 특정 회원(memberId)이 소유한 모든 Vehicle을 삭제한다. */
+  @Transactional
+  public void deleteAllByMemberId(Long memberId) {
+    vehicleRepository.findAllByMemberId(memberId).forEach(vehicleRepository::delete);
+  }
+
+  /** Vehicle 객체를 저장한다. */
+  @Transactional
+  public Vehicle save(Vehicle vehicle) {
+    return vehicleRepository.save(vehicle);
   }
 
   private Vehicle findVehicleOrThrow(Long vehicleId) {
