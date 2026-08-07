@@ -15,10 +15,11 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
+import org.springframework.transaction.support.TransactionTemplate;
 
 /**
  * 배송 상태 변경 이벤트를 받아 관련 회원(고객·배송원)에게 실제 알림을 생성하고, 그 회원 전용 WebSocket 채널로 실시간 브로드캐스트한다. 트랜잭션이 커밋된 이후에만
@@ -35,22 +36,22 @@ public class NotificationCreateListener {
   private final VehicleService vehicleService;
   private final NotificationRepository notificationRepository;
   private final SimpMessagingTemplate messagingTemplate;
+  private final PlatformTransactionManager transactionManager;
 
   @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-  @Transactional(propagation = Propagation.REQUIRES_NEW)
   public void onDeliveryStatusChanged(DeliveryStatusChangedEvent event) {
-    Copy customerCopy = customerCopyOf(event.status());
-    if (customerCopy == null) {
+    DeliveryNotificationTemplate template = DeliveryNotificationTemplate.forStatus(event.status());
+    if (template == null) {
       return;
     }
 
     DeliveryRequest deliveryRequest = deliveryService.getDeliveryRequest(event.deliveryRequestId());
-    notify(deliveryRequest.getMemberId(), customerCopy);
+    notify(deliveryRequest.getMemberId(), template.customerTitle(), template.customerMessage());
 
-    Copy courierCopy = courierCopyOf(event.status());
-    if (courierCopy != null) {
+    if (template.hasCourierCopy()) {
       findCourierId(event.deliveryRequestId())
-          .ifPresent(courierId -> notify(courierId, courierCopy));
+          .ifPresent(
+              courierId -> notify(courierId, template.courierTitle(), template.courierMessage()));
     }
   }
 
@@ -64,34 +65,78 @@ public class NotificationCreateListener {
     }
   }
 
-  private void notify(Long memberId, Copy copy) {
-    Notification saved =
-        notificationRepository.save(
-            Notification.of(memberId, copy.title(), copy.message(), CATEGORY_DELIVERY, false));
+  /**
+   * 알림을 별도 트랜잭션(REQUIRES_NEW)에 저장해 실제로 커밋을 마친 뒤에만 WebSocket push를 내보낸다. 저장과 발송을 하나의 트랜잭션으로 묶으면, 커밋
+   * 전에 이미 나간 메시지가 이후 롤백으로 DB에는 존재하지 않는 알림을 가리키게 될 수 있다.
+   */
+  private void notify(Long memberId, String title, String message) {
+    Notification saved = saveInNewTransaction(memberId, title, message);
     messagingTemplate.convertAndSend(
         "/topic/members/" + memberId + "/notifications", NotificationResponse.from(saved));
   }
 
-  /** 상태별 고객용 알림 문구. 이 리스너가 다루지 않는 상태(예: REQUESTED)면 null. */
-  private Copy customerCopyOf(DeliveryStatus status) {
-    return switch (status) {
-      case MATCHED -> new Copy("배송기사 매칭 완료", "배송기사가 배정되어 곧 픽업을 시작합니다.");
-      case PICKED_UP -> new Copy("픽업 완료", "배송기사가 물품을 픽업했습니다.");
-      case COMPLETED -> new Copy("배송 완료", "배송이 완료되었습니다. 이용해주셔서 감사합니다.");
-      case CANCELLED -> new Copy("배송 취소", "배송 요청이 취소되었습니다.");
-      default -> null;
-    };
+  private Notification saveInNewTransaction(Long memberId, String title, String message) {
+    TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
+    transactionTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+    return transactionTemplate.execute(
+        status ->
+            notificationRepository.save(
+                Notification.of(memberId, title, message, CATEGORY_DELIVERY, false)));
   }
 
-  /** 상태별 배송원용 알림 문구. PICKED_UP은 본인이 방금 한 행동이라 알림을 보내지 않는다(null). */
-  private Copy courierCopyOf(DeliveryStatus status) {
-    return switch (status) {
-      case MATCHED -> new Copy("새 배송 배정", "배송 요청이 배정되었습니다. 픽업을 진행해주세요.");
-      case COMPLETED -> new Copy("배송 완료 처리됨", "배송을 완료 처리했습니다.");
-      case CANCELLED -> new Copy("배정 취소", "배정된 배송이 취소되었습니다.");
-      default -> null;
-    };
-  }
+  /**
+   * 배송 상태별 알림 문구를 한곳에 모아 관리한다. 고객/배송원 문구를 각각 별도 switch로 흩어두지 않고, 상태 하나당 이 enum 상수 하나로 대응시켜 문구 추가·수정
+   * 시 여기 한 곳만 보면 되게 한다. 이 리스너가 다루지 않는 상태(예: REQUESTED)는 상수가 없다.
+   */
+  private enum DeliveryNotificationTemplate {
+    MATCHED("배송기사 매칭 완료", "배송기사가 배정되어 곧 픽업을 시작합니다.", "새 배송 배정", "배송 요청이 배정되었습니다. 픽업을 진행해주세요."),
+    PICKED_UP("픽업 완료", "배송기사가 물품을 픽업했습니다.", null, null),
+    COMPLETED("배송 완료", "배송이 완료되었습니다. 이용해주셔서 감사합니다.", "배송 완료 처리됨", "배송을 완료 처리했습니다."),
+    CANCELLED("배송 취소", "배송 요청이 취소되었습니다.", "배정 취소", "배정된 배송이 취소되었습니다.");
 
-  private record Copy(String title, String message) {}
+    private final String customerTitle;
+    private final String customerMessage;
+    private final String courierTitle;
+    private final String courierMessage;
+
+    DeliveryNotificationTemplate(
+        String customerTitle, String customerMessage, String courierTitle, String courierMessage) {
+      this.customerTitle = customerTitle;
+      this.customerMessage = customerMessage;
+      this.courierTitle = courierTitle;
+      this.courierMessage = courierMessage;
+    }
+
+    /** 이 리스너가 다루지 않는 상태(예: REQUESTED)면 null. */
+    private static DeliveryNotificationTemplate forStatus(DeliveryStatus status) {
+      return switch (status) {
+        case MATCHED -> MATCHED;
+        case PICKED_UP -> PICKED_UP;
+        case COMPLETED -> COMPLETED;
+        case CANCELLED -> CANCELLED;
+        default -> null;
+      };
+    }
+
+    /** PICKED_UP은 배송원 본인이 방금 한 행동이라 배송원용 문구가 없다(false). */
+    private boolean hasCourierCopy() {
+      return courierTitle != null;
+    }
+
+    private String customerTitle() {
+      return customerTitle;
+    }
+
+    private String customerMessage() {
+      return customerMessage;
+    }
+
+    private String courierTitle() {
+      return courierTitle;
+    }
+
+    private String courierMessage() {
+      return courierMessage;
+    }
+  }
 }

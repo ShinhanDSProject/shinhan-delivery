@@ -3,6 +3,8 @@ package com.example.shinhandelivery.notification.service;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -26,6 +28,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,6 +37,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionStatus;
 
 @ExtendWith(MockitoExtension.class)
 class NotificationCreateListenerTest {
@@ -48,7 +53,15 @@ class NotificationCreateListenerTest {
   @Mock private VehicleService vehicleService;
   @Mock private NotificationRepository notificationRepository;
   @Mock private SimpMessagingTemplate messagingTemplate;
+  @Mock private PlatformTransactionManager transactionManager;
   @InjectMocks private NotificationCreateListener listener;
+
+  @BeforeEach
+  void setUp() {
+    lenient()
+        .when(transactionManager.getTransaction(any()))
+        .thenReturn(mock(TransactionStatus.class));
+  }
 
   @Test
   @DisplayName("MATCHED 전이 시 고객과 배송원 모두에게 알림을 생성하고 각자 채널로 push한다")
