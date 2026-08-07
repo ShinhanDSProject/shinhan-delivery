@@ -7,6 +7,7 @@ import com.example.shinhandelivery.delivery.service.DeliveryService;
 import com.example.shinhandelivery.delivery.service.MatchingService;
 import com.example.shinhandelivery.realtime.dto.request.LocationUpdateRequest;
 import com.example.shinhandelivery.realtime.dto.response.LocationBroadcastResponse;
+import com.example.shinhandelivery.realtime.exception.UnauthorizedNotificationAccessException;
 import com.example.shinhandelivery.realtime.exception.UnauthorizedOfferAccessException;
 import com.example.shinhandelivery.realtime.exception.UnauthorizedTrackingAccessException;
 import com.example.shinhandelivery.vehicle.entity.Vehicle;
@@ -44,6 +45,13 @@ public class TrackingService {
   public void assertCanSubscribeToOffers(Long memberId, Long vehicleId) {
     if (!isOwner(memberId, vehicleId)) {
       throw new UnauthorizedOfferAccessException(vehicleId);
+    }
+  }
+
+  /** 요청자가 해당 회원의 알림 채널을 구독할 수 있는지 검증한다 — 본인이어야 한다. */
+  public void assertCanSubscribeToNotifications(Long memberId, Long targetMemberId) {
+    if (!memberId.equals(targetMemberId)) {
+      throw new UnauthorizedNotificationAccessException();
     }
   }
 

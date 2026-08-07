@@ -229,6 +229,11 @@ public class DeliveryFeeCalculator {
 }
 ```
 
+### 5.2 상태별 안내 문구 관리 및 단건 조회 반환 타입
+
+- **상태값(Enum)마다 제목/본문 같은 정적 문구가 여러 개 딸려 있으면**, 대상마다 개별 `switch`를 반복하지 말고 상태 하나당 문구 세트 하나를 대응시키는 Enum(예: `NotificationCreateListener.DeliveryNotificationTemplate`)으로 모은다. 문구를 추가·수정할 때 한 곳만 보면 되게 하기 위함이다.
+- **단건 조회의 반환 타입은 "없으면 실제 오류인가"로 정한다.** 존재가 불변식(있어야 정상)이면 `findXxxOrThrow(...)`로 커스텀 예외를 던진다(이 문서 전반의 기본 패턴). 반대로 "아직 없을 수 있는 게 정상 상태"(예: 아직 매칭되지 않은 배송 요청의 배송원 조회)라면 `Optional<T>`를 반환해 호출부가 `ifPresent`/`orElse`로 자연스럽게 처리하게 한다. 모든 단건 조회에 `Optional`을 일괄 강제하지는 않는다 — 존재가 불변식인 곳까지 `Optional`로 감싸면 호출부마다 불필요한 null 처리 부담만 늘어난다.
+
 ---
 
 ## 6. 예외 처리
