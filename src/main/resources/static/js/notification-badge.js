@@ -10,26 +10,49 @@ function subscribeToNotifications(onNotification) {
     }
 
     const protocol = location.protocol === 'https:' ? 'wss' : 'ws';
+    const authHeader = `${tokenType} ${token}`;
 
-    fetch('/api/v1/members/me', { headers: { Authorization: `${tokenType} ${token}` } })
-        .then((response) => (response.ok ? response.json() : null))
-        .then((me) => {
-            if (!me) {
-                return;
-            }
+    fetchCurrentMember(authHeader).then((me) => {
+        if (!me) {
+            return;
+        }
 
-            const client = new StompJs.Client({
-                brokerURL: `${protocol}://${location.host}/ws`,
-                connectHeaders: { Authorization: `${tokenType} ${token}` },
-                reconnectDelay: 4000
-            });
-
-            client.onConnect = () => {
-                client.subscribe(`/topic/members/${me.id}/notifications`, (message) => {
-                    onNotification(JSON.parse(message.body));
-                });
-            };
-
-            client.activate();
+        const client = new StompJs.Client({
+            brokerURL: `${protocol}://${location.host}/ws`,
+            connectHeaders: { Authorization: authHeader },
+            reconnectDelay: 4000
         });
+
+        client.onConnect = () => {
+            client.subscribe(`/topic/members/${me.id}/notifications`, (message) => {
+                onNotification(JSON.parse(message.body));
+            });
+        };
+
+        client.activate();
+    });
+}
+
+/**
+ * 로그인 회원 정보를 조회한다. 네트워크 오류·5xx 응답은 지수 백오프로 재시도하되(reconnectDelay는 소켓이 붙은 뒤에만
+ * 동작해 이 최초 조회 실패는 못 복구하므로), 401/403(인증 실패)은 재시도해도 의미가 없어 즉시 포기한다.
+ */
+async function fetchCurrentMember(authHeader, attempt = 0) {
+    const MAX_RETRIES = 3;
+    try {
+        const response = await fetch('/api/v1/members/me', { headers: { Authorization: authHeader } });
+        if (response.status === 401 || response.status === 403) {
+            return null;
+        }
+        if (!response.ok) {
+            throw new Error(`알림 채널 구독을 위한 회원 조회 실패: status=${response.status}`);
+        }
+        return await response.json();
+    } catch (error) {
+        if (attempt >= MAX_RETRIES) {
+            return null;
+        }
+        await new Promise((resolve) => setTimeout(resolve, 1000 * (attempt + 1)));
+        return fetchCurrentMember(authHeader, attempt + 1);
+    }
 }
