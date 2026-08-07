@@ -1,6 +1,6 @@
 ---
 metadata:
-  ssot_owner: "docs/ERD-데이터베이스-연관관계도.md"
+  ssot_owner: "docs/architecture/ERD-데이터베이스-연관관계도.md"
   last_updated: "2026-08-05"
   status: "APPROVED (SSOT Primary)"
 ---
