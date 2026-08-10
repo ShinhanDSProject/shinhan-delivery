@@ -35,17 +35,17 @@
   <form id="profileForm" novalidate>
     <div class="field-group">
       <label class="field-label" for="name">이름</label>
-      <input class="field-input" id="name" name="name" autocomplete="name" maxlength="50" required>
+      <input class="field-input" id="name" name="name" autocomplete="name" maxlength="50" required th:value="${member != null ? member.name : ''}">
       <p id="nameHint" class="field-hint">2자 이상 50자 이하로 입력해주세요.</p>
     </div>
     <div class="field-group">
       <label class="field-label" for="email">이메일</label>
-      <input class="field-input" id="email" name="email" type="email" readonly aria-readonly="true">
+      <input class="field-input" id="email" name="email" type="email" readonly aria-readonly="true" th:value="${member != null ? member.email : ''}">
       <p class="field-hint">이메일은 변경할 수 없습니다.</p>
     </div>
     <div class="field-group">
       <label class="field-label" for="phoneNumber">휴대폰 번호</label>
-      <input class="field-input" id="phoneNumber" name="phoneNumber" type="tel" inputmode="tel" placeholder="010-1234-5678" autocomplete="tel" required>
+      <input class="field-input" id="phoneNumber" name="phoneNumber" type="tel" inputmode="tel" placeholder="010-1234-5678" autocomplete="tel" required th:value="${member != null ? member.phoneNumber : ''}">
       <p id="phoneHint" class="field-hint">하이픈(-)을 포함해 입력해주세요.</p>
     </div>
 

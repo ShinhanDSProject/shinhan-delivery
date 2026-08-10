@@ -1,14 +1,32 @@
 package com.example.shinhandelivery.address.controller;
 
+import com.example.shinhandelivery.address.entity.Address;
+import com.example.shinhandelivery.address.service.AddressService;
+import com.example.shinhandelivery.common.security.CustomUserDetails;
+import java.util.List;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
 /** 주소(Address) 도메인 화면의 SSR 라우팅을 담당하는 Web Controller입니다. */
 @Controller
+@RequiredArgsConstructor
 public class AddressWebController {
 
+  private final AddressService addressService;
+
   @GetMapping("/address-management")
-  public String addressManagement() {
+  public String addressManagement(
+      @AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
+    if (userDetails != null && userDetails.getId() != null) {
+      try {
+        List<Address> addresses = addressService.list(userDetails.getId());
+        model.addAttribute("addresses", addresses);
+      } catch (Exception ignored) {
+      }
+    }
     return "address-management";
   }
 

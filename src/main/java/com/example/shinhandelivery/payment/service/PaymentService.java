@@ -44,6 +44,11 @@ public class PaymentService {
   }
 
   @Transactional(readOnly = true)
+  public PointWallet getByMemberId(Long memberId) {
+    return paymentRepository.findByMemberId(memberId).orElse(null);
+  }
+
+  @Transactional(readOnly = true)
   public List<PointWallet> list() {
     return paymentRepository.findAll();
   }
