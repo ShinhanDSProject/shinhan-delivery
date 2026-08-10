@@ -46,6 +46,7 @@ graph TD
 ### 2. 🏛️ [`docs/architecture/`](./architecture/) — 핵심 시스템 아키텍처 & 유저플로우 (14종)
 서버, 데이터베이스, 보안, REST API, 프론트엔드 디자인 시스템 및 E2E 유저 플로우의 표준 규격입니다.
 * 📖 [**전체 E2E 유저 플로우 & 화면-서비스 매핑 가이드**](./architecture/전체-유저-플로우-가이드.md) — E2E 여정 및 7대 도메인 딥다이브 맵
+* 📖 [**프로덕트 고도화 & 유저플로우 보완 종합 기획서**](./architecture/프로덕트-고도화-및-유저플로우-보완-기획서.md) — 4대 실용 과제 및 사용자 여정 보완 명세서
 * 📖 [**RESTful API 설계 규격 가이드**](./architecture/REST-API-설계-규격-가이드.md) — REST API 자원/행위 매핑 및 HTTP 상태 응답 규격
 * 📖 [**ERD 데이터베이스 연관관계도**](./architecture/ERD-데이터베이스-연관관계도.md) — 전체 엔티티 테이블 설계 및 FK 연관관계도
 * 📖 [**Flyway 마이그레이션 가이드**](./architecture/Flyway-마이그레이션-가이드.md) — DDL 무중단 마이그레이션 및 파일명 규격
