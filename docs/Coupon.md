@@ -23,20 +23,20 @@
 erDiagram
     COUPON ||--o{ USER_COUPON : "issued_as"
     USER_COUPON ||--o| DELIVERY_REQUEST : "applied_to"
-
+    
     COUPON {
         Long id PK "Auto Increment"
         String code UK "Unique Coupon Code"
-        String name "Coupon Name (e.g. 무료 배송 쿠폰)"
+        String name "Coupon Name"
         String discount_type "FIXED_AMOUNT / PERCENTAGE / FREE_DELIVERY"
-        BigDecimal discount_value "Discount Amount or Rate"
-        BigDecimal min_delivery_fee "Minimum Delivery Fee Condition"
-        BigDecimal max_discount_amount "Max Discount Amount Limit"
+        BigDecimal discount_value
+        BigDecimal min_delivery_fee
+        BigDecimal max_discount_amount
         Integer total_quantity "Total Quantity Issued"
-        Integer issued_quantity "Currently Issued Quantity"
+        Integer issued_quantity "CHECK (issued_quantity <= total_quantity)"
         String status "ACTIVE / INACTIVE / EXPIRED"
-        DateTime start_at "Validity Start Date"
-        DateTime end_at "Validity End Date"
+        DateTime start_at
+        DateTime end_at
         DateTime created_at
         DateTime updated_at
     }
@@ -45,7 +45,7 @@ erDiagram
         Long id PK "Auto Increment"
         Long coupon_id FK "References COUPON"
         Long user_id FK "Target User ID"
-        Long delivery_request_id FK "Nullable (Linked when applied)"
+        Long delivery_request_id FK "Nullable"
         String status "UNUSED / USED / EXPIRED"
         DateTime used_at "Nullable"
         DateTime issued_at
