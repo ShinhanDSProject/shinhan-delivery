@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -24,7 +24,17 @@
 
   <section id="listView" class="content-view" aria-label="공지사항 목록">
     <div id="noticeList" class="notice-list" aria-live="polite">
-      <div class="empty-state">공지사항을 불러오는 중입니다.</div>
+      <div th:if="${notices == null or #lists.isEmpty(notices)}" class="empty-state">등록된 공지사항이 없습니다.</div>
+      <button th:each="notice : ${notices}" class="notice-card" type="button" th:attr="onclick=|openDetail(${notice.id})|,aria-label=|${notice.title} 공지사항 상세 보기|">
+        <span>
+          <span class="notice-card__title">
+            <span th:if="${notice.isPinned}" class="notice-pin" aria-label="상단 고정"></span>
+            <span th:text="${notice.title}">공지사항 제목</span>
+          </span>
+          <span class="notice-card__date" th:text="${notice.createdAt != null ? #temporals.format(notice.createdAt, 'yyyy.MM.dd') : ''}">2026.08.10</span>
+        </span>
+        <span class="menu-chevron" aria-hidden="true">›</span>
+      </button>
     </div>
   </section>
 
