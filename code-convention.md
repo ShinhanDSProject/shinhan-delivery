@@ -674,6 +674,7 @@ void 도메인은_다른_도메인의_repository를_직접_참조하지_않는�
 - [ ] `main`을 대상으로 브랜치를 분기·PR 했는가?
 - [ ] 리뷰어를 지정하고, PR 템플릿의 요약/변경사항/리뷰 포인트/테스트 결과를 모두 작성했는가?
 - [ ] UI 개발 시 `/css/design-system.css` 토큰 및 `templates/fragments/components.html` Thymeleaf 프래그먼트를 100% 준수하였는가?
+- [ ] 모든 HTML 화면 파일이 `src/main/resources/templates/` 하위에 위치하며, Spring MVC `@Controller` 및 Thymeleaf SSR(`Model` 바인딩 & `th:*` 태그) 기반으로 개발되었는가?
 - [ ] 신규 화면이나 기능 추가 시 `docs/architecture/전체-유저-플로우-가이드.md`에 E2E 유저 플로우 및 화면 매핑을 필수 업데이트하였는가?
 
 ---
@@ -687,7 +688,15 @@ void 도메인은_다른_도메인의_repository를_직접_참조하지_않는�
    - 반복되는 UI 요소(버튼, 입력창, 카드, 배지 등)는 `src/main/resources/templates/fragments/components.html`에 정의된 Thymeleaf Fragment를 100% 활용하여 구축해야 합니다.
 3. **표준 기술 스택 준수 (Thymeleaf Core Stack):**
    - 본 프로젝트의 프론트엔드는 `HTML5 + Vanilla CSS + Vanilla JS + Thymeleaf` 기반의 서버 사이드 템플릿 아키텍처를 프로젝트 표준 스택으로 채택하여 개발합니다.
-4. **문서 및 라이브 가이드 세트 최신화:**
+4. **Thymeleaf 템플릿 디렉토리 표준 및 static HTML 배치 금지 (Templates Directory Rule):**
+   - 모든 UI 화면 HTML 파일(`*.html`)은 반드시 `src/main/resources/templates/` 하위에 위치시켜야 합니다.
+   - `src/main/resources/static/` 하위에는 CSS, JS, 이미지 등 순수 정적 자산(Static Assets)만 허용하며, HTML 화면 파일을 `static/`에 배치하고 JavaScript `fetch()` 비동기 통신으로 화면 껍데기를 조립하는 CSR 방식 개발을 엄격히 금지합니다.
+5. **서버 사이드 렌더링(SSR) 및 Web Controller 구축 필수 (SSR First & Web Controller Rule):**
+   - 공지사항, 카테고리 목록, 홈 화면 등 초기 데이터 조회가 필요한 모든 화면은 백엔드 Spring MVC `@Controller` (Web Controller)를 신설하고 `Model`에 DTO를 추가하여 Thymeleaf SSR(`th:each`, `th:text`, `th:if`, `th:replace`) 형태로 완성된 HTML을 서버에서 렌더링하여 응답해야 합니다.
+   - 초기 진입 시 FOUC(Flash of Unstyled Content)나 스켈레톤 지연 없이 완성된 DOM을 사용자에게 즉시 노출해야 합니다.
+6. **Thymeleaf 표현식 Null-Safety 수칙:**
+   - 템플릿 내 날짜/시간 포맷팅이나 데이터 바인딩 시 `th:text="${notice.createdAt != null ? #temporals.format(notice.createdAt, 'yyyy.MM.dd') : ''}"`와 같이 방어적 Null-Safety 표현식을 적용해야 합니다.
+7. **문서 및 라이브 가이드 세트 최신화:**
    - 신규 UI 요소 추가나 디자인 스펙 수정 시 반드시 `docs/architecture/UI-공통-디자인-시스템.md` 가이드북과 `http://localhost:8080/style-guide.html` 라이브 가이드 페이지를 소스 코드와 세트로 최신화해야 합니다.
-5. **전체 유저 플로우 가이드 동기화 필수:**
+8. **전체 유저 플로우 가이드 동기화 필수:**
    - 신규 화면(`*.html`)이나 새로운 기능/유스케이스가 추가될 때, 개발자는 반드시 단일 원본 문서인 `docs/architecture/전체-유저-플로우-가이드.md`에 해당 화면과 유저 여정, 화면-서비스 매핑표를 필수로 동기화 반영해야 합니다.
