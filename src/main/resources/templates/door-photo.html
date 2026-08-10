@@ -150,12 +150,12 @@
 
     (function init() {
         if (!authHeader()) {
-            location.replace('/login.html');
+            location.replace('/login');
             return;
         }
         const deliveryId = new URLSearchParams(location.search).get('id');
         if (!deliveryId) {
-            location.replace('/home.html');
+            location.replace('/home');
             return;
         }
         loadProofPhoto(deliveryId).catch((error) => {

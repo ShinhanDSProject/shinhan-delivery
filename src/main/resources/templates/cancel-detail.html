@@ -297,7 +297,7 @@
     async function load() {
         const header = authHeader();
         if (!header || !deliveryId) {
-            location.replace('/login.html');
+            location.replace('/login');
             return;
         }
         try {
@@ -305,7 +305,7 @@
                 headers: { Authorization: header }
             });
             if (response.status === 401) {
-                location.replace('/login.html');
+                location.replace('/login');
                 return;
             }
             if (response.status === 403) {

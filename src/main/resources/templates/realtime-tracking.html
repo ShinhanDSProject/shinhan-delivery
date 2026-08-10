@@ -263,7 +263,7 @@
 <body>
 <main class="page">
     <header class="top">
-        <button class="back-button" type="button" aria-label="홈으로 이동" onclick="location.href='/home.html'">
+        <button class="back-button" type="button" aria-label="홈으로 이동" onclick="location.href='/home'">
             <img src="/images/tracking-icons/arrow-left.svg" alt="">
         </button>
         <h1>실시간 위치 확인</h1>
@@ -431,7 +431,7 @@
         const doorPhotoButton = document.getElementById('doorPhotoButton');
         doorPhotoButton.hidden = false;
         doorPhotoButton.addEventListener('click', () => {
-            location.href = `/door-photo.html?id=${deliveryId}`;
+            location.href = `/door-photo?id=${deliveryId}`;
         });
     }
 
@@ -480,12 +480,12 @@
 
     (function init() {
         if (!authHeader()) {
-            location.replace('/login.html');
+            location.replace('/login');
             return;
         }
         const deliveryId = new URLSearchParams(location.search).get('id');
         if (!deliveryId) {
-            location.replace('/home.html');
+            location.replace('/home');
             return;
         }
         loadTracking(deliveryId).catch((error) => {

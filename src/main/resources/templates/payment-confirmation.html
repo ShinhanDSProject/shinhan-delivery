@@ -131,7 +131,7 @@
         if (Number(estimate.walletBalance || 0) < Number(estimate.totalFee || 0)) {
             return;
         }
-        location.href = '/payment-pin.html';
+        location.href = '/payment-pin';
     }
 
     function quickChargeAmounts(shortfall) {
@@ -225,7 +225,7 @@
     function renderState() {
         const draft = loadDraft();
         if (!draft.paymentEstimate) {
-            location.replace('/address-input.html');
+            location.replace('/address-input');
             return;
         }
 

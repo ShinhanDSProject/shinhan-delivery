@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 public class RealtimeWebController {
 
-  @GetMapping({"/realtime-tracking", "/realtime-tracking.html"})
+  @GetMapping("/realtime-tracking")
   public String realtimeTracking() {
     return "realtime-tracking";
   }

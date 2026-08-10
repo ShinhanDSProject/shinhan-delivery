@@ -7,27 +7,27 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 public class CourierWebController {
 
-  @GetMapping({"/courier-home", "/courier-home.html"})
+  @GetMapping("/courier-home")
   public String courierHome() {
     return "courier-home";
   }
 
-  @GetMapping({"/courier-login", "/courier-login.html"})
+  @GetMapping("/courier-login")
   public String courierLogin() {
     return "courier-login";
   }
 
-  @GetMapping({"/courier-signup", "/courier-signup.html"})
+  @GetMapping("/courier-signup")
   public String courierSignup() {
     return "courier-signup";
   }
 
-  @GetMapping({"/pickup-guide", "/pickup-guide.html"})
+  @GetMapping("/pickup-guide")
   public String pickupGuide() {
     return "pickup-guide";
   }
 
-  @GetMapping({"/pickup-map", "/pickup-map.html"})
+  @GetMapping("/pickup-map")
   public String pickupMap() {
     return "pickup-map";
   }

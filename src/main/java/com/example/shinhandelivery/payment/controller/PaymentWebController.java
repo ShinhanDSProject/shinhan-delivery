@@ -7,32 +7,32 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 public class PaymentWebController {
 
-  @GetMapping({"/point-wallet", "/point-wallet.html"})
+  @GetMapping("/point-wallet")
   public String pointWallet() {
     return "point-wallet";
   }
 
-  @GetMapping({"/point-charge", "/point-charge.html"})
+  @GetMapping("/point-charge")
   public String pointCharge() {
     return "point-charge";
   }
 
-  @GetMapping({"/payment-confirmation", "/payment-confirmation.html"})
+  @GetMapping("/payment-confirmation")
   public String paymentConfirmation() {
     return "payment-confirmation";
   }
 
-  @GetMapping({"/payment-pin", "/payment-pin.html"})
+  @GetMapping("/payment-pin")
   public String paymentPin() {
     return "payment-pin";
   }
 
-  @GetMapping({"/payment-pin-settings", "/payment-pin-settings.html"})
+  @GetMapping("/payment-pin-settings")
   public String paymentPinSettings() {
     return "payment-pin-settings";
   }
 
-  @GetMapping({"/payment-complete", "/payment-complete.html"})
+  @GetMapping("/payment-complete")
   public String paymentComplete() {
     return "payment-complete";
   }

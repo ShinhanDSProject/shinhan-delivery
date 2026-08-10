@@ -282,12 +282,12 @@
             photoUrl: uploadedPhotoUrl
         };
         saveDraft(draft);
-        location.href = '/address-input.html';
+        location.href = '/address-input';
     }
 
     (function init() {
         if (!authHeader()) {
-            location.replace('/login.html');
+            location.replace('/login');
             return;
         }
         const draft = loadDraft();

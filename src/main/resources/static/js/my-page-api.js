@@ -1,5 +1,5 @@
 (function () {
-  const LOGIN_PATH = "/login.html";
+  const LOGIN_PATH = "/login";
 
   function getToken() {
     return localStorage.getItem("accessToken");

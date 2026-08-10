@@ -18,20 +18,20 @@ class WebConfigTest {
   @Autowired private MockMvc mockMvc;
 
   @Test
-  @DisplayName("루트 경로(\"/\")로 접속하면 홈 화면(/home.html)으로 리다이렉트된다")
+  @DisplayName("루트 경로(\"/\")로 접속하면 홈 화면(/home)으로 리다이렉트된다")
   void rootPathRedirectsToHomePage() throws Exception {
     mockMvc
         .perform(get("/"))
         .andExpect(status().is3xxRedirection())
-        .andExpect(redirectedUrl("/home.html"));
+        .andExpect(redirectedUrl("/home"));
   }
 
   @Test
-  @DisplayName("index.html 경로(\"/index.html\")로 접속하면 홈 화면(/home.html)으로 리다이렉트된다")
+  @DisplayName("index.html 경로(\"/index.html\")로 접속하면 홈 화면(/home)으로 리다이렉트된다")
   void indexPathRedirectsToHomePage() throws Exception {
     mockMvc
         .perform(get("/index.html"))
         .andExpect(status().is3xxRedirection())
-        .andExpect(redirectedUrl("/home.html"));
+        .andExpect(redirectedUrl("/home"));
   }
 }

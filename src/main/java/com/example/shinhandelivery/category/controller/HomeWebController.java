@@ -15,7 +15,7 @@ public class HomeWebController {
 
   private final CategoryService categoryService;
 
-  @GetMapping({"/home", "/home.html"})
+  @GetMapping("/home")
   public String home(Model model) {
     List<CategoryResponse> categories =
         categoryService.list().stream().map(CategoryResponse::from).toList();

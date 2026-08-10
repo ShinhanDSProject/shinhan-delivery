@@ -411,7 +411,7 @@
 <body>
 
 <div class="signup-card">
-    <button class="back-button" type="button" aria-label="배송파트너 로그인 페이지로 이동" onclick="location.href='/courier-login.html'"></button>
+    <button class="back-button" type="button" aria-label="배송파트너 로그인 페이지로 이동" onclick="location.href='/courier-login'"></button>
 
     <div class="signup-header">
         <span class="badge">Shinhan Delivery Partner</span>
@@ -652,7 +652,7 @@
                 resultToast.className = 'result-toast success';
                 resultToast.textContent = `배송 파트너 가입 완료! 축하합니다. ${data.name}님(${data.email})`;
                 setTimeout(() => {
-                    location.href = '/courier-login.html';
+                    location.href = '/courier-login';
                 }, 2000);
             } else {
                 resultToast.className = 'result-toast error';

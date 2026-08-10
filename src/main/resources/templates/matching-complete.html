@@ -307,14 +307,14 @@
         document.getElementById('callButton').addEventListener('click', () => showToast('아직 준비 중인 기능입니다.'));
         document.getElementById('messageButton').addEventListener('click', () => showToast('아직 준비 중인 기능입니다.'));
         document.getElementById('trackingButton').addEventListener('click', () => {
-            location.href = `/realtime-tracking.html?id=${encodeURIComponent(deliveryId)}`;
+            location.href = `/realtime-tracking?id=${encodeURIComponent(deliveryId)}`;
         });
     }
 
     async function load() {
         const header = authHeader();
         if (!header || !deliveryId) {
-            location.replace(header ? '/home.html' : '/login.html');
+            location.replace(header ? '/home' : '/login');
             return;
         }
         try {
@@ -323,7 +323,7 @@
                 cache: 'no-store'
             });
             if (response.status === 401) {
-                location.replace('/login.html');
+                location.replace('/login');
                 return;
             }
             if (response.status === 403) {
@@ -336,7 +336,7 @@
             }
             const detail = await response.json();
             if (detail.status === 'REQUESTED') {
-                location.replace(`/matching-wait.html?id=${encodeURIComponent(deliveryId)}`);
+                location.replace(`/matching-wait?id=${encodeURIComponent(deliveryId)}`);
                 return;
             }
             if (detail.status === 'CANCELLED') {

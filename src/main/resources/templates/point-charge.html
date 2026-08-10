@@ -182,7 +182,7 @@
 <body>
 <main class="shell">
   <div class="topbar">
-    <button class="icon-btn" type="button" onclick="location.href='/point-wallet.html'" aria-label="뒤로가기">‹</button>
+    <button class="icon-btn" type="button" onclick="location.href='/point-wallet'" aria-label="뒤로가기">‹</button>
     <div class="hero">
       <h1>포인트 충전</h1>
       <p>원하는 금액을 선택하고 결제 수단을 골라 포인트를 충전합니다.</p>
@@ -314,7 +314,7 @@
         methodLabel: methodLabel(paymentMethod),
         lastChargedAt: response.lastChargedAt
       }));
-      location.replace("/point-wallet.html");
+      location.replace("/point-wallet");
     } catch (error) {
       showToast(error.message);
       chargeButton.disabled = false;

@@ -204,7 +204,7 @@
 <body>
 <main class="page">
     <header class="top">
-        <button class="back-button" type="button" aria-label="이전으로" onclick="location.href='/home.html'">
+        <button class="back-button" type="button" aria-label="이전으로" onclick="location.href='/home'">
             <svg viewBox="0 0 24 24" fill="none" width="20" height="20"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
         <h1>배송 내역</h1>
@@ -221,11 +221,11 @@
 </main>
 
 <nav class="bottom-tab-bar" aria-label="하단 메뉴">
-    <a href="/my-page.html" aria-label="포인트"><span class="point-icon" aria-hidden="true">P</span></a>
-    <a href="/home.html" aria-label="홈">
+    <a href="/my-page" aria-label="포인트"><span class="point-icon" aria-hidden="true">P</span></a>
+    <a href="/home" aria-label="홈">
         <svg viewBox="0 0 24 24" fill="none"><path d="M4 11 12 4l8 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 10v9a1 1 0 0 0 1 1h4v-6h2v6h4a1 1 0 0 0 1-1v-9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </a>
-    <a href="/my-page.html" class="active" aria-label="마이페이지" aria-current="page">
+    <a href="/my-page" class="active" aria-label="마이페이지" aria-current="page">
         <svg viewBox="0 0 24 24" fill="none"><path d="M5 7h14M5 12h14M5 17h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
     </a>
 </nav>
@@ -272,7 +272,7 @@
             headers: { Authorization: header }
         });
         if (response.status === 401 || response.status === 403) {
-            location.replace('/login.html');
+            location.replace('/login');
             return null;
         }
         if (!response.ok) return null;
@@ -283,7 +283,7 @@
         const badge = badgeFor(item.status);
         const card = document.createElement('a');
         card.className = 'history-card';
-        card.href = (item.status === 'CANCELLED' ? '/cancel-detail.html?id=' : '/delivery-detail.html?id=')
+        card.href = (item.status === 'CANCELLED' ? '/cancel-detail?id=' : '/delivery-detail?id=')
             + encodeURIComponent(item.id);
         card.innerHTML = `
             <div class="card-top">
@@ -376,7 +376,7 @@
     });
 
     if (!authHeader()) {
-        location.replace('/login.html');
+        location.replace('/login');
     } else {
         loadNextPage();
     }

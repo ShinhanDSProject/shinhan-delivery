@@ -17,7 +17,7 @@ public class NoticeWebController {
 
   private final NoticeService noticeService;
 
-  @GetMapping({"/announcements", "/announcements.html"})
+  @GetMapping("/announcements")
   public String announcements(@RequestParam(required = false) String category, Model model) {
     Page<NoticeResponse> notices =
         noticeService.list(category, PageRequest.of(0, 50)).map(NoticeResponse::from);

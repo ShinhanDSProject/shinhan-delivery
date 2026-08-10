@@ -233,7 +233,7 @@
 </head>
 <body>
 <main class="page">
-    <button class="back-button" type="button" aria-label="이용 방식 선택 페이지로 이동" onclick="location.href='/onboarding/index.html?screen=4'"></button>
+    <button class="back-button" type="button" aria-label="이용 방식 선택 페이지로 이동" onclick="location.href='/onboarding?screen=4'"></button>
 
     <div class="header">
         <span class="badge">Shinhan Delivery Partner</span>
@@ -258,7 +258,7 @@
         <nav class="links" aria-label="계정 관련 링크">
             <a href="#" id="forgotPassword">비밀번호를 잊으셨나요?</a>
             <span aria-hidden="true"></span>
-            <a class="signup-link" href="/courier-signup.html">배송원 회원가입</a>
+            <a class="signup-link" href="/courier-signup">배송원 회원가입</a>
         </nav>
     </div>
 </main>
@@ -302,7 +302,7 @@
             localStorage.setItem('tokenType', data.tokenType || 'Bearer');
             showMessage('배송파트너 로그인에 성공했습니다. 이동 중...', true);
             setTimeout(() => {
-                location.assign('/courier-home.html');
+                location.assign('/courier-home');
             }, 500);
         } catch (error) {
             showMessage('서버 통신 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');

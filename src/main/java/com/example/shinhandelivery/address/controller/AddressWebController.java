@@ -7,17 +7,17 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 public class AddressWebController {
 
-  @GetMapping({"/address-management", "/address-management.html"})
+  @GetMapping("/address-management")
   public String addressManagement() {
     return "address-management";
   }
 
-  @GetMapping({"/address-input", "/address-input.html"})
+  @GetMapping("/address-input")
   public String addressInput() {
     return "address-input";
   }
 
-  @GetMapping({"/destination-map", "/destination-map.html"})
+  @GetMapping("/destination-map")
   public String destinationMap() {
     return "destination-map";
   }

@@ -7,42 +7,42 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 public class DeliveryWebController {
 
-  @GetMapping({"/delivery-history", "/delivery-history.html"})
+  @GetMapping("/delivery-history")
   public String deliveryHistory() {
     return "delivery-history";
   }
 
-  @GetMapping({"/delivery-cancel-list", "/delivery-cancel-list.html"})
+  @GetMapping("/delivery-cancel-list")
   public String deliveryCancelList() {
     return "delivery-cancel-list";
   }
 
-  @GetMapping({"/delivery-detail", "/delivery-detail.html"})
+  @GetMapping("/delivery-detail")
   public String deliveryDetail() {
     return "delivery-detail";
   }
 
-  @GetMapping({"/item-detail", "/item-detail.html"})
+  @GetMapping("/item-detail")
   public String itemDetail() {
     return "item-detail";
   }
 
-  @GetMapping({"/door-photo", "/door-photo.html"})
+  @GetMapping("/door-photo")
   public String doorPhoto() {
     return "door-photo";
   }
 
-  @GetMapping({"/cancel-detail", "/cancel-detail.html"})
+  @GetMapping("/cancel-detail")
   public String cancelDetail() {
     return "cancel-detail";
   }
 
-  @GetMapping({"/matching-wait", "/matching-wait.html"})
+  @GetMapping("/matching-wait")
   public String matchingWait() {
     return "matching-wait";
   }
 
-  @GetMapping({"/matching-complete", "/matching-complete.html"})
+  @GetMapping("/matching-complete")
   public String matchingComplete() {
     return "matching-complete";
   }

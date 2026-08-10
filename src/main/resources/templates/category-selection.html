@@ -297,7 +297,7 @@
         draft.categoryId = selectedCategory.id;
         draft.categoryName = selectedCategory.name;
         saveDraft(draft);
-        location.href = '/item-detail.html';
+        location.href = '/item-detail';
     }
 
     async function loadCategories() {
@@ -320,7 +320,7 @@
 
     (function init() {
         if (!authHeader()) {
-            location.replace('/login.html');
+            location.replace('/login');
             return;
         }
         loadCategories();

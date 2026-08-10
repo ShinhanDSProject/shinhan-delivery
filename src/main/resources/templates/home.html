@@ -334,7 +334,7 @@
             <h1 id="greetingName">고객님</h1>
         </div>
         <div class="top-actions">
-            <button class="icon-button" type="button" aria-label="알림센터로 이동" onclick="location.href='/notifications.html'">
+            <button class="icon-button" type="button" aria-label="알림센터로 이동" onclick="location.href='/notifications'">
                 <span class="unread-badge" id="unreadBadge" aria-hidden="true"></span>
                 <svg viewBox="0 0 24 24" fill="none"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M13.7 21a2 2 0 0 1-3.4 0" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
             </button>
@@ -355,7 +355,7 @@
 
     <section>
         <h2>빠른 배송 신청</h2>
-        <button class="quick-request-card" type="button" onclick="location.href='/address-input.html'">
+        <button class="quick-request-card" type="button" onclick="location.href='/address-input'">
             <span class="plus"><svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>
             <span>
                 <span class="title" style="display:block;">새 배송 신청 예약</span>
@@ -371,13 +371,13 @@
 </main>
 
 <nav class="bottom-tab-bar" aria-label="하단 메뉴">
-    <button type="button" aria-label="포인트" onclick="location.href='/point-wallet.html'">
+    <button type="button" aria-label="포인트" onclick="location.href='/point-wallet'">
         <span class="point-icon" aria-hidden="true">P</span>
     </button>
-    <a href="/home.html" class="active" aria-label="홈" aria-current="page">
+    <a href="/home" class="active" aria-label="홈" aria-current="page">
         <svg viewBox="0 0 24 24" fill="none"><path d="M4 11 12 4l8 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 10v9a1 1 0 0 0 1 1h4v-6h2v6h4a1 1 0 0 0 1-1v-9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </a>
-    <a href="/my-page.html" aria-label="마이페이지">
+    <a href="/my-page" aria-label="마이페이지">
         <svg viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
     </a>
 </nav>
@@ -475,10 +475,10 @@
                     </div>
                 `;
                 card.querySelector('[data-action="track"]').addEventListener('click', () => {
-                    location.href = `/realtime-tracking.html?id=${delivery.id}`;
+                    location.href = `/realtime-tracking?id=${delivery.id}`;
                 });
                 card.querySelector('[data-action="detail"]').addEventListener('click', () => {
-                    location.href = `/delivery-detail.html?id=${delivery.id}`;
+                    location.href = `/delivery-detail?id=${delivery.id}`;
                 });
                 activeList.appendChild(card);
             });
@@ -506,7 +506,7 @@
     async function loadHome() {
         const header = authHeader();
         if (!header) {
-            location.replace('/login.html');
+            location.replace('/login');
             return;
         }
 
@@ -517,12 +517,12 @@
                 headers: { Authorization: header }
             });
             if (meResponse.status === 401 || meResponse.status === 403) {
-                location.replace('/login.html');
+                location.replace('/login');
                 return;
             }
             const me = await meResponse.json();
             if (!me.hasPaymentPin) {
-                location.replace('/payment-pin-settings.html?required=1&returnUrl=%2Fhome.html');
+                location.replace('/payment-pin-settings?required=1&returnUrl=%2Fhome.html');
                 return;
             }
             document.getElementById('greetingName').textContent = `${me.name} 님`;

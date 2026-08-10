@@ -134,7 +134,7 @@
     async function verifyPin(pin) {
         const authHeader = getAuthHeader();
         if (!authHeader) {
-            location.replace('/login.html');
+            location.replace('/login');
             throw new Error('LOGIN_REQUIRED');
         }
 
@@ -148,7 +148,7 @@
         });
 
         if (response.status === 401 || response.status === 403) {
-            location.replace('/login.html');
+            location.replace('/login');
             throw new Error('LOGIN_REQUIRED');
         }
 
@@ -184,7 +184,7 @@
         const idempotencyKey = crypto.randomUUID ? crypto.randomUUID() : `payment-${Date.now()}`;
         const authHeader = getAuthHeader();
         if (!authHeader) {
-            location.replace('/login.html');
+            location.replace('/login');
             throw new Error('LOGIN_REQUIRED');
         }
 
@@ -199,7 +199,7 @@
         });
 
         if (response.status === 401 || response.status === 403) {
-            location.replace('/login.html');
+            location.replace('/login');
             throw new Error('LOGIN_REQUIRED');
         }
 
@@ -255,17 +255,17 @@
         draft.paymentResult = result;
         draft.paymentStatus = 'COMPLETED';
         saveDraft(draft);
-        location.href = '/payment-complete.html';
+        location.href = '/payment-complete';
     }
 
     (function init() {
         const draft = loadDraft();
         if (draft.paymentStatus === 'COMPLETED') {
-            location.replace('/payment-complete.html');
+            location.replace('/payment-complete');
             return;
         }
         if (!draft.paymentEstimate) {
-            location.replace('/payment-confirmation.html');
+            location.replace('/payment-confirmation');
             return;
         }
 

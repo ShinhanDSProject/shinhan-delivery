@@ -7,32 +7,32 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 public class MemberWebController {
 
-  @GetMapping({"/my-page", "/my-page.html"})
+  @GetMapping("/my-page")
   public String myPage() {
     return "my-page";
   }
 
-  @GetMapping({"/profile-edit", "/profile-edit.html"})
+  @GetMapping("/profile-edit")
   public String profileEdit() {
     return "profile-edit";
   }
 
-  @GetMapping({"/change-password", "/change-password.html"})
+  @GetMapping("/change-password")
   public String changePassword() {
     return "change-password";
   }
 
-  @GetMapping({"/role-selection", "/role-selection.html"})
+  @GetMapping("/role-selection")
   public String roleSelection() {
     return "role-selection";
   }
 
-  @GetMapping({"/login", "/login.html"})
+  @GetMapping("/login")
   public String login() {
     return "login";
   }
 
-  @GetMapping({"/signup", "/signup.html"})
+  @GetMapping("/signup")
   public String signup() {
     return "signup";
   }

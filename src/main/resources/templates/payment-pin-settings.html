@@ -71,7 +71,7 @@
 <script>
     const params = new URLSearchParams(location.search);
     const required = params.get('required') === '1';
-    const returnUrl = params.get('returnUrl') || '/my-page.html';
+    const returnUrl = params.get('returnUrl') || '/my-page';
     let hasPaymentPin = false;
 
     function setHelper(text, className = '') {
@@ -148,7 +148,7 @@
     document.getElementById('skipButton').addEventListener('click', () => location.href = returnUrl);
     document.getElementById('backButton').addEventListener('click', () => {
         if (required) {
-            location.replace('/login.html');
+            location.replace('/login');
             return;
         }
         history.back();

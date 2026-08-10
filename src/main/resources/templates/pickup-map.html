@@ -245,7 +245,7 @@
             lng: currentCenter.lng
         };
         saveDraft(draft);
-        location.href = '/address-input.html';
+        location.href = '/address-input';
     }
 
     function initMap(center) {
@@ -258,7 +258,7 @@
 
     (function init() {
         if (!localStorage.getItem('accessToken')) {
-            location.replace('/login.html');
+            location.replace('/login');
             return;
         }
         const draft = loadDraft();

@@ -15,7 +15,7 @@ public class CategoryWebController {
 
   private final CategoryService categoryService;
 
-  @GetMapping({"/category-selection", "/category-selection.html"})
+  @GetMapping("/category-selection")
   public String categorySelection(Model model) {
     List<CategoryResponse> categories =
         categoryService.list().stream().map(CategoryResponse::from).toList();

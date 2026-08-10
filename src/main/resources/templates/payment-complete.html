@@ -42,8 +42,8 @@
     </section>
 
     <div class="cta">
-        <button type="button" class="primary-btn" onclick="location.href='/matching-wait.html'">매칭 대기 화면으로 이동</button>
-        <button type="button" class="secondary-btn" onclick="location.href='/home.html'">홈으로 돌아가기</button>
+        <button type="button" class="primary-btn" onclick="location.href='/matching-wait'">매칭 대기 화면으로 이동</button>
+        <button type="button" class="secondary-btn" onclick="location.href='/home'">홈으로 돌아가기</button>
     </div>
 </main>
 
@@ -55,7 +55,7 @@
     (function init() {
         const draft = loadDraft();
         if (!draft.paymentResult || !draft.paymentEstimate) {
-            location.replace('/payment-confirmation.html');
+            location.replace('/payment-confirmation');
             return;
         }
 

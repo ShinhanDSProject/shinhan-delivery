@@ -254,7 +254,7 @@
 <body>
 <main class="page">
     <header class="top">
-        <button class="back-button" type="button" aria-label="홈으로 이동" onclick="location.href='/home.html'">
+        <button class="back-button" type="button" aria-label="홈으로 이동" onclick="location.href='/home'">
             <svg viewBox="0 0 24 24" fill="none" width="20" height="20"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
         <h1>배송 신청 예약</h1>
@@ -286,7 +286,7 @@
 
         <div class="field">
             <label>픽업 가이드</label>
-            <button type="button" class="field-box" id="pickupGuideField" onclick="location.href='/pickup-guide.html'">
+            <button type="button" class="field-box" id="pickupGuideField" onclick="location.href='/pickup-guide'">
                 <svg viewBox="0 0 24 24" fill="none"><path d="M9 12h6M9 16h6M9 8h1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><rect x="4" y="4" width="16" height="16" rx="2" stroke="currentColor" stroke-width="1.8"/></svg>
                 <span class="value placeholder" id="pickupGuideValue">픽업 가이드를 입력해주세요</span>
             </button>
@@ -294,7 +294,7 @@
 
         <div class="field">
             <label>물품 정보</label>
-            <button type="button" class="field-box" id="itemDetailField" onclick="location.href='/item-detail.html'">
+            <button type="button" class="field-box" id="itemDetailField" onclick="location.href='/item-detail'">
                 <svg viewBox="0 0 24 24" fill="none"><path d="M21 8V21H3V8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M1 3h22v5H1z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 12h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
                 <span class="value placeholder" id="itemDetailValue">물품 정보를 입력해주세요</span>
             </button>
@@ -343,11 +343,11 @@
     }
 
     function goToPickupMap() {
-        location.href = '/pickup-map.html';
+        location.href = '/pickup-map';
     }
 
     function goToDestinationMap() {
-        location.href = '/destination-map.html';
+        location.href = '/destination-map';
     }
 
     function renderPoint(field, point) {
@@ -612,12 +612,12 @@
             notReady();
             return;
         }
-        location.href = '/payment-confirmation.html';
+        location.href = '/payment-confirmation';
     }
 
     (function init() {
         if (!authHeader()) {
-            location.replace('/login.html');
+            location.replace('/login');
             return;
         }
         const draft = loadDraft();

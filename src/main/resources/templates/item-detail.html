@@ -267,7 +267,7 @@
 
         <div class="field">
             <label>카테고리</label>
-            <button type="button" class="category-field" id="categoryField" onclick="location.href='/category-selection.html'">
+            <button type="button" class="category-field" id="categoryField" onclick="location.href='/category-selection'">
                 <span class="value placeholder" id="categoryValue">카테고리를 선택하세요</span>
                 <svg viewBox="0 0 24 24" fill="none"><polyline points="6 9 12 15 18 9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </button>
@@ -384,12 +384,12 @@
         draft.weight = Number(document.getElementById('weightSlider').value);
         draft.itemPhotoUrl = uploadedPhotoUrl;
         saveDraft(draft);
-        location.href = '/address-input.html';
+        location.href = '/address-input';
     }
 
     (function init() {
         if (!authHeader()) {
-            location.replace('/login.html');
+            location.replace('/login');
             return;
         }
         const draft = loadDraft();

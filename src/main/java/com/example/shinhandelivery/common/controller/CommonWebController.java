@@ -7,22 +7,22 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 public class CommonWebController {
 
-  @GetMapping({"/style-guide", "/style-guide.html"})
+  @GetMapping("/style-guide")
   public String styleGuide() {
     return "style-guide";
   }
 
-  @GetMapping({"/langgraph-opensource-dashboard", "/langgraph-opensource-dashboard.html"})
+  @GetMapping("/langgraph-opensource-dashboard")
   public String langgraphDashboard() {
     return "langgraph-opensource-dashboard";
   }
 
-  @GetMapping({"/langgraph-visualization", "/langgraph-visualization.html"})
+  @GetMapping("/langgraph-visualization")
   public String langgraphVisualization() {
     return "langgraph-visualization";
   }
 
-  @GetMapping({"/onboarding", "/onboarding/", "/onboarding/index.html"})
+  @GetMapping({"/onboarding", "/onboarding/"})
   public String onboarding() {
     return "onboarding/index";
   }
