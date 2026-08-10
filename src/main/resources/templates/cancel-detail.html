@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>취소 상세 내역 - 신한 딜리버리</title>
+    <link rel="stylesheet" href="/css/design-system.css">
+    <style>
+        :root {
+            --text-dark: var(--color-black-100);
+            --text-muted: var(--color-grey-500);
+            --border: var(--color-grey-50);
+            --primary: var(--color-blue-500);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: var(--font-family-base);
+        }
+
+        body {
+            min-height: 100vh;
+            color: var(--text-dark);
+            background: #F8F8F8;
+        }
+
+        .page {
+            max-width: 480px;
+            margin: 0 auto;
+            min-height: 100vh;
+            padding-bottom: 40px;
+        }
+
+        header.top {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 20px;
+        }
+
+        .back-button {
+            width: 32px;
+            height: 32px;
+            border-radius: 999px;
+            border: 0;
+            background: rgba(0, 0, 0, 0.02);
+            color: var(--text-dark);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        header.top h1 {
+            font-size: 18px;
+            font-weight: 800;
+        }
+
+        .body {
+            padding: 12px 20px 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .status-section {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            padding: 6px 12px;
+            border-radius: 6px;
+            background: var(--color-red-30);
+            border: 1px solid var(--color-red-50);
+            color: var(--color-red-100);
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+        .order-no {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .card {
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 18px;
+        }
+
+        .card-title {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .route {
+            font-size: 15px;
+            font-weight: 800;
+            margin-bottom: 6px;
+        }
+
+        .item-line {
+            display: flex;
+            gap: 8px;
+            font-size: 13px;
+        }
+
+        .item-line .item-label {
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .divider {
+            border: 0;
+            border-top: 1px solid var(--border);
+            margin: 14px 0;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+        }
+
+        .info-row + .info-row {
+            margin-top: 8px;
+        }
+
+        .info-row .info-label {
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .info-row .info-value.pending {
+            color: var(--color-grey-100);
+        }
+
+        .placeholder-box {
+            padding: 10px 14px;
+            background: #F8F8F8;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 14px;
+            color: var(--color-grey-100);
+        }
+
+        .placeholder-box + .placeholder-box {
+            margin-top: 10px;
+        }
+
+        .amount {
+            font-size: 15px;
+            font-weight: 800;
+            color: var(--color-orange-100);
+        }
+
+        .refund-status {
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .action-area {
+            padding: 8px 31px 24px;
+        }
+
+        .confirm-button {
+            display: block;
+            width: 100%;
+            padding: 18px 0;
+            border: 0;
+            border-radius: 15px;
+            background: var(--primary);
+            color: #fff;
+            font-size: 16px;
+            font-weight: 800;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .loading-state {
+            text-align: center;
+            padding: 48px 16px;
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+<main class="page">
+    <header class="top">
+        <button class="back-button" type="button" aria-label="이전으로" onclick="history.back()">
+            <svg viewBox="0 0 24 24" fill="none" width="20" height="20"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <h1>취소 상세 내역</h1>
+    </header>
+
+    <div class="body" id="body">
+        <div class="loading-state">불러오는 중...</div>
+    </div>
+</main>
+
+<div class="action-area">
+    <button class="confirm-button" type="button" onclick="history.back()">확인</button>
+</div>
+
+<script>
+    const deliveryId = new URLSearchParams(location.search).get('id');
+
+    function authHeader() {
+        const token = localStorage.getItem('accessToken');
+        const tokenType = localStorage.getItem('tokenType') || 'Bearer';
+        if (!token) return null;
+        return `${tokenType} ${token}`;
+    }
+
+    function formatDateTime(isoString) {
+        if (!isoString) return '-';
+        const date = new Date(isoString);
+        const yyyy = date.getFullYear();
+        const mm = String(date.getMonth() + 1).padStart(2, '0');
+        const dd = String(date.getDate()).padStart(2, '0');
+        const hh = String(date.getHours()).padStart(2, '0');
+        const min = String(date.getMinutes()).padStart(2, '0');
+        return `${yyyy}.${mm}.${dd} ${hh}:${min}`;
+    }
+
+    function itemSizeLabel(itemSize) {
+        return { SMALL: '소형', MEDIUM: '중형', LARGE: '대형' }[itemSize] || itemSize;
+    }
+
+    function render(detail) {
+        const body = document.getElementById('body');
+        body.innerHTML = `
+            <div class="status-section">
+                <span class="status-badge">취소 완료</span>
+                <span class="order-no">배송번호 #${detail.id}</span>
+            </div>
+
+            <section class="card">
+                <div class="card-title">배송 정보</div>
+                <div class="route" data-field="route"></div>
+                <div class="item-line">
+                    <span class="item-label">물품:</span>
+                    <span>${itemSizeLabel(detail.itemSize)} (${detail.weight}kg)</span>
+                </div>
+                <hr class="divider">
+                <div class="info-row">
+                    <span class="info-label">요청 일시</span>
+                    <span class="info-value">${formatDateTime(detail.createdAt)}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">취소 일시</span>
+                    <span class="info-value pending">제공 예정</span>
+                </div>
+            </section>
+
+            <section class="card">
+                <div class="card-title" style="text-transform:none;margin-bottom:12px;">취소 사유</div>
+                <div class="placeholder-box">사유 정보가 아직 제공되지 않아요</div>
+            </section>
+
+            <section class="card">
+                <div class="card-title" style="text-transform:none;margin-bottom:12px;">환불 정보</div>
+                <div class="info-row">
+                    <span class="info-label">결제 금액</span>
+                    <span class="amount">${detail.feePoint.toLocaleString()} P</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">환불 금액</span>
+                    <span class="info-value pending">제공 예정</span>
+                </div>
+                <hr class="divider">
+                <div class="info-row">
+                    <span class="info-label">환불 상태</span>
+                    <span class="info-value pending">제공 예정</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">환불 일시</span>
+                    <span class="info-value pending">제공 예정</span>
+                </div>
+            </section>
+        `;
+        // pickupAddress/dropoffAddress는 고객이 자유 입력하는 텍스트라 innerHTML에 직접 꽂지 않고
+        // textContent로만 채워 스크립트 삽입(XSS)을 막는다.
+        body.querySelector('[data-field="route"]').textContent = `${detail.pickupAddress} → ${detail.dropoffAddress}`;
+    }
+
+    async function load() {
+        const header = authHeader();
+        if (!header || !deliveryId) {
+            location.replace('/login');
+            return;
+        }
+        try {
+            const response = await fetch(`/api/v1/delivery-requests/${deliveryId}`, {
+                headers: { Authorization: header }
+            });
+            if (response.status === 401) {
+                location.replace('/login');
+                return;
+            }
+            if (response.status === 403) {
+                document.getElementById('body').innerHTML = '<div class="loading-state">이 취소 내역을 볼 권한이 없어요.</div>';
+                return;
+            }
+            if (!response.ok) {
+                document.getElementById('body').innerHTML = '<div class="loading-state">취소 내역을 불러오지 못했어요.</div>';
+                return;
+            }
+            const detail = await response.json();
+            if (detail.status !== 'CANCELLED') {
+                document.getElementById('body').innerHTML = '<div class="loading-state">취소된 배송이 아니에요.</div>';
+                return;
+            }
+            render(detail);
+        } catch (error) {
+            document.getElementById('body').innerHTML = '<div class="loading-state">취소 내역을 불러오지 못했어요.</div>';
+        }
+    }
+
+    load();
+</script>
+</body>
+</html>

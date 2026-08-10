@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>문앞 픽업 가이드 - Shinhan Delivery</title>
+    <link rel="stylesheet" href="/css/design-system.css">
+    <script src="/js/utils/storage.js"></script>
+    <style>
+        :root {
+            --primary: var(--color-blue-500);
+            --text-dark: var(--color-black-200);
+            --text-muted: var(--color-grey-300);
+            --surface: #FAFBFD;
+            --border: var(--color-grey-50);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: var(--font-family-base);
+        }
+
+        body {
+            min-height: 100vh;
+            color: var(--text-dark);
+            background: #fff;
+        }
+
+        .page {
+            max-width: 480px;
+            margin: 0 auto;
+            min-height: 100vh;
+            background: #fff;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header.top {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 20px;
+        }
+
+        .back-button {
+            width: 32px;
+            height: 32px;
+            min-width: 32px;
+            border-radius: 999px;
+            border: 0;
+            background: rgba(0, 0, 0, 0.02);
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        header.top h1 {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            padding: 20px;
+            flex: 1;
+        }
+
+        .field label {
+            display: block;
+            font-size: 13px;
+            font-weight: 700;
+            color: #4A5568;
+            margin-bottom: 6px;
+        }
+
+        .field input[type="text"] {
+            width: 100%;
+            padding: 12px 14px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            font-family: var(--font-family-base);
+            font-size: 14px;
+            color: var(--text-dark);
+        }
+
+        .field textarea {
+            width: 100%;
+            min-height: 100px;
+            padding: 14px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            font-family: var(--font-family-base);
+            font-size: 14px;
+            color: var(--text-dark);
+            resize: vertical;
+        }
+
+        .photo-upload {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 20px;
+            background: var(--surface);
+            border: 1px dashed var(--border);
+            border-radius: 12px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .photo-upload svg {
+            width: 24px;
+            height: 24px;
+            color: #4A5568;
+        }
+
+        .photo-upload span {
+            font-size: 13px;
+            font-weight: 600;
+            color: #4A5568;
+        }
+
+        .photo-preview {
+            display: none;
+            width: 100%;
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .photo-preview.visible {
+            display: block;
+        }
+
+        .photo-preview img {
+            width: 100%;
+            height: 160px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .photo-preview button {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: 0;
+            background: rgba(0, 0, 0, 0.6);
+            color: #fff;
+            cursor: pointer;
+        }
+
+        footer.bottom {
+            display: flex;
+            justify-content: center;
+            padding: 16px;
+        }
+
+        footer.bottom button {
+            width: 100%;
+            max-width: 350px;
+            height: 56px;
+            border: 0;
+            border-radius: 12px;
+            background: var(--primary);
+            color: #fff;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+<main class="page">
+    <header class="top">
+        <button class="back-button" type="button" aria-label="뒤로 가기" onclick="history.back()">
+            <svg viewBox="0 0 24 24" fill="none" width="20" height="20"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <h1>문앞 픽업 가이드</h1>
+    </header>
+
+    <div class="form">
+        <div class="field">
+            <label>공동현관 비밀번호</label>
+            <input type="text" id="doorPassword" placeholder="예: #1234* 호출 버튼 누른 후 입력" maxlength="100">
+        </div>
+
+        <div class="field">
+            <label>동 / 호수 상세</label>
+            <input type="text" id="unitDetail" placeholder="예: 101동 1403호" maxlength="100">
+        </div>
+
+        <div class="field">
+            <label>물품 위치 설명</label>
+            <textarea id="locationNote" placeholder="예: 현관문 옆 흰색 보관함 위에 놓아두었습니다. 픽업 후 노크 한 번만 해주세요." maxlength="255"></textarea>
+        </div>
+
+        <div class="field">
+            <label>입구/위치 참고 사진 등록 (선택)</label>
+            <button type="button" class="photo-upload" id="photoUploadBtn">
+                <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/><path d="M4 7h3l2-3h6l2 3h3v13H4z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+                <span id="photoUploadLabel">사진 찍어 추가하기</span>
+            </button>
+            <input type="file" id="photoInput" accept="image/jpeg,image/png,image/webp" style="display:none;">
+            <div class="photo-preview" id="photoPreview">
+                <img id="photoPreviewImg" alt="등록한 참고 사진 미리보기">
+                <button type="button" id="photoRemoveBtn" aria-label="사진 삭제">×</button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bottom">
+        <button type="button" id="confirmButton" onclick="confirmGuide()">확인</button>
+    </footer>
+</main>
+
+<script>
+    function authHeader() {
+        const token = localStorage.getItem('accessToken');
+        const tokenType = localStorage.getItem('tokenType') || 'Bearer';
+        if (!token) return null;
+        return `${tokenType} ${token}`;
+    }
+
+    let uploadedPhotoUrl = null;
+
+    document.getElementById('photoUploadBtn').addEventListener('click', () => {
+        document.getElementById('photoInput').click();
+    });
+
+    document.getElementById('photoInput').addEventListener('change', async (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const label = document.getElementById('photoUploadLabel');
+        label.textContent = '업로드 중...';
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+            const header = authHeader();
+            const response = await fetch('/api/v1/uploads/image', {
+                method: 'POST',
+                headers: header ? { Authorization: header } : undefined,
+                body: formData
+            });
+            if (!response.ok) throw new Error('upload failed');
+            const result = await response.json();
+            uploadedPhotoUrl = result.imageUrl;
+
+            document.getElementById('photoPreviewImg').src = uploadedPhotoUrl;
+            document.getElementById('photoPreview').classList.add('visible');
+            document.getElementById('photoUploadBtn').style.display = 'none';
+        } catch (error) {
+            label.textContent = '업로드에 실패했어요. 다시 시도해주세요';
+        }
+    });
+
+    document.getElementById('photoRemoveBtn').addEventListener('click', () => {
+        uploadedPhotoUrl = null;
+        document.getElementById('photoInput').value = '';
+        document.getElementById('photoPreview').classList.remove('visible');
+        document.getElementById('photoUploadBtn').style.display = 'flex';
+        document.getElementById('photoUploadLabel').textContent = '사진 찍어 추가하기';
+    });
+
+    function confirmGuide() {
+        const draft = loadDraft();
+        draft.pickupGuide = {
+            doorPassword: document.getElementById('doorPassword').value.trim(),
+            unitDetail: document.getElementById('unitDetail').value.trim(),
+            locationNote: document.getElementById('locationNote').value.trim(),
+            photoUrl: uploadedPhotoUrl
+        };
+        saveDraft(draft);
+        location.href = '/address-input';
+    }
+
+    (function init() {
+        if (!authHeader()) {
+            location.replace('/login');
+            return;
+        }
+        const draft = loadDraft();
+        if (draft.pickupGuide) {
+            document.getElementById('doorPassword').value = draft.pickupGuide.doorPassword || '';
+            document.getElementById('unitDetail').value = draft.pickupGuide.unitDetail || '';
+            document.getElementById('locationNote').value = draft.pickupGuide.locationNote || '';
+            if (draft.pickupGuide.photoUrl) {
+                uploadedPhotoUrl = draft.pickupGuide.photoUrl;
+                document.getElementById('photoPreviewImg').src = uploadedPhotoUrl;
+                document.getElementById('photoPreview').classList.add('visible');
+                document.getElementById('photoUploadBtn').style.display = 'none';
+            }
+        }
+    })();
+</script>
+</body>
+</html>

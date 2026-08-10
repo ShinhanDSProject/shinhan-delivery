@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>결제 확인 - 신한 딜리버리</title>
+    <link rel="stylesheet" href="/css/design-system.css">
+    <script src="/js/utils/storage.js"></script>
+    <script src="/js/my-page-api.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font-family-base); }
+        body { min-height: 100vh; background: #f8fafc; color: var(--color-black-200); }
+        .page { max-width: 480px; min-height: 100vh; margin: 0 auto; display: flex; flex-direction: column; background: #f8fafc; }
+        .top { display: flex; align-items: center; gap: 12px; padding: 12px 20px; }
+        .back-button { width: 32px; height: 32px; border: 0; border-radius: 999px; background: rgba(0, 0, 0, 0.04); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .top h1 { font-size: 18px; font-weight: 800; }
+        .step-pill { margin: 8px 20px 0; display: inline-flex; padding: 6px 12px; border-radius: 999px; background: var(--color-blue-50); color: var(--color-blue-100); font-size: 12px; font-weight: 700; }
+        .content { padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+        .hero { background: linear-gradient(135deg, #ffffff, #eef5ff); border: 1px solid var(--color-blue-50); border-radius: 24px; padding: 24px; box-shadow: var(--shadow-md); }
+        .hero h2 { font-size: 24px; font-weight: 800; margin-bottom: 8px; }
+        .hero p { color: var(--color-grey-300); line-height: 1.5; font-size: 14px; }
+        .summary-card, .balance-card { background: #fff; border-radius: 20px; padding: 20px; box-shadow: var(--shadow-sm); border: 1px solid var(--color-grey-50); }
+        .summary-card h3, .balance-card h3 { font-size: 15px; font-weight: 800; margin-bottom: 14px; }
+        .row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; font-size: 14px; }
+        .row + .row { border-top: 1px solid var(--color-grey-30); }
+        .row strong { font-size: 15px; }
+        .total-row { color: var(--color-blue-100); font-weight: 800; }
+        .balance-card .amount { font-size: 28px; font-weight: 800; margin-top: 8px; }
+        .balance-card .helper { color: var(--color-grey-300); font-size: 13px; margin-top: 6px; }
+        .status-banner { padding: 14px 16px; border-radius: 16px; font-size: 14px; font-weight: 700; }
+        .status-banner.ok { background: var(--color-green-50); color: var(--color-green-300); }
+        .status-banner.fail { background: var(--color-red-30); color: var(--color-red-200); }
+        .cta { margin-top: auto; padding: 20px; display: flex; flex-direction: column; gap: 10px; }
+        .primary-btn, .secondary-btn { height: 56px; border-radius: 16px; border: 0; font-size: 16px; font-weight: 800; cursor: pointer; }
+        .primary-btn { background: var(--color-blue-500); color: #fff; box-shadow: var(--shadow-lg); }
+        .primary-btn:disabled { background: var(--color-grey-100); box-shadow: none; cursor: not-allowed; }
+        .secondary-btn { background: transparent; color: var(--color-grey-300); border: 1px solid var(--color-grey-50); }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.45); display: none; align-items: flex-end; justify-content: center; z-index: 30; }
+        .modal-overlay.is-open { display: flex; }
+        .modal-card { width: 100%; max-width: 480px; background: #fff; border-radius: 24px 24px 0 0; padding: 24px 20px; display: flex; flex-direction: column; gap: 12px; max-height: 85vh; overflow-y: auto; }
+        .modal-card h3 { font-size: 18px; font-weight: 800; }
+        .modal-desc { color: var(--color-grey-300); font-size: 13px; line-height: 1.5; }
+        .modal-label { font-size: 13px; font-weight: 700; color: var(--color-grey-300); }
+        .modal-input { height: 48px; border: 1px solid var(--color-grey-50); border-radius: 12px; padding: 0 14px; font-size: 16px; font-weight: 700; }
+        .amount-chip-row { display: flex; gap: 8px; flex-wrap: wrap; }
+        .amount-chip { padding: 8px 14px; border-radius: 999px; border: 1px solid var(--color-grey-50); background: #fff; font-size: 13px; font-weight: 700; cursor: pointer; }
+        .amount-chip.is-selected { border-color: var(--color-blue-100); color: var(--color-blue-100); background: var(--color-blue-50); }
+        .method-list { display: grid; gap: 8px; }
+        .method-item { display: flex; align-items: center; gap: 10px; min-height: 48px; padding: 0 14px; border: 1px solid var(--color-grey-50); border-radius: 14px; }
+        .method-item input { accent-color: var(--color-blue-100); }
+        .modal-actions { display: flex; gap: 10px; margin-top: 4px; }
+        .modal-actions .secondary-btn, .modal-actions .primary-btn { flex: 1; height: 48px; }
+        .toast { position: fixed; left: 50%; bottom: 32px; transform: translateX(-50%); min-width: 200px; max-width: calc(100% - 32px); padding: 12px 16px; border-radius: 999px; color: #fff; background: rgba(17, 24, 39, 0.88); opacity: 0; pointer-events: none; transition: opacity 0.2s ease; text-align: center; font-size: 13px; z-index: 40; }
+        .toast.is-visible { opacity: 1; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+<main class="page">
+    <header class="top">
+        <button class="back-button" type="button" aria-label="뒤로 가기" onclick="history.back()">
+            <svg viewBox="0 0 24 24" fill="none" width="20" height="20"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <h1>결제 확인</h1>
+    </header>
+    <div class="step-pill">STEP 1 · 결제 금액 확인</div>
+
+    <section class="content">
+        <div class="hero">
+            <h2>배송 요청 전 결제를 확인해 주세요</h2>
+            <p>기본 요금과 거리, 무게, 크기 가산 요금이 반영된 예상 결제 금액입니다. 보유 포인트가 충분하면 다음 단계에서 결제 PIN을 입력할 수 있습니다.</p>
+        </div>
+
+        <div class="summary-card">
+            <h3>결제 상세</h3>
+            <div class="row"><span>기본 요금</span><strong id="baseFee">0 P</strong></div>
+            <div class="row"><span>거리 가산</span><strong id="distanceSurcharge">0 P</strong></div>
+            <div class="row"><span>무게 가산</span><strong id="weightSurcharge">0 P</strong></div>
+            <div class="row"><span>크기 가산</span><strong id="sizeSurcharge">0 P</strong></div>
+            <div class="row total-row"><span>총 결제 금액</span><strong id="totalFee">0 P</strong></div>
+        </div>
+
+        <div class="balance-card">
+            <h3>보유 포인트</h3>
+            <div class="amount" id="walletBalance">0 P</div>
+            <div class="helper" id="remainingBalance">결제 후 잔액 0 P</div>
+        </div>
+
+        <div class="status-banner" id="statusBanner">결제 확인 중입니다.</div>
+    </section>
+
+    <div class="cta">
+        <button type="button" class="primary-btn" id="payButton" onclick="goToPin()" disabled>결제 PIN 입력하기</button>
+        <button type="button" class="primary-btn hidden" id="chargeButton" onclick="openChargeModal()">부족한 포인트 충전하기</button>
+        <button type="button" class="secondary-btn" onclick="history.back()">배송 정보 다시 보기</button>
+    </div>
+</main>
+
+<div class="modal-overlay" id="chargeModalOverlay">
+    <div class="modal-card">
+        <h3>포인트 충전</h3>
+        <p class="modal-desc" id="chargeModalDesc">부족한 포인트를 충전하고 결제를 이어가세요.</p>
+        <label class="modal-label" for="chargeAmountInput">충전 금액</label>
+        <input type="number" id="chargeAmountInput" class="modal-input" min="1" step="1000">
+        <div class="amount-chip-row" id="chargeAmountChips"></div>
+        <div class="method-list">
+            <label class="method-item"><input type="radio" name="chargePaymentMethod" value="CARD" checked><span>카드 결제</span></label>
+            <label class="method-item"><input type="radio" name="chargePaymentMethod" value="BANK_TRANSFER"><span>계좌 이체</span></label>
+            <label class="method-item"><input type="radio" name="chargePaymentMethod" value="EASY_PAY"><span>간편 결제</span></label>
+        </div>
+        <div class="modal-actions">
+            <button type="button" class="secondary-btn" onclick="closeChargeModal()">취소</button>
+            <button type="button" class="primary-btn" id="chargeSubmitButton" onclick="submitCharge()">충전하기</button>
+        </div>
+    </div>
+</div>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<script>
+    function formatPoint(value) {
+        return `${Number(value || 0).toLocaleString()} P`;
+    }
+
+    function goToPin() {
+        const draft = loadDraft();
+        const estimate = draft.paymentEstimate;
+        if (!estimate) {
+            return;
+        }
+        if (Number(estimate.walletBalance || 0) < Number(estimate.totalFee || 0)) {
+            return;
+        }
+        location.href = '/payment-pin';
+    }
+
+    function quickChargeAmounts(shortfall) {
+        return Array.from(new Set([shortfall, 10000, 30000, 50000]))
+            .filter((amount) => amount >= shortfall)
+            .sort((a, b) => a - b);
+    }
+
+    function syncChipSelection(amount) {
+        document.querySelectorAll('#chargeAmountChips .amount-chip').forEach((chip) => {
+            chip.classList.toggle('is-selected', Number(chip.dataset.amount) === Number(amount));
+        });
+    }
+
+    function renderChargeChips(shortfall) {
+        const row = document.getElementById('chargeAmountChips');
+        row.innerHTML = '';
+        quickChargeAmounts(shortfall).forEach((amount) => {
+            const chip = document.createElement('button');
+            chip.type = 'button';
+            chip.className = 'amount-chip';
+            chip.textContent = formatPoint(amount);
+            chip.dataset.amount = String(amount);
+            chip.addEventListener('click', () => {
+                document.getElementById('chargeAmountInput').value = amount;
+                syncChipSelection(amount);
+            });
+            row.appendChild(chip);
+        });
+        syncChipSelection(shortfall);
+    }
+
+    function openChargeModal() {
+        const draft = loadDraft();
+        const estimate = draft.paymentEstimate;
+        if (!estimate) {
+            return;
+        }
+        const shortfall = Math.max(0, Number(estimate.totalFee || 0) - Number(estimate.walletBalance || 0));
+        document.getElementById('chargeModalDesc').textContent =
+            `부족한 포인트 ${formatPoint(shortfall)}을(를) 충전하면 바로 결제를 진행할 수 있어요.`;
+        document.getElementById('chargeAmountInput').value = shortfall;
+        renderChargeChips(shortfall);
+        document.getElementById('chargeModalOverlay').classList.add('is-open');
+    }
+
+    function closeChargeModal() {
+        document.getElementById('chargeModalOverlay').classList.remove('is-open');
+    }
+
+    async function submitCharge() {
+        const amount = Number(document.getElementById('chargeAmountInput').value);
+        if (!amount || amount <= 0) {
+            MyPageApi.showToast('충전 금액을 올바르게 입력해 주세요.');
+            return;
+        }
+
+        const paymentMethod = document.querySelector("input[name='chargePaymentMethod']:checked")?.value || 'CARD';
+        const idempotencyKey =
+            (window.crypto && crypto.randomUUID && crypto.randomUUID()) ||
+            `payment-confirmation-charge-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+
+        const submitButton = document.getElementById('chargeSubmitButton');
+        submitButton.disabled = true;
+        submitButton.textContent = '충전 처리 중...';
+
+        try {
+            const response = await MyPageApi.request('/api/v1/points/charge', {
+                method: 'POST',
+                headers: { 'Idempotency-Key': idempotencyKey },
+                body: JSON.stringify({ amount, paymentMethod })
+            });
+
+            MyPageApi.showToast('포인트 충전이 완료되었습니다.');
+            closeChargeModal();
+
+            const draft = loadDraft();
+            if (draft.paymentEstimate) {
+                draft.paymentEstimate.walletBalance = Number(response.balance);
+                saveDraft(draft);
+            }
+            renderState();
+        } catch (error) {
+            MyPageApi.showToast(error.message);
+        } finally {
+            submitButton.disabled = false;
+            submitButton.textContent = '충전하기';
+        }
+    }
+
+    function renderState() {
+        const draft = loadDraft();
+        if (!draft.paymentEstimate) {
+            location.replace('/address-input');
+            return;
+        }
+
+        const estimate = draft.paymentEstimate;
+        const remaining = Number(estimate.walletBalance || 0) - Number(estimate.totalFee || 0);
+        const enough = remaining >= 0;
+
+        document.getElementById('baseFee').textContent = formatPoint(estimate.baseFee);
+        document.getElementById('distanceSurcharge').textContent = formatPoint(estimate.distanceSurcharge);
+        document.getElementById('weightSurcharge').textContent = formatPoint(estimate.weightSurcharge);
+        document.getElementById('sizeSurcharge').textContent = formatPoint(estimate.sizeSurcharge);
+        document.getElementById('totalFee').textContent = formatPoint(estimate.totalFee);
+        document.getElementById('walletBalance').textContent = formatPoint(estimate.walletBalance);
+        document.getElementById('remainingBalance').textContent = `결제 후 잔액 ${formatPoint(remaining)}`;
+
+        const banner = document.getElementById('statusBanner');
+        const payButton = document.getElementById('payButton');
+        const chargeButton = document.getElementById('chargeButton');
+        if (enough) {
+            banner.className = 'status-banner ok';
+            banner.textContent = '보유 포인트가 충분합니다. 결제를 진행할 수 있습니다.';
+            payButton.classList.remove('hidden');
+            payButton.disabled = false;
+            chargeButton.classList.add('hidden');
+        } else {
+            const shortfall = Math.abs(remaining);
+            banner.className = 'status-banner fail';
+            banner.textContent = `보유 포인트가 ${formatPoint(shortfall)} 부족합니다. 포인트를 충전한 뒤 결제를 진행해 주세요.`;
+            payButton.classList.add('hidden');
+            chargeButton.classList.remove('hidden');
+        }
+    }
+
+    (function init() {
+        renderState();
+    })();
+</script>
+</body>
+</html>

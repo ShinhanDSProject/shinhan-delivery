@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>매칭 완료 - 신한 딜리버리</title>
+    <link rel="stylesheet" href="/css/design-system.css">
+    <style>
+        :root {
+            --text-dark: var(--color-black-200);
+            --text-muted: var(--color-grey-300);
+            --border: var(--color-grey-50);
+            --primary: var(--color-blue-30);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: var(--font-family-base);
+        }
+
+        body {
+            min-height: 100vh;
+            color: var(--text-dark);
+        }
+
+        .page {
+            max-width: 480px;
+            margin: 0 auto;
+            min-height: 100vh;
+            background: #FAFBFD;
+            padding-bottom: 24px;
+        }
+
+        header.top {
+            display: flex;
+            align-items: center;
+            padding: 16px 20px;
+        }
+
+        header.top h1 {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .body-area {
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 50px;
+        }
+
+        .success-header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .success-badge {
+            display: inline-flex;
+            padding: 6px 12px;
+            border-radius: 30px;
+            background: #fff;
+            border: 1px solid var(--color-orange-100);
+            color: var(--color-orange-100);
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .success-header h2 {
+            font-size: 22px;
+            font-weight: 800;
+            text-align: center;
+        }
+
+        .card {
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .courier-profile {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .courier-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 999px;
+            background: var(--color-blue-50);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex: none;
+        }
+
+        .courier-avatar svg {
+            width: 30px;
+            height: 30px;
+        }
+
+        .courier-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            min-width: 0;
+        }
+
+        .courier-name {
+            font-size: 18px;
+            font-weight: 800;
+        }
+
+        .courier-vehicle {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        .contact-buttons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .contact-buttons button {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 0;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: #fff;
+            color: var(--text-muted);
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .contact-buttons svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .brief-row {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+            font-size: 14px;
+        }
+
+        .brief-row .brief-label {
+            color: var(--text-muted);
+            font-weight: 500;
+            flex: none;
+        }
+
+        .brief-row .brief-value {
+            font-weight: 700;
+            text-align: right;
+        }
+
+        .divider {
+            border: 0;
+            border-top: 1px solid var(--border);
+        }
+
+        .tracking-cta {
+            display: block;
+            width: 100%;
+            padding: 16px 0;
+            margin-top: 20px;
+            border: 0;
+            border-radius: 12px;
+            background: var(--primary);
+            color: #fff;
+            font-size: 16px;
+            font-weight: 700;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .status-message {
+            text-align: center;
+            padding: 48px 16px;
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        #toast {
+            position: fixed;
+            left: 50%;
+            bottom: 40px;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: #fff;
+            padding: 10px 18px;
+            border-radius: 999px;
+            font-size: 13px;
+            white-space: nowrap;
+            z-index: 20;
+        }
+    </style>
+</head>
+<body>
+<main class="page">
+    <header class="top">
+        <h1>매칭 완료</h1>
+    </header>
+
+    <div class="body-area" id="body">
+        <div class="status-message">불러오는 중...</div>
+    </div>
+</main>
+
+<script>
+    const deliveryId = new URLSearchParams(location.search).get('id');
+    const VEHICLE_TYPE_LABELS = { MOTORCYCLE: '오토바이', DRONE: '드론', CAR: '차량' };
+    const ITEM_SIZE_LABELS = { SMALL: '소형', MEDIUM: '중형', LARGE: '대형' };
+
+    function authHeader() {
+        const token = localStorage.getItem('accessToken');
+        const tokenType = localStorage.getItem('tokenType') || 'Bearer';
+        if (!token) return null;
+        return `${tokenType} ${token}`;
+    }
+
+    function showToast(message) {
+        const existing = document.getElementById('toast');
+        if (existing) existing.remove();
+        const toast = document.createElement('div');
+        toast.id = 'toast';
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 2000);
+    }
+
+    function showStatusMessage(message) {
+        document.getElementById('body').innerHTML = `<div class="status-message">${message}</div>`;
+    }
+    // message는 이 파일 안에서만 정의된 고정 문자열만 넘기므로 innerHTML로 꽂아도 XSS 위험이 없다.
+
+    function render(detail, vehicleType) {
+        const body = document.getElementById('body');
+        body.innerHTML = `
+            <div class="success-header">
+                <span class="success-badge">매칭 성공</span>
+                <h2>배송원이 배정되었습니다!</h2>
+            </div>
+
+            <section class="card">
+                <div class="courier-profile">
+                    <div class="courier-avatar" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="#4A90FF" stroke-width="1.6"/><path d="M4 20c0-4 3.6-6 8-6s8 2 8 6" stroke="#4A90FF" stroke-width="1.6" stroke-linecap="round"/></svg>
+                    </div>
+                    <div class="courier-info">
+                        <span class="courier-name" data-field="courierName"></span>
+                        <span class="courier-vehicle" data-field="vehicleType"></span>
+                    </div>
+                </div>
+                <div class="contact-buttons">
+                    <button type="button" id="callButton">
+                        <svg viewBox="0 0 24 24" fill="none"><path d="M4 5c0-.6.4-1 1-1h3l2 5-2 1c1 3 3 5 6 6l1-2 5 2v3c0 .6-.4 1-1 1C10 20 4 14 4 5Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+                        전화하기
+                    </button>
+                    <button type="button" id="messageButton">
+                        <svg viewBox="0 0 24 24" fill="none"><path d="M4 5h16v11H8l-4 4V5Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+                        메시지
+                    </button>
+                </div>
+            </section>
+
+            <section class="card">
+                <div class="brief-row">
+                    <span class="brief-label">물품 정보</span>
+                    <span class="brief-value" data-field="itemInfo"></span>
+                </div>
+                <hr class="divider">
+                <div class="brief-row">
+                    <span class="brief-label">이동 경로</span>
+                    <span class="brief-value" data-field="route"></span>
+                </div>
+            </section>
+
+            <button class="tracking-cta" type="button" id="trackingButton">실시간 위치 확인</button>
+        `;
+        // courierName/pickupAddress/dropoffAddress는 고객·배송원이 자유 입력하는 텍스트라 innerHTML에
+        // 직접 꽂지 않고 textContent로만 채워 스크립트 삽입(XSS)을 막는다.
+        body.querySelector('[data-field="courierName"]').textContent = detail.courierName || '배송원';
+        body.querySelector('[data-field="vehicleType"]').textContent =
+            `운송 수단: ${VEHICLE_TYPE_LABELS[vehicleType] || '정보 없음'}`;
+        body.querySelector('[data-field="itemInfo"]').textContent =
+            `${ITEM_SIZE_LABELS[detail.itemSize] || detail.itemSize} ${detail.weight}kg`;
+        body.querySelector('[data-field="route"]').textContent =
+            `${detail.pickupAddress} → ${detail.dropoffAddress}`;
+
+        document.getElementById('callButton').addEventListener('click', () => showToast('아직 준비 중인 기능입니다.'));
+        document.getElementById('messageButton').addEventListener('click', () => showToast('아직 준비 중인 기능입니다.'));
+        document.getElementById('trackingButton').addEventListener('click', () => {
+            location.href = `/realtime-tracking?id=${encodeURIComponent(deliveryId)}`;
+        });
+    }
+
+    async function load() {
+        const header = authHeader();
+        if (!header || !deliveryId) {
+            location.replace(header ? '/home' : '/login');
+            return;
+        }
+        try {
+            const response = await fetch(`/api/v1/delivery-requests/${deliveryId}`, {
+                headers: { Authorization: header },
+                cache: 'no-store'
+            });
+            if (response.status === 401) {
+                location.replace('/login');
+                return;
+            }
+            if (response.status === 403) {
+                showStatusMessage('이 배송 요청을 볼 권한이 없어요.');
+                return;
+            }
+            if (!response.ok) {
+                showStatusMessage('배송 정보를 불러오지 못했어요.');
+                return;
+            }
+            const detail = await response.json();
+            if (detail.status === 'REQUESTED') {
+                location.replace(`/matching-wait?id=${encodeURIComponent(deliveryId)}`);
+                return;
+            }
+            if (detail.status === 'CANCELLED') {
+                showStatusMessage('취소된 배송 요청이에요.');
+                return;
+            }
+
+            render(detail, detail.vehicleType);
+        } catch (error) {
+            showStatusMessage('배송 정보를 불러오지 못했어요.');
+        }
+    }
+
+    load();
+</script>
+</body>
+</html>

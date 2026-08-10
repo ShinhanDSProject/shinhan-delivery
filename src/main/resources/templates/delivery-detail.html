@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>배송 상세 내역 - 신한 딜리버리</title>
+    <link rel="stylesheet" href="/css/design-system.css">
+    <style>
+        :root {
+            --text-dark: var(--color-black-200);
+            --text-muted: var(--color-grey-300);
+            --text-faint: var(--color-grey-100);
+            --border: var(--color-grey-50);
+            --primary: var(--color-blue-30);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: var(--font-family-base);
+        }
+
+        body {
+            min-height: 100vh;
+            color: var(--text-dark);
+        }
+
+        .page {
+            max-width: 480px;
+            margin: 0 auto;
+            min-height: 100vh;
+            background: #FAFBFD;
+        }
+
+        header.top {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 20px;
+        }
+
+        .back-button {
+            width: 32px;
+            height: 32px;
+            border-radius: 999px;
+            border: 0;
+            background: rgba(0, 0, 0, 0.02);
+            color: var(--text-dark);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        header.top h1 {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .body {
+            padding: 8px 20px 150px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .card {
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 18px;
+        }
+
+        .card-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+
+        .timeline-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .timeline-row + .timeline-row {
+            margin-top: 12px;
+        }
+
+        .timeline-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex: none;
+        }
+
+        .timeline-dot.done { background: var(--color-green-200); }
+        .timeline-dot.pending { background: var(--border); }
+
+        .timeline-row .content {
+            flex: 1;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .timeline-row .label {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        .timeline-row .time {
+            font-size: 12px;
+            color: var(--text-faint);
+        }
+
+        .detail-row + .detail-row {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+        }
+
+        .detail-row .label {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-faint);
+            margin-bottom: 6px;
+        }
+
+        .detail-row .value {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .detail-row .value.fee {
+            font-size: 16px;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        .footer-actions {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 480px;
+            padding: 24px;
+        }
+
+        .photo-cta {
+            display: block;
+            width: 100%;
+            padding: 16px 0;
+            border: 0;
+            border-radius: 12px;
+            background: var(--primary);
+            color: #fff;
+            font-size: 16px;
+            font-weight: 700;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .photo-cta:disabled {
+            background: var(--border);
+            color: var(--text-faint);
+            cursor: not-allowed;
+        }
+
+        .loading-state {
+            text-align: center;
+            padding: 48px 16px;
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+<main class="page">
+    <header class="top">
+        <button class="back-button" type="button" aria-label="이전으로" onclick="location.href='/delivery-history'">
+            <svg viewBox="0 0 24 24" fill="none" width="20" height="20"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <h1>배송 상세 내역</h1>
+    </header>
+
+    <div class="body" id="body">
+        <div class="loading-state">불러오는 중...</div>
+    </div>
+</main>
+
+<div class="footer-actions" id="footerActions" hidden>
+    <button class="photo-cta" id="photoCta" type="button">문앞 인증 사진 보기</button>
+</div>
+
+<script>
+    const deliveryId = new URLSearchParams(location.search).get('id');
+
+    function authHeader() {
+        const token = localStorage.getItem('accessToken');
+        const tokenType = localStorage.getItem('tokenType') || 'Bearer';
+        if (!token) return null;
+        return `${tokenType} ${token}`;
+    }
+
+    function formatTime(isoString) {
+        if (!isoString) return null;
+        const date = new Date(isoString);
+        return date.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false });
+    }
+
+    function itemSizeLabel(itemSize) {
+        return { SMALL: '소형', MEDIUM: '중형', LARGE: '대형' }[itemSize] || itemSize;
+    }
+
+    function timelineRow(label, time, done) {
+        return `
+            <div class="timeline-row">
+                <span class="timeline-dot ${done ? 'done' : 'pending'}"></span>
+                <div class="content">
+                    <span class="label">${label}</span>
+                    <span class="time">${time ? formatTime(time) : ''}</span>
+                </div>
+            </div>
+        `;
+    }
+
+    function render(detail) {
+        const body = document.getElementById('body');
+        const timelineSteps = [
+            { label: '배송원 배정 완료', time: detail.matchedAt },
+            { label: '물품 픽업 완료', time: detail.pickedUpAt },
+            { label: '배송 완료', time: detail.completedAt }
+        ];
+
+        body.innerHTML = `
+            <section class="card">
+                <div class="card-title">배송 타임라인</div>
+                ${timelineSteps.map((step) => timelineRow(step.label, step.time, !!step.time)).join('')}
+            </section>
+            <section class="card">
+                <div class="detail-row">
+                    <div class="label">출발지 (픽업)</div>
+                    <div class="value" data-field="pickupAddress"></div>
+                </div>
+                <div class="detail-row">
+                    <div class="label">도착지</div>
+                    <div class="value" data-field="dropoffAddress"></div>
+                </div>
+                <div class="detail-row">
+                    <div class="label">물품 정보</div>
+                    <div class="value">${itemSizeLabel(detail.itemSize)} (${detail.weight}kg)</div>
+                </div>
+                ${detail.courierName ? `
+                <div class="detail-row">
+                    <div class="label">배송원</div>
+                    <div class="value" data-field="courierName"></div>
+                </div>` : ''}
+                <div class="detail-row">
+                    <div class="label">결제 요금</div>
+                    <div class="value fee">${detail.feePoint.toLocaleString()} P (포인트 결제)</div>
+                </div>
+            </section>
+        `;
+        // pickupAddress/dropoffAddress/courierName은 사용자가 입력한 자유 텍스트라 innerHTML에 직접
+        // 꽂지 않고 textContent로만 채워 스크립트 삽입(XSS)을 막는다.
+        body.querySelector('[data-field="pickupAddress"]').textContent = detail.pickupAddress;
+        body.querySelector('[data-field="dropoffAddress"]').textContent = detail.dropoffAddress;
+        if (detail.courierName) {
+            body.querySelector('[data-field="courierName"]').textContent = detail.courierName;
+        }
+
+        const footerActions = document.getElementById('footerActions');
+        const photoCta = document.getElementById('photoCta');
+        if (detail.status === 'COMPLETED') {
+            footerActions.hidden = false;
+            photoCta.disabled = !detail.proofPhotoUrl;
+            photoCta.addEventListener('click', () => {
+                location.href = `/door-photo?id=${deliveryId}`;
+            });
+        }
+    }
+
+    async function load() {
+        const header = authHeader();
+        if (!header) {
+            location.replace('/login');
+            return;
+        }
+        if (!deliveryId) {
+            document.getElementById('body').innerHTML = '<div class="loading-state">잘못된 접근이에요.</div>';
+            return;
+        }
+        try {
+            const response = await fetch(`/api/v1/delivery-requests/${deliveryId}`, {
+                headers: { Authorization: header }
+            });
+            if (response.status === 401) {
+                location.replace('/login');
+                return;
+            }
+            if (response.status === 403) {
+                document.getElementById('body').innerHTML = '<div class="loading-state">이 배송 정보를 볼 권한이 없어요.</div>';
+                return;
+            }
+            if (!response.ok) {
+                document.getElementById('body').innerHTML = '<div class="loading-state">배송 정보를 불러오지 못했어요.</div>';
+                return;
+            }
+            render(await response.json());
+        } catch (error) {
+            document.getElementById('body').innerHTML = '<div class="loading-state">배송 정보를 불러오지 못했어요.</div>';
+        }
+    }
+
+    load();
+</script>
+</body>
+</html>

@@ -15,22 +15,21 @@ YELLOW="\033[33m"
 RESET="\033[0m"
 
 STATIC_DIR="src/main/resources/static"
+TEMPLATES_DIR="src/main/resources/templates"
 ERRORS=0
 
-echo -e "🔍 공통 디자인 시스템 린팅 검사 시작: ${STATIC_DIR}"
+echo -e "🔍 공통 디자인 시스템 린팅 검사 시작: ${STATIC_DIR} 및 ${TEMPLATES_DIR}"
 
-if [ ! -d "$STATIC_DIR" ]; then
-    echo -e "${GREEN}  ✓ static 디렉토리가 존재하지 않으므로 검사를 통과합니다.${RESET}"
-    exit 0
-fi
-
-# 1. static 하위 HTML 파일에 design-system.css 연동 여부 검사
+# 1. static 및 templates 하위 HTML 파일에 design-system.css 연동 여부 검사 (components.html 제외)
 while IFS= read -r -d '' html_file; do
+    if [[ "$html_file" == *"components.html"* ]]; then
+        continue
+    fi
     if ! grep -q "design-system.css" "$html_file"; then
         echo -e "${RED}  ❌ [디자인 시스템 미비] ${html_file} 파일에 'design-system.css' 연동이 누락되었습니다.${RESET}"
         ERRORS=$((ERRORS + 1))
     fi
-done < <(find "$STATIC_DIR" -type f -name "*.html" -print0)
+done < <(find "$STATIC_DIR" "$TEMPLATES_DIR" -type f -name "*.html" -print0 2>/dev/null)
 
 if [ $ERRORS -gt 0 ]; then
     echo -e "${RED}❌ 총 ${ERRORS}개의 디자인 시스템 규격 위반 사항이 발견되었습니다.${RESET}"

@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>배송 취소 내역 - 신한 딜리버리</title>
+    <link rel="stylesheet" href="/css/design-system.css">
+    <style>
+        :root {
+            --text-dark: var(--color-black-200);
+            --text-muted: var(--color-grey-300);
+            --text-faint: var(--color-grey-100);
+            --border: var(--color-grey-50);
+            --primary: var(--color-blue-500);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: var(--font-family-base);
+        }
+
+        body {
+            min-height: 100vh;
+            color: var(--text-dark);
+            background: #F8F8F8;
+        }
+
+        .page {
+            max-width: 480px;
+            margin: 0 auto;
+            min-height: 100vh;
+            padding-bottom: 40px;
+        }
+
+        header.top {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 20px;
+        }
+
+        .back-button {
+            width: 32px;
+            height: 32px;
+            border-radius: 999px;
+            border: 0;
+            background: rgba(0, 0, 0, 0.02);
+            color: var(--text-dark);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        header.top h1 {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .list {
+            padding: 8px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .cancel-card {
+            display: block;
+            width: 100%;
+            text-align: left;
+            background: #fff;
+            border: 0;
+            border-radius: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+            padding: 20px;
+            cursor: pointer;
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .card-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .order-no {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .chevron {
+            color: var(--text-faint);
+        }
+
+        .divider {
+            border: 0;
+            border-top: 1px solid #EEEEEE;
+            margin: 12px 0;
+        }
+
+        .route-rows {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .route-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .route-tag {
+            padding: 2px 6px;
+            border: 1px solid #EAEAEA;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--text-muted);
+        }
+
+        .route-address {
+            font-size: 15px;
+            font-weight: 700;
+        }
+
+        .card-bottom {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+        }
+
+        .card-bottom .requested-at {
+            font-size: 13px;
+            color: var(--text-faint);
+        }
+
+        .status-pill {
+            padding: 6px 10px;
+            border: 1px solid #EAEAEA;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .empty-state, .loading-state {
+            text-align: center;
+            padding: 48px 16px;
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+<main class="page">
+    <header class="top">
+        <button class="back-button" type="button" aria-label="이전으로" onclick="location.href='/my-page'">
+            <svg viewBox="0 0 24 24" fill="none" width="20" height="20"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <h1>배송 취소 내역</h1>
+    </header>
+
+    <div class="list" id="list"></div>
+</main>
+
+<script>
+    const PAGE_SIZE = 10;
+    let currentPage = 0;
+    let isLastPage = false;
+    let isLoading = false;
+
+    function authHeader() {
+        const token = localStorage.getItem('accessToken');
+        const tokenType = localStorage.getItem('tokenType') || 'Bearer';
+        if (!token) return null;
+        return `${tokenType} ${token}`;
+    }
+
+    function formatDateTime(isoString) {
+        const date = new Date(isoString);
+        const yyyy = date.getFullYear();
+        const mm = String(date.getMonth() + 1).padStart(2, '0');
+        const dd = String(date.getDate()).padStart(2, '0');
+        const hh = String(date.getHours()).padStart(2, '0');
+        const min = String(date.getMinutes()).padStart(2, '0');
+        return `${yyyy}.${mm}.${dd} ${hh}:${min}`;
+    }
+
+    function renderCard(item) {
+        const card = document.createElement('a');
+        card.className = 'cancel-card';
+        card.href = '/cancel-detail?id=' + encodeURIComponent(item.id);
+        card.innerHTML = `
+            <div class="card-top">
+                <span class="order-no">배송번호 #${item.id}</span>
+                <span class="chevron" aria-hidden="true">›</span>
+            </div>
+            <hr class="divider">
+            <div class="route-rows">
+                <div class="route-row">
+                    <span class="route-tag">출발</span>
+                    <span class="route-address" data-field="pickup"></span>
+                </div>
+                <div class="route-row">
+                    <span class="route-tag">도착</span>
+                    <span class="route-address" data-field="dropoff"></span>
+                </div>
+            </div>
+            <hr class="divider">
+            <div class="card-bottom">
+                <span class="requested-at">요청 일시: ${formatDateTime(item.createdAt)}</span>
+                <span class="status-pill">취소 완료</span>
+            </div>
+        `;
+        // pickupAddress/dropoffAddress는 고객이 자유 입력하는 텍스트라 innerHTML에 직접 꽂지 않고
+        // textContent로만 채워 스크립트 삽입(XSS)을 막는다.
+        card.querySelector('[data-field="pickup"]').textContent = item.pickupAddress;
+        card.querySelector('[data-field="dropoff"]').textContent = item.dropoffAddress;
+        return card;
+    }
+
+    async function loadNextPage() {
+        if (isLoading || isLastPage) return;
+        isLoading = true;
+
+        const list = document.getElementById('list');
+        if (currentPage === 0) {
+            list.innerHTML = '<div class="loading-state">불러오는 중...</div>';
+        }
+
+        const header = authHeader();
+        if (!header) {
+            location.replace('/login');
+            return;
+        }
+
+        try {
+            const response = await fetch(
+                `/api/v1/delivery-requests?status=CANCELLED&page=${currentPage}&size=${PAGE_SIZE}`,
+                { headers: { Authorization: header } }
+            );
+            if (response.status === 401) {
+                location.replace('/login');
+                return;
+            }
+            if (response.status === 403) {
+                if (currentPage === 0) {
+                    list.innerHTML = '<div class="empty-state">취소 내역을 볼 권한이 없어요.</div>';
+                }
+                isLastPage = true;
+                return;
+            }
+            if (!response.ok) return;
+
+            const page = await response.json();
+            const items = page.content || [];
+
+            if (currentPage === 0) {
+                list.innerHTML = '';
+            }
+            if (currentPage === 0 && items.length === 0) {
+                list.innerHTML = '<div class="empty-state">취소된 배송이 없어요.</div>';
+            } else {
+                items.forEach((item) => list.appendChild(renderCard(item)));
+            }
+
+            isLastPage = page.last;
+            currentPage += 1;
+        } catch (error) {
+            if (currentPage === 0) {
+                list.innerHTML = '<div class="empty-state">취소 내역을 불러오지 못했어요.</div>';
+            }
+        } finally {
+            isLoading = false;
+        }
+    }
+
+    window.addEventListener('scroll', () => {
+        const scrolledToBottom = window.innerHeight + window.scrollY >= document.body.offsetHeight - 200;
+        if (scrolledToBottom) loadNextPage();
+    });
+
+    if (!authHeader()) {
+        location.replace('/login');
+    } else {
+        loadNextPage();
+    }
+</script>
+</body>
+</html>

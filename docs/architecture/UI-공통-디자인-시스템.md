@@ -15,6 +15,7 @@
 - [7. Form & Input Components (입력창 컴포넌트)](#7-form--input-components-입력창-컴포넌트)
 - [8. Card & Badge Components (카드 및 배지)](#8-card--badge-components-카드-및-배지)
 - [9. Thymeleaf Fragment 사용법 (공통 컴포넌트)](#9-thymeleaf-fragment-사용법-공통-컴포넌트)
+- [10. Thymeleaf 템플릿 디렉토리 표준 & SSR 아키텍처 규칙](#10-thymeleaf-템플릿-디렉토리-표준--ssr-아키텍처-규칙)
 
 ---
 
@@ -1278,4 +1279,16 @@ Thymeleaf 템플릿에서 공통 프래그먼트를 불러와 손쉽게 조립�
 
 > 💡 **Spring Form 바인딩 팁 (th:field)**  
 > Spring DTO 바인딩이 필요한 폼 개발 시, `<input class="input-field" th:field="*{email}">` 형태로 `th:field`를 직접 사용하면 `id`, `name`, `value`가 바인딩 객체 사양에 따라 자동 생성됩니다.
+
+---
+
+## 10. Thymeleaf 템플릿 디렉토리 표준 & SSR 아키텍처 규칙
+
+### 1) 템플릿 파일 디렉토리 표준 (`src/main/resources/templates/`)
+- 본 프로젝트의 모든 UI 화면 HTML 파일(`*.html`)은 반드시 `src/main/resources/templates/` 하위에 위치해야 합니다.
+- `src/main/resources/static/` 디렉토리에는 CSS, JavaScript, 이미지 등 순수 정적 자산(Static Assets)만 배치하며, HTML 파일이 `static/`에 위치하여 브라우저에서 `fetch()` API로 화면을 동적 조립하는 CSR 방식 개발은 엄격히 금지됩니다.
+
+### 2) 서버 사이드 렌더링(SSR) 및 Web Controller 구축 수칙
+- 초기 데이터 조회가 필요한 페이지(공지사항, 카테고리 선택, 홈 화면 등)는 Spring MVC `@Controller` (Web Controller)를 신설하고 `Model` 객체에 DTO 데이터를 담아 Thymeleaf SSR(`th:each`, `th:text`, `th:if`, `th:replace`) 형태로 렌더링하여 전달합니다.
+- 페이지 첫 로드 시 FOUC(Flash of Unstyled Content)나 스켈레톤(Skeleton) 지연을 차단하고 완성된 HTML을 사용자에게 즉시 응답합니다.
 
