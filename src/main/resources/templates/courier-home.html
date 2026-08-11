@@ -477,22 +477,24 @@
           </svg>
         </div>
         <div class="profile-meta">
-          <div class="profile-name"><span id="courierNameText">홍길동</span> 기사님</div>
-          <div class="profile-transport" id="courierTransportText">🛵 오토바이</div>
+          <div class="profile-name"><span id="courierNameText" th:text="${memberName}">홍길동</span> 기사님</div>
+          <div class="profile-transport" id="courierTransportText" th:text="${transportMode}">🛵 오토바이</div>
         </div>
       </div>
 
       <div class="status-toggle-area">
         <label class="switch" title="온라인/오프라인 영업 상태 변경">
-          <input type="checkbox" id="workStatusToggle" onchange="toggleWorkStatus(this)">
+          <input type="checkbox" id="workStatusToggle" th:checked="${isOnline}" onchange="toggleWorkStatus(this)">
           <span class="slider"></span>
         </label>
-        <span id="statusText" class="status-text-badge status-badge-offline">오프라인</span>
+        <span id="statusText" 
+              th:text="${isOnline ? '온라인' : '오프라인'}" 
+              th:class="${'status-text-badge ' + (isOnline ? 'status-badge-online' : 'status-badge-offline')}">오프라인</span>
       </div>
     </header>
 
     <!-- 오프라인 상태 전용 안내 카드 (오프라인일 때만 표시) -->
-    <section class="offline-notice-card" id="offlineNoticeSection">
+    <section class="offline-notice-card" id="offlineNoticeSection" th:style="${isOnline ? 'display: none;' : 'display: flex;'}">
       <div class="offline-notice-icon">
         <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
           <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/>
@@ -507,7 +509,7 @@
     </section>
 
     <!-- 2. 위치 지도 카드 (온라인일 때만 표시) -->
-    <section class="map-section" id="mapSection" style="display: none;">
+    <section class="map-section" id="mapSection" th:style="${isOnline ? 'display: flex;' : 'display: none;'}">
       <div class="map-header">
         <div class="map-title">
           <span>📍 내 주변 위치 지도</span>
@@ -528,11 +530,11 @@
     </section>
 
     <!-- 3. 대기 중인 배달 목록 (온라인일 때만 표시, 전체보기/접기 가능) -->
-    <section class="queue-section" id="queueSection" style="display: none;">
+    <section class="queue-section" id="queueSection" th:style="${isOnline ? 'display: block;' : 'display: none;'}">
       <div class="queue-header">
         <div class="queue-title">
           <span>대기 중인 배달</span>
-          <span class="queue-count-badge" id="queueCountBadge">0건</span>
+          <span class="queue-count-badge" id="queueCountBadge" th:text="${availableCount + '건'}">0건</span>
         </div>
         <button type="button" class="btn-toggle-view" id="btnToggleExpand" onclick="toggleExpandQueue()">
           <span id="toggleText">전체보기</span>
@@ -541,7 +543,24 @@
       </div>
 
       <div id="deliveryQueueList" class="queue-list-container">
-        <!-- JS로 배달 내역 카드가 삽입됩니다 -->
+        <div th:if="${availableDeliveries == null or #lists.isEmpty(availableDeliveries)}" class="card-box" style="text-align: center; color: var(--color-grey-300); padding: 30px 20px;">
+          <p style="font-size: 15px; font-weight: 700; margin-bottom: 6px;">현재 대기 중인 배달이 없습니다. ☕</p>
+          <p style="font-size: 13px;">새로운 주문이 접수되면 목록에 나타납니다.</p>
+        </div>
+        <div th:each="item : ${availableDeliveries}" class="delivery-card">
+          <div class="delivery-header">
+            <span class="badge badge-primary" th:text="'픽업 ' + ${item.distanceToPickupKm != null ? #numbers.formatDecimal(item.distanceToPickupKm, 1, 1) : '1.0'} + 'km'">픽업 0.8km</span>
+            <span class="fee-badge" th:text="${item.feePoint != null ? #numbers.formatInteger(item.feePoint, 0, 'COMMA') + ' P' : '4,000 P'}">4,500 P</span>
+          </div>
+          <div class="route-info">
+            <div class="route-line">📍 픽업: <strong th:text="${item.pickupAddress}">서울 마포구 백범로 31 (신한DS 건물)</strong></div>
+            <div class="route-line">🏁 배송: <strong th:text="${item.dropoffAddress}">서울 마포구 독막로 12 (상수빌딩)</strong></div>
+          </div>
+          <div class="card-footer">
+            <span class="meta-text" th:text="'이동거리 ' + ${item.distanceKm != null ? #numbers.formatDecimal(item.distanceKm, 1, 1) : '2.0'} + 'km | ' + ${item.itemSize != null ? item.itemSize : '소형'}">이동거리 2.1km | 소형</span>
+            <button class="btn btn-primary btn-sm" th:onclick="'catchDelivery(' + ${item.deliveryRequestId} + ')'">⚡ 주문 수락</button>
+          </div>
+        </div>
       </div>
     </section>
   </div>
@@ -569,18 +588,19 @@
   <!-- 토스트 알림 -->
   <div id="toast" class="toast-popup">메시지 내용</div>
 
-  <script>
+  <script th:inline="javascript">
     let kakaoMap = null;
     let currentMarker = null;
     let allDeliveries = [];
     let isExpanded = false;
-    let isCurrentOnline = false;
-    let currentLat = 37.5665;
-    let currentLng = 126.9780;
+    let isCurrentOnline = /*[[${isOnline}]]*/ false;
+    let currentLat = /*[[${latitude}]]*/ 37.5665;
+    let currentLng = /*[[${longitude}]]*/ 126.9780;
 
     document.addEventListener("DOMContentLoaded", () => {
-      fetchCourierProfile();
-      fetchWorkStatus();
+      if (isCurrentOnline) {
+        initKakaoMap();
+      }
     });
 
     // 0. 기사 본인 프로필 정보 조회
