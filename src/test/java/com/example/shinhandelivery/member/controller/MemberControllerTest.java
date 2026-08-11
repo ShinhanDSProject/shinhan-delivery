@@ -29,7 +29,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
@@ -48,10 +47,11 @@ class MemberControllerTest {
 
   @Mock private MemberService memberService;
   @Mock private JwtProvider jwtProvider;
-  @InjectMocks private MemberController memberController;
+  private MemberController memberController;
 
   @BeforeEach
   void setUp() {
+    memberController = new MemberController(memberService, jwtProvider, false);
     mockMvc =
         MockMvcBuilders.standaloneSetup(memberController)
             .setCustomArgumentResolvers(new AuthenticationPrincipalArgumentResolver())
@@ -118,6 +118,25 @@ class MemberControllerTest {
                         org.hamcrest.Matchers.containsString("accessToken=access-token-value"),
                         org.hamcrest.Matchers.containsString("HttpOnly"),
                         org.hamcrest.Matchers.containsString("Max-Age=3600"))));
+  }
+
+  @Test
+  @DisplayName("app.cookie.secure가 true로 설정되면 발급되는 쿠키에도 Secure 속성이 붙는다")
+  void loginCookieSecureReflectsConfiguredValue() throws Exception {
+    org.springframework.test.util.ReflectionTestUtils.setField(
+        memberController, "cookieSecure", true);
+    LoginRequest request = new LoginRequest("user@example.com", "password123");
+    when(memberService.login(any()))
+        .thenReturn(TokenResponse.of("access-token-value", "refresh-token-value"));
+    when(jwtProvider.getAccessTokenExpirationSeconds()).thenReturn(3600L);
+
+    mockMvc
+        .perform(
+            post("/api/v1/members/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isOk())
+        .andExpect(header().string("Set-Cookie", org.hamcrest.Matchers.containsString("Secure")));
   }
 
   @Test

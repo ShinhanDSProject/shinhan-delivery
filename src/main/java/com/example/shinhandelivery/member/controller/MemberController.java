@@ -19,7 +19,7 @@ import com.example.shinhandelivery.member.service.MemberService;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import java.util.List;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -40,13 +40,22 @@ import org.springframework.web.bind.annotation.RestController;
 /** Member CRUD 및 역할 변경 API를 제공하는 컨트롤러. */
 @RestController
 @RequestMapping("/api/v1/members")
-@RequiredArgsConstructor
 public class MemberController {
 
   private static final String ACCESS_TOKEN_COOKIE_NAME = "accessToken";
 
   private final MemberService memberService;
   private final JwtProvider jwtProvider;
+  private final boolean cookieSecure;
+
+  public MemberController(
+      MemberService memberService,
+      JwtProvider jwtProvider,
+      @Value("${app.cookie.secure}") boolean cookieSecure) {
+    this.memberService = memberService;
+    this.jwtProvider = jwtProvider;
+    this.cookieSecure = cookieSecure;
+  }
 
   /** 회원을 생성(가입)한다. */
   @PostMapping
@@ -76,7 +85,7 @@ public class MemberController {
   private ResponseCookie buildAccessTokenCookie(String accessToken) {
     return ResponseCookie.from(ACCESS_TOKEN_COOKIE_NAME, accessToken)
         .httpOnly(true)
-        .secure(false)
+        .secure(cookieSecure)
         .sameSite("Lax")
         .path("/")
         .maxAge(jwtProvider.getAccessTokenExpirationSeconds())
@@ -86,7 +95,7 @@ public class MemberController {
   private ResponseCookie buildExpiredAccessTokenCookie() {
     return ResponseCookie.from(ACCESS_TOKEN_COOKIE_NAME, "")
         .httpOnly(true)
-        .secure(false)
+        .secure(cookieSecure)
         .sameSite("Lax")
         .path("/")
         .maxAge(0)

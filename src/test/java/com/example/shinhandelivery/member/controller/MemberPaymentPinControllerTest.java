@@ -8,6 +8,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.example.shinhandelivery.common.exception.GlobalExceptionHandler;
 import com.example.shinhandelivery.common.security.CustomUserDetails;
+import com.example.shinhandelivery.common.security.JwtProvider;
 import com.example.shinhandelivery.member.dto.request.MemberPaymentPinUpdateRequest;
 import com.example.shinhandelivery.member.service.MemberService;
 import org.junit.jupiter.api.AfterEach;
@@ -15,7 +16,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
@@ -33,10 +33,12 @@ class MemberPaymentPinControllerTest {
   private final ObjectMapper objectMapper = new ObjectMapper();
 
   @Mock private MemberService memberService;
-  @InjectMocks private MemberController memberController;
+  @Mock private JwtProvider jwtProvider;
+  private MemberController memberController;
 
   @BeforeEach
   void setUp() {
+    memberController = new MemberController(memberService, jwtProvider, false);
     mockMvc =
         MockMvcBuilders.standaloneSetup(memberController)
             .setCustomArgumentResolvers(new AuthenticationPrincipalArgumentResolver())
