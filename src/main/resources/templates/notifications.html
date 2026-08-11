@@ -186,6 +186,7 @@
     let currentTab = 'ALL';
     let loadInFlight = false;
     let pendingLiveNotifications = [];
+    let loadRequestId = 0;
     const noticeDetailCache = new Map();
 
     function authHeader() {
@@ -315,6 +316,7 @@
     }
 
     async function loadTab(tab) {
+        const requestId = ++loadRequestId;
         loadInFlight = true;
         const list = document.getElementById('list');
         list.innerHTML = '<div class="loading-state">불러오는 중...</div>';
@@ -327,6 +329,11 @@
             items = await fetchNotices();
         } else {
             items = await fetchNotifications(tab);
+        }
+
+        // 이 사이 더 최신 loadTab() 호출이 시작됐으면, 이 응답은 낡은 것이니 화면 반영·로딩 상태 해제 없이 버린다.
+        if (requestId !== loadRequestId) {
+            return;
         }
 
         items.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
