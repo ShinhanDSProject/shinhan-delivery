@@ -1,6 +1,7 @@
 package com.example.shinhandelivery.address.controller;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -90,7 +91,8 @@ class AddressWebControllerTest {
     mockMvc
         .perform(get("/address-management").with(user(principal())))
         .andExpect(status().isOk())
-        .andExpect(content().string(containsString("&lt;script&gt;")));
+        .andExpect(content().string(containsString("&lt;script&gt;")))
+        .andExpect(content().string(not(containsString("<script>alert('xss')</script>"))));
   }
 
   @Test
