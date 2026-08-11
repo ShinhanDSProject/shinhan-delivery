@@ -1118,7 +1118,7 @@
         secondsLeft -= 1;
         if (secondsLeft <= 0) {
           window.clearInterval(offerCountdownInterval);
-          closeOfferModal();
+          closeOfferModalWithoutAccept();
           return;
         }
         badge.textContent = `수락 대기 ${secondsLeft}초`;
@@ -1131,9 +1131,17 @@
       currentOffer = null;
     }
 
+    /** 오퍼가 수락되지 않고 닫힌 경우(타임아웃/거절), 콜은 여전히 대기 상태로 남으므로 목록을 다시 불러와 반영한다. */
+    function closeOfferModalWithoutAccept() {
+      closeOfferModal();
+      if (isCurrentOnline) {
+        loadAvailableDeliveries();
+      }
+    }
+
     /** 서버에는 "거절" 전용 API가 없어, 모달만 닫는다 — 콜은 계속 대기 상태로 남아 다른 배송원에게도 열려있다. */
     function rejectOffer() {
-      closeOfferModal();
+      closeOfferModalWithoutAccept();
     }
 
     function acceptOffer() {
