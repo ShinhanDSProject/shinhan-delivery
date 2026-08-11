@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -25,7 +25,31 @@
   <section id="contentView" class="content-view">
     <button id="addButton" class="add-address-button" type="button">＋ 새 주소 추가</button>
     <div id="addressList" class="address-list" aria-live="polite">
-      <div class="empty-state">주소 목록을 불러오는 중입니다.</div>
+      <div th:if="${#lists.isEmpty(addresses)}" class="empty-state">등록된 배송 주소가 없습니다.<br>새 주소를 추가해보세요.</div>
+      <article th:each="savedAddress : ${addresses}"
+               class="address-card"
+               th:attr="data-id=${savedAddress.id},data-alias=${savedAddress.alias},data-address=${savedAddress.address},data-detail-address=${savedAddress.detailAddress},data-pickup-guide=${savedAddress.pickupGuide}">
+        <div>
+          <span class="address-badge" th:text="${savedAddress.alias}">집</span>
+          <p class="address-main" th:text="${savedAddress.address}">서울특별시 중구 세종대로 110</p>
+          <p class="address-detail"
+             th:text="${#strings.isEmpty(savedAddress.detailAddress) ? '상세 주소 없음' : savedAddress.detailAddress}">101동 1001호</p>
+        </div>
+        <div class="address-actions">
+          <button class="address-action"
+                  type="button"
+                  data-action="edit"
+                  th:attr="aria-label=|${savedAddress.alias} 주소 수정|">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m4 16-.7 4.7L8 20l11-11-4-4L4 16Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="m13.5 6.5 4 4" stroke="currentColor" stroke-width="1.8"/></svg>
+          </button>
+          <button class="address-action address-action--delete"
+                  type="button"
+                  data-action="delete"
+                  th:attr="aria-label=|${savedAddress.alias} 주소 삭제|">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 7h14M9 7V4h6v3m2 0-1 13H8L7 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+      </article>
     </div>
   </section>
 
@@ -81,50 +105,6 @@
   const saveButton = document.getElementById("saveButton");
   const statusMessage = document.getElementById("statusMessage");
   let editingId = null;
-  let addresses = [];
-
-  function escapeHtml(value = "") {
-    return String(value)
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#39;");
-  }
-
-  function renderAddresses() {
-    if (!addresses.length) {
-      addressList.innerHTML = '<div class="empty-state">등록된 배송 주소가 없습니다.<br>새 주소를 추가해보세요.</div>';
-      return;
-    }
-
-    addressList.innerHTML = addresses.map((item) => `
-      <article class="address-card">
-        <div>
-          <span class="address-badge">${escapeHtml(item.alias)}</span>
-          <p class="address-main">${escapeHtml(item.address)}</p>
-          <p class="address-detail">${escapeHtml(item.detailAddress || "상세 주소 없음")}</p>
-        </div>
-        <div class="address-actions">
-          <button class="address-action" type="button" data-action="edit" data-id="${item.id}" aria-label="${escapeHtml(item.alias)} 주소 수정">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m4 16-.7 4.7L8 20l11-11-4-4L4 16Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="m13.5 6.5 4 4" stroke="currentColor" stroke-width="1.8"/></svg>
-          </button>
-          <button class="address-action address-action--delete" type="button" data-action="delete" data-id="${item.id}" aria-label="${escapeHtml(item.alias)} 주소 삭제">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 7h14M9 7V4h6v3m2 0-1 13H8L7 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </button>
-        </div>
-      </article>
-    `).join("");
-  }
-
-  async function loadAddresses() {
-    try {
-      addresses = await MyPageApi.request(API_PATH);
-      renderAddresses();
-    } catch (error) {
-      addressList.innerHTML = `<div class="empty-state">${escapeHtml(error.message)}</div>`;
-    }
-  }
 
   function openForm(item = null) {
     editingId = item?.id || null;
@@ -151,15 +131,14 @@
     headerTitle.textContent = "배송 주소 관리";
   }
 
-  async function deleteAddress(id) {
-    const item = addresses.find((address) => address.id === id);
+  async function deleteAddress(item) {
+    const id = Number(item.id);
     if (!window.confirm(`'${item?.alias || "선택한"}' 주소를 삭제할까요?`)) return;
 
     try {
       await MyPageApi.request(`${API_PATH}/${id}`, { method: "DELETE" });
-      addresses = addresses.filter((address) => address.id !== id);
-      renderAddresses();
       MyPageApi.showToast("주소가 삭제되었습니다.");
+      window.setTimeout(() => location.reload(), 400);
     } catch (error) {
       MyPageApi.showToast(error.message);
     }
@@ -175,9 +154,16 @@
   addressList.addEventListener("click", (event) => {
     const button = event.target.closest("[data-action]");
     if (!button) return;
-    const id = Number(button.dataset.id);
-    if (button.dataset.action === "edit") openForm(addresses.find((item) => item.id === id));
-    if (button.dataset.action === "delete") deleteAddress(id);
+    const card = button.closest(".address-card");
+    const item = {
+      id: Number(card.dataset.id),
+      alias: card.dataset.alias,
+      address: card.dataset.address,
+      detailAddress: card.dataset.detailAddress,
+      pickupGuide: card.dataset.pickupGuide
+    };
+    if (button.dataset.action === "edit") openForm(item);
+    if (button.dataset.action === "delete") deleteAddress(item);
   });
 
   form.addEventListener("submit", async (event) => {
@@ -199,18 +185,12 @@
     saveButton.textContent = "저장 중...";
     statusMessage.textContent = "";
     try {
-      const saved = await MyPageApi.request(editingId ? `${API_PATH}/${editingId}` : API_PATH, {
+      await MyPageApi.request(editingId ? `${API_PATH}/${editingId}` : API_PATH, {
         method: editingId ? "PATCH" : "POST",
         body: JSON.stringify(payload)
       });
-      if (editingId) {
-        addresses = addresses.map((item) => item.id === editingId ? saved : item);
-      } else {
-        addresses.push(saved);
-      }
-      closeForm();
-      renderAddresses();
       MyPageApi.showToast("주소가 저장되었습니다.");
+      window.setTimeout(() => location.reload(), 400);
     } catch (error) {
       statusMessage.textContent = error.message;
       statusMessage.className = "status-message is-error";
@@ -219,8 +199,6 @@
       saveButton.textContent = "저장하기";
     }
   });
-
-  if (MyPageApi.requireToken()) loadAddresses();
 </script>
 </body>
 </html>

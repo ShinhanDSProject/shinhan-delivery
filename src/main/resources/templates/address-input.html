@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -280,7 +280,24 @@
         <div class="recent-section">
             <span>최근 목록</span>
             <div class="recent-list" id="recentList">
-                <div class="recent-empty">불러오는 중...</div>
+                <div th:if="${#lists.isEmpty(addresses)}" class="recent-empty">자주 쓰는 주소가 없어요.</div>
+                <th:block th:each="savedAddress, status : ${addresses}">
+                    <div th:if="${!status.first}" class="recent-divider"></div>
+                    <button type="button"
+                            class="recent-item"
+                            data-recent-address
+                            th:attr="data-address=${savedAddress.address},data-detail-address=${savedAddress.detailAddress}">
+                        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                            <path d="M12 21s7-6.5 7-11.5A7 7 0 0 0 5 9.5C5 14.5 12 21 12 21z" stroke="currentColor" stroke-width="1.8"/>
+                            <circle cx="12" cy="9.5" r="2.5" stroke="currentColor" stroke-width="1.8"/>
+                        </svg>
+                        <span>
+                            <span class="title" style="display:block" th:text="${savedAddress.alias}">집</span>
+                            <span class="subtitle"
+                                  th:text="${savedAddress.address + (#strings.isEmpty(savedAddress.detailAddress) ? '' : ' ' + savedAddress.detailAddress)}">서울특별시 중구 세종대로 110</span>
+                        </span>
+                    </button>
+                </th:block>
             </div>
         </div>
 
@@ -361,57 +378,6 @@
         el.classList.remove('placeholder');
     }
 
-    async function loadRecentAddresses() {
-        const listEl = document.getElementById('recentList');
-        const header = authHeader();
-        if (!header) return;
-        try {
-            const response = await fetch('/api/v1/addresses', { headers: { Authorization: header } });
-            if (!response.ok) throw new Error('failed');
-            const addresses = await response.json();
-            if (addresses.length === 0) {
-                listEl.innerHTML = '<div class="recent-empty">자주 쓰는 주소가 없어요.</div>';
-                return;
-            }
-            listEl.innerHTML = '';
-            addresses.forEach((addr, idx) => {
-                if (idx > 0) {
-                    const divider = document.createElement('div');
-                    divider.className = 'recent-divider';
-                    listEl.appendChild(divider);
-                }
-                const item = document.createElement('button');
-                item.type = 'button';
-                item.className = 'recent-item';
-
-                const icon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-                icon.setAttribute('viewBox', '0 0 24 24');
-                icon.setAttribute('fill', 'none');
-                icon.innerHTML =
-                    '<path d="M12 21s7-6.5 7-11.5A7 7 0 0 0 5 9.5C5 14.5 12 21 12 21z" stroke="currentColor" stroke-width="1.8"/>' +
-                    '<circle cx="12" cy="9.5" r="2.5" stroke="currentColor" stroke-width="1.8"/>';
-
-                const textWrap = document.createElement('span');
-                const title = document.createElement('span');
-                title.className = 'title';
-                title.style.display = 'block';
-                title.textContent = addr.alias;
-                const subtitle = document.createElement('span');
-                subtitle.className = 'subtitle';
-                subtitle.textContent = addr.address + (addr.detailAddress ? ' ' + addr.detailAddress : '');
-                textWrap.appendChild(title);
-                textWrap.appendChild(subtitle);
-
-                item.appendChild(icon);
-                item.appendChild(textWrap);
-                item.addEventListener('click', () => selectRecentAddress(addr));
-                listEl.appendChild(item);
-            });
-        } catch (error) {
-            listEl.innerHTML = '<div class="recent-empty">최근 목록을 불러오지 못했어요.</div>';
-        }
-    }
-
     function selectRecentAddress(addr) {
         if (!window.kakao || !window.kakao.maps) {
             notReady();
@@ -437,6 +403,15 @@
             });
         });
     }
+
+    document.getElementById('recentList').addEventListener('click', (event) => {
+        const item = event.target.closest('[data-recent-address]');
+        if (!item) return;
+        selectRecentAddress({
+            address: item.dataset.address,
+            detailAddress: item.dataset.detailAddress
+        });
+    });
 
     function detectCurrentLocation() {
         const draft = loadDraft();
@@ -616,17 +591,12 @@
     }
 
     (function init() {
-        if (!authHeader()) {
-            location.replace('/login');
-            return;
-        }
         const draft = loadDraft();
         renderPickupGuideSummary(draft);
         renderItemDetailSummary(draft);
         renderPoint('pickup', draft.pickup);
         renderPoint('dropoff', draft.dropoff);
         detectCurrentLocation();
-        loadRecentAddresses();
         maybeEstimateFee();
     })();
 </script>
