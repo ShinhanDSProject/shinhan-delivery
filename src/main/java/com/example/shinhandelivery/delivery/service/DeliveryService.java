@@ -295,7 +295,10 @@ public class DeliveryService {
   private void publishOfferIfCandidatesExist(DeliveryRequest deliveryRequest) {
     List<Long> candidateVehicleIds =
         vehicleService
-            .findOfferCandidates(deliveryRequest.getWeight(), deliveryRequest.getDistance())
+            .findOfferCandidates(
+                deliveryRequest.getWeight(),
+                deliveryRequest.getDistance(),
+                deliveryRequest.getPickupLocation())
             .stream()
             .map(Vehicle::getId)
             .toList();

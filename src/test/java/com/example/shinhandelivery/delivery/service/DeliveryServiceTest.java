@@ -160,7 +160,7 @@ class DeliveryServiceTest {
     when(deliveryRequestRepository.save(any(DeliveryRequest.class)))
         .thenAnswer(invocation -> invocation.getArgument(0));
     Vehicle candidate = Vehicle.builder().id(2L).memberId(20L).build();
-    when(vehicleService.findOfferCandidates(anyDouble(), anyDouble()))
+    when(vehicleService.findOfferCandidates(anyDouble(), anyDouble(), any()))
         .thenReturn(List.of(candidate));
 
     deliveryService.requestDelivery(1L, request);
@@ -187,7 +187,7 @@ class DeliveryServiceTest {
 
     when(deliveryRequestRepository.save(any(DeliveryRequest.class)))
         .thenAnswer(invocation -> invocation.getArgument(0));
-    when(vehicleService.findOfferCandidates(anyDouble(), anyDouble())).thenReturn(List.of());
+    when(vehicleService.findOfferCandidates(anyDouble(), anyDouble(), any())).thenReturn(List.of());
 
     deliveryService.requestDelivery(1L, request);
 
@@ -210,7 +210,7 @@ class DeliveryServiceTest {
     when(deliveryRequestRepository.save(any(DeliveryRequest.class)))
         .thenAnswer(invocation -> invocation.getArgument(0));
     Vehicle candidate = Vehicle.builder().id(2L).memberId(20L).build();
-    when(vehicleService.findOfferCandidates(anyDouble(), anyDouble()))
+    when(vehicleService.findOfferCandidates(anyDouble(), anyDouble(), any()))
         .thenReturn(List.of(candidate));
 
     DeliveryPaymentResponse response = deliveryService.payDelivery(1L, "idem-pay", request);
