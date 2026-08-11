@@ -1,12 +1,12 @@
-package com.example.shinhandelivery.category.controller;
+package com.example.shinhandelivery.home.service;
 
 import com.example.shinhandelivery.category.dto.response.CategoryResponse;
-import com.example.shinhandelivery.category.dto.response.HomeDeliveryCardResponse;
 import com.example.shinhandelivery.category.service.CategoryService;
-import com.example.shinhandelivery.common.security.CustomUserDetails;
 import com.example.shinhandelivery.delivery.dto.response.DeliveryListResponseDto;
 import com.example.shinhandelivery.delivery.entity.DeliveryStatus;
 import com.example.shinhandelivery.delivery.service.DeliveryService;
+import com.example.shinhandelivery.home.dto.response.HomeDeliveryCardResponse;
+import com.example.shinhandelivery.home.dto.response.HomePageResponse;
 import com.example.shinhandelivery.member.dto.response.MemberProfileResponseDto;
 import com.example.shinhandelivery.member.service.MemberService;
 import com.example.shinhandelivery.notification.service.NotificationService;
@@ -14,31 +14,26 @@ import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-/** 홈 화면의 서버 사이드 렌더링(SSR)을 제공하는 뷰 컨트롤러입니다. */
-@Controller
+/** 홈 화면 SSR 렌더링에 필요한 회원·배송·알림·카테고리 데이터를 조합하는 서비스. */
+@Service
 @RequiredArgsConstructor
-public class HomeWebController {
+public class HomeService {
 
   private final CategoryService categoryService;
   private final MemberService memberService;
   private final DeliveryService deliveryService;
   private final NotificationService notificationService;
 
-  @GetMapping("/home")
-  public String home(Model model, @AuthenticationPrincipal CustomUserDetails principal) {
-    if (principal == null) {
-      return "redirect:/login";
-    }
-
+  /** 로그인 회원의 홈 화면 데이터를 조합한다. 결제 PIN이 없으면 나머지 조회 없이 즉시 반환한다. */
+  @Transactional(readOnly = true)
+  public HomePageResponse load(Long memberId) {
     MemberProfileResponseDto profile =
-        MemberProfileResponseDto.from(memberService.getMyProfile(principal.getId()));
+        MemberProfileResponseDto.from(memberService.getMyProfile(memberId));
     if (!profile.hasPaymentPin()) {
-      return "redirect:/payment-pin-settings?required=1&returnUrl=/home";
+      return HomePageResponse.forPaymentPinRequired();
     }
 
     List<CategoryResponse> categories =
@@ -46,27 +41,21 @@ public class HomeWebController {
 
     List<HomeDeliveryCardResponse> activeDeliveries =
         deliveryService
-            .getMyDeliveryRequests(
-                principal.getId(), DeliveryStatus.MATCHED, PageRequest.of(0, 100))
+            .getMyDeliveryRequests(memberId, DeliveryStatus.MATCHED, PageRequest.of(0, 100))
             .map(DeliveryListResponseDto::from)
             .map(this::toHomeDeliveryCard)
             .toList();
     long waitingCount =
         deliveryService
-            .getMyDeliveryRequests(
-                principal.getId(), DeliveryStatus.REQUESTED, PageRequest.of(0, 100))
+            .getMyDeliveryRequests(memberId, DeliveryStatus.REQUESTED, PageRequest.of(0, 100))
             .getTotalElements();
 
     boolean hasUnreadNotification =
-        notificationService.list(principal.getId(), null, PageRequest.of(0, 20)).stream()
+        notificationService.list(memberId, null, PageRequest.of(0, 20)).stream()
             .anyMatch(notification -> !notification.isRead());
 
-    model.addAttribute("categories", categories);
-    model.addAttribute("memberName", profile.name());
-    model.addAttribute("activeDeliveries", activeDeliveries);
-    model.addAttribute("waitingCount", waitingCount);
-    model.addAttribute("hasUnreadNotification", hasUnreadNotification);
-    return "home";
+    return new HomePageResponse(
+        false, profile.name(), categories, activeDeliveries, waitingCount, hasUnreadNotification);
   }
 
   private HomeDeliveryCardResponse toHomeDeliveryCard(DeliveryListResponseDto delivery) {
