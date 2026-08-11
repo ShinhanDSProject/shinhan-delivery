@@ -57,10 +57,16 @@
   }
 
   async function logout() {
+    let response;
     try {
-      await fetch("/api/v1/members/logout", { method: "POST" });
+      response = await fetch("/api/v1/members/logout", { method: "POST" });
     } catch (error) {
-      // SSR 페이지 인증용 쿠키 만료 요청이 실패해도 로컬 로그아웃은 계속 진행한다.
+      showToast("로그아웃에 실패했습니다. 다시 시도해 주세요.");
+      return;
+    }
+    if (!response.ok) {
+      showToast("로그아웃에 실패했습니다. 다시 시도해 주세요.");
+      return;
     }
     localStorage.removeItem("accessToken");
     localStorage.removeItem("refreshToken");
