@@ -42,7 +42,7 @@ graph TD
 | 번호 (ID) | 의사결정 제목 (Title) | 상태 (Status) | 작성일 | 연관 이슈/PR |
 | :--- | :--- | :--- | :--- | :--- |
 | [**ADR-0001**](./0001-무상태-JWT-인증-체계.md) | JWT 기반 무상태 인증 체계 채택 | 🟢 ACCEPTED | 2026-07-28 | [#70](https://github.com/ShinhanDSProject/shinhan-delivery/issues/70) / [#84](https://github.com/ShinhanDSProject/shinhan-delivery/pull/84) |
-| [**ADR-0002**](./0002-SSR-쿠키-폴백-인증-체계.md) | SSR 페이지를 위한 JWT 쿠키 폴백 인증 도입 | 🟡 PROPOSED | 2026-08-11 | (미정) |
+| [**ADR-0002**](./0002-SSR-쿠키-폴백-인증-체계.md) | SSR 페이지를 위한 JWT 쿠키 폴백 인증 도입 | 🟡 PROPOSED | 2026-08-11 | [#266](https://github.com/ShinhanDSProject/shinhan-delivery/pull/266) |
 
 ---
 
