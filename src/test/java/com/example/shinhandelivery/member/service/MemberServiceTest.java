@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 import com.example.shinhandelivery.common.exception.EntityNotFoundException;
 import com.example.shinhandelivery.member.dto.request.MemberCreateRequest;
 import com.example.shinhandelivery.member.dto.request.MemberProfileUpdateRequestDto;
+import com.example.shinhandelivery.member.entity.CourierApprovalStatus;
 import com.example.shinhandelivery.member.entity.Member;
 import com.example.shinhandelivery.member.entity.MemberRole;
 import com.example.shinhandelivery.member.exception.DuplicateMemberException;
@@ -58,10 +59,11 @@ class MemberServiceTest {
 
     assertThat(response.getEmail()).isEqualTo("user@example.com");
     assertThat(response.getRole()).isEqualTo(MemberRole.CUSTOMER);
+    assertThat(response.getCourierApprovalStatus()).isEqualTo(CourierApprovalStatus.APPROVED);
   }
 
   @Test
-  @DisplayName("배송원 회원가입이면 기본 차량도 함께 생성한다")
+  @DisplayName("배송원 회원가입이면 기본 차량도 함께 생성되고 상태는 PENDING이 된다")
   void createCourierCreatesDefaultVehicle() {
     MemberCreateRequest request = new MemberCreateRequest();
     request.setEmail("courier@example.com");
@@ -72,6 +74,7 @@ class MemberServiceTest {
     request.setVehicleType(VehicleType.MOTORCYCLE);
     request.setActivityRegion("서울 강남구");
     request.setPreferredWeight(15.0);
+    request.setProofDocumentUrl("http://localhost:8080/uploads/license.png");
 
     when(memberRepository.existsByEmail("courier@example.com")).thenReturn(false);
     when(passwordEncoder.encode("password123")).thenReturn("encoded-password");
@@ -88,6 +91,9 @@ class MemberServiceTest {
     Member response = memberService.create(request);
 
     assertThat(response.getRole()).isEqualTo(MemberRole.COURIER);
+    assertThat(response.getCourierApprovalStatus()).isEqualTo(CourierApprovalStatus.PENDING);
+    assertThat(response.getProofDocumentUrl())
+        .isEqualTo("http://localhost:8080/uploads/license.png");
     verify(vehicleService).save(any(Vehicle.class));
   }
 
@@ -153,6 +159,24 @@ class MemberServiceTest {
 
     assertThat(response.getName()).isEqualTo("김영희");
     assertThat(response.getPhoneNumber()).isEqualTo("010-1111-2222");
+  }
+
+  @Test
+  @DisplayName("거절(REJECTED) 상태인 배송원이 증빙 서류를 재제출하면 PENDING으로 자동 전환된다")
+  void updateProofDocumentUrlResetsRejectedStatusToPending() {
+    Member courier =
+        Member.builder()
+            .id(1L)
+            .role(MemberRole.COURIER)
+            .courierApprovalStatus(CourierApprovalStatus.REJECTED)
+            .build();
+
+    when(memberRepository.findById(1L)).thenReturn(Optional.of(courier));
+
+    Member response = memberService.updateProofDocumentUrl(1L, "http://localhost/new_license.png");
+
+    assertThat(response.getProofDocumentUrl()).isEqualTo("http://localhost/new_license.png");
+    assertThat(response.getCourierApprovalStatus()).isEqualTo(CourierApprovalStatus.PENDING);
   }
 
   @Test

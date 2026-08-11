@@ -594,6 +594,10 @@
         });
         if (res.ok) {
           const me = await res.json();
+          if (me.courierApprovalStatus === 'PENDING' || me.courierApprovalStatus === 'REJECTED') {
+            window.location.replace('/courier-pending');
+            return;
+          }
           if (me.name) {
             document.getElementById('courierNameText').textContent = me.name;
           }

@@ -46,13 +46,17 @@ public class DataSeedInitializer implements CommandLineRunner {
   public void run(String... args) throws Exception {
     log.info("Starting local data seeding...");
 
-    // 테이블이 완전히 비어있을 때만 더미 데이터를 시딩하여 중복 발생 방지
-    if (memberRepository.count() > 0) {
-      log.info("Database already contains member data. Skipping local data seeding.");
-      return;
+    // 1. 관리자 계정이 없으면 항상 우선 생성 보장
+    if (!memberRepository.existsByEmail("admin@shinhan.com")) {
+      createMember("admin@shinhan.com", "password123", "관리자", "010-0000-0000", MemberRole.ADMIN);
+      log.info("Admin account (admin@shinhan.com) seeded successfully.");
     }
 
-    // 1. 테스트 회원 생성 (화주 1명, 배송원 2명)
+    // 데이터베이스에 다른 회원 데이터가 이미 존재하면 나머지 테스트 데이터 시딩은 건너뜀
+    if (memberRepository.count() > 1) {
+      log.info("Database already contains test member data. Skipping remaining data seeding.");
+      return;
+    }
     Member client =
         createMember(
             "client@example.com", "password123", "김화주", "010-1234-5678", MemberRole.CUSTOMER);

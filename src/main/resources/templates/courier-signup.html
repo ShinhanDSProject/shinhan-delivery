@@ -475,6 +475,24 @@
         </div>
 
         <div class="form-group">
+            <label for="proofDocumentFile">자격 증빙 서류 첨부 <span class="text-required">*</span></label>
+            <div style="border: 1.5px dashed #cbd5e1; padding: 18px; border-radius: 12px; background: #f8fafc; text-align: center;">
+                <input type="file" id="proofDocumentFile" accept="image/*" style="display:none;" onchange="uploadProofDocument(event)">
+                <button type="button" class="btn" style="background:#0046ff; color:#ffffff; border:none; padding:10px 20px; border-radius:8px; font-weight:700; cursor:pointer; box-shadow:0 4px 12px rgba(0,70,255,0.2);" onclick="document.getElementById('proofDocumentFile').click()">
+                    📸 자격증 / 면허증 이미지 첨부하기
+                </button>
+                <div id="proofDocHint" style="font-size: 13px; color: #475569; margin-top: 10px; font-weight: 500;">
+                    선택하신 배송 수단에 알맞은 자격증 및 면허증 이미지를 첨부해 주세요.
+                </div>
+                <input type="hidden" id="proofDocumentUrl" name="proofDocumentUrl" required>
+                <div id="proofPreviewArea" style="display:none; margin-top:12px;">
+                    <img id="proofPreviewImg" src="" alt="증빙서류 미리보기" style="max-height:140px; border-radius:8px; border:1px solid #cbd5e1;">
+                    <span id="proofStatusText" style="display:block; font-size:12px; color:#16a34a; font-weight:700; margin-top:6px;">✅ 서류 업로드 완료</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
             <label>희망 배송 중량 <span class="text-required">*</span></label>
             <input type="hidden" id="preferredWeight" name="preferredWeight" required>
             <div class="weight-chips" id="weightChips">
@@ -562,8 +580,56 @@
             item.classList.add('selected');
 
             vehicleDropdown.classList.remove('active');
+
+            // 운송수단별 자격 서류 힌트 메시지 업데이트
+            const hint = document.getElementById('proofDocHint');
+            if (value === '드론') {
+                hint.textContent = '🛸 드론 조종자 자격증 및 기체 등록증 이미지를 첨부해 주세요.';
+            } else if (value === '오토바이') {
+                hint.textContent = '🛵 운전면허증 (원동기 / 2종 소형 이상) 이미지를 첨부해 주세요.';
+            } else if (['승용차','소형차','중형차','대형차','트럭'].includes(value)) {
+                hint.textContent = '🚗 운전면허증 및 자동차 등록증 이미지를 첨부해 주세요.';
+            } else {
+                hint.textContent = '📄 본인 신분증 이미지를 첨부해 주세요.';
+            }
         });
     });
+
+    async function uploadProofDocument(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const hint = document.getElementById('proofDocHint');
+        hint.textContent = '⏳ 자격 서류 이미지 업로드 중...';
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+            const res = await fetch('/api/v1/uploads/image', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                document.getElementById('proofDocumentUrl').value = data.imageUrl;
+                document.getElementById('proofPreviewImg').src = data.imageUrl;
+                document.getElementById('proofPreviewArea').style.display = 'block';
+                hint.textContent = '✅ 자격 증빙 서류 업로드가 완료되었습니다!';
+                hint.style.color = '#16a34a';
+            } else {
+                const errData = await res.json();
+                alert(`서류 업로드 실패: ${errData.message || '이미지 업로드에 실패했습니다.'}`);
+                hint.textContent = '❌ 업로드 실패. 다시 시도해 주세요.';
+                hint.style.color = '#ef4444';
+            }
+        } catch (err) {
+            alert('서류 업로드 중 통신 오류가 발생했습니다.');
+            hint.textContent = '❌ 통신 오류 발생.';
+            hint.style.color = '#ef4444';
+        }
+    }
 
     document.addEventListener('click', () => {
         vehicleDropdown.classList.remove('active');
@@ -608,11 +674,19 @@
         const vehicle = vehicleInput.value;
         const activityRegion = document.getElementById('activityRegion').value.trim();
         const preferredWeight = preferredWeightInput.value;
+        const proofDocumentUrl = document.getElementById('proofDocumentUrl').value;
 
         if (!vehicle) {
             resultToast.className = 'result-toast error';
             resultToast.textContent = '배송 수단을 선택해 주세요.';
             vehicleDropdown.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return;
+        }
+
+        if (!proofDocumentUrl) {
+            resultToast.className = 'result-toast error';
+            resultToast.textContent = '자격 증빙 서류 이미지를 첨부해 주세요.';
+            document.getElementById('proofDocumentFile').scrollIntoView({ behavior: 'smooth', block: 'center' });
             return;
         }
 
@@ -642,7 +716,8 @@
                     role: 'COURIER',
                     vehicleType: mapVehicleType(vehicle),
                     activityRegion,
-                    preferredWeight: preferredWeightValue
+                    preferredWeight: preferredWeightValue,
+                    proofDocumentUrl: proofDocumentUrl
                 })
             });
 

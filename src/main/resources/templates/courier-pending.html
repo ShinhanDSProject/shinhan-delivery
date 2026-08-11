@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>자격 심사 대기 - Shinhan Delivery</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/design-system.css">
+  <style>
+    :root {
+      --primary: var(--color-blue-100);
+      --bg: #F8FAFC;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--color-black-200);
+      display: flex;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    .app-container {
+      width: 100%;
+      max-width: 480px;
+      background-color: var(--color-white-100);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+    }
+
+    .header {
+      height: 56px;
+      padding: 0 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+      background-color: var(--color-white-100);
+    }
+
+    .logo-text {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .content {
+      flex: 1;
+      padding: 32px 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    .icon-wrapper {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: var(--color-blue-50);
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 24px;
+    }
+
+    .icon-wrapper.rejected {
+      background: #FEF2F2;
+      color: #EF4444;
+    }
+
+    .status-title {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: var(--color-black-200);
+    }
+
+    .status-desc {
+      font-size: 15px;
+      color: var(--color-grey-300);
+      line-height: 1.6;
+      margin-bottom: 32px;
+    }
+
+    .info-card {
+      width: 100%;
+      background: #F1F5F9;
+      border-radius: var(--radius-md);
+      padding: 20px;
+      text-align: left;
+      margin-bottom: 32px;
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+      margin-bottom: 10px;
+    }
+
+    .info-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .info-label {
+      color: var(--color-grey-300);
+    }
+
+    .info-value {
+      font-weight: 600;
+      color: var(--color-black-200);
+    }
+
+    .btn-group {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: auto;
+    }
+
+    .btn-refresh {
+      width: 100%;
+      height: 48px;
+      border-radius: var(--radius-md);
+      background-color: var(--primary);
+      color: white;
+      font-size: 16px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-logout {
+      width: 100%;
+      height: 44px;
+      border-radius: var(--radius-md);
+      background-color: transparent;
+      color: var(--color-grey-300);
+      font-size: 14px;
+      font-weight: 500;
+      border: 1px solid var(--border);
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <header class="header">
+      <span class="logo-text">Shinhan Delivery</span>
+      <span style="font-size: 13px; color: var(--color-grey-300);">배송 파트너</span>
+    </header>
+
+    <main class="content">
+      <div class="icon-wrapper" id="statusIcon">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+
+      <h1 class="status-title" id="statusTitle">서류 심사가 진행 중입니다</h1>
+      <p class="status-desc" id="statusDesc">
+        제출하신 운송수단 및 자격 증빙 서류를 관리자가 검토하고 있습니다.<br>
+        승인이 완료되면 배송 업무를 시작하실 수 있습니다.
+      </p>
+
+      <div class="info-card">
+        <div class="info-row">
+          <span class="info-label">이름</span>
+          <span class="info-value" id="infoName">-</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">이메일</span>
+          <span class="info-value" id="infoEmail">-</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">심사 상태</span>
+          <span class="info-value" id="infoStatus" style="color: var(--primary);">승인 대기 (PENDING)</span>
+        </div>
+        <div class="info-row" style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed #cbd5e1;">
+          <span class="info-label">제출 서류</span>
+          <span class="info-value" id="infoDoc"><a href="#" id="docLink" target="_blank" style="color:var(--primary); text-decoration:underline;">📄 첨부 서류 보기</a></span>
+        </div>
+      </div>
+
+      <div class="btn-group">
+        <input type="file" id="reuploadFileInput" accept="image/*" style="display:none;" onchange="reuploadProofDocument(event)">
+        <button class="btn-refresh" style="background:#475569;" onclick="document.getElementById('reuploadFileInput').click()">📸 서류 보완 / 재업로드</button>
+        <button class="btn-refresh" onclick="checkStatus()">🔄 심사 상태 새로고침</button>
+        <button class="btn-logout" onclick="logout()">로그아웃</button>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      checkStatus();
+    });
+
+    async function checkStatus() {
+      const token = localStorage.getItem('accessToken');
+      if (!token) {
+        window.location.href = '/courier-login';
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/v1/members/me', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (res.status === 401 || res.status === 403) {
+          window.location.href = '/courier-login';
+          return;
+        }
+
+        const me = await res.json();
+        document.getElementById('infoName').textContent = me.name || '-';
+        document.getElementById('infoEmail').textContent = me.email || '-';
+
+        if (me.proofDocumentUrl) {
+          document.getElementById('docLink').href = me.proofDocumentUrl;
+          document.getElementById('docLink').style.display = 'inline';
+        } else {
+          document.getElementById('docLink').style.display = 'none';
+          document.getElementById('infoDoc').textContent = '미제출';
+        }
+
+        if (me.courierApprovalStatus === 'APPROVED') {
+          alert('🎉 배송 파트너 자격 심사가 승인되었습니다! 홈 화면으로 이동합니다.');
+          window.location.href = '/courier-home';
+        } else if (me.courierApprovalStatus === 'REJECTED') {
+          document.getElementById('statusIcon').className = 'icon-wrapper rejected';
+          document.getElementById('statusTitle').textContent = '자격 심사가 거절되었습니다';
+          document.getElementById('statusDesc').textContent = '제출하신 서류가 적합하지 않아 심사가 거절되었습니다. 아래 [서류 보완 / 재업로드] 버튼을 눌러 올바른 자격증/면허증을 다시 제출해 주세요.';
+          document.getElementById('infoStatus').textContent = '심사 거절 (REJECTED)';
+          document.getElementById('infoStatus').style.color = '#EF4444';
+        } else {
+          document.getElementById('statusTitle').textContent = '서류 심사가 진행 중입니다';
+          document.getElementById('statusDesc').textContent = '제출하신 운송수단 및 자격 증빙 서류를 관리자가 검토하고 있습니다. 승인이 완료되면 배송 업무를 시작하실 수 있습니다.';
+          document.getElementById('infoStatus').textContent = '승인 대기 (PENDING)';
+          document.getElementById('infoStatus').style.color = 'var(--primary)';
+        }
+      } catch (err) {
+        console.error('Status check failed', err);
+      }
+    }
+
+    async function reuploadProofDocument(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const token = localStorage.getItem('accessToken');
+      if (!token) return;
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      try {
+        const uploadRes = await fetch('/api/v1/uploads/image', {
+          method: 'POST',
+          body: formData
+        });
+
+        if (!uploadRes.ok) {
+          alert('서류 이미지 업로드에 실패했습니다.');
+          return;
+        }
+
+        const uploadData = await uploadRes.json();
+        const imageUrl = uploadData.imageUrl;
+
+        const updateRes = await fetch('/api/v1/members/me/proof-document', {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ proofDocumentUrl: imageUrl })
+        });
+
+        if (updateRes.ok) {
+          alert('🎉 자격 증빙 서류가 재제출되었습니다! 다시 서류 심사가 진행됩니다.');
+          checkStatus();
+        } else {
+          alert('서류 재제출 처리 중 오류가 발생했습니다.');
+        }
+      } catch (err) {
+        alert('서류 재제출 중 통신 오류가 발생했습니다.');
+      }
+    }
+
+    function logout() {
+      localStorage.removeItem('accessToken');
+      document.cookie = "accessToken=; path=/; max-age=0;";
+      window.location.href = '/courier-login';
+    }
+  </script>
+</body>
+</html>
