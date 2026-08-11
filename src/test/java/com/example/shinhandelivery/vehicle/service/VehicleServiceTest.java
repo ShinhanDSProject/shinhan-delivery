@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import com.example.shinhandelivery.common.domain.Location;
 import com.example.shinhandelivery.common.exception.EntityNotFoundException;
 import com.example.shinhandelivery.common.exception.ErrorCode;
 import com.example.shinhandelivery.member.service.MemberService;
@@ -17,6 +18,7 @@ import com.example.shinhandelivery.vehicle.exception.InvalidWeightException;
 import com.example.shinhandelivery.vehicle.exception.OverMaxDistanceException;
 import com.example.shinhandelivery.vehicle.exception.VehicleNotAvailableException;
 import com.example.shinhandelivery.vehicle.repository.VehicleRepository;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -206,5 +208,38 @@ class VehicleServiceTest {
     vehicleService.markAvailable(1L);
 
     assertThat(vehicle.getStatus()).isEqualTo(VehicleStatus.AVAILABLE);
+  }
+
+  @Test
+  @DisplayName("오퍼 후보 조회 시 픽업 위치 기준 반경(3km) 밖 차량은 제외하고 반경 안 차량만 반환한다")
+  void findOfferCandidatesExcludesVehiclesOutsideRadius() {
+    Location pickupLocation = Location.of(37.5665, 126.9780);
+
+    Vehicle nearbyVehicle =
+        Vehicle.builder()
+            .id(1L)
+            .memberId(10L)
+            .maxWeight(1000)
+            .maxDistance(100)
+            .location(Location.of(37.5670, 126.9785))
+            .status(VehicleStatus.AVAILABLE)
+            .build();
+    Vehicle farVehicle =
+        Vehicle.builder()
+            .id(2L)
+            .memberId(20L)
+            .maxWeight(1000)
+            .maxDistance(100)
+            .location(Location.of(37.6000, 127.0500))
+            .status(VehicleStatus.AVAILABLE)
+            .build();
+
+    when(vehicleRepository.findByStatusAndMaxWeightGreaterThanEqualAndMaxDistanceGreaterThanEqual(
+            VehicleStatus.AVAILABLE, 10.0, 5.0))
+        .thenReturn(List.of(nearbyVehicle, farVehicle));
+
+    List<Vehicle> candidates = vehicleService.findOfferCandidates(10.0, 5.0, pickupLocation);
+
+    assertThat(candidates).containsExactly(nearbyVehicle);
   }
 }

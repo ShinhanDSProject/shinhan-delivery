@@ -1,6 +1,5 @@
 package com.example.shinhandelivery.delivery.service;
 
-import com.example.shinhandelivery.common.domain.Location;
 import com.example.shinhandelivery.common.exception.EntityNotFoundException;
 import com.example.shinhandelivery.common.exception.ErrorCode;
 import com.example.shinhandelivery.delivery.dto.request.DeliveryCompleteRequest;
@@ -95,6 +94,13 @@ public class DeliveryService {
     memberService.getById(customerId);
 
     DeliveryEstimateResponse estimate = estimateFee(toEstimateRequest(request));
+    DeliveryCreateRequest createRequest = toCreateRequest(request);
+    double distanceKm =
+        deliveryFeeCalculator.calculateDistanceKm(
+            createRequest.getPickupLocation(), createRequest.getDropoffLocation());
+    DeliveryRequest pendingDeliveryRequest =
+        DeliveryRequest.of(
+            customerId, createRequest, distanceKm, estimate.totalFee().longValueExact());
 
     PointUseRequest pointUseRequest = new PointUseRequest();
     pointUseRequest.setAmount(estimate.totalFee().longValueExact());
@@ -106,20 +112,8 @@ public class DeliveryService {
             .findByMemberIdAndPaymentIdempotencyKey(customerId, idempotencyKey)
             .orElseGet(
                 () -> {
-                  double distanceKm =
-                      deliveryFeeCalculator.calculateDistanceKm(
-                          Location.of(request.getPickup().getLat(), request.getPickup().getLng()),
-                          Location.of(
-                              request.getDropoff().getLat(), request.getDropoff().getLng()));
-
-                  DeliveryRequest created =
-                      DeliveryRequest.of(
-                          customerId,
-                          toCreateRequest(request),
-                          distanceKm,
-                          estimate.totalFee().longValueExact());
-                  created.setPaymentIdempotencyKey(idempotencyKey);
-                  DeliveryRequest saved = deliveryRequestRepository.save(created);
+                  pendingDeliveryRequest.setPaymentIdempotencyKey(idempotencyKey);
+                  DeliveryRequest saved = deliveryRequestRepository.save(pendingDeliveryRequest);
                   publishOfferIfCandidatesExist(saved);
                   return saved;
                 });
@@ -290,13 +284,21 @@ public class DeliveryService {
     createRequest.setDropoffLongitude(request.getDropoff().getLng());
     createRequest.setWeight(request.getWeight());
     createRequest.setItemSize(request.getItemSize());
+    createRequest.setDeliveryInstructionType(request.getDeliveryInstructionType());
+    createRequest.setEntranceCode(request.getEntranceCode());
+    createRequest.setUnitDetail(request.getUnitDetail());
+    createRequest.setDeliveryNote(request.getDeliveryNote());
+    createRequest.setDeliveryReferencePhotoUrl(request.getDeliveryReferencePhotoUrl());
     return createRequest;
   }
 
   private void publishOfferIfCandidatesExist(DeliveryRequest deliveryRequest) {
     List<Long> candidateVehicleIds =
         vehicleService
-            .findOfferCandidates(deliveryRequest.getWeight(), deliveryRequest.getDistance())
+            .findOfferCandidates(
+                deliveryRequest.getWeight(),
+                deliveryRequest.getDistance(),
+                deliveryRequest.getPickupLocation())
             .stream()
             .map(Vehicle::getId)
             .toList();

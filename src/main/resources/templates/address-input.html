@@ -478,12 +478,18 @@
 
     function renderPickupGuideSummary(draft) {
         const el = document.getElementById('pickupGuideValue');
-        if (!draft.pickupGuide || !draft.pickupGuide.locationNote) {
+        if (!draft.pickupGuide || !draft.pickupGuide.deliveryInstructionType) {
             el.textContent = '픽업 가이드를 입력해주세요';
             el.classList.add('placeholder');
             return;
         }
-        el.textContent = draft.pickupGuide.locationNote;
+        const labels = {
+            LEAVE_AT_DOOR_NO_BELL: '문 앞에 두고 벨 누르지 않기',
+            ENTRANCE_CODE: '공동현관 출입번호 사용',
+            SECURITY_OFFICE: '경비실에 맡기기',
+            CUSTOM: draft.pickupGuide.deliveryNote || '기타 전달 요청'
+        };
+        el.textContent = labels[draft.pickupGuide.deliveryInstructionType] || '전달 지침 입력 완료';
         el.classList.remove('placeholder');
     }
 

@@ -8,8 +8,10 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import com.example.shinhandelivery.common.exception.BusinessException;
 import com.example.shinhandelivery.common.exception.EntityNotFoundException;
 import com.example.shinhandelivery.common.exception.ErrorCode;
 import com.example.shinhandelivery.delivery.dto.request.DeliveryCompleteRequest;
@@ -22,6 +24,7 @@ import com.example.shinhandelivery.delivery.dto.response.DeliveryDetailResponseD
 import com.example.shinhandelivery.delivery.dto.response.DeliveryEstimateResponse;
 import com.example.shinhandelivery.delivery.dto.response.DeliveryPaymentResponse;
 import com.example.shinhandelivery.delivery.dto.response.ProofPhotoResponse;
+import com.example.shinhandelivery.delivery.entity.DeliveryInstructionType;
 import com.example.shinhandelivery.delivery.entity.DeliveryRequest;
 import com.example.shinhandelivery.delivery.entity.DeliveryStatus;
 import com.example.shinhandelivery.delivery.entity.ItemSize;
@@ -97,6 +100,51 @@ class DeliveryServiceTest {
   }
 
   @Test
+  @DisplayName("공동현관 출입번호 전달 지침을 배송 요청에 저장한다")
+  void requestDeliveryWithEntranceCodeSuccess() {
+    DeliveryCreateRequest request = new DeliveryCreateRequest();
+    request.setPickupAddress("서울시 강남구");
+    request.setDropoffAddress("서울시 서초구");
+    request.setWeight(10);
+    request.setPickupLatitude(37.0);
+    request.setPickupLongitude(127.0);
+    request.setDropoffLatitude(38.0);
+    request.setDropoffLongitude(127.0);
+    request.setItemSize(ItemSize.MEDIUM);
+    request.setDeliveryInstructionType(DeliveryInstructionType.ENTRANCE_CODE);
+    request.setEntranceCode("#1234*");
+    request.setUnitDetail("101동 1403호");
+
+    when(deliveryRequestRepository.save(any(DeliveryRequest.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
+
+    DeliveryRequest response = deliveryService.requestDelivery(1L, request);
+
+    assertThat(response.getDeliveryInstructionType())
+        .isEqualTo(DeliveryInstructionType.ENTRANCE_CODE);
+    assertThat(response.getEntranceCode()).isEqualTo("#1234*");
+    assertThat(response.getUnitDetail()).isEqualTo("101동 1403호");
+  }
+
+  @Test
+  @DisplayName("공동현관 출입번호 방식을 선택하고 번호를 누락하면 요청을 거절한다")
+  void requestDeliveryWithoutRequiredEntranceCodeShouldThrowException() {
+    DeliveryCreateRequest request = new DeliveryCreateRequest();
+    request.setPickupAddress("서울시 강남구");
+    request.setDropoffAddress("서울시 서초구");
+    request.setWeight(10);
+    request.setPickupLatitude(37.0);
+    request.setPickupLongitude(127.0);
+    request.setDropoffLatitude(38.0);
+    request.setDropoffLongitude(127.0);
+    request.setItemSize(ItemSize.MEDIUM);
+    request.setDeliveryInstructionType(DeliveryInstructionType.ENTRANCE_CODE);
+
+    assertThatThrownBy(() -> deliveryService.requestDelivery(1L, request))
+        .isInstanceOf(BusinessException.class);
+  }
+
+  @Test
   @DisplayName("오퍼 후보 차량이 있으면 DeliveryOfferBroadcastEvent를 발행한다")
   void requestDeliveryWithCandidatesShouldPublishOfferEvent() {
     DeliveryCreateRequest request = new DeliveryCreateRequest();
@@ -112,7 +160,7 @@ class DeliveryServiceTest {
     when(deliveryRequestRepository.save(any(DeliveryRequest.class)))
         .thenAnswer(invocation -> invocation.getArgument(0));
     Vehicle candidate = Vehicle.builder().id(2L).memberId(20L).build();
-    when(vehicleService.findOfferCandidates(anyDouble(), anyDouble()))
+    when(vehicleService.findOfferCandidates(anyDouble(), anyDouble(), any()))
         .thenReturn(List.of(candidate));
 
     deliveryService.requestDelivery(1L, request);
@@ -139,7 +187,7 @@ class DeliveryServiceTest {
 
     when(deliveryRequestRepository.save(any(DeliveryRequest.class)))
         .thenAnswer(invocation -> invocation.getArgument(0));
-    when(vehicleService.findOfferCandidates(anyDouble(), anyDouble())).thenReturn(List.of());
+    when(vehicleService.findOfferCandidates(anyDouble(), anyDouble(), any())).thenReturn(List.of());
 
     deliveryService.requestDelivery(1L, request);
 
@@ -162,7 +210,7 @@ class DeliveryServiceTest {
     when(deliveryRequestRepository.save(any(DeliveryRequest.class)))
         .thenAnswer(invocation -> invocation.getArgument(0));
     Vehicle candidate = Vehicle.builder().id(2L).memberId(20L).build();
-    when(vehicleService.findOfferCandidates(anyDouble(), anyDouble()))
+    when(vehicleService.findOfferCandidates(anyDouble(), anyDouble(), any()))
         .thenReturn(List.of(candidate));
 
     DeliveryPaymentResponse response = deliveryService.payDelivery(1L, "idem-pay", request);
@@ -173,6 +221,22 @@ class DeliveryServiceTest {
     assertThat(response.deliveryStatus()).isEqualTo(DeliveryStatus.REQUESTED);
     assertThat(eventCaptor.getValue().candidateVehicleIds()).containsExactly(2L);
     assertThat(eventCaptor.getValue().offer().memberId()).isEqualTo(1L);
+  }
+
+  @Test
+  @DisplayName("잘못된 전달 지침이면 포인트를 사용하지 않는다")
+  void payDeliveryInvalidInstructionShouldNotUsePoint() {
+    DeliveryPayRequest request = new DeliveryPayRequest();
+    request.setPickup(createPayLocation("서울 강남구", 37.0, 127.0));
+    request.setDropoff(createPayLocation("서울 서초구", 38.0, 127.0));
+    request.setWeight(10.0);
+    request.setItemSize(ItemSize.MEDIUM);
+    request.setDeliveryInstructionType(DeliveryInstructionType.ENTRANCE_CODE);
+
+    assertThatThrownBy(() -> deliveryService.payDelivery(1L, "idem-invalid", request))
+        .isInstanceOf(BusinessException.class);
+
+    verifyNoInteractions(paymentService);
   }
 
   @Test

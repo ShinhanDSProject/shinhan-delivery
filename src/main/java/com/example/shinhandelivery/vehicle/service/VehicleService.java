@@ -1,5 +1,6 @@
 package com.example.shinhandelivery.vehicle.service;
 
+import com.example.shinhandelivery.common.domain.Location;
 import com.example.shinhandelivery.common.exception.EntityNotFoundException;
 import com.example.shinhandelivery.common.exception.ErrorCode;
 import com.example.shinhandelivery.member.service.MemberService;
@@ -17,6 +18,9 @@ import org.springframework.transaction.annotation.Transactional;
 /** Vehicle 관련 유스케이스(등록/조회/수정/삭제)를 담당하는 서비스. */
 @Service
 public class VehicleService {
+
+  /** 오퍼 후보·대기 목록 조회 모두가 공유하는 기본 탐색 반경(km). */
+  public static final double DEFAULT_OFFER_RADIUS_KM = 3.0;
 
   private final VehicleRepository vehicleRepository;
   private final MemberService memberService;
@@ -68,11 +72,21 @@ public class VehicleService {
     return vehicleRepository.findAll();
   }
 
-  /** 신규 배송요청을 감당할 수 있는(AVAILABLE + 용량 충분) 오퍼 후보 차량 목록을 조회한다. */
+  /**
+   * 신규 배송요청을 감당할 수 있는(AVAILABLE + 용량 충분) 차량 중, 픽업 위치 기준 {@link #DEFAULT_OFFER_RADIUS_KM} 이내에 있는 차량만
+   * 오퍼 후보로 조회한다.
+   */
   @Transactional(readOnly = true)
-  public List<Vehicle> findOfferCandidates(double weight, double distance) {
-    return vehicleRepository.findByStatusAndMaxWeightGreaterThanEqualAndMaxDistanceGreaterThanEqual(
-        VehicleStatus.AVAILABLE, weight, distance);
+  public List<Vehicle> findOfferCandidates(
+      double weight, double distance, Location pickupLocation) {
+    return vehicleRepository
+        .findByStatusAndMaxWeightGreaterThanEqualAndMaxDistanceGreaterThanEqual(
+            VehicleStatus.AVAILABLE, weight, distance)
+        .stream()
+        .filter(
+            vehicle ->
+                vehicle.getLocation().distanceToKm(pickupLocation) <= DEFAULT_OFFER_RADIUS_KM)
+        .toList();
   }
 
   /** Vehicle을 BUSY 상태로 전환한다. */
