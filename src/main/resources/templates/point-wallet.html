@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -189,8 +189,8 @@
 
   <section class="wallet-card" aria-label="포인트 잔액">
     <div class="label">현재 보유 포인트</div>
-    <div id="balance" class="balance">0 P</div>
-    <div id="walletHint" class="hint">지갑을 확인하는 중입니다.</div>
+    <div id="balance" class="balance" th:attr="data-balance=${balance}" th:text="${#numbers.formatInteger(balance, 1, 'COMMA')} + ' P'">0 P</div>
+    <div id="walletHint" class="hint">포인트를 충전하면 배송 결제에 바로 사용할 수 있습니다.</div>
     <div class="actions">
       <button class="btn btn-primary" type="button" onclick="location.href='/point-charge'">포인트 충전</button>
       <button class="btn" type="button" onclick="location.href='/home'" style="background:#fff;border:1px solid var(--wallet-line);color:var(--wallet-ink);">홈으로</button>
@@ -208,7 +208,6 @@
 
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-<script src="/js/my-page-api.js"></script>
 <script>
   let toastTimer = null;
 
@@ -236,19 +235,10 @@
     });
   }
 
-  async function resolveWallet(memberId) {
-    const wallets = await MyPageApi.request("/api/v1/point-wallets");
-    const existing = Array.isArray(wallets) ? wallets.find((wallet) => wallet.memberId === memberId) : null;
-    if (existing) return existing;
-    return MyPageApi.request("/api/v1/point-wallets", {
-      method: "POST",
-      body: JSON.stringify({ memberId })
-    });
-  }
-
-  function renderHistory(wallet, chargeSnapshot) {
+  function renderHistory(chargeSnapshot) {
     const historyList = document.getElementById("historyList");
     const historyCount = document.getElementById("historyCount");
+    const balance = Number(document.getElementById("balance").dataset.balance);
     const entries = [];
 
     if (chargeSnapshot) {
@@ -261,8 +251,8 @@
 
     entries.push({
       title: "현재 포인트 잔액",
-      subtitle: wallet.id ? `지갑 ID ${wallet.id}` : "지갑 정보",
-      amountText: formatPoint(wallet.balance)
+      subtitle: "지갑 정보",
+      amountText: formatPoint(balance)
     });
 
     historyCount.textContent = `${entries.length}건`;
@@ -279,34 +269,20 @@
     `).join("");
   }
 
-  async function init() {
-    if (!MyPageApi.requireToken()) return;
-    try {
-      const profile = await MyPageApi.request("/api/v1/members/me");
-      const wallet = await resolveWallet(profile.id);
-      const chargeSnapshotRaw = sessionStorage.getItem("pointChargeSnapshot");
-      const chargeSnapshot = chargeSnapshotRaw ? JSON.parse(chargeSnapshotRaw) : null;
+  function init() {
+    const chargeSnapshotRaw = sessionStorage.getItem("pointChargeSnapshot");
+    const chargeSnapshot = chargeSnapshotRaw ? JSON.parse(chargeSnapshotRaw) : null;
 
-      document.getElementById("balance").textContent = formatPoint(wallet.balance);
-      document.getElementById("walletHint").textContent = chargeSnapshot
-        ? `최근 충전이 반영되었습니다. 마지막 충전 시각 ${formatDate(chargeSnapshot.lastChargedAt)}`
-        : "포인트를 충전하면 배송 결제에 바로 사용할 수 있습니다.";
+    if (chargeSnapshot) {
+      document.getElementById("walletHint").textContent =
+        `최근 충전이 반영되었습니다. 마지막 충전 시각 ${formatDate(chargeSnapshot.lastChargedAt)}`;
+    }
 
-      renderHistory(wallet, chargeSnapshot);
+    renderHistory(chargeSnapshot);
 
-      if (chargeSnapshot) {
-        sessionStorage.removeItem("pointChargeSnapshot");
-        showToast("포인트 충전이 완료되었습니다.");
-      }
-    } catch (error) {
-      document.getElementById("walletHint").textContent = "포인트 지갑을 불러오지 못했습니다.";
-      document.getElementById("historyList").innerHTML = `
-        <div class="empty-state">
-          <strong>지갑 정보를 가져오지 못했습니다.</strong>
-          <p>${error.message}</p>
-        </div>
-      `;
-      showToast(error.message);
+    if (chargeSnapshot) {
+      sessionStorage.removeItem("pointChargeSnapshot");
+      showToast("포인트 충전이 완료되었습니다.");
     }
   }
 

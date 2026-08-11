@@ -43,6 +43,14 @@ public class PaymentService {
     return findWalletOrThrow(walletId);
   }
 
+  /** 로그인 회원의 포인트 지갑을 조회한다. 아직 지갑이 없으면 잔액 0으로 새로 만든다. */
+  @Transactional
+  public PointWallet getOrCreateWallet(Long memberId) {
+    return paymentRepository
+        .findByMemberId(memberId)
+        .orElseGet(() -> paymentRepository.save(PointWallet.createEmpty(memberId)));
+  }
+
   @Transactional(readOnly = true)
   public List<PointWallet> list() {
     return paymentRepository.findAll();

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -191,7 +191,7 @@
 
   <section class="balance-card" aria-label="현재 잔액">
     <div class="label">현재 포인트</div>
-    <div id="currentBalance" class="value">0 P</div>
+    <div id="currentBalance" class="value" th:attr="data-balance=${balance}" th:text="${#numbers.formatInteger(balance, 1, 'COMMA')} + ' P'">0 P</div>
   </section>
 
   <section class="panel" aria-label="충전 금액 선택">
@@ -229,8 +229,7 @@
   const currentBalanceElement = document.getElementById("currentBalance");
   const nextBalanceElement = document.getElementById("nextBalance");
   let selectedAmount = 0;
-  let currentBalance = 0;
-  let memberId = null;
+  let currentBalance = Number(currentBalanceElement.dataset.balance);
   let toastTimer = null;
 
   function showToast(message) {
@@ -250,16 +249,6 @@
     return labels[value] || value;
   }
 
-  async function resolveWallet(member) {
-    const wallets = await MyPageApi.request("/api/v1/point-wallets");
-    const existing = Array.isArray(wallets) ? wallets.find((wallet) => wallet.memberId === member.id) : null;
-    if (existing) return existing;
-    return MyPageApi.request("/api/v1/point-wallets", {
-      method: "POST",
-      body: JSON.stringify({ memberId: member.id })
-    });
-  }
-
   function syncSummary() {
     nextBalanceElement.textContent = formatPoint(currentBalance + selectedAmount);
     chargeButton.disabled = selectedAmount <= 0;
@@ -273,23 +262,8 @@
     });
   });
 
-  async function init() {
-    if (!MyPageApi.requireToken()) return;
-    try {
-      const profile = await MyPageApi.request("/api/v1/members/me");
-      memberId = profile.id;
-      const wallet = await resolveWallet(profile);
-      currentBalance = Number(wallet.balance || 0);
-      currentBalanceElement.textContent = formatPoint(currentBalance);
-      syncSummary();
-    } catch (error) {
-      showToast(error.message);
-      chargeButton.disabled = true;
-    }
-  }
-
   chargeButton.addEventListener("click", async () => {
-    if (!memberId || selectedAmount <= 0) {
+    if (selectedAmount <= 0) {
       showToast("충전 금액을 먼저 선택해 주세요.");
       return;
     }
@@ -322,7 +296,7 @@
     }
   });
 
-  init();
+  syncSummary();
 </script>
 </body>
 </html>

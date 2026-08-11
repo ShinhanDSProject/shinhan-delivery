@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -34,7 +34,7 @@
     </style>
 </head>
 <body>
-<main class="page">
+<main class="page" th:attr="data-has-payment-pin=${hasPaymentPin}">
     <header class="top">
         <button id="backButton" class="back-button" type="button" aria-label="뒤로가기">&lt;</button>
         <h1>결제 PIN 설정</h1>
@@ -72,7 +72,7 @@
     const params = new URLSearchParams(location.search);
     const required = params.get('required') === '1';
     const returnUrl = params.get('returnUrl') || '/my-page';
-    let hasPaymentPin = false;
+    const hasPaymentPin = document.querySelector('.page').dataset.hasPaymentPin === 'true';
 
     function setHelper(text, className = '') {
         const el = document.getElementById('helperText');
@@ -95,12 +95,6 @@
             document.getElementById('heroTitle').textContent = '결제 PIN을 변경할 수 있어요';
             document.getElementById('heroDesc').textContent = '현재 PIN을 확인한 뒤 새 6자리 PIN으로 변경합니다.';
         }
-    }
-
-    async function loadProfile() {
-        const profile = await MyPageApi.request('/api/v1/members/me');
-        hasPaymentPin = !!profile.hasPaymentPin;
-        updateMode();
     }
 
     async function submitPin() {
@@ -161,9 +155,7 @@
         });
     });
 
-    loadProfile().catch(() => {
-        setHelper('PIN 설정 정보를 불러오지 못했습니다.', 'error');
-    });
+    updateMode();
 </script>
 </body>
 </html>

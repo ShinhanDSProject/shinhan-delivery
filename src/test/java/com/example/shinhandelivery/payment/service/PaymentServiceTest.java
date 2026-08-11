@@ -174,6 +174,35 @@ class PaymentServiceTest {
   }
 
   @Test
+  @DisplayName("이미 지갑이 있으면 기존 지갑을 그대로 반환한다")
+  void getOrCreateWalletReturnsExistingWallet() {
+    PointWallet wallet = new PointWallet();
+    wallet.setId(5L);
+    wallet.setMemberId(1L);
+    wallet.setBalance(2000L);
+    when(paymentRepository.findByMemberId(1L)).thenReturn(Optional.of(wallet));
+
+    PointWallet response = paymentService.getOrCreateWallet(1L);
+
+    assertThat(response.getId()).isEqualTo(5L);
+    assertThat(response.getBalance()).isEqualTo(2000L);
+    verify(paymentRepository, never()).save(any(PointWallet.class));
+  }
+
+  @Test
+  @DisplayName("지갑이 없으면 잔액 0인 지갑을 새로 만들어 저장한다")
+  void getOrCreateWalletCreatesWalletWhenMissing() {
+    when(paymentRepository.findByMemberId(1L)).thenReturn(Optional.empty());
+    when(paymentRepository.save(any(PointWallet.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
+
+    PointWallet response = paymentService.getOrCreateWallet(1L);
+
+    assertThat(response.getMemberId()).isEqualTo(1L);
+    assertThat(response.getBalance()).isEqualTo(0L);
+  }
+
+  @Test
   @DisplayName("포인트를 충전하면 잔액이 증가한다")
   void chargePointSuccess() {
     PointWallet wallet = new PointWallet();
