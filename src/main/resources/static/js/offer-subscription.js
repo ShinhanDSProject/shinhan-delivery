@@ -51,6 +51,9 @@ async function fetchMyVehicleId(authHeader, attempt = 0) {
         const me = await meResponse.json();
 
         const vehiclesResponse = await fetch('/api/v1/vehicles', { headers: { Authorization: authHeader } });
+        if (vehiclesResponse.status === 401 || vehiclesResponse.status === 403) {
+            return null;
+        }
         if (!vehiclesResponse.ok) {
             throw new Error(`오퍼 채널 구독을 위한 차량 조회 실패: status=${vehiclesResponse.status}`);
         }
