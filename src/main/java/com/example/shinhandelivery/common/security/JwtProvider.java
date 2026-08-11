@@ -30,6 +30,10 @@ public class JwtProvider {
     this.refreshTokenExpiration = refreshTokenExpiration;
   }
 
+  public long getAccessTokenExpirationSeconds() {
+    return accessTokenExpiration / 1000;
+  }
+
   public String createAccessToken(Long id, String email, String role) {
     Date now = new Date();
     Date validity = new Date(now.getTime() + accessTokenExpiration);

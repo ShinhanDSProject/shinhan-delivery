@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -14,9 +15,12 @@ import com.example.shinhandelivery.common.exception.EntityNotFoundException;
 import com.example.shinhandelivery.common.exception.ErrorCode;
 import com.example.shinhandelivery.common.exception.GlobalExceptionHandler;
 import com.example.shinhandelivery.common.security.CustomUserDetails;
+import com.example.shinhandelivery.common.security.JwtProvider;
+import com.example.shinhandelivery.member.dto.request.LoginRequest;
 import com.example.shinhandelivery.member.dto.request.MemberCreateRequest;
 import com.example.shinhandelivery.member.dto.request.MemberPasswordUpdateRequest;
 import com.example.shinhandelivery.member.dto.request.MemberProfileUpdateRequestDto;
+import com.example.shinhandelivery.member.dto.response.TokenResponse;
 import com.example.shinhandelivery.member.entity.Member;
 import com.example.shinhandelivery.member.entity.MemberRole;
 import com.example.shinhandelivery.member.service.MemberService;
@@ -25,7 +29,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
@@ -43,10 +46,12 @@ class MemberControllerTest {
   private final ObjectMapper objectMapper = new ObjectMapper();
 
   @Mock private MemberService memberService;
-  @InjectMocks private MemberController memberController;
+  @Mock private JwtProvider jwtProvider;
+  private MemberController memberController;
 
   @BeforeEach
   void setUp() {
+    memberController = new MemberController(memberService, jwtProvider, false);
     mockMvc =
         MockMvcBuilders.standaloneSetup(memberController)
             .setCustomArgumentResolvers(new AuthenticationPrincipalArgumentResolver())
@@ -88,6 +93,65 @@ class MemberControllerTest {
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.email").value("user@example.com"))
         .andExpect(jsonPath("$.role").value("CUSTOMER"));
+  }
+
+  @Test
+  @DisplayName("로그인 성공 시 기존 JSON 응답과 함께 accessToken을 HttpOnly 쿠키로도 내려준다")
+  void loginSetsAccessTokenCookie() throws Exception {
+    LoginRequest request = new LoginRequest("user@example.com", "password123");
+    when(memberService.login(any()))
+        .thenReturn(TokenResponse.of("access-token-value", "refresh-token-value"));
+    when(jwtProvider.getAccessTokenExpirationSeconds()).thenReturn(3600L);
+
+    mockMvc
+        .perform(
+            post("/api/v1/members/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.accessToken").value("access-token-value"))
+        .andExpect(
+            header()
+                .string(
+                    "Set-Cookie",
+                    org.hamcrest.Matchers.allOf(
+                        org.hamcrest.Matchers.containsString("accessToken=access-token-value"),
+                        org.hamcrest.Matchers.containsString("HttpOnly"),
+                        org.hamcrest.Matchers.containsString("Max-Age=3600"))));
+  }
+
+  @Test
+  @DisplayName("app.cookie.secure가 true로 설정되면 발급되는 쿠키에도 Secure 속성이 붙는다")
+  void loginCookieSecureReflectsConfiguredValue() throws Exception {
+    org.springframework.test.util.ReflectionTestUtils.setField(
+        memberController, "cookieSecure", true);
+    LoginRequest request = new LoginRequest("user@example.com", "password123");
+    when(memberService.login(any()))
+        .thenReturn(TokenResponse.of("access-token-value", "refresh-token-value"));
+    when(jwtProvider.getAccessTokenExpirationSeconds()).thenReturn(3600L);
+
+    mockMvc
+        .perform(
+            post("/api/v1/members/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isOk())
+        .andExpect(header().string("Set-Cookie", org.hamcrest.Matchers.containsString("Secure")));
+  }
+
+  @Test
+  @DisplayName("로그아웃 요청 시 accessToken 쿠키를 즉시 만료시킨다")
+  void logoutExpiresAccessTokenCookie() throws Exception {
+    mockMvc
+        .perform(post("/api/v1/members/logout"))
+        .andExpect(status().isNoContent())
+        .andExpect(
+            header()
+                .string(
+                    "Set-Cookie",
+                    org.hamcrest.Matchers.allOf(
+                        org.hamcrest.Matchers.containsString("accessToken="),
+                        org.hamcrest.Matchers.containsString("Max-Age=0"))));
   }
 
   @Test

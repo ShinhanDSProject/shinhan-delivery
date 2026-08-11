@@ -56,7 +56,18 @@
     return parseResponse(response);
   }
 
-  function logout() {
+  async function logout() {
+    let response;
+    try {
+      response = await fetch("/api/v1/members/logout", { method: "POST" });
+    } catch (error) {
+      showToast("로그아웃에 실패했습니다. 다시 시도해 주세요.");
+      return;
+    }
+    if (!response.ok) {
+      showToast("로그아웃에 실패했습니다. 다시 시도해 주세요.");
+      return;
+    }
     localStorage.removeItem("accessToken");
     localStorage.removeItem("refreshToken");
     localStorage.removeItem("tokenType");
