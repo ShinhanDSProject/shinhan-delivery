@@ -8,6 +8,7 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import com.example.shinhandelivery.common.exception.BusinessException;
@@ -220,6 +221,22 @@ class DeliveryServiceTest {
     assertThat(response.deliveryStatus()).isEqualTo(DeliveryStatus.REQUESTED);
     assertThat(eventCaptor.getValue().candidateVehicleIds()).containsExactly(2L);
     assertThat(eventCaptor.getValue().offer().memberId()).isEqualTo(1L);
+  }
+
+  @Test
+  @DisplayName("잘못된 전달 지침이면 포인트를 사용하지 않는다")
+  void payDeliveryInvalidInstructionShouldNotUsePoint() {
+    DeliveryPayRequest request = new DeliveryPayRequest();
+    request.setPickup(createPayLocation("서울 강남구", 37.0, 127.0));
+    request.setDropoff(createPayLocation("서울 서초구", 38.0, 127.0));
+    request.setWeight(10.0);
+    request.setItemSize(ItemSize.MEDIUM);
+    request.setDeliveryInstructionType(DeliveryInstructionType.ENTRANCE_CODE);
+
+    assertThatThrownBy(() -> deliveryService.payDelivery(1L, "idem-invalid", request))
+        .isInstanceOf(BusinessException.class);
+
+    verifyNoInteractions(paymentService);
   }
 
   @Test

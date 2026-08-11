@@ -341,12 +341,12 @@
         }
         const draft = loadDraft();
         if (draft.pickupGuide) {
-            const type = draft.pickupGuide.deliveryInstructionType || 'CUSTOM';
+            const type = draft.pickupGuide.deliveryInstructionType;
             const selected = document.querySelector(`input[name="deliveryInstructionType"][value="${type}"]`);
             if (selected) selected.checked = true;
-            document.getElementById('entranceCode').value = draft.pickupGuide.entranceCode || draft.pickupGuide.doorPassword || '';
+            document.getElementById('entranceCode').value = draft.pickupGuide.entranceCode || '';
             document.getElementById('unitDetail').value = draft.pickupGuide.unitDetail || '';
-            document.getElementById('deliveryNote').value = draft.pickupGuide.deliveryNote || draft.pickupGuide.locationNote || '';
+            document.getElementById('deliveryNote').value = draft.pickupGuide.deliveryNote || '';
             if (draft.pickupGuide.photoUrl) {
                 uploadedPhotoUrl = draft.pickupGuide.photoUrl;
                 document.getElementById('photoPreviewImg').src = uploadedPhotoUrl;
