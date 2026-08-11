@@ -14,10 +14,12 @@ import com.example.shinhandelivery.member.entity.Member;
 import com.example.shinhandelivery.member.service.MemberService;
 import com.example.shinhandelivery.payment.dto.request.PinVerifyRequestDto;
 import com.example.shinhandelivery.payment.dto.request.PointChargeRequest;
+import com.example.shinhandelivery.payment.dto.request.PointRefundRequest;
 import com.example.shinhandelivery.payment.dto.request.PointUseRequest;
 import com.example.shinhandelivery.payment.dto.request.PointWalletCreateRequest;
 import com.example.shinhandelivery.payment.dto.response.PinVerifyResponseDto;
 import com.example.shinhandelivery.payment.dto.response.PointBalanceResponse;
+import com.example.shinhandelivery.payment.dto.response.PointRefundResponse;
 import com.example.shinhandelivery.payment.dto.response.PointUseResultResponse;
 import com.example.shinhandelivery.payment.entity.PaymentMethod;
 import com.example.shinhandelivery.payment.entity.PointHistory;
@@ -389,6 +391,58 @@ class PaymentServiceTest {
     assertThat(response.usedAmount()).isEqualTo(2000L);
     assertThat(response.paidAt()).isEqualTo(LocalDateTime.of(2026, 8, 4, 10, 0));
     verify(paymentRepository, never()).findByMemberIdForUpdate(1L);
+    verify(pointHistoryRepository, never()).save(any(PointHistory.class));
+  }
+
+  @Test
+  @DisplayName("배송 취소 환불은 지갑 잔액을 늘리고 참조 배송 이력을 저장한다")
+  void refundPointCreatesRefundHistory() {
+    when(memberService.getById(1L)).thenReturn(new Member());
+    PointWallet wallet = PointWallet.builder().id(10L).memberId(1L).balance(1000L).build();
+    when(paymentRepository.findByMemberIdForUpdate(1L)).thenReturn(Optional.of(wallet));
+    when(pointHistoryRepository.findByTypeAndReferenceId(PointHistoryType.REFUND, 55L))
+        .thenReturn(Optional.empty());
+    when(pointHistoryRepository.save(any(PointHistory.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
+
+    PointRefundResponse response =
+        paymentService.refundPoint(1L, "refund-55", PointRefundRequest.of(3000L, 55L, "자동 취소 환불"));
+
+    ArgumentCaptor<PointHistory> historyCaptor = ArgumentCaptor.forClass(PointHistory.class);
+    verify(pointHistoryRepository).save(historyCaptor.capture());
+    PointHistory history = historyCaptor.getValue();
+    assertThat(response.balance()).isEqualTo(4000L);
+    assertThat(response.refundedAmount()).isEqualTo(3000L);
+    assertThat(history.getType()).isEqualTo(PointHistoryType.REFUND);
+    assertThat(history.getReferenceId()).isEqualTo(55L);
+    assertThat(history.getDescription()).isEqualTo("자동 취소 환불");
+  }
+
+  @Test
+  @DisplayName("동일 멱등 키 환불은 기존 이력을 반환하고 잔액을 다시 늘리지 않는다")
+  void refundPointDuplicateKeyReusesExistingHistory() {
+    when(memberService.getById(1L)).thenReturn(new Member());
+    PointWallet wallet = PointWallet.builder().id(10L).memberId(1L).balance(4000L).build();
+    when(paymentRepository.findByMemberIdForUpdate(1L)).thenReturn(Optional.of(wallet));
+    PointHistory history =
+        PointHistory.builder()
+            .memberId(1L)
+            .walletId(10L)
+            .amount(3000L)
+            .balanceAfter(4000L)
+            .type(PointHistoryType.REFUND)
+            .idempotencyKey("refund-55")
+            .referenceId(55L)
+            .createdAt(LocalDateTime.of(2026, 8, 11, 16, 0))
+            .build();
+    when(pointHistoryRepository.findByTypeAndReferenceId(PointHistoryType.REFUND, 55L))
+        .thenReturn(Optional.of(history));
+
+    PointRefundResponse response =
+        paymentService.refundPoint(1L, "refund-55", PointRefundRequest.of(3000L, 55L, "자동 취소 환불"));
+
+    assertThat(response.balance()).isEqualTo(4000L);
+    assertThat(wallet.getBalance()).isEqualTo(4000L);
     verify(pointHistoryRepository, never()).save(any(PointHistory.class));
   }
 }

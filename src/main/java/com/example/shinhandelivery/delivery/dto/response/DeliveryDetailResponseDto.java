@@ -1,5 +1,6 @@
 package com.example.shinhandelivery.delivery.dto.response;
 
+import com.example.shinhandelivery.delivery.entity.DeliveryCancellationReason;
 import com.example.shinhandelivery.delivery.entity.DeliveryRequest;
 import com.example.shinhandelivery.delivery.entity.DeliveryStatus;
 import com.example.shinhandelivery.delivery.entity.ItemSize;
@@ -27,7 +28,10 @@ public record DeliveryDetailResponseDto(
     LocalDateTime createdAt,
     LocalDateTime matchedAt,
     LocalDateTime pickedUpAt,
-    LocalDateTime completedAt) {
+    LocalDateTime completedAt,
+    DeliveryCancellationReason cancellationReason,
+    LocalDateTime cancelledAt,
+    LocalDateTime refundedAt) {
 
   /**
    * DeliveryRequest 엔티티를 상세 응답 DTO로 변환한다. courierName·vehicleType·matchedAt은 아직 매칭된 배송원이 없으면 모두
@@ -58,6 +62,9 @@ public record DeliveryDetailResponseDto(
         entity.getCreatedAt(),
         matchedAt,
         entity.getPickedUpAt(),
-        entity.getCompletedAt());
+        entity.getCompletedAt(),
+        entity.getCancellationReason(),
+        entity.getCancelledAt(),
+        entity.getRefundedAt());
   }
 }

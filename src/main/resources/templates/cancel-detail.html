@@ -237,6 +237,12 @@
         return { SMALL: '소형', MEDIUM: '중형', LARGE: '대형' }[itemSize] || itemSize;
     }
 
+    function cancellationReasonLabel(reason) {
+        return reason === 'AUTO_TIMEOUT'
+            ? '30분 동안 배송원이 배정되지 않아 자동 취소되었습니다.'
+            : '배송 요청이 취소되었습니다.';
+    }
+
     function render(detail) {
         const body = document.getElementById('body');
         body.innerHTML = `
@@ -259,13 +265,13 @@
                 </div>
                 <div class="info-row">
                     <span class="info-label">취소 일시</span>
-                    <span class="info-value pending">제공 예정</span>
+                    <span class="info-value">${formatDateTime(detail.cancelledAt)}</span>
                 </div>
             </section>
 
             <section class="card">
                 <div class="card-title" style="text-transform:none;margin-bottom:12px;">취소 사유</div>
-                <div class="placeholder-box">사유 정보가 아직 제공되지 않아요</div>
+                <div class="placeholder-box">${cancellationReasonLabel(detail.cancellationReason)}</div>
             </section>
 
             <section class="card">
@@ -276,16 +282,16 @@
                 </div>
                 <div class="info-row">
                     <span class="info-label">환불 금액</span>
-                    <span class="info-value pending">제공 예정</span>
+                    <span class="info-value">${detail.refundedAt ? `${detail.feePoint.toLocaleString()} P` : '환불 대상 아님'}</span>
                 </div>
                 <hr class="divider">
                 <div class="info-row">
                     <span class="info-label">환불 상태</span>
-                    <span class="info-value pending">제공 예정</span>
+                    <span class="info-value">${detail.refundedAt ? '환불 완료' : '환불 없음'}</span>
                 </div>
                 <div class="info-row">
                     <span class="info-label">환불 일시</span>
-                    <span class="info-value pending">제공 예정</span>
+                    <span class="info-value">${detail.refundedAt ? formatDateTime(detail.refundedAt) : '-'}</span>
                 </div>
             </section>
         `;

@@ -112,6 +112,16 @@ public class DeliveryRequest {
   @Column(name = "created_at")
   private LocalDateTime createdAt;
 
+  @Enumerated(EnumType.STRING)
+  @Column(name = "cancellation_reason", length = 30)
+  private DeliveryCancellationReason cancellationReason;
+
+  @Column(name = "cancelled_at")
+  private LocalDateTime cancelledAt;
+
+  @Column(name = "refunded_at")
+  private LocalDateTime refundedAt;
+
   public double getPickupLatitude() {
     return pickupLocation != null ? pickupLocation.getLatitude() : 0.0;
   }
@@ -198,6 +208,15 @@ public class DeliveryRequest {
   /** 배송 요청의 상태를 변경하는 도메인 비즈니스 메서드. */
   public DeliveryRequest changeStatus(DeliveryStatus newStatus) {
     this.status = newStatus;
+    return this;
+  }
+
+  /** 30분 미배정 타임아웃으로 요청을 취소하고, 결제 요청이면 환불 완료 시각을 함께 기록한다. */
+  public DeliveryRequest cancelByTimeout(LocalDateTime processedAt, boolean refunded) {
+    this.status = DeliveryStatus.CANCELLED;
+    this.cancellationReason = DeliveryCancellationReason.AUTO_TIMEOUT;
+    this.cancelledAt = processedAt;
+    this.refundedAt = refunded ? processedAt : null;
     return this;
   }
 }

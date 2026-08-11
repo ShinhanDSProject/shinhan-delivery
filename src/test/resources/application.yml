@@ -8,3 +8,5 @@ spring:
 app:
   data-seed:
     enabled: false
+  delivery-timeout:
+    enabled: false
