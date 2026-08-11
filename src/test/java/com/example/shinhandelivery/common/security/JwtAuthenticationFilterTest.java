@@ -75,4 +75,39 @@ class JwtAuthenticationFilterTest {
 
     assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
   }
+
+  @Test
+  @DisplayName("헤더가 없고 GET이 아닌 요청이면 쿠키가 있어도 인증하지 않는다")
+  void doesNotAuthenticateFromCookieForNonGetRequest() throws Exception {
+    MockHttpServletRequest request = new MockHttpServletRequest("POST", "/address-input");
+    request.setCookies(new Cookie("accessToken", accessToken));
+
+    filter.doFilter(request, new MockHttpServletResponse(), new MockFilterChain());
+
+    assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
+  }
+
+  @Test
+  @DisplayName("서블릿 컨텍스트 경로가 있어도 /api/ 경로는 컨텍스트 상대경로 기준으로 판별해 쿠키 인증하지 않는다")
+  void doesNotAuthenticateFromCookieForApiPathUnderContextPath() throws Exception {
+    MockHttpServletRequest request = new MockHttpServletRequest("GET", "/app/api/v1/members/me");
+    request.setContextPath("/app");
+    request.setCookies(new Cookie("accessToken", accessToken));
+
+    filter.doFilter(request, new MockHttpServletResponse(), new MockFilterChain());
+
+    assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
+  }
+
+  @Test
+  @DisplayName("서블릿 컨텍스트 경로가 있어도 SSR GET 경로는 컨텍스트 상대경로 기준으로 판별해 쿠키 인증한다")
+  void authenticatesFromCookieForNonApiPathUnderContextPath() throws Exception {
+    MockHttpServletRequest request = new MockHttpServletRequest("GET", "/app/home");
+    request.setContextPath("/app");
+    request.setCookies(new Cookie("accessToken", accessToken));
+
+    filter.doFilter(request, new MockHttpServletResponse(), new MockFilterChain());
+
+    assertThat(SecurityContextHolder.getContext().getAuthentication()).isNotNull();
+  }
 }

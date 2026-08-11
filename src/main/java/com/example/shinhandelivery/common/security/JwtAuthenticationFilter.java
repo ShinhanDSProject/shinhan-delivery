@@ -39,10 +39,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
       return bearerToken.substring(7);
     }
-    if (request.getRequestURI().startsWith("/api/")) {
+    if (!"GET".equalsIgnoreCase(request.getMethod()) || isApiRequest(request)) {
       return null;
     }
     return resolveTokenFromCookie(request);
+  }
+
+  private boolean isApiRequest(HttpServletRequest request) {
+    String contextRelativePath =
+        request.getRequestURI().substring(request.getContextPath().length());
+    return contextRelativePath.startsWith("/api/");
   }
 
   private String resolveTokenFromCookie(HttpServletRequest request) {
