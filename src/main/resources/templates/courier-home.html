@@ -919,6 +919,9 @@
 
     /** 토스트 알림 없이 조용히 위치만 갱신한다 (기존 출근/퇴근 토글의 sendStatusUpdate와 달리 UI 반응이 없어야 함). */
     async function pingLocation(lat, lon) {
+      if (!isCurrentOnline) {
+        return; // 오프라인으로 전환된 뒤 뒤늦게 도착한 하트비트는 무시한다 (퇴근 처리를 다시 ONLINE으로 덮어쓰는 것을 방지)
+      }
       try {
         await fetch('/api/v1/couriers/status', {
           method: 'PATCH',
