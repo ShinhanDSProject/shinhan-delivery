@@ -17,6 +17,7 @@ import com.example.shinhandelivery.common.security.JwtProvider;
 import com.example.shinhandelivery.delivery.dto.request.DeliveryCreateRequest;
 import com.example.shinhandelivery.delivery.dto.response.DeliveryDetailResponseDto;
 import com.example.shinhandelivery.delivery.dto.response.ProofPhotoResponse;
+import com.example.shinhandelivery.delivery.entity.DeliveryInstructionType;
 import com.example.shinhandelivery.delivery.entity.DeliveryRequest;
 import com.example.shinhandelivery.delivery.entity.DeliveryStatus;
 import com.example.shinhandelivery.delivery.entity.ItemSize;
@@ -134,6 +135,11 @@ class DeliveryHistoryControllerTest {
             "박배송",
             VehicleType.CAR,
             null,
+            DeliveryInstructionType.ENTRANCE_CODE,
+            "#1234*",
+            "101동 1403호",
+            null,
+            "https://example.com/entrance.jpg",
             createdAt,
             matchedAt,
             pickedUpAt,
@@ -145,6 +151,8 @@ class DeliveryHistoryControllerTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.courierName").value("박배송"))
         .andExpect(jsonPath("$.vehicleType").value("CAR"))
+        .andExpect(jsonPath("$.deliveryInstructionType").value("ENTRANCE_CODE"))
+        .andExpect(jsonPath("$.entranceCode").value("#1234*"))
         .andExpect(jsonPath("$.createdAt").exists())
         .andExpect(jsonPath("$.matchedAt").exists())
         .andExpect(jsonPath("$.pickedUpAt").exists())

@@ -290,6 +290,11 @@ public class DeliveryService {
     createRequest.setDropoffLongitude(request.getDropoff().getLng());
     createRequest.setWeight(request.getWeight());
     createRequest.setItemSize(request.getItemSize());
+    createRequest.setDeliveryInstructionType(request.getDeliveryInstructionType());
+    createRequest.setEntranceCode(request.getEntranceCode());
+    createRequest.setUnitDetail(request.getUnitDetail());
+    createRequest.setDeliveryNote(request.getDeliveryNote());
+    createRequest.setDeliveryReferencePhotoUrl(request.getDeliveryReferencePhotoUrl());
     return createRequest;
   }
 

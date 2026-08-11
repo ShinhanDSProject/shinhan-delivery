@@ -175,7 +175,12 @@
                 lng: draft.dropoff.lng
             },
             weight: draft.weight,
-            itemSize: draft.itemSize
+            itemSize: draft.itemSize,
+            deliveryInstructionType: draft.pickupGuide?.deliveryInstructionType,
+            entranceCode: draft.pickupGuide?.entranceCode,
+            unitDetail: draft.pickupGuide?.unitDetail,
+            deliveryNote: draft.pickupGuide?.deliveryNote,
+            deliveryReferencePhotoUrl: draft.pickupGuide?.photoUrl
         };
     }
 
@@ -254,6 +259,9 @@
         const draft = loadDraft();
         draft.paymentResult = result;
         draft.paymentStatus = 'COMPLETED';
+        if (draft.pickupGuide) {
+            draft.pickupGuide.entranceCode = '';
+        }
         saveDraft(draft);
         location.href = '/payment-complete';
     }

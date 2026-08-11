@@ -12,6 +12,15 @@
     확인
   </button>
 
+  <button th:fragment="primaryBtnForForm(text, formId, buttonId)"
+          th:id="${buttonId}"
+          th:attr="form=${formId}"
+          type="submit"
+          class="btn btn-primary btn-full"
+          th:text="${text}">
+    확인
+  </button>
+
   <button th:fragment="secondaryBtn(text)"
           type="button"
           class="btn btn-outline btn-full"
@@ -39,6 +48,48 @@
            th:type="${type}"
            class="input-field"
            th:placeholder="${placeholder}" />
+  </div>
+
+  <!-- 배송 현장 전달 지침 입력 묶음. 민감한 출입번호는 선택한 경우에만 노출한다. -->
+  <div th:fragment="deliveryInstructionFields" class="delivery-instruction-fields">
+    <fieldset class="field instruction-options">
+      <legend>전달 방식</legend>
+      <label><input type="radio" name="deliveryInstructionType" value="LEAVE_AT_DOOR_NO_BELL"> 문 앞에 두고 벨 누르지 않기</label>
+      <label><input type="radio" name="deliveryInstructionType" value="ENTRANCE_CODE"> 공동현관 출입번호 사용</label>
+      <label><input type="radio" name="deliveryInstructionType" value="SECURITY_OFFICE"> 경비실에 맡기기</label>
+      <label><input type="radio" name="deliveryInstructionType" value="CUSTOM"> 기타 전달 요청</label>
+    </fieldset>
+
+    <div class="field conditional-field" id="entranceCodeField" hidden>
+      <label for="entranceCode">공동현관 출입번호</label>
+      <input type="password" id="entranceCode" autocomplete="off"
+             placeholder="예: #1234* 호출 버튼 누른 후 입력" maxlength="100">
+      <p class="field-help">출입번호는 권한이 있는 고객과 배정된 배송원에게만 표시됩니다.</p>
+    </div>
+
+    <div class="field">
+      <label for="unitDetail">동 / 호수 상세</label>
+      <input type="text" id="unitDetail" placeholder="예: 101동 1403호" maxlength="100">
+    </div>
+
+    <div class="field conditional-field" id="deliveryNoteField" hidden>
+      <label for="deliveryNote">기타 전달 요청</label>
+      <textarea id="deliveryNote" placeholder="예: 현관문 옆 흰색 보관함 위에 놓아주세요." maxlength="500"></textarea>
+    </div>
+
+    <div class="field">
+      <label>입구/위치 참고 사진 등록 (선택)</label>
+      <button type="button" class="photo-upload" id="photoUploadBtn">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/><path d="M4 7h3l2-3h6l2 3h3v13H4z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+        <span id="photoUploadLabel">사진 찍어 추가하기</span>
+      </button>
+      <input type="file" id="photoInput" accept="image/jpeg,image/png,image/webp" hidden>
+      <div class="photo-preview" id="photoPreview">
+        <img id="photoPreviewImg" alt="등록한 참고 사진 미리보기">
+        <button type="button" id="photoRemoveBtn" aria-label="사진 삭제">×</button>
+      </div>
+    </div>
+    <p class="form-error" id="formError" role="alert" aria-live="polite"></p>
   </div>
 
   <!-- ==================================================================== -->

@@ -10,6 +10,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.example.shinhandelivery.common.exception.BusinessException;
 import com.example.shinhandelivery.common.exception.EntityNotFoundException;
 import com.example.shinhandelivery.common.exception.ErrorCode;
 import com.example.shinhandelivery.delivery.dto.request.DeliveryCompleteRequest;
@@ -22,6 +23,7 @@ import com.example.shinhandelivery.delivery.dto.response.DeliveryDetailResponseD
 import com.example.shinhandelivery.delivery.dto.response.DeliveryEstimateResponse;
 import com.example.shinhandelivery.delivery.dto.response.DeliveryPaymentResponse;
 import com.example.shinhandelivery.delivery.dto.response.ProofPhotoResponse;
+import com.example.shinhandelivery.delivery.entity.DeliveryInstructionType;
 import com.example.shinhandelivery.delivery.entity.DeliveryRequest;
 import com.example.shinhandelivery.delivery.entity.DeliveryStatus;
 import com.example.shinhandelivery.delivery.entity.ItemSize;
@@ -94,6 +96,51 @@ class DeliveryServiceTest {
     assertThat(response.getMemberId()).isEqualTo(1L);
     assertThat(response.getFeePoint()).isEqualTo(78776L);
     assertThat(response.getStatus()).isEqualTo(DeliveryStatus.REQUESTED);
+  }
+
+  @Test
+  @DisplayName("공동현관 출입번호 전달 지침을 배송 요청에 저장한다")
+  void requestDeliveryWithEntranceCodeSuccess() {
+    DeliveryCreateRequest request = new DeliveryCreateRequest();
+    request.setPickupAddress("서울시 강남구");
+    request.setDropoffAddress("서울시 서초구");
+    request.setWeight(10);
+    request.setPickupLatitude(37.0);
+    request.setPickupLongitude(127.0);
+    request.setDropoffLatitude(38.0);
+    request.setDropoffLongitude(127.0);
+    request.setItemSize(ItemSize.MEDIUM);
+    request.setDeliveryInstructionType(DeliveryInstructionType.ENTRANCE_CODE);
+    request.setEntranceCode("#1234*");
+    request.setUnitDetail("101동 1403호");
+
+    when(deliveryRequestRepository.save(any(DeliveryRequest.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
+
+    DeliveryRequest response = deliveryService.requestDelivery(1L, request);
+
+    assertThat(response.getDeliveryInstructionType())
+        .isEqualTo(DeliveryInstructionType.ENTRANCE_CODE);
+    assertThat(response.getEntranceCode()).isEqualTo("#1234*");
+    assertThat(response.getUnitDetail()).isEqualTo("101동 1403호");
+  }
+
+  @Test
+  @DisplayName("공동현관 출입번호 방식을 선택하고 번호를 누락하면 요청을 거절한다")
+  void requestDeliveryWithoutRequiredEntranceCodeShouldThrowException() {
+    DeliveryCreateRequest request = new DeliveryCreateRequest();
+    request.setPickupAddress("서울시 강남구");
+    request.setDropoffAddress("서울시 서초구");
+    request.setWeight(10);
+    request.setPickupLatitude(37.0);
+    request.setPickupLongitude(127.0);
+    request.setDropoffLatitude(38.0);
+    request.setDropoffLongitude(127.0);
+    request.setItemSize(ItemSize.MEDIUM);
+    request.setDeliveryInstructionType(DeliveryInstructionType.ENTRANCE_CODE);
+
+    assertThatThrownBy(() -> deliveryService.requestDelivery(1L, request))
+        .isInstanceOf(BusinessException.class);
   }
 
   @Test

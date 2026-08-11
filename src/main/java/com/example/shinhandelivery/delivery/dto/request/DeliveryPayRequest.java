@@ -1,9 +1,11 @@
 package com.example.shinhandelivery.delivery.dto.request;
 
+import com.example.shinhandelivery.delivery.entity.DeliveryInstructionType;
 import com.example.shinhandelivery.delivery.entity.ItemSize;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -31,4 +33,18 @@ public class DeliveryPayRequest {
 
   @NotNull(message = "물품 크기는 필수입니다.")
   private ItemSize itemSize;
+
+  private DeliveryInstructionType deliveryInstructionType;
+
+  @Size(max = 100, message = "공동현관 출입번호는 100자 이하여야 합니다.")
+  private String entranceCode;
+
+  @Size(max = 100, message = "동/호수 상세는 100자 이하여야 합니다.")
+  private String unitDetail;
+
+  @Size(max = 500, message = "전달 요청사항은 500자 이하여야 합니다.")
+  private String deliveryNote;
+
+  @Size(max = 255, message = "참고 사진 URL은 255자 이하여야 합니다.")
+  private String deliveryReferencePhotoUrl;
 }
