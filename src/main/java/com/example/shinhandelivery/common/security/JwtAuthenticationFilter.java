@@ -2,7 +2,6 @@ package com.example.shinhandelivery.common.security;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -14,8 +13,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
-
-  private static final String ACCESS_TOKEN_COOKIE_NAME = "accessToken";
 
   private final JwtProvider jwtProvider;
 
@@ -38,29 +35,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     String bearerToken = request.getHeader("Authorization");
     if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
       return bearerToken.substring(7);
-    }
-    if (!"GET".equalsIgnoreCase(request.getMethod()) || isApiRequest(request)) {
-      return null;
-    }
-    return resolveTokenFromCookie(request);
-  }
-
-  private boolean isApiRequest(HttpServletRequest request) {
-    String contextRelativePath =
-        request.getRequestURI().substring(request.getContextPath().length());
-    return contextRelativePath.startsWith("/api/");
-  }
-
-  private String resolveTokenFromCookie(HttpServletRequest request) {
-    Cookie[] cookies = request.getCookies();
-    if (cookies == null) {
-      return null;
-    }
-    for (Cookie cookie : cookies) {
-      if (ACCESS_TOKEN_COOKIE_NAME.equals(cookie.getName())
-          && StringUtils.hasText(cookie.getValue())) {
-        return cookie.getValue();
-      }
     }
     return null;
   }
