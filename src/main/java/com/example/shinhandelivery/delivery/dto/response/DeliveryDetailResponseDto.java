@@ -1,5 +1,6 @@
 package com.example.shinhandelivery.delivery.dto.response;
 
+import com.example.shinhandelivery.delivery.entity.DeliveryInstructionType;
 import com.example.shinhandelivery.delivery.entity.DeliveryRequest;
 import com.example.shinhandelivery.delivery.entity.DeliveryStatus;
 import com.example.shinhandelivery.delivery.entity.ItemSize;
@@ -24,6 +25,11 @@ public record DeliveryDetailResponseDto(
     String courierName,
     VehicleType vehicleType,
     String proofPhotoUrl,
+    DeliveryInstructionType deliveryInstructionType,
+    String entranceCode,
+    String unitDetail,
+    String deliveryNote,
+    String deliveryReferencePhotoUrl,
     LocalDateTime createdAt,
     LocalDateTime matchedAt,
     LocalDateTime pickedUpAt,
@@ -55,6 +61,11 @@ public record DeliveryDetailResponseDto(
         courierName,
         vehicleType,
         entity.getProofPhotoUrl(),
+        entity.getDeliveryInstructionType(),
+        entity.getEntranceCode(),
+        entity.getUnitDetail(),
+        entity.getDeliveryNote(),
+        entity.getDeliveryReferencePhotoUrl(),
         entity.getCreatedAt(),
         matchedAt,
         entity.getPickedUpAt(),
