@@ -48,7 +48,7 @@ public class DeliveryMatchingService {
 
     double currentLat = latitude != null ? latitude : 0.0;
     double currentLon = longitude != null ? longitude : 0.0;
-    double searchRadius = radiusKm != null ? radiusKm : 3.0;
+    double searchRadius = radiusKm != null ? radiusKm : VehicleService.DEFAULT_OFFER_RADIUS_KM;
 
     if (latitude == null || longitude == null) {
       List<Vehicle> vehicles = vehicleService.getVehiclesByMemberId(memberId);
