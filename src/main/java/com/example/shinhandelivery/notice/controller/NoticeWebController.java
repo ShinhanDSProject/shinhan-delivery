@@ -1,5 +1,6 @@
 package com.example.shinhandelivery.notice.controller;
 
+import com.example.shinhandelivery.notice.dto.response.NoticeDetailResponse;
 import com.example.shinhandelivery.notice.dto.response.NoticeResponse;
 import com.example.shinhandelivery.notice.service.NoticeService;
 import lombok.RequiredArgsConstructor;
@@ -18,10 +19,17 @@ public class NoticeWebController {
   private final NoticeService noticeService;
 
   @GetMapping("/announcements")
-  public String announcements(@RequestParam(required = false) String category, Model model) {
+  public String announcements(
+      @RequestParam(required = false) String category,
+      @RequestParam(required = false) Long id,
+      Model model) {
     Page<NoticeResponse> notices =
         noticeService.list(category, PageRequest.of(0, 50)).map(NoticeResponse::from);
     model.addAttribute("notices", notices.getContent());
+    model.addAttribute("category", category);
+    if (id != null) {
+      model.addAttribute("selectedNotice", NoticeDetailResponse.from(noticeService.getById(id)));
+    }
     return "announcements";
   }
 }
