@@ -694,13 +694,6 @@ void 도메인은_다른_도메인의_repository를_직접_참조하지_않는�
 5. **서버 사이드 렌더링(SSR) 및 Web Controller 구축 필수 (SSR First & Web Controller Rule):**
    - 공지사항, 카테고리 목록, 홈 화면 등 초기 데이터 조회가 필요한 모든 화면은 백엔드 Spring MVC `@Controller` (Web Controller)를 신설하고 `Model`에 DTO를 추가하여 Thymeleaf SSR(`th:each`, `th:text`, `th:if`, `th:replace`) 형태로 완성된 HTML을 서버에서 렌더링하여 응답해야 합니다.
    - 초기 진입 시 FOUC(Flash of Unstyled Content)나 스켈레톤 지연 없이 완성된 DOM을 사용자에게 즉시 노출해야 합니다.
-   - **Web Controller가 `Model`을 만들어놓고 템플릿이 실제로는 `th:` 바인딩 없이 `<script>`의 `fetch()`로 다시 그리는 CSR로 되돌아가는 것을 엄격히 금지합니다.** Web Controller를 신설하는 것만으로는 이 규칙을 충족하지 않으며, 템플릿이 `Model`의 값을 실제로 렌더링해야 합니다.
-5.1 **SSR 페이지의 로그인 사용자 식별 (SSR Authentication Rule):**
-   - 회원별 데이터를 렌더링해야 하는 Web Controller는 `@AuthenticationPrincipal CustomUserDetails principal` 파라미터로 로그인 사용자를 식별합니다. `principal == null`이면 `"redirect:/login"`을 반환하고, 결제 PIN 미설정 등 추가 선행 조건이 있으면 해당 화면으로 리다이렉트합니다.
-   - 이 인증은 로그인 시 함께 발급되는 `accessToken` HttpOnly 쿠키를 `JwtAuthenticationFilter`가 `/api/`로 시작하지 않는 요청에서만 폴백으로 읽어 처리합니다(ADR-0002 참고). REST API(`/api/v1/**`)의 인증 방식(`Authorization` 헤더 전용)은 이 쿠키의 영향을 받지 않습니다.
-5.2 **SSR 페이지의 상태 변경 액션 처리 (No Native Form POST Rule):**
-   - 배송 신청, 결제, 프로필 수정 등 상태를 변경하는 액션은 Thymeleaf `th:action` 서버 직접 폼 제출로 구현하지 않습니다. 지금처럼 기존 REST API(`/api/v1/**`)에 대한 JS `fetch()` 호출(`Authorization` 헤더 방식)로 처리합니다.
-   - 이 프로젝트는 CSRF 보호가 비활성화되어 있으므로(`SecurityConfig`), `accessToken` 쿠키는 SSR 페이지의 GET 렌더링에만 사용하고 상태 변경 요청에는 관여시키지 않습니다(ADR-0002 참고).
 6. **Thymeleaf 표현식 Null-Safety 수칙:**
    - 템플릿 내 날짜/시간 포맷팅이나 데이터 바인딩 시 `th:text="${notice.createdAt != null ? #temporals.format(notice.createdAt, 'yyyy.MM.dd') : ''}"`와 같이 방어적 Null-Safety 표현식을 적용해야 합니다.
 7. **문서 및 라이브 가이드 세트 최신화:**
