@@ -1,12 +1,14 @@
 package com.example.shinhandelivery.vehicle.service;
 
 import com.example.shinhandelivery.common.domain.Location;
+import com.example.shinhandelivery.common.exception.BusinessException;
 import com.example.shinhandelivery.common.exception.EntityNotFoundException;
 import com.example.shinhandelivery.common.exception.ErrorCode;
 import com.example.shinhandelivery.member.service.MemberService;
 import com.example.shinhandelivery.vehicle.dto.request.VehicleCreateRequest;
 import com.example.shinhandelivery.vehicle.dto.request.VehicleUpdateRequest;
 import com.example.shinhandelivery.vehicle.entity.Vehicle;
+import com.example.shinhandelivery.vehicle.entity.VehicleApprovalStatus;
 import com.example.shinhandelivery.vehicle.entity.VehicleStatus;
 import com.example.shinhandelivery.vehicle.exception.VehicleNotAvailableException;
 import com.example.shinhandelivery.vehicle.repository.VehicleRepository;
@@ -14,9 +16,6 @@ import java.util.List;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import com.example.shinhandelivery.common.exception.BusinessException;
-import com.example.shinhandelivery.vehicle.entity.VehicleApprovalStatus;
 
 /** Vehicle 관련 유스케이스(등록/조회/수정/삭제)를 담당하는 서비스. */
 @Service
@@ -107,10 +106,7 @@ public class VehicleService {
     findVehicleOrThrow(vehicleId).markAs(VehicleStatus.AVAILABLE);
   }
 
-  /**
-   * 배송원의 장비 중 단 1개만 활성화(Exclusive Toggle) 트랜잭션.
-   * 승인 완료(APPROVED) 상태인 장비만 활성화 허용.
-   */
+  /** 배송원의 장비 중 단 1개만 활성화(Exclusive Toggle) 트랜잭션. 승인 완료(APPROVED) 상태인 장비만 활성화 허용. */
   @Transactional
   public Vehicle activateVehicle(Long memberId, Long vehicleId) {
     Vehicle target = findVehicleOrThrow(vehicleId);

@@ -11,12 +11,12 @@
       --primary-hover: var(--color-blue-500);
       --text-dark: var(--color-black-200);
       --text-muted: var(--color-grey-300);
-      --surface: #FFFFFF;
+      --surface: var(--color-white-100);
       --border: var(--color-grey-50);
     }
 
     body {
-      background-color: #F8FAFC;
+      background-color: var(--color-grey-50);
       color: var(--text-dark);
       margin: 0;
       padding: 0;
@@ -632,8 +632,14 @@
 
     async function checkOnlineAccessGuard() {
       try {
+        const auth = getAuthHeader();
+        if (!auth) {
+          alert("⚠️ 로그인 정보가 없습니다. 다시 로그인해 주세요.");
+          window.location.replace("/courier-login");
+          return false;
+        }
         const res = await fetch("/api/v1/couriers/status", {
-          headers: { "Authorization": getAuthHeader() }
+          headers: { "Authorization": auth }
         });
         if (res.ok) {
           const data = await res.json();
@@ -642,11 +648,18 @@
             window.location.replace("/courier-home");
             return false;
           }
+          return true;
+        } else {
+          alert("⚠️ 영업 상태를 확인할 수 없습니다. 홈 화면으로 이동합니다.");
+          window.location.replace("/courier-home");
+          return false;
         }
       } catch (e) {
         console.error(e);
+        alert("⚠️ 통신 오류가 발생했습니다. 홈 화면으로 이동합니다.");
+        window.location.replace("/courier-home");
+        return false;
       }
-      return true;
     }
 
     async function fetchMyProfile() {
@@ -849,8 +862,17 @@
 
       const name = document.getElementById("equipmentName").value;
       const type = document.getElementById("vehicleType").value;
-      const maxDistance = parseFloat(document.getElementById("maxDistance").value) || 50.0;
-      const maxWeight = parseFloat(document.getElementById("maxWeight").value) || 30.0;
+      const maxDistance = parseFloat(document.getElementById("maxDistance").value);
+      const maxWeight = parseFloat(document.getElementById("maxWeight").value);
+
+      if (isNaN(maxWeight) || maxWeight <= 0) {
+        alert("최대 적재 무게는 0보다 큰 숫자를 입력해 주세요.");
+        return;
+      }
+      if (isNaN(maxDistance) || maxDistance <= 0) {
+        alert("최대 주행 거리는 0보다 큰 숫자를 입력해 주세요.");
+        return;
+      }
 
       let insurancePhotoUrl = null;
       if (type === "MOTORCYCLE" || type === "CAR") {

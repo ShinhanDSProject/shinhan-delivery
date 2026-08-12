@@ -148,7 +148,10 @@ public class Vehicle {
     Vehicle vehicle =
         Vehicle.builder()
             .memberId(request.getMemberId())
-            .name(request.getName() != null && !request.getName().isBlank() ? request.getName() : (request.getType() != null ? request.getType().name() : "신규 장비"))
+            .name(
+                request.getName() != null && !request.getName().isBlank()
+                    ? request.getName()
+                    : (request.getType() != null ? request.getType().name() : "신규 장비"))
             .type(request.getType())
             .maxWeight(request.getMaxWeight())
             .maxDistance(request.getMaxDistance())

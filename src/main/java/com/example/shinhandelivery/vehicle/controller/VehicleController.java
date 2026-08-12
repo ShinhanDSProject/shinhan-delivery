@@ -1,5 +1,6 @@
 package com.example.shinhandelivery.vehicle.controller;
 
+import com.example.shinhandelivery.common.security.CustomUserDetails;
 import com.example.shinhandelivery.vehicle.dto.request.VehicleCreateRequest;
 import com.example.shinhandelivery.vehicle.dto.request.VehicleUpdateRequest;
 import com.example.shinhandelivery.vehicle.dto.response.VehicleResponse;
@@ -10,19 +11,17 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import com.example.shinhandelivery.common.security.CustomUserDetails;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PatchMapping;
 
 /** Vehicle CRUD API를 제공하는 컨트롤러. */
 @RestController
@@ -55,14 +54,11 @@ public class VehicleController {
       @AuthenticationPrincipal CustomUserDetails userDetails) {
     if (userDetails == null) {
       throw new com.example.shinhandelivery.common.exception.BusinessException(
-          com.example.shinhandelivery.common.exception.ErrorCode.ACCESS_DENIED,
-          "로그인이 필요합니다.");
+          com.example.shinhandelivery.common.exception.ErrorCode.ACCESS_DENIED, "로그인이 필요합니다.");
     }
     Long memberId = userDetails.getId();
     List<VehicleResponse> responses =
-        vehicleService.getVehiclesByMemberId(memberId).stream()
-            .map(VehicleResponse::from)
-            .toList();
+        vehicleService.getVehiclesByMemberId(memberId).stream().map(VehicleResponse::from).toList();
     return ResponseEntity.ok(responses);
   }
 
@@ -83,8 +79,7 @@ public class VehicleController {
   /** 운송수단을 단일 활성화(Exclusive Toggle)한다. */
   @PatchMapping("/{vehicleId}/activate")
   public ResponseEntity<VehicleResponse> activateVehicle(
-      @PathVariable Long vehicleId,
-      @AuthenticationPrincipal CustomUserDetails userDetails) {
+      @PathVariable Long vehicleId, @AuthenticationPrincipal CustomUserDetails userDetails) {
     Long memberId = userDetails.getId();
     Vehicle activated = vehicleService.activateVehicle(memberId, vehicleId);
     return ResponseEntity.ok(VehicleResponse.from(activated));

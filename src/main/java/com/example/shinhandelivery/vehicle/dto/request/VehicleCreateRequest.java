@@ -3,14 +3,13 @@ package com.example.shinhandelivery.vehicle.dto.request;
 import com.example.shinhandelivery.common.domain.Location;
 import com.example.shinhandelivery.vehicle.entity.VehicleType;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import jakarta.validation.constraints.AssertTrue;
 
 /** 운송수단 등록 요청 DTO. */
 @Getter

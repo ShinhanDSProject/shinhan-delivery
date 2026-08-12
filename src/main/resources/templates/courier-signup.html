@@ -656,9 +656,21 @@
         const phoneNumber = document.getElementById('phoneNumber').value.trim();
         const vehicle = vehicleInput.value;
         const equipmentName = document.getElementById('equipmentName')?.value?.trim() || null;
-        const maxDistanceVal = Number.parseFloat(document.getElementById('maxDistance').value) || 50.0;
-        const preferredWeightVal = Number.parseFloat(document.getElementById('preferredWeight').value) || 30.0;
+        const maxDistanceVal = Number.parseFloat(document.getElementById('maxDistance').value);
+        const preferredWeightVal = Number.parseFloat(document.getElementById('preferredWeight').value);
         const proofDocumentUrl = document.getElementById('proofDocumentUrl').value;
+
+        if (isNaN(preferredWeightVal) || preferredWeightVal <= 0) {
+            resultToast.className = 'result-toast error';
+            resultToast.textContent = '최대 적재 무게는 0보다 큰 숫자를 입력해 주세요.';
+            return;
+        }
+
+        if (isNaN(maxDistanceVal) || maxDistanceVal <= 0) {
+            resultToast.className = 'result-toast error';
+            resultToast.textContent = '최대 주행 거리는 0보다 큰 숫자를 입력해 주세요.';
+            return;
+        }
 
         if (!vehicle) {
             resultToast.className = 'result-toast error';
