@@ -230,6 +230,7 @@
 <script>
     const deliveryId = new URLSearchParams(location.search).get('id');
     let uploadedPhotoUrl = null;
+    let photoSelectionVersion = 0;
 
     function authHeader() {
         const token = localStorage.getItem('accessToken');
@@ -282,6 +283,7 @@
     async function onPhotoSelected(event) {
         const file = event.target.files[0];
         if (!file) return;
+        const selectionVersion = ++photoSelectionVersion;
 
         const label = document.getElementById('photoUploadLabel');
         label.textContent = '업로드 중...';
@@ -295,6 +297,7 @@
             });
             if (!response.ok) throw new Error('upload failed');
             const result = await response.json();
+            if (selectionVersion !== photoSelectionVersion) return;   // 그 사이 다른 사진이 선택/삭제됨 — 이 응답은 버림
             uploadedPhotoUrl = result.imageUrl;
 
             document.getElementById('photoPreviewImg').src = uploadedPhotoUrl;
@@ -302,11 +305,15 @@
             document.getElementById('photoUploadBtn').style.display = 'none';
             document.getElementById('completeButton').disabled = false;
         } catch (error) {
-            label.textContent = '업로드에 실패했어요. 다시 시도해주세요';
+            if (selectionVersion === photoSelectionVersion) {
+                event.target.value = '';   // 같은 파일을 다시 선택해도 change가 발생하도록 초기화(재시도 가능하게)
+                label.textContent = '업로드에 실패했어요. 다시 시도해주세요';
+            }
         }
     }
 
     function removePhoto() {
+        photoSelectionVersion++;
         uploadedPhotoUrl = null;
         document.getElementById('photoInput').value = '';
         document.getElementById('photoPreview').classList.remove('visible');
