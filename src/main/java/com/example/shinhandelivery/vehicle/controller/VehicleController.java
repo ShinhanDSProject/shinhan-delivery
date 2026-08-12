@@ -1,5 +1,7 @@
 package com.example.shinhandelivery.vehicle.controller;
 
+import com.example.shinhandelivery.common.exception.BusinessException;
+import com.example.shinhandelivery.common.exception.ErrorCode;
 import com.example.shinhandelivery.common.security.CustomUserDetails;
 import com.example.shinhandelivery.vehicle.dto.request.VehicleCreateRequest;
 import com.example.shinhandelivery.vehicle.dto.request.VehicleUpdateRequest;
@@ -40,9 +42,7 @@ public class VehicleController {
       request.setMemberId(userDetails.getId());
     }
     if (request.getMemberId() == null || request.getMemberId() <= 0) {
-      throw new com.example.shinhandelivery.common.exception.BusinessException(
-          com.example.shinhandelivery.common.exception.ErrorCode.INVALID_INPUT_VALUE,
-          "회원 인증 정보가 유효하지 않습니다.");
+      throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE, "회원 인증 정보가 유효하지 않습니다.");
     }
     Vehicle created = vehicleService.create(request);
     return ResponseEntity.status(HttpStatus.CREATED).body(VehicleResponse.from(created));
@@ -53,8 +53,7 @@ public class VehicleController {
   public ResponseEntity<List<VehicleResponse>> getMyVehicles(
       @AuthenticationPrincipal CustomUserDetails userDetails) {
     if (userDetails == null) {
-      throw new com.example.shinhandelivery.common.exception.BusinessException(
-          com.example.shinhandelivery.common.exception.ErrorCode.ACCESS_DENIED, "로그인이 필요합니다.");
+      throw new BusinessException(ErrorCode.ACCESS_DENIED, "로그인이 필요합니다.");
     }
     Long memberId = userDetails.getId();
     List<VehicleResponse> responses =

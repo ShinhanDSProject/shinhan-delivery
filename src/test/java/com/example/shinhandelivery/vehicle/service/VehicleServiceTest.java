@@ -6,12 +6,14 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import com.example.shinhandelivery.common.domain.Location;
+import com.example.shinhandelivery.common.exception.BusinessException;
 import com.example.shinhandelivery.common.exception.EntityNotFoundException;
 import com.example.shinhandelivery.common.exception.ErrorCode;
 import com.example.shinhandelivery.member.service.MemberService;
 import com.example.shinhandelivery.vehicle.dto.request.VehicleCreateRequest;
 import com.example.shinhandelivery.vehicle.dto.request.VehicleUpdateRequest;
 import com.example.shinhandelivery.vehicle.entity.Vehicle;
+import com.example.shinhandelivery.vehicle.entity.VehicleApprovalStatus;
 import com.example.shinhandelivery.vehicle.entity.VehicleStatus;
 import com.example.shinhandelivery.vehicle.entity.VehicleType;
 import com.example.shinhandelivery.vehicle.exception.InvalidWeightException;
@@ -250,16 +252,14 @@ class VehicleServiceTest {
         Vehicle.builder()
             .id(1L)
             .memberId(10L)
-            .approvalStatus(
-                com.example.shinhandelivery.vehicle.entity.VehicleApprovalStatus.APPROVED)
+            .approvalStatus(VehicleApprovalStatus.APPROVED)
             .isActive(true)
             .build();
     Vehicle v2 =
         Vehicle.builder()
             .id(2L)
             .memberId(10L)
-            .approvalStatus(
-                com.example.shinhandelivery.vehicle.entity.VehicleApprovalStatus.APPROVED)
+            .approvalStatus(VehicleApprovalStatus.APPROVED)
             .isActive(false)
             .build();
 
@@ -279,14 +279,13 @@ class VehicleServiceTest {
         Vehicle.builder()
             .id(1L)
             .memberId(10L)
-            .approvalStatus(
-                com.example.shinhandelivery.vehicle.entity.VehicleApprovalStatus.PENDING)
+            .approvalStatus(VehicleApprovalStatus.PENDING)
             .isActive(false)
             .build();
 
     when(vehicleRepository.findById(1L)).thenReturn(Optional.of(v1));
 
     assertThatThrownBy(() -> vehicleService.activateVehicle(10L, 1L))
-        .isInstanceOf(com.example.shinhandelivery.common.exception.BusinessException.class);
+        .isInstanceOf(BusinessException.class);
   }
 }
