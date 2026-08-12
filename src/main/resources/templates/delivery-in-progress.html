@@ -271,24 +271,36 @@
         updateEta(courierLat, courierLng);
     }
 
-    function renderInstruction(detail) {
-        if (!detail.deliveryInstructionType || detail.deliveryInstructionType === 'NONE') {
-            return '';
-        }
-        const rows = [`<div class="row"><span class="k">전달 방식</span><span class="v">${INSTRUCTION_LABELS[detail.deliveryInstructionType] || detail.deliveryInstructionType}</span></div>`];
-        if (detail.entranceCode) {
-            rows.push(`<div class="row"><span class="k">출입번호</span><span class="v">${detail.entranceCode}</span></div>`);
-        }
-        if (detail.unitDetail) {
-            rows.push(`<div class="row"><span class="k">동/호수</span><span class="v">${detail.unitDetail}</span></div>`);
-        }
-        if (detail.deliveryNote) {
-            rows.push(`<div class="row"><span class="k">요청 사항</span><span class="v">${detail.deliveryNote}</span></div>`);
-        }
-        return `<div class="info-box">${rows.join('')}</div>`;
+    function createRow(label, value) {
+        const row = document.createElement('div');
+        row.className = 'row';
+        const k = document.createElement('span');
+        k.className = 'k';
+        k.textContent = label;
+        const v = document.createElement('span');
+        v.className = 'v';
+        v.textContent = value;
+        row.appendChild(k);
+        row.appendChild(v);
+        return row;
     }
-    // entranceCode/unitDetail/deliveryNote는 고객이 자유 입력한 텍스트이므로, 이 화면 안에서만 쓰는
-    // 문자열 템플릿에 꽂을 때 이스케이프하지 않으면 XSS 위험이 있어 renderSheet에서 textContent로 재설정한다.
+
+    // entranceCode/unitDetail/deliveryNote는 고객이 자유 입력한 텍스트라 innerHTML 문자열 조립 대신
+    // DOM API + textContent로만 채워 스크립트 삽입(XSS)을 막는다.
+    function appendInstructionRows(container, detail) {
+        if (!detail.deliveryInstructionType || detail.deliveryInstructionType === 'NONE') {
+            return;
+        }
+        const box = document.createElement('div');
+        box.className = 'info-box';
+        box.appendChild(
+            createRow('전달 방식', INSTRUCTION_LABELS[detail.deliveryInstructionType] || detail.deliveryInstructionType)
+        );
+        if (detail.entranceCode) box.appendChild(createRow('출입번호', detail.entranceCode));
+        if (detail.unitDetail) box.appendChild(createRow('동/호수', detail.unitDetail));
+        if (detail.deliveryNote) box.appendChild(createRow('요청 사항', detail.deliveryNote));
+        container.appendChild(box);
+    }
 
     function renderSheet(detail) {
         const sheet = document.getElementById('bottomSheet');
@@ -301,13 +313,14 @@
             <div class="info-box">
                 <div class="row"><span class="k">물품 정보</span><span class="v">${ITEM_SIZE_LABELS[detail.itemSize] || detail.itemSize} · ${Number(detail.weight).toFixed(1)}kg</span></div>
             </div>
-            ${renderInstruction(detail)}
+            <div id="instructionSlot"></div>
             <div class="warning-note">⚠ 수락 후 무단 취소 시 서비스 이용 정지(노쇼 패널티)가 부과될 수 있습니다.</div>
             <button class="pickup-button" id="pickupButton" type="button" ${alreadyPickedUp ? 'disabled' : ''}>
                 ${alreadyPickedUp ? '픽업 완료됨' : '픽업 완료'}
             </button>
         `;
         sheet.querySelector('[data-field="pickupAddress"]').textContent = detail.pickupAddress;
+        appendInstructionRows(sheet.querySelector('#instructionSlot'), detail);
 
         if (!alreadyPickedUp) {
             document.getElementById('pickupButton').addEventListener('click', () => confirmPickup(detail.id));
