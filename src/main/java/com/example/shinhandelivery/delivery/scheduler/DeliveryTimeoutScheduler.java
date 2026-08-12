@@ -44,6 +44,12 @@ public class DeliveryTimeoutScheduler {
       } catch (RuntimeException exception) {
         failedCount++;
         log.error("배송 자동 타임아웃 처리 실패: deliveryRequestId={}", deliveryRequestId, exception);
+        try {
+          deliveryTimeoutService.scheduleRetryAfterFailure(deliveryRequestId, processedAt);
+        } catch (RuntimeException retryException) {
+          log.error(
+              "배송 자동 타임아웃 재시도 예약 실패: deliveryRequestId={}", deliveryRequestId, retryException);
+        }
       }
     }
 

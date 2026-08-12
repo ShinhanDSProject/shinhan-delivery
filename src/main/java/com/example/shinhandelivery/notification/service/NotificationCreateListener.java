@@ -94,7 +94,8 @@ public class NotificationCreateListener {
     PICKED_UP("픽업 완료", "배송기사가 물품을 픽업했습니다.", null, null),
     COMPLETED("배송 완료", "배송이 완료되었습니다. 이용해주셔서 감사합니다.", "배송 완료 처리됨", "배송을 완료 처리했습니다."),
     CANCELLED("배송 취소", "배송 요청이 취소되었습니다.", "배정 취소", "배정된 배송이 취소되었습니다."),
-    AUTO_TIMEOUT_CANCELLED(
+    AUTO_TIMEOUT_CANCELLED("배송 자동 취소", "30분 동안 배송원이 배정되지 않아 배송이 자동 취소되었습니다.", null, null),
+    AUTO_TIMEOUT_CANCELLED_AND_REFUNDED(
         "배송 자동 취소 및 환불 완료", "30분 동안 배송원이 배정되지 않아 배송이 취소되고 결제 포인트가 환불되었습니다.", null, null);
 
     private final String customerTitle;
@@ -115,7 +116,9 @@ public class NotificationCreateListener {
         DeliveryRequest deliveryRequest, DeliveryStatus status) {
       if (status == DeliveryStatus.CANCELLED
           && deliveryRequest.getCancellationReason() == DeliveryCancellationReason.AUTO_TIMEOUT) {
-        return AUTO_TIMEOUT_CANCELLED;
+        return deliveryRequest.getRefundedAt() == null
+            ? AUTO_TIMEOUT_CANCELLED
+            : AUTO_TIMEOUT_CANCELLED_AND_REFUNDED;
       }
       return switch (status) {
         case MATCHED -> MATCHED;

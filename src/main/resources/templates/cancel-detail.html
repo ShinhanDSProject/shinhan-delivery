@@ -265,7 +265,7 @@
                 </div>
                 <div class="info-row">
                     <span class="info-label">취소 일시</span>
-                    <span class="info-value">${formatDateTime(detail.cancelledAt)}</span>
+                    <span class="info-value">${detail.cancelledAt ? formatDateTime(detail.cancelledAt) : '-'}</span>
                 </div>
             </section>
 

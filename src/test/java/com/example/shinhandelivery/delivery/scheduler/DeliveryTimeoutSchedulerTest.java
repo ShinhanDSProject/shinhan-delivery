@@ -40,6 +40,7 @@ class DeliveryTimeoutSchedulerTest {
 
     scheduler.expireTimedOutDeliveries();
 
+    verify(deliveryTimeoutService).scheduleRetryAfterFailure(eq(1L), any(LocalDateTime.class));
     verify(deliveryTimeoutService)
         .expireTimedOutDelivery(eq(2L), any(LocalDateTime.class), any(LocalDateTime.class));
   }

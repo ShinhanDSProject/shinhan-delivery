@@ -45,7 +45,10 @@ class DeliveryTimeoutServiceTest {
   @DisplayName("만료 후보는 설정된 배치 크기와 경계 시각으로 조회한다")
   void listTimedOutCandidateIdsUsesCutoffAndBatchSize() {
     when(deliveryRequestRepository.findTimedOutCandidateIds(
-            eq(DeliveryStatus.REQUESTED), eq(CUTOFF), any(Pageable.class)))
+            eq(DeliveryStatus.REQUESTED),
+            eq(CUTOFF),
+            any(LocalDateTime.class),
+            any(Pageable.class)))
         .thenReturn(List.of(1L, 2L));
 
     List<Long> result = deliveryTimeoutService.listTimedOutCandidateIds(CUTOFF, 100);
@@ -54,7 +57,10 @@ class DeliveryTimeoutServiceTest {
     ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
     verify(deliveryRequestRepository)
         .findTimedOutCandidateIds(
-            eq(DeliveryStatus.REQUESTED), eq(CUTOFF), pageableCaptor.capture());
+            eq(DeliveryStatus.REQUESTED),
+            eq(CUTOFF),
+            any(LocalDateTime.class),
+            pageableCaptor.capture());
     assertThat(pageableCaptor.getValue().getPageSize()).isEqualTo(100);
   }
 
@@ -146,6 +152,18 @@ class DeliveryTimeoutServiceTest {
 
     assertThat(deliveryRequest.getStatus()).isEqualTo(DeliveryStatus.REQUESTED);
     verify(eventPublisher, never()).publishEvent(any());
+  }
+
+  @Test
+  @DisplayName("타임아웃 실패는 5분 뒤 재시도하도록 별도 상태를 기록한다")
+  void scheduleRetryAfterFailureAppliesBackoff() {
+    DeliveryRequest deliveryRequest = paidRequestedDelivery(CUTOFF.minusMinutes(1));
+    when(deliveryRequestRepository.findByIdForUpdate(55L)).thenReturn(Optional.of(deliveryRequest));
+
+    deliveryTimeoutService.scheduleRetryAfterFailure(55L, PROCESSED_AT);
+
+    assertThat(deliveryRequest.getTimeoutRetryCount()).isEqualTo(1);
+    assertThat(deliveryRequest.getTimeoutNextRetryAt()).isEqualTo(PROCESSED_AT.plusMinutes(5));
   }
 
   private DeliveryRequest paidRequestedDelivery(LocalDateTime createdAt) {

@@ -45,12 +45,13 @@ class DeliveryTimeoutConcurrencyTest {
   private Long memberId;
   private Long walletId;
   private Long deliveryRequestId;
-  private Long refundHistoryId;
 
   @AfterEach
   void cleanUp() {
-    if (refundHistoryId != null) {
-      pointHistoryRepository.deleteById(refundHistoryId);
+    if (deliveryRequestId != null) {
+      pointHistoryRepository
+          .findByTypeAndReferenceId(PointHistoryType.REFUND, deliveryRequestId)
+          .ifPresent(pointHistoryRepository::delete);
     }
     if (deliveryRequestId != null) {
       deliveryRequestRepository.deleteById(deliveryRequestId);
@@ -122,8 +123,6 @@ class DeliveryTimeoutConcurrencyTest {
             .findByMemberIdAndIdempotencyKey(
                 memberId, "delivery-timeout-refund:" + deliveryRequestId)
             .orElseThrow();
-    refundHistoryId = history.getId();
-
     assertThat(expiredCount.get()).isEqualTo(1);
     assertThat(deliveryRequest.getStatus()).isEqualTo(DeliveryStatus.CANCELLED);
     assertThat(deliveryRequest.getCancellationReason())

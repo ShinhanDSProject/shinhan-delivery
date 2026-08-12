@@ -45,9 +45,11 @@ public interface DeliveryRequestRepository extends JpaRepository<DeliveryRequest
   @Query(
       "select d.id from DeliveryRequest d "
           + "where d.status = :status and d.createdAt <= :cutoff "
+          + "and (d.timeoutNextRetryAt is null or d.timeoutNextRetryAt <= :eligibleAt) "
           + "order by d.createdAt asc, d.id asc")
   List<Long> findTimedOutCandidateIds(
       @Param("status") DeliveryStatus status,
       @Param("cutoff") LocalDateTime cutoff,
+      @Param("eligibleAt") LocalDateTime eligibleAt,
       Pageable pageable);
 }

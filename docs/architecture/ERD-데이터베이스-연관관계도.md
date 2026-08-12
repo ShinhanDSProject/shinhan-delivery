@@ -95,6 +95,8 @@ erDiagram
         DeliveryCancellationReason cancellationReason "AUTO_TIMEOUT (nullable)"
         LocalDateTime cancelledAt
         LocalDateTime refundedAt
+        int timeoutRetryCount
+        LocalDateTime timeoutNextRetryAt
     }
 
     MATCHING {

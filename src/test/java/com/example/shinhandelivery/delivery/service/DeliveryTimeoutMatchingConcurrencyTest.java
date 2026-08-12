@@ -5,14 +5,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.example.shinhandelivery.delivery.dto.request.MatchingCreateRequest;
 import com.example.shinhandelivery.delivery.entity.DeliveryRequest;
 import com.example.shinhandelivery.delivery.entity.DeliveryStatus;
-import com.example.shinhandelivery.delivery.entity.Matching;
 import com.example.shinhandelivery.delivery.exception.AlreadyMatchedException;
 import com.example.shinhandelivery.delivery.repository.DeliveryRequestRepository;
 import com.example.shinhandelivery.delivery.repository.MatchingRepository;
 import com.example.shinhandelivery.member.entity.Member;
 import com.example.shinhandelivery.member.entity.MemberRole;
 import com.example.shinhandelivery.member.repository.MemberRepository;
-import com.example.shinhandelivery.payment.entity.PointHistory;
+import com.example.shinhandelivery.payment.entity.PointHistoryType;
 import com.example.shinhandelivery.payment.entity.PointWallet;
 import com.example.shinhandelivery.payment.repository.PaymentRepository;
 import com.example.shinhandelivery.payment.repository.PointHistoryRepository;
@@ -52,16 +51,16 @@ class DeliveryTimeoutMatchingConcurrencyTest {
   private Long walletId;
   private Long vehicleId;
   private Long deliveryRequestId;
-  private Long matchingId;
-  private Long refundHistoryId;
 
   @AfterEach
   void cleanUp() {
-    if (matchingId != null) {
-      matchingRepository.deleteById(matchingId);
-    }
-    if (refundHistoryId != null) {
-      pointHistoryRepository.deleteById(refundHistoryId);
+    if (deliveryRequestId != null) {
+      matchingRepository
+          .findByDeliveryRequestId(deliveryRequestId)
+          .ifPresent(matchingRepository::delete);
+      pointHistoryRepository
+          .findByTypeAndReferenceId(PointHistoryType.REFUND, deliveryRequestId)
+          .ifPresent(pointHistoryRepository::delete);
     }
     if (deliveryRequestId != null) {
       deliveryRequestRepository.deleteById(deliveryRequestId);
@@ -102,8 +101,7 @@ class DeliveryTimeoutMatchingConcurrencyTest {
           readyLatch.countDown();
           try {
             startLatch.await();
-            Matching matching = matchingService.create(matchingRequest);
-            matchingId = matching.getId();
+            matchingService.create(matchingRequest);
             matched.set(true);
           } catch (AlreadyMatchedException ignored) {
             // 자동 취소가 먼저 배송 행 락을 획득한 정상 경합 결과다.
@@ -137,11 +135,6 @@ class DeliveryTimeoutMatchingConcurrencyTest {
     DeliveryRequest deliveryRequest =
         deliveryRequestRepository.findById(deliveryRequestId).orElseThrow();
     PointWallet wallet = paymentRepository.findById(walletId).orElseThrow();
-    pointHistoryRepository
-        .findByMemberIdAndIdempotencyKey(customerId, "delivery-timeout-refund:" + deliveryRequestId)
-        .map(PointHistory::getId)
-        .ifPresent(id -> refundHistoryId = id);
-
     assertThat(completed).isTrue();
     assertThat(unexpectedFailures).isEmpty();
     assertThat(matched.get()).isNotEqualTo(timedOut.get());
