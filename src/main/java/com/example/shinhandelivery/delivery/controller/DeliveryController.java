@@ -16,6 +16,7 @@ import com.example.shinhandelivery.delivery.dto.response.DeliveryDetailResponseD
 import com.example.shinhandelivery.delivery.dto.response.DeliveryEstimateResponse;
 import com.example.shinhandelivery.delivery.dto.response.DeliveryListResponseDto;
 import com.example.shinhandelivery.delivery.dto.response.DeliveryPaymentResponse;
+import com.example.shinhandelivery.delivery.dto.response.DeliveryReorderResponse;
 import com.example.shinhandelivery.delivery.dto.response.DeliveryResponse;
 import com.example.shinhandelivery.delivery.dto.response.MatchingResponse;
 import com.example.shinhandelivery.delivery.dto.response.ProofPhotoResponse;
@@ -124,6 +125,15 @@ public class DeliveryController {
             .getMyDeliveryRequests(memberId, status, pageable)
             .map(DeliveryListResponseDto::from);
     return ResponseEntity.ok(responses);
+  }
+
+  /** 고객 본인의 과거 배송에서 재배송 입력값만 조회한다. */
+  @GetMapping("/{deliveryRequestId}/reorder")
+  @PreAuthorize("isAuthenticated()")
+  public ResponseEntity<DeliveryReorderResponse> getReorderDraft(
+      @PathVariable Long deliveryRequestId) {
+    Long memberId = resolveUserDetails().getId();
+    return ResponseEntity.ok(deliveryService.getReorderDraft(memberId, deliveryRequestId));
   }
 
   /** 주변 3km 이내의 대기 중인(REQUESTED) 배송 요청 목록을 배송원 위치 기준으로 거리가 가까운 순으로 조회한다. */

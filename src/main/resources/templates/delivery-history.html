@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>배송 내역 - 신한 딜리버리</title>
     <link rel="stylesheet" href="/css/design-system.css">
+    <script src="/js/utils/storage.js"></script>
+    <script src="/js/delivery-reorder.js"></script>
     <style>
         :root {
             --text-dark: var(--color-black-200);
@@ -149,6 +151,33 @@
             color: var(--text-faint);
         }
 
+        .reorder-button {
+            border: 1px solid var(--color-blue-100);
+            border-radius: 10px;
+            background: var(--color-white-100);
+            color: var(--color-blue-500);
+            padding: 9px 12px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .history-error {
+            position: fixed;
+            left: 50%;
+            bottom: 90px;
+            transform: translateX(-50%);
+            width: calc(100% - 40px);
+            max-width: 440px;
+            padding: 12px 16px;
+            border-radius: 12px;
+            background: var(--color-black-200);
+            color: var(--color-white-100);
+            text-align: center;
+            font-size: 13px;
+            z-index: 10;
+        }
+
         .empty-state, .loading-state {
             text-align: center;
             padding: 48px 16px;
@@ -281,10 +310,16 @@
 
     function renderCard(item) {
         const badge = badgeFor(item.status);
-        const card = document.createElement('a');
+        const card = document.createElement('article');
         card.className = 'history-card';
-        card.href = (item.status === 'CANCELLED' ? '/cancel-detail?id=' : '/delivery-detail?id=')
+        card.tabIndex = 0;
+        card.setAttribute('role', 'link');
+        const detailUrl = (item.status === 'CANCELLED' ? '/cancel-detail?id=' : '/delivery-detail?id=')
             + encodeURIComponent(item.id);
+        card.addEventListener('click', () => { location.href = detailUrl; });
+        card.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter' && event.target === card) location.href = detailUrl;
+        });
         card.innerHTML = `
             <div class="card-top">
                 <span class="date">${formatDate(item.createdAt)}</span>
@@ -295,13 +330,28 @@
             </div>
             <div class="card-bottom">
                 <span class="fee">${item.feePoint.toLocaleString()} P</span>
-                <span class="chevron" aria-hidden="true">›</span>
+                <button class="reorder-button" type="button">이 배송 다시 보내기</button>
             </div>
         `;
         // pickupAddress/dropoffAddress는 고객이 자유 입력하는 텍스트라 innerHTML에 직접 꽂지 않고
         // textContent로만 채워 스크립트 삽입(XSS)을 막는다.
         card.querySelector('[data-field="route"]').textContent = `${item.pickupAddress} → ${item.dropoffAddress}`;
+        card.querySelector('.reorder-button').addEventListener('click', (event) => {
+            event.stopPropagation();
+            startDeliveryReorder(item.id, showReorderError);
+        });
         return card;
+    }
+
+    function showReorderError(message) {
+        const existing = document.getElementById('reorderError');
+        if (existing) existing.remove();
+        const error = document.createElement('div');
+        error.id = 'reorderError';
+        error.className = 'history-error';
+        error.textContent = message;
+        document.body.appendChild(error);
+        setTimeout(() => error.remove(), 3000);
     }
 
     async function loadNextPage() {

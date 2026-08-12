@@ -11,6 +11,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import com.example.shinhandelivery.common.domain.Location;
 import com.example.shinhandelivery.common.exception.BusinessException;
 import com.example.shinhandelivery.common.exception.EntityNotFoundException;
 import com.example.shinhandelivery.common.exception.ErrorCode;
@@ -24,6 +25,7 @@ import com.example.shinhandelivery.delivery.dto.request.DeliveryUpdateRequest;
 import com.example.shinhandelivery.delivery.dto.response.DeliveryDetailResponseDto;
 import com.example.shinhandelivery.delivery.dto.response.DeliveryEstimateResponse;
 import com.example.shinhandelivery.delivery.dto.response.DeliveryPaymentResponse;
+import com.example.shinhandelivery.delivery.dto.response.DeliveryReorderResponse;
 import com.example.shinhandelivery.delivery.dto.response.ProofPhotoResponse;
 import com.example.shinhandelivery.delivery.entity.DeliveryInstructionType;
 import com.example.shinhandelivery.delivery.entity.DeliveryRequest;
@@ -692,6 +694,57 @@ class DeliveryServiceTest {
     assertThat(result.getContent()).isEmpty();
     verify(deliveryRequestRepository, never())
         .findByMemberIdOrderByCreatedAtDescIdDesc(any(), any());
+  }
+
+  @Test
+  @DisplayName("고객 본인은 과거 배송에서 재배송 입력값만 조회한다")
+  void getReorderDraftReturnsReusableFieldsOnly() {
+    DeliveryRequest deliveryRequest =
+        DeliveryRequest.builder()
+            .id(10L)
+            .memberId(1L)
+            .pickupAddress("서울 강남구")
+            .dropoffAddress("서울 서초구")
+            .pickupLocation(Location.of(37.1, 127.1))
+            .dropoffLocation(Location.of(37.2, 127.2))
+            .weight(3.5)
+            .itemSize(ItemSize.SMALL)
+            .feePoint(9000L)
+            .status(DeliveryStatus.COMPLETED)
+            .paymentIdempotencyKey("past-payment-key")
+            .build();
+    when(deliveryRequestRepository.findById(10L)).thenReturn(Optional.of(deliveryRequest));
+
+    DeliveryReorderResponse response = deliveryService.getReorderDraft(1L, 10L);
+
+    assertThat(response.sourceDeliveryRequestId()).isEqualTo(10L);
+    assertThat(response.pickupAddress()).isEqualTo("서울 강남구");
+    assertThat(response.dropoffAddress()).isEqualTo("서울 서초구");
+    assertThat(response.pickupLatitude()).isEqualTo(37.1);
+    assertThat(response.pickupLongitude()).isEqualTo(127.1);
+    assertThat(response.dropoffLatitude()).isEqualTo(37.2);
+    assertThat(response.dropoffLongitude()).isEqualTo(127.2);
+    assertThat(response.weight()).isEqualTo(3.5);
+    assertThat(response.itemSize()).isEqualTo(ItemSize.SMALL);
+  }
+
+  @Test
+  @DisplayName("다른 고객의 배송은 재배송 입력값으로 조회할 수 없다")
+  void getReorderDraftByNonOwnerShouldThrowException() {
+    DeliveryRequest deliveryRequest = DeliveryRequest.builder().id(10L).memberId(1L).build();
+    when(deliveryRequestRepository.findById(10L)).thenReturn(Optional.of(deliveryRequest));
+
+    assertThatThrownBy(() -> deliveryService.getReorderDraft(999L, 10L))
+        .isInstanceOf(DeliveryAccessDeniedException.class);
+  }
+
+  @Test
+  @DisplayName("존재하지 않는 배송은 재배송 입력값으로 조회할 수 없다")
+  void getReorderDraftForMissingDeliveryShouldThrowException() {
+    when(deliveryRequestRepository.findById(10L)).thenReturn(Optional.empty());
+
+    assertThatThrownBy(() -> deliveryService.getReorderDraft(1L, 10L))
+        .isInstanceOf(EntityNotFoundException.class);
   }
 
   @Test

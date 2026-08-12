@@ -72,6 +72,17 @@
             padding: 8px 16px 12px;
         }
 
+        .reorder-notice {
+            padding: 12px 14px;
+            border: 1px solid var(--color-blue-100);
+            border-radius: 12px;
+            background: var(--color-blue-50);
+            color: var(--color-blue-500);
+            font-size: 13px;
+            font-weight: 600;
+            line-height: 1.5;
+        }
+
         .field label {
             display: block;
             font-size: 14px;
@@ -261,6 +272,9 @@
     </header>
 
     <div class="form">
+        <div class="reorder-notice" id="reorderNotice" hidden>
+            이전 배송 정보를 자동으로 채웠어요. 내용을 확인하고 필요하면 수정해 주세요.
+        </div>
         <div class="field">
             <label>출발지 (문앞 픽업)</label>
             <button type="button" class="field-box" id="pickupField" onclick="goToPickupMap()">
@@ -627,6 +641,9 @@
             return;
         }
         const draft = loadDraft();
+        if (draft.reorderSourceId && new URLSearchParams(location.search).get('reorder') === 'success') {
+            document.getElementById('reorderNotice').hidden = false;
+        }
         renderPickupGuideSummary(draft);
         renderItemDetailSummary(draft);
         renderPoint('pickup', draft.pickup);

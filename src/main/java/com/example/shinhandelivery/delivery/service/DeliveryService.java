@@ -11,6 +11,7 @@ import com.example.shinhandelivery.delivery.dto.request.DeliveryUpdateRequest;
 import com.example.shinhandelivery.delivery.dto.response.DeliveryDetailResponseDto;
 import com.example.shinhandelivery.delivery.dto.response.DeliveryEstimateResponse;
 import com.example.shinhandelivery.delivery.dto.response.DeliveryPaymentResponse;
+import com.example.shinhandelivery.delivery.dto.response.DeliveryReorderResponse;
 import com.example.shinhandelivery.delivery.dto.response.DeliveryResponse;
 import com.example.shinhandelivery.delivery.dto.response.ProofPhotoResponse;
 import com.example.shinhandelivery.delivery.entity.DeliveryRequest;
@@ -137,6 +138,16 @@ public class DeliveryService {
         ? deliveryRequestRepository.findByMemberIdOrderByCreatedAtDescIdDesc(customerId, pageable)
         : deliveryRequestRepository.findByMemberIdAndStatusOrderByCreatedAtDescIdDesc(
             customerId, status, pageable);
+  }
+
+  /** 고객 본인의 과거 배송에서 신규 배송 초안에 다시 사용할 입력값만 조회한다. */
+  @Transactional(readOnly = true)
+  public DeliveryReorderResponse getReorderDraft(Long customerId, Long deliveryRequestId) {
+    DeliveryRequest deliveryRequest = findDeliveryRequestOrThrow(deliveryRequestId);
+    if (!customerId.equals(deliveryRequest.getMemberId())) {
+      throw new DeliveryAccessDeniedException(deliveryRequestId, customerId);
+    }
+    return DeliveryReorderResponse.from(deliveryRequest);
   }
 
   /**

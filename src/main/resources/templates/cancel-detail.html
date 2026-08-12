@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>취소 상세 내역 - 신한 딜리버리</title>
     <link rel="stylesheet" href="/css/design-system.css">
+    <script src="/js/utils/storage.js"></script>
+    <script src="/js/delivery-reorder.js"></script>
     <style>
         :root {
             --text-dark: var(--color-black-100);
@@ -170,6 +172,8 @@
 
         .action-area {
             padding: 8px 31px 24px;
+            display: flex;
+            gap: 10px;
         }
 
         .confirm-button {
@@ -183,6 +187,19 @@
             font-size: 16px;
             font-weight: 800;
             text-align: center;
+            cursor: pointer;
+        }
+
+        .reorder-button {
+            display: block;
+            width: 100%;
+            padding: 18px 0;
+            border: 1px solid var(--color-blue-100);
+            border-radius: 15px;
+            background: var(--color-white-100);
+            color: var(--color-blue-500);
+            font-size: 16px;
+            font-weight: 800;
             cursor: pointer;
         }
 
@@ -209,11 +226,26 @@
 </main>
 
 <div class="action-area">
+    <button class="reorder-button" id="reorderButton" type="button">이 배송 다시 보내기</button>
     <button class="confirm-button" type="button" onclick="history.back()">확인</button>
 </div>
 
 <script>
     const deliveryId = new URLSearchParams(location.search).get('id');
+
+    document.getElementById('reorderButton').addEventListener('click', () => {
+        const button = document.getElementById('reorderButton');
+        button.disabled = true;
+        button.textContent = '불러오는 중...';
+        startDeliveryReorder(deliveryId, (message) => {
+            button.disabled = false;
+            button.textContent = '이 배송 다시 보내기';
+            const error = document.createElement('div');
+            error.className = 'loading-state';
+            error.textContent = message;
+            document.getElementById('body').prepend(error);
+        });
+    });
 
     function authHeader() {
         const token = localStorage.getItem('accessToken');
