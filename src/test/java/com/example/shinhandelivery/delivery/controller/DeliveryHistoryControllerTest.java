@@ -7,6 +7,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -14,6 +15,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.example.shinhandelivery.common.exception.EntityNotFoundException;
 import com.example.shinhandelivery.common.exception.ErrorCode;
 import com.example.shinhandelivery.common.security.JwtProvider;
+import com.example.shinhandelivery.delivery.dto.request.DeliveryCompleteRequest;
 import com.example.shinhandelivery.delivery.dto.request.DeliveryCreateRequest;
 import com.example.shinhandelivery.delivery.dto.response.DeliveryDetailResponseDto;
 import com.example.shinhandelivery.delivery.dto.response.ProofPhotoResponse;
@@ -365,5 +367,30 @@ class DeliveryHistoryControllerTest {
 
     verify(deliveryService).requestDelivery(eq(1L), any());
     verify(deliveryService, never()).requestDelivery(eq(999L), any());
+  }
+
+  /**
+   * confirmPickup/completeDelivery의 @PreAuthorize 자체는 @WebMvcTest 슬라이스로 검증할 수 없어(클래스 상단 Javadoc 참고)
+   * 여기서 실제 SecurityConfig가 실린 컨텍스트로 검증한다. 나머지 상태코드(200/409/403 배정불일치 등) 케이스는
+   * DeliveryControllerTest에 있다.
+   */
+  @Test
+  @DisplayName("인증 토큰이 없으면 픽업 완료 요청은 403을 반환한다")
+  void confirmPickupUnauthenticatedShouldReturn403() throws Exception {
+    mockMvc.perform(patch("/api/v1/delivery-requests/1/pickup")).andExpect(status().isForbidden());
+  }
+
+  @Test
+  @DisplayName("인증 토큰이 없으면 완료 처리 요청도 403을 반환한다")
+  void completeDeliveryUnauthenticatedShouldReturn403() throws Exception {
+    DeliveryCompleteRequest request = new DeliveryCompleteRequest();
+    request.setProofPhotoUrl("https://example.com/proof.jpg");
+
+    mockMvc
+        .perform(
+            patch("/api/v1/delivery-requests/1/complete")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isForbidden());
   }
 }

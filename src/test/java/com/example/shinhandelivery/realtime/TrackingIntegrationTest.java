@@ -174,7 +174,7 @@ class TrackingIntegrationTest {
   void broadcastStatusChangeShouldReachOwner() throws Exception {
     BlockingQueue<DeliveryStatusBroadcastResponse> received = subscribeToStatusAsCustomer();
 
-    deliveryService.confirmPickup(deliveryId);
+    deliveryService.confirmPickup(courierId, deliveryId);
 
     DeliveryStatusBroadcastResponse broadcast = received.poll(5, TimeUnit.SECONDS);
 
@@ -192,7 +192,7 @@ class TrackingIntegrationTest {
         "/topic/delivery/" + deliveryId + "/status",
         frameHandler(strangerReceived, DeliveryStatusBroadcastResponse.class));
 
-    deliveryService.confirmPickup(deliveryId);
+    deliveryService.confirmPickup(courierId, deliveryId);
 
     assertThat(strangerReceived.poll(2, TimeUnit.SECONDS)).isNull();
   }
