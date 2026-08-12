@@ -138,7 +138,7 @@ class DeliveryHistoryControllerTest {
             "박배송",
             VehicleType.CAR,
             null,
-            null,
+            "https://example.com/pickup.jpg",
             DeliveryInstructionType.ENTRANCE_CODE,
             "#1234*",
             "101동 1403호",
@@ -160,6 +160,7 @@ class DeliveryHistoryControllerTest {
         .andExpect(jsonPath("$.vehicleType").value("CAR"))
         .andExpect(jsonPath("$.deliveryInstructionType").value("ENTRANCE_CODE"))
         .andExpect(jsonPath("$.entranceCode").value("#1234*"))
+        .andExpect(jsonPath("$.pickupPhotoUrl").value("https://example.com/pickup.jpg"))
         .andExpect(jsonPath("$.createdAt").exists())
         .andExpect(jsonPath("$.matchedAt").exists())
         .andExpect(jsonPath("$.pickedUpAt").exists())
