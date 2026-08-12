@@ -6,9 +6,11 @@ import static org.mockito.BDDMockito.given;
 
 import com.example.shinhandelivery.common.domain.Location;
 import com.example.shinhandelivery.common.exception.BusinessException;
+import com.example.shinhandelivery.common.exception.ErrorCode;
 import com.example.shinhandelivery.courier.dto.request.CourierStatusUpdateRequest;
 import com.example.shinhandelivery.courier.dto.response.CourierStatusResponse;
 import com.example.shinhandelivery.courier.entity.WorkStatus;
+import com.example.shinhandelivery.member.entity.CourierApprovalStatus;
 import com.example.shinhandelivery.member.entity.Member;
 import com.example.shinhandelivery.member.entity.MemberRole;
 import com.example.shinhandelivery.vehicle.entity.Vehicle;
@@ -85,6 +87,38 @@ class CourierStatusServiceTest {
     assertThatThrownBy(() -> courierStatusService.updateWorkStatus(memberId, request))
         .isInstanceOf(BusinessException.class)
         .hasMessageContaining("배송원(COURIER) 권한만");
+  }
+
+  @Test
+  @DisplayName("승인 대기(PENDING) 상태인 배송원이 ONLINE 출근 시도 시 서류 심사 예외가 발생한다")
+  void updateWorkStatusPendingCourierAccessDenied() {
+    Long memberId = 6L;
+    Member pendingCourier =
+        Member.builder()
+            .id(memberId)
+            .role(MemberRole.COURIER)
+            .courierApprovalStatus(CourierApprovalStatus.PENDING)
+            .build();
+
+    Vehicle vehicle =
+        Vehicle.builder()
+            .id(60L)
+            .memberId(memberId)
+            .member(pendingCourier)
+            .type(VehicleType.MOTORCYCLE)
+            .status(VehicleStatus.BUSY)
+            .location(Location.of(37.5, 127.0))
+            .build();
+
+    given(vehicleService.getVehiclesWithMemberByMemberId(memberId)).willReturn(List.of(vehicle));
+    CourierStatusUpdateRequest request =
+        new CourierStatusUpdateRequest(WorkStatus.ONLINE, 37.5, 127.0);
+
+    assertThatThrownBy(() -> courierStatusService.updateWorkStatus(memberId, request))
+        .isInstanceOf(BusinessException.class)
+        .hasMessageContaining("서류 심사가 진행 중입니다")
+        .extracting("errorCode")
+        .isEqualTo(ErrorCode.ACCESS_DENIED);
   }
 
   @Test

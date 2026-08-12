@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>홈 - Shinhan Delivery</title>
     <link rel="stylesheet" href="/css/design-system.css">
+    <script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@7.0.0/bundles/stomp.umd.min.js"></script>
+    <script src="/js/notification-badge.js"></script>
     <style>
         :root {
             --primary: var(--color-blue-100);
@@ -522,7 +524,7 @@
             }
             const me = await meResponse.json();
             if (!me.hasPaymentPin) {
-                location.replace('/payment-pin-settings?required=1&returnUrl=%2Fhome.html');
+                location.replace('/payment-pin-settings?required=1&returnUrl=%2Fhome');
                 return;
             }
             document.getElementById('greetingName').textContent = `${me.name} 님`;
@@ -552,6 +554,9 @@
     }
 
     loadHome();
+    subscribeToNotifications(() => {
+        document.getElementById('unreadBadge').style.display = 'block';
+    });
 </script>
 </body>
 </html>

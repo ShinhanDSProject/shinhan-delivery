@@ -11,6 +11,7 @@ import com.example.shinhandelivery.member.dto.request.MemberPaymentPinUpdateRequ
 import com.example.shinhandelivery.member.dto.request.MemberProfileUpdateRequestDto;
 import com.example.shinhandelivery.member.dto.request.MemberUpdateRequest;
 import com.example.shinhandelivery.member.dto.response.TokenResponse;
+import com.example.shinhandelivery.member.entity.CourierApprovalStatus;
 import com.example.shinhandelivery.member.entity.Member;
 import com.example.shinhandelivery.member.entity.MemberRole;
 import com.example.shinhandelivery.member.exception.DuplicateMemberException;
@@ -20,6 +21,8 @@ import com.example.shinhandelivery.vehicle.entity.VehicleType;
 import com.example.shinhandelivery.vehicle.service.VehicleService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -148,6 +151,40 @@ public class MemberService {
   @Transactional
   public Member updateRole(Long memberId, MemberRole role) {
     return findMemberOrThrow(memberId).changeRole(role);
+  }
+
+  /** 승인 대기 중인 배송원 목록을 페이징 조회한다. */
+  @Transactional(readOnly = true)
+  public Page<Member> getPendingCouriers(Pageable pageable) {
+    return memberRepository.findAllByRoleAndCourierApprovalStatus(
+        MemberRole.COURIER, CourierApprovalStatus.PENDING, pageable);
+  }
+
+  /** 특정 배송원의 자격 심사를 최종 승인 처리한다. */
+  @Transactional
+  public Member approveCourier(Long memberId) {
+    Member courier = findMemberOrThrow(memberId);
+    if (courier.getRole() != MemberRole.COURIER) {
+      throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE, "배송원 계정만 자격 심사를 진행할 수 있습니다.");
+    }
+    return courier.approveCourier();
+  }
+
+  /** 특정 배송원의 자격 심사를 거절 처리한다. */
+  @Transactional
+  public Member rejectCourier(Long memberId) {
+    Member courier = findMemberOrThrow(memberId);
+    if (courier.getRole() != MemberRole.COURIER) {
+      throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE, "배송원 계정만 자격 심사를 진행할 수 있습니다.");
+    }
+    return courier.rejectCourier();
+  }
+
+  /** 배송원 본인의 자격 증빙 서류 URL을 등록/재제출한다. */
+  @Transactional
+  public Member updateProofDocumentUrl(Long memberId, String proofDocumentUrl) {
+    Member member = findMemberOrThrow(memberId);
+    return member.updateProofDocumentUrl(proofDocumentUrl);
   }
 
   /** id로 회원을 조회해 삭제한다. 없으면 EntityNotFoundException. */

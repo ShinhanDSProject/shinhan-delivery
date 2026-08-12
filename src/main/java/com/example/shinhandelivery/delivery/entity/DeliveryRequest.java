@@ -1,6 +1,8 @@
 package com.example.shinhandelivery.delivery.entity;
 
 import com.example.shinhandelivery.common.domain.Location;
+import com.example.shinhandelivery.common.exception.BusinessException;
+import com.example.shinhandelivery.common.exception.ErrorCode;
 import com.example.shinhandelivery.delivery.dto.request.DeliveryCompleteRequest;
 import com.example.shinhandelivery.delivery.dto.request.DeliveryCreateRequest;
 import com.example.shinhandelivery.delivery.dto.request.DeliveryUpdateRequest;
@@ -103,6 +105,23 @@ public class DeliveryRequest {
   @Column(name = "proof_photo_url", length = 255)
   private String proofPhotoUrl;
 
+  @Enumerated(EnumType.STRING)
+  @Column(name = "delivery_instruction_type", nullable = false, length = 40)
+  @Builder.Default
+  private DeliveryInstructionType deliveryInstructionType = DeliveryInstructionType.NONE;
+
+  @Column(name = "entrance_code", length = 100)
+  private String entranceCode;
+
+  @Column(name = "unit_detail", length = 100)
+  private String unitDetail;
+
+  @Column(name = "delivery_note", length = 500)
+  private String deliveryNote;
+
+  @Column(name = "delivery_reference_photo_url", length = 255)
+  private String deliveryReferencePhotoUrl;
+
   @Column(name = "completed_at")
   private LocalDateTime completedAt;
 
@@ -167,6 +186,7 @@ public class DeliveryRequest {
     if (distanceKm <= 0) {
       throw new InvalidDeliveryDistanceException(distanceKm);
     }
+    validateDeliveryInstructions(request);
 
     return DeliveryRequest.builder()
         .memberId(memberId)
@@ -177,10 +197,34 @@ public class DeliveryRequest {
         .pickupLocation(request.getPickupLocation())
         .dropoffLocation(request.getDropoffLocation())
         .itemSize(request.getItemSize())
+        .deliveryInstructionType(resolveInstructionType(request.getDeliveryInstructionType()))
+        .entranceCode(normalize(request.getEntranceCode()))
+        .unitDetail(normalize(request.getUnitDetail()))
+        .deliveryNote(normalize(request.getDeliveryNote()))
+        .deliveryReferencePhotoUrl(normalize(request.getDeliveryReferencePhotoUrl()))
         .status(DeliveryStatus.REQUESTED)
         .feePoint(feePoint)
         .createdAt(LocalDateTime.now())
         .build();
+  }
+
+  private static void validateDeliveryInstructions(DeliveryCreateRequest request) {
+    DeliveryInstructionType type = resolveInstructionType(request.getDeliveryInstructionType());
+    if (type == DeliveryInstructionType.ENTRANCE_CODE
+        && normalize(request.getEntranceCode()) == null) {
+      throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
+    }
+    if (type == DeliveryInstructionType.CUSTOM && normalize(request.getDeliveryNote()) == null) {
+      throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
+    }
+  }
+
+  private static DeliveryInstructionType resolveInstructionType(DeliveryInstructionType type) {
+    return type == null ? DeliveryInstructionType.NONE : type;
+  }
+
+  private static String normalize(String value) {
+    return value == null || value.isBlank() ? null : value.trim();
   }
 
   /** DeliveryUpdateRequest DTO 기반으로 픽업지·도착지를 수정하는 도메인 비즈니스 메서드. */

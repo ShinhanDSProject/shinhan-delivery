@@ -174,7 +174,7 @@ class TrackingIntegrationTest {
   void broadcastStatusChangeShouldReachOwner() throws Exception {
     BlockingQueue<DeliveryStatusBroadcastResponse> received = subscribeToStatusAsCustomer();
 
-    deliveryService.confirmPickup(deliveryId);
+    deliveryService.confirmPickup(courierId, deliveryId);
 
     DeliveryStatusBroadcastResponse broadcast = received.poll(5, TimeUnit.SECONDS);
 
@@ -192,7 +192,7 @@ class TrackingIntegrationTest {
         "/topic/delivery/" + deliveryId + "/status",
         frameHandler(strangerReceived, DeliveryStatusBroadcastResponse.class));
 
-    deliveryService.confirmPickup(deliveryId);
+    deliveryService.confirmPickup(courierId, deliveryId);
 
     assertThat(strangerReceived.poll(2, TimeUnit.SECONDS)).isNull();
   }
@@ -252,13 +252,14 @@ class TrackingIntegrationTest {
     }
   }
 
+  /** newDeliveryRequest()의 픽업 좌표(37.0, 127.0)와 3km 이내가 되도록 차량 위치를 맞춘다(오퍼 반경 필터 대상). */
   private Long createAvailableVehicle(Long memberId) {
     Vehicle vehicle = new Vehicle();
     vehicle.setMemberId(memberId);
     vehicle.setType(VehicleType.CAR);
     vehicle.setMaxWeight(500);
     vehicle.setMaxDistance(500);
-    vehicle.setLatitude(37.5);
+    vehicle.setLatitude(37.0);
     vehicle.setLongitude(127.0);
     vehicle.setStatus(VehicleStatus.AVAILABLE);
     return vehicleRepository.save(vehicle).getId();

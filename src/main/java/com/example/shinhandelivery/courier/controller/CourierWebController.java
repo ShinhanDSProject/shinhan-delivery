@@ -22,6 +22,11 @@ public class CourierWebController {
     return "courier-signup";
   }
 
+  @GetMapping("/courier-pending")
+  public String courierPending() {
+    return "courier-pending";
+  }
+
   @GetMapping("/pickup-guide")
   public String pickupGuide() {
     return "pickup-guide";
@@ -30,5 +35,15 @@ public class CourierWebController {
   @GetMapping("/pickup-map")
   public String pickupMap() {
     return "pickup-map";
+  }
+
+  @GetMapping("/delivery-in-progress")
+  public String deliveryInProgress() {
+    return "delivery-in-progress";
+  }
+
+  @GetMapping("/delivery-complete-photo")
+  public String deliveryCompletePhoto() {
+    return "delivery-complete-photo";
   }
 }

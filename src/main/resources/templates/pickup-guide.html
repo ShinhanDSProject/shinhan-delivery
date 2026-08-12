@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>문앞 픽업 가이드 - Shinhan Delivery</title>
+    <title>배송 현장 전달 지침 - Shinhan Delivery</title>
     <link rel="stylesheet" href="/css/design-system.css">
     <script src="/js/utils/storage.js"></script>
     <style>
@@ -71,6 +71,34 @@
             flex: 1;
         }
 
+        .delivery-instruction-fields {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-xl);
+        }
+
+        .instruction-options {
+            border: 0;
+        }
+
+        .instruction-options legend,
+        .field label {
+            display: block;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--color-grey-300);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .instruction-options label {
+            padding: var(--spacing-md);
+            border: 1px solid var(--color-grey-50);
+            border-radius: var(--radius-sm);
+            margin-bottom: var(--spacing-sm);
+            font-weight: 500;
+            cursor: pointer;
+        }
+
         .field label {
             display: block;
             font-size: 13px;
@@ -79,7 +107,8 @@
             margin-bottom: 6px;
         }
 
-        .field input[type="text"] {
+        .field input[type="text"],
+        .field input[type="password"] {
             width: 100%;
             padding: 12px 14px;
             background: var(--surface);
@@ -88,6 +117,18 @@
             font-family: var(--font-family-base);
             font-size: 14px;
             color: var(--text-dark);
+        }
+
+        .field-help {
+            margin-top: var(--spacing-xs);
+            color: var(--color-grey-300);
+            font-size: 12px;
+        }
+
+        .form-error {
+            min-height: 18px;
+            color: var(--color-red-100);
+            font-size: 13px;
         }
 
         .field textarea {
@@ -186,41 +227,15 @@
         <button class="back-button" type="button" aria-label="뒤로 가기" onclick="history.back()">
             <svg viewBox="0 0 24 24" fill="none" width="20" height="20"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
-        <h1>문앞 픽업 가이드</h1>
+        <h1>배송 현장 전달 지침</h1>
     </header>
 
-    <div class="form">
-        <div class="field">
-            <label>공동현관 비밀번호</label>
-            <input type="text" id="doorPassword" placeholder="예: #1234* 호출 버튼 누른 후 입력" maxlength="100">
-        </div>
-
-        <div class="field">
-            <label>동 / 호수 상세</label>
-            <input type="text" id="unitDetail" placeholder="예: 101동 1403호" maxlength="100">
-        </div>
-
-        <div class="field">
-            <label>물품 위치 설명</label>
-            <textarea id="locationNote" placeholder="예: 현관문 옆 흰색 보관함 위에 놓아두었습니다. 픽업 후 노크 한 번만 해주세요." maxlength="255"></textarea>
-        </div>
-
-        <div class="field">
-            <label>입구/위치 참고 사진 등록 (선택)</label>
-            <button type="button" class="photo-upload" id="photoUploadBtn">
-                <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/><path d="M4 7h3l2-3h6l2 3h3v13H4z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
-                <span id="photoUploadLabel">사진 찍어 추가하기</span>
-            </button>
-            <input type="file" id="photoInput" accept="image/jpeg,image/png,image/webp" style="display:none;">
-            <div class="photo-preview" id="photoPreview">
-                <img id="photoPreviewImg" alt="등록한 참고 사진 미리보기">
-                <button type="button" id="photoRemoveBtn" aria-label="사진 삭제">×</button>
-            </div>
-        </div>
-    </div>
+    <form class="form" id="deliveryInstructionForm">
+        <div th:replace="~{fragments/components :: deliveryInstructionFields}"></div>
+    </form>
 
     <footer class="bottom">
-        <button type="button" id="confirmButton" onclick="confirmGuide()">확인</button>
+        <button th:replace="~{fragments/components :: primaryBtnForForm('확인', 'deliveryInstructionForm', 'confirmButton')}">확인</button>
     </footer>
 </main>
 
@@ -233,6 +248,20 @@
     }
 
     let uploadedPhotoUrl = null;
+
+    function selectedInstructionType() {
+        return document.querySelector('input[name="deliveryInstructionType"]:checked')?.value || null;
+    }
+
+    function renderConditionalFields() {
+        const type = selectedInstructionType();
+        document.getElementById('entranceCodeField').hidden = type !== 'ENTRANCE_CODE';
+        document.getElementById('deliveryNoteField').hidden = type !== 'CUSTOM';
+    }
+
+    document.querySelectorAll('input[name="deliveryInstructionType"]').forEach((input) => {
+        input.addEventListener('change', renderConditionalFields);
+    });
 
     document.getElementById('photoUploadBtn').addEventListener('click', () => {
         document.getElementById('photoInput').click();
@@ -273,17 +302,37 @@
         document.getElementById('photoUploadLabel').textContent = '사진 찍어 추가하기';
     });
 
-    function confirmGuide() {
+    function confirmGuide(event) {
+        event.preventDefault();
+        const type = selectedInstructionType();
+        const entranceCode = document.getElementById('entranceCode').value.trim();
+        const deliveryNote = document.getElementById('deliveryNote').value.trim();
+        const error = document.getElementById('formError');
+        if (!type) {
+            error.textContent = '전달 방식을 선택해주세요.';
+            return;
+        }
+        if (type === 'ENTRANCE_CODE' && !entranceCode) {
+            error.textContent = '공동현관 출입번호를 입력해주세요.';
+            return;
+        }
+        if (type === 'CUSTOM' && !deliveryNote) {
+            error.textContent = '기타 전달 요청을 입력해주세요.';
+            return;
+        }
         const draft = loadDraft();
         draft.pickupGuide = {
-            doorPassword: document.getElementById('doorPassword').value.trim(),
+            deliveryInstructionType: type,
+            entranceCode: type === 'ENTRANCE_CODE' ? entranceCode : '',
             unitDetail: document.getElementById('unitDetail').value.trim(),
-            locationNote: document.getElementById('locationNote').value.trim(),
+            deliveryNote: type === 'CUSTOM' ? deliveryNote : '',
             photoUrl: uploadedPhotoUrl
         };
         saveDraft(draft);
         location.href = '/address-input';
     }
+
+    document.getElementById('deliveryInstructionForm').addEventListener('submit', confirmGuide);
 
     (function init() {
         if (!authHeader()) {
@@ -292,9 +341,12 @@
         }
         const draft = loadDraft();
         if (draft.pickupGuide) {
-            document.getElementById('doorPassword').value = draft.pickupGuide.doorPassword || '';
+            const type = draft.pickupGuide.deliveryInstructionType;
+            const selected = document.querySelector(`input[name="deliveryInstructionType"][value="${type}"]`);
+            if (selected) selected.checked = true;
+            document.getElementById('entranceCode').value = draft.pickupGuide.entranceCode || '';
             document.getElementById('unitDetail').value = draft.pickupGuide.unitDetail || '';
-            document.getElementById('locationNote').value = draft.pickupGuide.locationNote || '';
+            document.getElementById('deliveryNote').value = draft.pickupGuide.deliveryNote || '';
             if (draft.pickupGuide.photoUrl) {
                 uploadedPhotoUrl = draft.pickupGuide.photoUrl;
                 document.getElementById('photoPreviewImg').src = uploadedPhotoUrl;
@@ -302,6 +354,7 @@
                 document.getElementById('photoUploadBtn').style.display = 'none';
             }
         }
+        renderConditionalFields();
     })();
 </script>
 </body>

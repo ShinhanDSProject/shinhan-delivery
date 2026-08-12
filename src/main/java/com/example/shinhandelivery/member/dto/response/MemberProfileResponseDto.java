@@ -1,5 +1,6 @@
 package com.example.shinhandelivery.member.dto.response;
 
+import com.example.shinhandelivery.member.entity.CourierApprovalStatus;
 import com.example.shinhandelivery.member.entity.Member;
 import com.example.shinhandelivery.member.entity.MemberRole;
 
@@ -10,7 +11,9 @@ public record MemberProfileResponseDto(
     String name,
     String phoneNumber,
     MemberRole role,
-    boolean hasPaymentPin) {
+    boolean hasPaymentPin,
+    CourierApprovalStatus courierApprovalStatus,
+    String proofDocumentUrl) {
 
   /** Member 엔티티를 MemberProfileResponseDto로 변환한다. */
   public static MemberProfileResponseDto from(Member entity) {
@@ -20,6 +23,8 @@ public record MemberProfileResponseDto(
         entity.getName(),
         entity.getPhoneNumber(),
         entity.getRole(),
-        entity.getPinHash() != null && !entity.getPinHash().isBlank());
+        entity.getPinHash() != null && !entity.getPinHash().isBlank(),
+        entity.getCourierApprovalStatus(),
+        entity.getProofDocumentUrl());
   }
 }

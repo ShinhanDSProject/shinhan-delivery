@@ -64,6 +64,14 @@ public class Member {
   @Column(name = "pin_locked", nullable = false)
   private boolean pinLocked;
 
+  @Enumerated(EnumType.STRING)
+  @Column(name = "courier_approval_status", nullable = false, length = 20)
+  @Builder.Default
+  private CourierApprovalStatus courierApprovalStatus = CourierApprovalStatus.APPROVED;
+
+  @Column(name = "proof_document_url", length = 255)
+  private String proofDocumentUrl;
+
   /** 회원의 역할(CUSTOMER/COURIER)을 변경한다. ADMIN 권한 승격은 직접 변경을 불허한다. */
   public Member changeRole(MemberRole newRole) {
     if (newRole == null) {
@@ -72,7 +80,35 @@ public class Member {
     if (newRole == MemberRole.ADMIN) {
       throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
     }
+    if (this.role != MemberRole.COURIER && newRole == MemberRole.COURIER) {
+      this.courierApprovalStatus = CourierApprovalStatus.PENDING;
+    }
     this.role = newRole;
+    return this;
+  }
+
+  /** 배송원의 자격 심사를 최종 승인한다. */
+  public Member approveCourier() {
+    if (this.proofDocumentUrl == null || this.proofDocumentUrl.isBlank()) {
+      throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE, "증빙 서류가 등록되지 않은 배송원은 승인할 수 없습니다.");
+    }
+    this.courierApprovalStatus = CourierApprovalStatus.APPROVED;
+    return this;
+  }
+
+  /** 배송원의 자격 심사를 거절한다. */
+  public Member rejectCourier() {
+    this.courierApprovalStatus = CourierApprovalStatus.REJECTED;
+    return this;
+  }
+
+  /** 배송원 증빙 서류 이미지 URL을 등록/수정한다. (거절 상태였다면 PENDING으로 재심사 전환) */
+  public Member updateProofDocumentUrl(String proofDocumentUrl) {
+    this.proofDocumentUrl = proofDocumentUrl;
+    if (this.role == MemberRole.COURIER
+        && this.courierApprovalStatus == CourierApprovalStatus.REJECTED) {
+      this.courierApprovalStatus = CourierApprovalStatus.PENDING;
+    }
     return this;
   }
 
@@ -127,6 +163,11 @@ public class Member {
 
   /** MemberCreateRequest DTO 기반으로 Member 엔티티를 생성하는 정적 팩토리 메서드. */
   public static Member from(MemberCreateRequest request, String encodedPassword) {
+    CourierApprovalStatus initialApprovalStatus =
+        request.getRole() == MemberRole.COURIER
+            ? CourierApprovalStatus.PENDING
+            : CourierApprovalStatus.APPROVED;
+
     return Member.builder()
         .email(request.getEmail())
         .password(encodedPassword)
@@ -135,6 +176,8 @@ public class Member {
         .role(request.getRole())
         .activityRegion(request.getActivityRegion())
         .preferredWeight(request.getPreferredWeight())
+        .courierApprovalStatus(initialApprovalStatus)
+        .proofDocumentUrl(request.getProofDocumentUrl())
         .build();
   }
 }

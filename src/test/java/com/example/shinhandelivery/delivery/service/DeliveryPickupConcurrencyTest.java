@@ -4,11 +4,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.example.shinhandelivery.delivery.entity.DeliveryRequest;
 import com.example.shinhandelivery.delivery.entity.DeliveryStatus;
+import com.example.shinhandelivery.delivery.entity.Matching;
 import com.example.shinhandelivery.delivery.exception.InvalidDeliveryTransitionException;
 import com.example.shinhandelivery.delivery.repository.DeliveryRequestRepository;
+import com.example.shinhandelivery.delivery.repository.MatchingRepository;
 import com.example.shinhandelivery.member.entity.Member;
 import com.example.shinhandelivery.member.entity.MemberRole;
 import com.example.shinhandelivery.member.repository.MemberRepository;
+import com.example.shinhandelivery.vehicle.entity.Vehicle;
+import com.example.shinhandelivery.vehicle.entity.VehicleType;
+import com.example.shinhandelivery.vehicle.repository.VehicleRepository;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
@@ -37,17 +42,32 @@ class DeliveryPickupConcurrencyTest {
   @Autowired private DeliveryService deliveryService;
   @Autowired private MemberRepository memberRepository;
   @Autowired private DeliveryRequestRepository deliveryRequestRepository;
+  @Autowired private VehicleRepository vehicleRepository;
+  @Autowired private MatchingRepository matchingRepository;
 
   private Long customerId;
+  private Long courierId;
+  private Long vehicleId;
+  private Long matchingId;
   private Long deliveryRequestId;
 
   @AfterEach
   void cleanUp() {
+    // FK 제약(matching -> delivery_request/vehicle) 때문에 matching을 가장 먼저 지워야 한다.
+    if (matchingId != null) {
+      matchingRepository.deleteById(matchingId);
+    }
     if (deliveryRequestId != null) {
       deliveryRequestRepository.deleteById(deliveryRequestId);
     }
+    if (vehicleId != null) {
+      vehicleRepository.deleteById(vehicleId);
+    }
     if (customerId != null) {
       memberRepository.deleteById(customerId);
+    }
+    if (courierId != null) {
+      memberRepository.deleteById(courierId);
     }
   }
 
@@ -62,6 +82,17 @@ class DeliveryPickupConcurrencyTest {
     customer.setRole(MemberRole.CUSTOMER);
     customerId = memberRepository.save(customer).getId();
 
+    Member courier = new Member();
+    courier.setEmail("pickup-concurrency-courier-" + System.nanoTime() + "@example.com");
+    courier.setPassword("password");
+    courier.setName("픽업 동시성 테스트 배송원");
+    courier.setPhoneNumber("010-0000-0001");
+    courier.setRole(MemberRole.COURIER);
+    courierId = memberRepository.save(courier).getId();
+
+    Vehicle vehicle = Vehicle.createDefault(courierId, VehicleType.MOTORCYCLE, 50.0, 50.0);
+    vehicleId = vehicleRepository.save(vehicle).getId();
+
     DeliveryRequest deliveryRequest = new DeliveryRequest();
     deliveryRequest.setMemberId(customerId);
     deliveryRequest.setPickupAddress("서울시 강남구");
@@ -73,6 +104,8 @@ class DeliveryPickupConcurrencyTest {
     deliveryRequest.setPickupLatitude(37.5);
     deliveryRequest.setPickupLongitude(127.0);
     deliveryRequestId = deliveryRequestRepository.save(deliveryRequest).getId();
+
+    matchingId = matchingRepository.save(Matching.of(deliveryRequestId, vehicleId)).getId();
 
     ExecutorService executorService = Executors.newFixedThreadPool(REQUEST_COUNT);
     CountDownLatch readyLatch = new CountDownLatch(REQUEST_COUNT);
@@ -88,7 +121,7 @@ class DeliveryPickupConcurrencyTest {
             readyLatch.countDown();
             try {
               startLatch.await();
-              deliveryService.confirmPickup(deliveryRequestId);
+              deliveryService.confirmPickup(courierId, deliveryRequestId);
               successCount.incrementAndGet();
             } catch (InvalidDeliveryTransitionException e) {
               invalidTransitionCount.incrementAndGet();
