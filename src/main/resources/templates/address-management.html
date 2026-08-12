@@ -25,7 +25,19 @@
   <section id="contentView" class="content-view">
     <button id="addButton" class="add-address-button" type="button">＋ 새 주소 추가</button>
     <div id="addressList" class="address-list" aria-live="polite">
-      <div class="empty-state">주소 목록을 불러오는 중입니다.</div>
+      <div th:if="${addresses != null and !#lists.isEmpty(addresses)}" th:each="addr : ${addresses}" class="address-card">
+        <div class="address-card__header">
+          <span class="alias" th:text="${addr.alias}">집</span>
+          <div>
+            <button class="text-button" type="button" th:attr="data-id=${addr.id}, data-action='edit'">수정</button>
+            <button class="text-button is-danger" type="button" th:attr="data-id=${addr.id}, data-action='delete'">삭제</button>
+          </div>
+        </div>
+        <p class="address" th:text="${addr.address}">서울특별시 강남구 테헤란로 123</p>
+        <p class="detail" th:if="${addr.detailAddress != null and !#strings.isEmpty(addr.detailAddress)}" th:text="${addr.detailAddress}">101호</p>
+        <p class="guide" th:if="${addr.pickupGuide != null and !#strings.isEmpty(addr.pickupGuide)}" th:text="${'픽업: ' + addr.pickupGuide}">문 앞</p>
+      </div>
+      <div class="empty-state" th:if="${addresses == null or #lists.isEmpty(addresses)}">등록된 자주 쓰는 주소가 없습니다.</div>
     </div>
   </section>
 

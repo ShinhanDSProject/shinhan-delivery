@@ -331,7 +331,7 @@
     <header class="top">
         <div class="greeting">
             <p id="greetingTime">Good morning</p>
-            <h1 id="greetingName">고객님</h1>
+            <h1 id="greetingName" th:text="${member != null ? member.name + '님' : '고객님'}">고객님</h1>
         </div>
         <div class="top-actions">
             <button class="icon-button" type="button" aria-label="알림센터로 이동" onclick="location.href='/notifications'">

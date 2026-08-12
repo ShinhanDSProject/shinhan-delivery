@@ -217,7 +217,23 @@
         <button type="button" data-tab="CANCELLED">취소</button>
     </nav>
 
-    <div class="history-list" id="list"></div>
+    <div class="history-list" id="list">
+        <div th:if="${deliveries != null and !#lists.isEmpty(deliveries)}" th:each="item : ${deliveries}" class="history-card" th:attr="onclick=|location.href='/delivery-detail?id=${item.id}'|">
+            <div class="meta">
+                <span class="status" th:text="${item.status != null ? item.status : '대기중'}">배송 상태</span>
+                <span class="date" th:text="${item.createdAt != null ? #temporals.format(item.createdAt, 'yyyy.MM.dd HH:mm') : ''}">2026.08.10</span>
+            </div>
+            <div class="address-box">
+                <p class="pickup" th:text="${'출발: ' + item.pickupAddress}">출발지 주소</p>
+                <p class="dropoff" th:text="${'도착: ' + item.dropoffAddress}">목적지 주소</p>
+            </div>
+            <div class="fee-box">
+                <span class="fee-label">결제 금액</span>
+                <span class="fee" th:text="${#numbers.formatInteger(item.estimatedFee, 0, 'COMMA') + '원'}">0원</span>
+            </div>
+        </div>
+        <div class="empty-state" th:if="${deliveries == null or #lists.isEmpty(deliveries)}">이용 내역이 없습니다.</div>
+    </div>
 </main>
 
 <nav class="bottom-tab-bar" aria-label="하단 메뉴">

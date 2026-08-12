@@ -165,7 +165,31 @@
         <h1>배송 취소 내역</h1>
     </header>
 
-    <div class="list" id="list"></div>
+    <div class="list" id="list">
+        <div th:if="${deliveries != null and !#lists.isEmpty(deliveries)}" th:each="item : ${deliveries}" class="cancel-card" th:attr="onclick=|location.href='/cancel-detail?id=${item.id}'|">
+            <div class="card-top">
+                <span class="order-no" th:text="${'배송번호 #' + item.id}">배송번호 #1</span>
+                <span class="chevron" aria-hidden="true">›</span>
+            </div>
+            <hr class="divider">
+            <div class="route-rows">
+                <div class="route-row">
+                    <span class="route-tag">출발</span>
+                    <span class="route-address" th:text="${item.pickupAddress}">출발지 주소</span>
+                </div>
+                <div class="route-row">
+                    <span class="route-tag">도착</span>
+                    <span class="route-address" th:text="${item.dropoffAddress}">목적지 주소</span>
+                </div>
+            </div>
+            <hr class="divider">
+            <div class="card-bottom">
+                <span class="requested-at" th:text="${'요청 일시: ' + (item.createdAt != null ? #temporals.format(item.createdAt, 'yyyy.MM.dd HH:mm') : '')}">요청 일시</span>
+                <span class="status-pill">취소 완료</span>
+            </div>
+        </div>
+        <div class="empty-state" th:if="${deliveries == null or #lists.isEmpty(deliveries)}">취소된 배송 내역이 없습니다.</div>
+    </div>
 </main>
 
 <script>
