@@ -154,7 +154,7 @@
         .reorder-button {
             border: 1px solid var(--color-blue-100);
             border-radius: 10px;
-            background: #fff;
+            background: var(--color-white-100);
             color: var(--color-blue-500);
             padding: 9px 12px;
             font-size: 13px;
@@ -172,7 +172,7 @@
             padding: 12px 16px;
             border-radius: 12px;
             background: var(--color-black-200);
-            color: #fff;
+            color: var(--color-white-100);
             text-align: center;
             font-size: 13px;
             z-index: 10;
@@ -318,7 +318,7 @@
             + encodeURIComponent(item.id);
         card.addEventListener('click', () => { location.href = detailUrl; });
         card.addEventListener('keydown', (event) => {
-            if (event.key === 'Enter') location.href = detailUrl;
+            if (event.key === 'Enter' && event.target === card) location.href = detailUrl;
         });
         card.innerHTML = `
             <div class="card-top">

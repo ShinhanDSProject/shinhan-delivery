@@ -721,6 +721,8 @@ class DeliveryServiceTest {
     assertThat(response.pickupAddress()).isEqualTo("서울 강남구");
     assertThat(response.dropoffAddress()).isEqualTo("서울 서초구");
     assertThat(response.pickupLatitude()).isEqualTo(37.1);
+    assertThat(response.pickupLongitude()).isEqualTo(127.1);
+    assertThat(response.dropoffLatitude()).isEqualTo(37.2);
     assertThat(response.dropoffLongitude()).isEqualTo(127.2);
     assertThat(response.weight()).isEqualTo(3.5);
     assertThat(response.itemSize()).isEqualTo(ItemSize.SMALL);

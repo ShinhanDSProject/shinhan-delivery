@@ -132,10 +132,15 @@ class DeliveryControllerTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.sourceDeliveryRequestId").value(10))
         .andExpect(jsonPath("$.pickupAddress").value("서울 강남구"))
+        .andExpect(jsonPath("$.pickupLatitude").value(37.1))
+        .andExpect(jsonPath("$.pickupLongitude").value(127.1))
+        .andExpect(jsonPath("$.dropoffAddress").value("서울 서초구"))
+        .andExpect(jsonPath("$.dropoffLatitude").value(37.2))
+        .andExpect(jsonPath("$.dropoffLongitude").value(127.2))
         .andExpect(jsonPath("$.weight").value(3.5))
         .andExpect(jsonPath("$.itemSize").value("SMALL"))
-        .andExpect(jsonPath("$.feePoint").doesNotExist())
-        .andExpect(jsonPath("$.status").doesNotExist());
+        .andExpect(jsonPath("$.feePoint").doesNotHaveJsonPath())
+        .andExpect(jsonPath("$.status").doesNotHaveJsonPath());
 
     verify(deliveryService).getReorderDraft(1L, 10L);
   }
