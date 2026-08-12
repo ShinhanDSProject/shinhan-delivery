@@ -71,9 +71,9 @@
 
     sessionStorage.setItem('selectedRole', selectedRole);
     if (selectedRole === 'COURIER') {
-      window.location.assign('/courier-login.html');
+      window.location.assign('/courier-login');
     } else {
-      window.location.assign('/login.html');
+      window.location.assign('/login');
     }
   });
 })();

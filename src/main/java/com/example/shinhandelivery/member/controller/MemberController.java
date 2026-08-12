@@ -10,6 +10,7 @@ import com.example.shinhandelivery.member.dto.request.MemberPaymentPinUpdateRequ
 import com.example.shinhandelivery.member.dto.request.MemberProfileUpdateRequestDto;
 import com.example.shinhandelivery.member.dto.request.MemberRoleUpdateRequest;
 import com.example.shinhandelivery.member.dto.request.MemberUpdateRequest;
+import com.example.shinhandelivery.member.dto.request.ProofDocumentUpdateRequest;
 import com.example.shinhandelivery.member.dto.response.MemberProfileResponseDto;
 import com.example.shinhandelivery.member.dto.response.MemberResponse;
 import com.example.shinhandelivery.member.dto.response.TokenResponse;
@@ -92,6 +93,17 @@ public class MemberController {
     CustomUserDetails resolved = resolveUserDetails(userDetails);
     memberService.updatePaymentPin(resolved.getId(), request);
     return ResponseEntity.noContent().build();
+  }
+
+  /** 인증된 본인의 자격 증빙 서류 이미지 URL을 등록/재제출한다. */
+  @PatchMapping("/me/proof-document")
+  public ResponseEntity<MemberProfileResponseDto> updateProofDocument(
+      @AuthenticationPrincipal CustomUserDetails userDetails,
+      @Valid @RequestBody ProofDocumentUpdateRequest request) {
+    CustomUserDetails resolved = resolveUserDetails(userDetails);
+    return ResponseEntity.ok(
+        MemberProfileResponseDto.from(
+            memberService.updateProofDocumentUrl(resolved.getId(), request.getProofDocumentUrl())));
   }
 
   private CustomUserDetails resolveUserDetails(CustomUserDetails userDetails) {

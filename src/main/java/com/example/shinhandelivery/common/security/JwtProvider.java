@@ -68,7 +68,8 @@ public class JwtProvider {
 
   public Authentication getAuthentication(String token) {
     Claims claims = parseClaims(token);
-    Long id = claims.get("id", Long.class);
+    Object idObj = claims.get("id");
+    Long id = idObj instanceof Number ? ((Number) idObj).longValue() : null;
     String email = claims.getSubject();
     String role = claims.get("role", String.class);
 

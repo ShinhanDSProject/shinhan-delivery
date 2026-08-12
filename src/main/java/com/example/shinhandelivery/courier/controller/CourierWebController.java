@@ -22,6 +22,11 @@ public class CourierWebController {
     return "courier-signup";
   }
 
+  @GetMapping("/courier-pending")
+  public String courierPending() {
+    return "courier-pending";
+  }
+
   @GetMapping("/pickup-guide")
   public String pickupGuide() {
     return "pickup-guide";

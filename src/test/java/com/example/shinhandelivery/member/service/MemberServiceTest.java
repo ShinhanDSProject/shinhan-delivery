@@ -6,9 +6,11 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.example.shinhandelivery.common.exception.BusinessException;
 import com.example.shinhandelivery.common.exception.EntityNotFoundException;
 import com.example.shinhandelivery.member.dto.request.MemberCreateRequest;
 import com.example.shinhandelivery.member.dto.request.MemberProfileUpdateRequestDto;
+import com.example.shinhandelivery.member.entity.CourierApprovalStatus;
 import com.example.shinhandelivery.member.entity.Member;
 import com.example.shinhandelivery.member.entity.MemberRole;
 import com.example.shinhandelivery.member.exception.DuplicateMemberException;
@@ -58,10 +60,11 @@ class MemberServiceTest {
 
     assertThat(response.getEmail()).isEqualTo("user@example.com");
     assertThat(response.getRole()).isEqualTo(MemberRole.CUSTOMER);
+    assertThat(response.getCourierApprovalStatus()).isEqualTo(CourierApprovalStatus.APPROVED);
   }
 
   @Test
-  @DisplayName("배송원 회원가입이면 기본 차량도 함께 생성한다")
+  @DisplayName("배송원 회원가입이면 기본 차량도 함께 생성되고 상태는 PENDING이 된다")
   void createCourierCreatesDefaultVehicle() {
     MemberCreateRequest request = new MemberCreateRequest();
     request.setEmail("courier@example.com");
@@ -72,6 +75,7 @@ class MemberServiceTest {
     request.setVehicleType(VehicleType.MOTORCYCLE);
     request.setActivityRegion("서울 강남구");
     request.setPreferredWeight(15.0);
+    request.setProofDocumentUrl("http://localhost:8080/uploads/license.png");
 
     when(memberRepository.existsByEmail("courier@example.com")).thenReturn(false);
     when(passwordEncoder.encode("password123")).thenReturn("encoded-password");
@@ -88,6 +92,9 @@ class MemberServiceTest {
     Member response = memberService.create(request);
 
     assertThat(response.getRole()).isEqualTo(MemberRole.COURIER);
+    assertThat(response.getCourierApprovalStatus()).isEqualTo(CourierApprovalStatus.PENDING);
+    assertThat(response.getProofDocumentUrl())
+        .isEqualTo("http://localhost:8080/uploads/license.png");
     verify(vehicleService).save(any(Vehicle.class));
   }
 
@@ -156,6 +163,24 @@ class MemberServiceTest {
   }
 
   @Test
+  @DisplayName("거절(REJECTED) 상태인 배송원이 증빙 서류를 재제출하면 PENDING으로 자동 전환된다")
+  void updateProofDocumentUrlResetsRejectedStatusToPending() {
+    Member courier =
+        Member.builder()
+            .id(1L)
+            .role(MemberRole.COURIER)
+            .courierApprovalStatus(CourierApprovalStatus.REJECTED)
+            .build();
+
+    when(memberRepository.findById(1L)).thenReturn(Optional.of(courier));
+
+    Member response = memberService.updateProofDocumentUrl(1L, "http://localhost/new_license.png");
+
+    assertThat(response.getProofDocumentUrl()).isEqualTo("http://localhost/new_license.png");
+    assertThat(response.getCourierApprovalStatus()).isEqualTo(CourierApprovalStatus.PENDING);
+  }
+
+  @Test
   @DisplayName("배송원 회원 삭제 시 소유 차량을 먼저 정리한다")
   void deleteCourierRemovesOwnedVehiclesFirst() {
     Member member = new Member();
@@ -166,5 +191,59 @@ class MemberServiceTest {
 
     verify(vehicleService).deleteAllByMemberId(3L);
     verify(memberRepository).delete(member);
+  }
+
+  @Test
+  @DisplayName("서류가 존재하는 배송원의 자격 심사를 승인한다")
+  void approveCourierSuccess() {
+    Member courier =
+        Member.builder()
+            .id(1L)
+            .role(MemberRole.COURIER)
+            .courierApprovalStatus(CourierApprovalStatus.PENDING)
+            .proofDocumentUrl("http://localhost/license.png")
+            .build();
+
+    when(memberRepository.findById(1L)).thenReturn(Optional.of(courier));
+
+    Member result = memberService.approveCourier(1L);
+
+    assertThat(result.getCourierApprovalStatus()).isEqualTo(CourierApprovalStatus.APPROVED);
+  }
+
+  @Test
+  @DisplayName("증빙 서류가 없는 배송원 승인 시 BusinessException을 던진다")
+  void approveCourierWithoutProofDocumentThrowsException() {
+    Member courier =
+        Member.builder()
+            .id(1L)
+            .role(MemberRole.COURIER)
+            .courierApprovalStatus(CourierApprovalStatus.PENDING)
+            .proofDocumentUrl("")
+            .build();
+
+    when(memberRepository.findById(1L)).thenReturn(Optional.of(courier));
+
+    assertThatThrownBy(() -> memberService.approveCourier(1L))
+        .isInstanceOf(BusinessException.class)
+        .hasMessageContaining("증빙 서류가 등록되지 않은 배송원");
+  }
+
+  @Test
+  @DisplayName("일반 회원이 배송원으로 역할 변경 시 자격 심사 상태가 PENDING으로 설정된다")
+  void updateRoleToCourierSetsStatusPending() {
+    Member customer =
+        Member.builder()
+            .id(1L)
+            .role(MemberRole.CUSTOMER)
+            .courierApprovalStatus(CourierApprovalStatus.APPROVED)
+            .build();
+
+    when(memberRepository.findById(1L)).thenReturn(Optional.of(customer));
+
+    Member result = memberService.updateRole(1L, MemberRole.COURIER);
+
+    assertThat(result.getRole()).isEqualTo(MemberRole.COURIER);
+    assertThat(result.getCourierApprovalStatus()).isEqualTo(CourierApprovalStatus.PENDING);
   }
 }

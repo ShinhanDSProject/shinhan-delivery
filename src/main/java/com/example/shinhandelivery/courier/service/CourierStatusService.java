@@ -5,6 +5,7 @@ import com.example.shinhandelivery.common.exception.ErrorCode;
 import com.example.shinhandelivery.courier.dto.request.CourierStatusUpdateRequest;
 import com.example.shinhandelivery.courier.dto.response.CourierStatusResponse;
 import com.example.shinhandelivery.courier.entity.WorkStatus;
+import com.example.shinhandelivery.member.entity.CourierApprovalStatus;
 import com.example.shinhandelivery.member.entity.MemberRole;
 import com.example.shinhandelivery.vehicle.entity.Vehicle;
 import com.example.shinhandelivery.vehicle.entity.VehicleStatus;
@@ -37,6 +38,9 @@ public class CourierStatusService {
     WorkStatus workStatus = request.getStatus();
 
     if (workStatus == WorkStatus.ONLINE) {
+      if (vehicle.getMember().getCourierApprovalStatus() != CourierApprovalStatus.APPROVED) {
+        throw new BusinessException(ErrorCode.ACCESS_DENIED, "서류 심사가 진행 중입니다. 관리자 승인 후 이용 가능합니다.");
+      }
       vehicle.setStatus(VehicleStatus.AVAILABLE);
     } else {
       vehicle.setStatus(VehicleStatus.BUSY);

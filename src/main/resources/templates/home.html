@@ -524,7 +524,7 @@
             }
             const me = await meResponse.json();
             if (!me.hasPaymentPin) {
-                location.replace('/payment-pin-settings?required=1&returnUrl=%2Fhome.html');
+                location.replace('/payment-pin-settings?required=1&returnUrl=%2Fhome');
                 return;
             }
             document.getElementById('greetingName').textContent = `${me.name} 님`;
