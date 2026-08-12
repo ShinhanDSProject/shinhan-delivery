@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>배송 상세 내역 - 신한 딜리버리</title>
     <link rel="stylesheet" href="/css/design-system.css">
+    <script src="/js/utils/storage.js"></script>
+    <script src="/js/delivery-reorder.js"></script>
     <style>
         :root {
             --text-dark: var(--color-black-200);
@@ -148,6 +150,8 @@
             width: 100%;
             max-width: 480px;
             padding: 24px;
+            display: flex;
+            gap: 10px;
         }
 
         .photo-cta {
@@ -161,6 +165,19 @@
             font-size: 16px;
             font-weight: 700;
             text-align: center;
+            cursor: pointer;
+        }
+
+        .reorder-cta {
+            display: block;
+            width: 100%;
+            padding: 16px 0;
+            border: 1px solid var(--color-blue-100);
+            border-radius: 12px;
+            background: #fff;
+            color: var(--color-blue-500);
+            font-size: 16px;
+            font-weight: 700;
             cursor: pointer;
         }
 
@@ -193,6 +210,7 @@
 </main>
 
 <div class="footer-actions" id="footerActions" hidden>
+    <button class="reorder-cta" id="reorderCta" type="button">이 배송 다시 보내기</button>
     <button class="photo-cta" id="photoCta" type="button">문앞 인증 사진 보기</button>
 </div>
 
@@ -275,12 +293,30 @@
 
         const footerActions = document.getElementById('footerActions');
         const photoCta = document.getElementById('photoCta');
+        const reorderCta = document.getElementById('reorderCta');
+        footerActions.hidden = false;
+        reorderCta.addEventListener('click', () => {
+            reorderCta.disabled = true;
+            reorderCta.textContent = '불러오는 중...';
+            startDeliveryReorder(deliveryId, (message) => {
+                reorderCta.disabled = false;
+                reorderCta.textContent = '이 배송 다시 보내기';
+                const previousError = document.getElementById('reorderError');
+                if (previousError) previousError.remove();
+                document.getElementById('body').insertAdjacentHTML(
+                    'afterbegin',
+                    '<div class="loading-state" id="reorderError"></div>'
+                );
+                document.getElementById('reorderError').textContent = message;
+            });
+        });
         if (detail.status === 'COMPLETED') {
-            footerActions.hidden = false;
             photoCta.disabled = !detail.proofPhotoUrl;
             photoCta.addEventListener('click', () => {
                 location.href = `/door-photo?id=${deliveryId}`;
             });
+        } else {
+            photoCta.hidden = true;
         }
     }
 

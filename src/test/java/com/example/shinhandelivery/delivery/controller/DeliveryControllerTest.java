@@ -22,6 +22,7 @@ import com.example.shinhandelivery.delivery.dto.request.DeliveryPickupRequest;
 import com.example.shinhandelivery.delivery.dto.response.DeliveryCancellationPreviewResponse;
 import com.example.shinhandelivery.delivery.dto.response.DeliveryEstimateResponse;
 import com.example.shinhandelivery.delivery.dto.response.DeliveryPaymentResponse;
+import com.example.shinhandelivery.delivery.dto.response.DeliveryReorderResponse;
 import com.example.shinhandelivery.delivery.dto.response.ProofPhotoResponse;
 import com.example.shinhandelivery.delivery.entity.DeliveryRequest;
 import com.example.shinhandelivery.delivery.entity.DeliveryStatus;
@@ -111,6 +112,46 @@ class DeliveryControllerTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.cancellationFee").value(1000))
         .andExpect(jsonPath("$.refundAmount").value(2000));
+  }
+
+  @Test
+  @DisplayName("재배송 입력값 조회는 로그인 고객 ID로 서비스에 위임한다")
+  void getReorderDraftReturnsReusableFields() throws Exception {
+    CustomUserDetails userDetails =
+        new CustomUserDetails(1L, "user@test.com", "password", "CUSTOMER");
+    UsernamePasswordAuthenticationToken auth =
+        new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+    SecurityContextHolder.getContext().setAuthentication(auth);
+    when(deliveryService.getReorderDraft(1L, 10L))
+        .thenReturn(
+            new DeliveryReorderResponse(
+                10L, "서울 강남구", 37.1, 127.1, "서울 서초구", 37.2, 127.2, 3.5, ItemSize.SMALL));
+
+    mockMvc
+        .perform(get("/api/v1/delivery-requests/10/reorder"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.sourceDeliveryRequestId").value(10))
+        .andExpect(jsonPath("$.pickupAddress").value("서울 강남구"))
+        .andExpect(jsonPath("$.weight").value(3.5))
+        .andExpect(jsonPath("$.itemSize").value("SMALL"))
+        .andExpect(jsonPath("$.feePoint").doesNotExist())
+        .andExpect(jsonPath("$.status").doesNotExist());
+
+    verify(deliveryService).getReorderDraft(1L, 10L);
+  }
+
+  @Test
+  @DisplayName("다른 고객의 배송으로 재배송을 요청하면 403을 반환한다")
+  void getReorderDraftByNonOwnerReturnsForbidden() throws Exception {
+    CustomUserDetails userDetails =
+        new CustomUserDetails(999L, "other@test.com", "password", "CUSTOMER");
+    UsernamePasswordAuthenticationToken auth =
+        new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+    SecurityContextHolder.getContext().setAuthentication(auth);
+    when(deliveryService.getReorderDraft(999L, 10L))
+        .thenThrow(new DeliveryAccessDeniedException(10L, 999L));
+
+    mockMvc.perform(get("/api/v1/delivery-requests/10/reorder")).andExpect(status().isForbidden());
   }
 
   @Test

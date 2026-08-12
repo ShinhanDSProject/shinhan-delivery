@@ -176,6 +176,7 @@ public class Vehicle {
 - 비즈니스 로직, 트랜잭션, 예외 발생이 전부 여기서 일어난다.
 - 생성자 주입(Lombok `@RequiredArgsConstructor`)을 쓴다. 필드 주입(`@Autowired` on field)은 금지.
 - 하나의 public 메서드 = 하나의 유스케이스. 메서드 안에서 검증 → Entity 생성/조회 → Repository 호출 순서로 작성한다.
+- 과거 주문 기반 재신청은 Entity나 결제 결과를 복제하지 않고, 소유권 검증 후 재사용 가능한 입력 필드만 전용 DTO로 반환한다. 신규 요금과 결제는 기존 견적·결제 유스케이스에서 다시 처리한다.
 
 ```java
 @Service
