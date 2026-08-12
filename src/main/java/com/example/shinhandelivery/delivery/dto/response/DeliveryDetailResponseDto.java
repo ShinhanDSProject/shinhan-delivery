@@ -1,6 +1,7 @@
 package com.example.shinhandelivery.delivery.dto.response;
 
 import com.example.shinhandelivery.delivery.entity.DeliveryCancellationReason;
+import com.example.shinhandelivery.delivery.entity.DeliveryInstructionType;
 import com.example.shinhandelivery.delivery.entity.DeliveryRequest;
 import com.example.shinhandelivery.delivery.entity.DeliveryStatus;
 import com.example.shinhandelivery.delivery.entity.ItemSize;
