@@ -271,31 +271,90 @@
         const couriers = data.content || [];
         const tbody = document.getElementById('pendingCourierList');
 
+        tbody.textContent = '';
         if (couriers.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="7" class="empty-msg">🎉 현재 승인 대기 중인 배송원이 없습니다.</td></tr>`;
+          const emptyTr = document.createElement('tr');
+          const emptyTd = document.createElement('td');
+          emptyTd.colSpan = 7;
+          emptyTd.className = 'empty-msg';
+          emptyTd.textContent = '🎉 현재 승인 대기 중인 배송원이 없습니다.';
+          emptyTr.appendChild(emptyTd);
+          tbody.appendChild(emptyTr);
           return;
         }
 
-        tbody.innerHTML = couriers.map(c => `
-          <tr>
-            <td>${c.id}</td>
-            <td><strong>${c.name}</strong></td>
-            <td>${c.email}<br><span style="font-size:12px; color:#94A3B8;">${c.phoneNumber || '-'}</span></td>
-            <td>${c.activityRegion || '전국'}</td>
-            <td>
-              ${c.proofDocumentUrl
-                ? `<a href="${c.proofDocumentUrl}" target="_blank" class="doc-link">📄 서류 확인</a>`
-                : `<span style="color:#94A3B8;">미제출</span>`}
-            </td>
-            <td><span class="status-pill status-pending">${c.courierApprovalStatus}</span></td>
-            <td>
-              <div class="action-btns">
-                <button class="btn-approve" onclick="approveCourier(${c.id}, '${c.name}')">승인</button>
-                <button class="btn-reject" onclick="rejectCourier(${c.id}, '${c.name}')">거절</button>
-              </div>
-            </td>
-          </tr>
-        `).join('');
+        couriers.forEach(c => {
+          const tr = document.createElement('tr');
+
+          const tdId = document.createElement('td');
+          tdId.textContent = c.id;
+          tr.appendChild(tdId);
+
+          const tdName = document.createElement('td');
+          const strongName = document.createElement('strong');
+          strongName.textContent = c.name;
+          tdName.appendChild(strongName);
+          tr.appendChild(tdName);
+
+          const tdContact = document.createElement('td');
+          tdContact.appendChild(document.createTextNode(c.email || ''));
+          tdContact.appendChild(document.createElement('br'));
+          const phoneSpan = document.createElement('span');
+          phoneSpan.style.fontSize = '12px';
+          phoneSpan.style.color = '#94A3B8';
+          phoneSpan.textContent = c.phoneNumber || '-';
+          tdContact.appendChild(phoneSpan);
+          tr.appendChild(tdContact);
+
+          const tdRegion = document.createElement('td');
+          tdRegion.textContent = c.activityRegion || '전국';
+          tr.appendChild(tdRegion);
+
+          const tdDoc = document.createElement('td');
+          if (c.proofDocumentUrl) {
+            const docLink = document.createElement('a');
+            docLink.href = c.proofDocumentUrl;
+            docLink.target = '_blank';
+            docLink.rel = 'noopener noreferrer';
+            docLink.className = 'doc-link';
+            docLink.textContent = '📄 서류 확인';
+            tdDoc.appendChild(docLink);
+          } else {
+            const noDocSpan = document.createElement('span');
+            noDocSpan.style.color = '#94A3B8';
+            noDocSpan.textContent = '미제출';
+            tdDoc.appendChild(noDocSpan);
+          }
+          tr.appendChild(tdDoc);
+
+          const tdStatus = document.createElement('td');
+          const statusSpan = document.createElement('span');
+          statusSpan.className = 'status-pill status-pending';
+          statusSpan.textContent = c.courierApprovalStatus || 'PENDING';
+          tdStatus.appendChild(statusSpan);
+          tr.appendChild(tdStatus);
+
+          const tdActions = document.createElement('td');
+          const actionDiv = document.createElement('div');
+          actionDiv.className = 'action-btns';
+
+          const btnApprove = document.createElement('button');
+          btnApprove.className = 'btn-approve';
+          btnApprove.textContent = '승인';
+          btnApprove.addEventListener('click', () => approveCourier(c.id, c.name));
+
+          const btnReject = document.createElement('button');
+          btnReject.className = 'btn-reject';
+          btnReject.textContent = '거절';
+          btnReject.addEventListener('click', () => rejectCourier(c.id, c.name));
+
+          actionDiv.appendChild(btnApprove);
+          actionDiv.appendChild(btnReject);
+          tdActions.appendChild(actionDiv);
+          tr.appendChild(tdActions);
+
+          tbody.appendChild(tr);
+        });
       } catch (err) {
         showToast('❌ 대기 목록을 불러오지 못했습니다.');
       }

@@ -6,6 +6,7 @@ import static org.mockito.BDDMockito.given;
 
 import com.example.shinhandelivery.common.domain.Location;
 import com.example.shinhandelivery.common.exception.BusinessException;
+import com.example.shinhandelivery.common.exception.ErrorCode;
 import com.example.shinhandelivery.courier.dto.request.CourierStatusUpdateRequest;
 import com.example.shinhandelivery.courier.dto.response.CourierStatusResponse;
 import com.example.shinhandelivery.courier.entity.WorkStatus;
@@ -115,7 +116,9 @@ class CourierStatusServiceTest {
 
     assertThatThrownBy(() -> courierStatusService.updateWorkStatus(memberId, request))
         .isInstanceOf(BusinessException.class)
-        .hasMessageContaining("서류 심사가 진행 중입니다");
+        .hasMessageContaining("서류 심사가 진행 중입니다")
+        .extracting("errorCode")
+        .isEqualTo(ErrorCode.ACCESS_DENIED);
   }
 
   @Test

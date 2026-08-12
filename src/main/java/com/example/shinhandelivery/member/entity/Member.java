@@ -80,12 +80,18 @@ public class Member {
     if (newRole == MemberRole.ADMIN) {
       throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
     }
+    if (this.role != MemberRole.COURIER && newRole == MemberRole.COURIER) {
+      this.courierApprovalStatus = CourierApprovalStatus.PENDING;
+    }
     this.role = newRole;
     return this;
   }
 
   /** 배송원의 자격 심사를 최종 승인한다. */
   public Member approveCourier() {
+    if (this.proofDocumentUrl == null || this.proofDocumentUrl.isBlank()) {
+      throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE, "증빙 서류가 등록되지 않은 배송원은 승인할 수 없습니다.");
+    }
     this.courierApprovalStatus = CourierApprovalStatus.APPROVED;
     return this;
   }

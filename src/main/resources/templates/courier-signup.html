@@ -476,18 +476,18 @@
 
         <div class="form-group">
             <label for="proofDocumentFile">자격 증빙 서류 첨부 <span class="text-required">*</span></label>
-            <div style="border: 1.5px dashed #cbd5e1; padding: 18px; border-radius: 12px; background: #f8fafc; text-align: center;">
+            <div style="border: 1.5px dashed var(--border); padding: 18px; border-radius: var(--radius-md, 12px); background: var(--color-grey-50, #f8fafc); text-align: center;">
                 <input type="file" id="proofDocumentFile" accept="image/*" style="display:none;" onchange="uploadProofDocument(event)">
-                <button type="button" class="btn" style="background:#0046ff; color:#ffffff; border:none; padding:10px 20px; border-radius:8px; font-weight:700; cursor:pointer; box-shadow:0 4px 12px rgba(0,70,255,0.2);" onclick="document.getElementById('proofDocumentFile').click()">
+                <button type="button" class="btn" style="background:var(--primary); color:var(--color-white-100, #ffffff); border:none; padding:10px 20px; border-radius:var(--radius-sm, 8px); font-weight:700; cursor:pointer; box-shadow:0 4px 12px rgba(0,70,255,0.2);" onclick="document.getElementById('proofDocumentFile').click()">
                     📸 자격증 / 면허증 이미지 첨부하기
                 </button>
-                <div id="proofDocHint" style="font-size: 13px; color: #475569; margin-top: 10px; font-weight: 500;">
+                <div id="proofDocHint" style="font-size: 13px; color: var(--color-grey-300); margin-top: 10px; font-weight: 500;">
                     선택하신 배송 수단에 알맞은 자격증 및 면허증 이미지를 첨부해 주세요.
                 </div>
                 <input type="hidden" id="proofDocumentUrl" name="proofDocumentUrl" required>
                 <div id="proofPreviewArea" style="display:none; margin-top:12px;">
-                    <img id="proofPreviewImg" src="" alt="증빙서류 미리보기" style="max-height:140px; border-radius:8px; border:1px solid #cbd5e1;">
-                    <span id="proofStatusText" style="display:block; font-size:12px; color:#16a34a; font-weight:700; margin-top:6px;">✅ 서류 업로드 완료</span>
+                    <img id="proofPreviewImg" alt="증빙서류 미리보기" style="max-height:140px; border-radius:8px; border:1px solid var(--border);">
+                    <span id="proofStatusText" style="display:block; font-size:12px; color:var(--color-blue-100); font-weight:700; margin-top:6px;">✅ 서류 업로드 완료</span>
                 </div>
             </div>
         </div>

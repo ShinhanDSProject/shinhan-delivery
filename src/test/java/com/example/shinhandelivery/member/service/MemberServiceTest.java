@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.example.shinhandelivery.common.exception.BusinessException;
 import com.example.shinhandelivery.common.exception.EntityNotFoundException;
 import com.example.shinhandelivery.member.dto.request.MemberCreateRequest;
 import com.example.shinhandelivery.member.dto.request.MemberProfileUpdateRequestDto;
@@ -190,5 +191,59 @@ class MemberServiceTest {
 
     verify(vehicleService).deleteAllByMemberId(3L);
     verify(memberRepository).delete(member);
+  }
+
+  @Test
+  @DisplayName("서류가 존재하는 배송원의 자격 심사를 승인한다")
+  void approveCourierSuccess() {
+    Member courier =
+        Member.builder()
+            .id(1L)
+            .role(MemberRole.COURIER)
+            .courierApprovalStatus(CourierApprovalStatus.PENDING)
+            .proofDocumentUrl("http://localhost/license.png")
+            .build();
+
+    when(memberRepository.findById(1L)).thenReturn(Optional.of(courier));
+
+    Member result = memberService.approveCourier(1L);
+
+    assertThat(result.getCourierApprovalStatus()).isEqualTo(CourierApprovalStatus.APPROVED);
+  }
+
+  @Test
+  @DisplayName("증빙 서류가 없는 배송원 승인 시 BusinessException을 던진다")
+  void approveCourierWithoutProofDocumentThrowsException() {
+    Member courier =
+        Member.builder()
+            .id(1L)
+            .role(MemberRole.COURIER)
+            .courierApprovalStatus(CourierApprovalStatus.PENDING)
+            .proofDocumentUrl("")
+            .build();
+
+    when(memberRepository.findById(1L)).thenReturn(Optional.of(courier));
+
+    assertThatThrownBy(() -> memberService.approveCourier(1L))
+        .isInstanceOf(BusinessException.class)
+        .hasMessageContaining("증빙 서류가 등록되지 않은 배송원");
+  }
+
+  @Test
+  @DisplayName("일반 회원이 배송원으로 역할 변경 시 자격 심사 상태가 PENDING으로 설정된다")
+  void updateRoleToCourierSetsStatusPending() {
+    Member customer =
+        Member.builder()
+            .id(1L)
+            .role(MemberRole.CUSTOMER)
+            .courierApprovalStatus(CourierApprovalStatus.APPROVED)
+            .build();
+
+    when(memberRepository.findById(1L)).thenReturn(Optional.of(customer));
+
+    Member result = memberService.updateRole(1L, MemberRole.COURIER);
+
+    assertThat(result.getRole()).isEqualTo(MemberRole.COURIER);
+    assertThat(result.getCourierApprovalStatus()).isEqualTo(CourierApprovalStatus.PENDING);
   }
 }

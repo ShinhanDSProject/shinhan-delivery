@@ -44,7 +44,7 @@ public class MemberCreateRequest {
   private String proofDocumentUrl;
 
   // 이 메서드는 결과가 반드시 true여야 통과
-  @AssertTrue(message = "배송원 회원가입 시 차량 종류, 활동 지역, 선호 중량은 필수입니다.")
+  @AssertTrue(message = "배송원 회원가입 시 차량 종류, 활동 지역, 선호 중량, 자격 증빙 서류는 필수입니다.")
   public boolean isCourierProfileValid() {
     if (role != MemberRole.COURIER) {
       return true;
@@ -53,6 +53,8 @@ public class MemberCreateRequest {
         && activityRegion != null
         && !activityRegion.isBlank()
         && preferredWeight != null
-        && preferredWeight > 0;
+        && preferredWeight > 0
+        && proofDocumentUrl != null
+        && !proofDocumentUrl.isBlank();
   }
 }
