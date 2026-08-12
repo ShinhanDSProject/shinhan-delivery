@@ -19,6 +19,7 @@ import com.example.shinhandelivery.delivery.dto.request.DeliveryCreateRequest;
 import com.example.shinhandelivery.delivery.dto.request.DeliveryEstimateRequest;
 import com.example.shinhandelivery.delivery.dto.request.DeliveryPayLocationRequest;
 import com.example.shinhandelivery.delivery.dto.request.DeliveryPayRequest;
+import com.example.shinhandelivery.delivery.dto.request.DeliveryPickupRequest;
 import com.example.shinhandelivery.delivery.dto.request.DeliveryUpdateRequest;
 import com.example.shinhandelivery.delivery.dto.response.DeliveryDetailResponseDto;
 import com.example.shinhandelivery.delivery.dto.response.DeliveryEstimateResponse;
@@ -539,10 +540,14 @@ class DeliveryServiceTest {
     when(deliveryRequestRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(deliveryRequest));
     stubAssignedCourier(1L, 10L, 20L);
 
-    DeliveryRequest response = deliveryService.confirmPickup(20L, 1L);
+    DeliveryPickupRequest request = new DeliveryPickupRequest();
+    request.setPickupPhotoUrl("https://example.com/pickup.jpg");
+
+    DeliveryRequest response = deliveryService.confirmPickup(20L, 1L, request);
 
     assertThat(response.getStatus()).isEqualTo(DeliveryStatus.PICKED_UP);
     assertThat(deliveryRequest.getPickedUpAt()).isNotNull();
+    assertThat(deliveryRequest.getPickupPhotoUrl()).isEqualTo("https://example.com/pickup.jpg");
     verify(eventPublisher)
         .publishEvent(
             argThat(
@@ -558,8 +563,10 @@ class DeliveryServiceTest {
     deliveryRequest.setStatus(DeliveryStatus.REQUESTED);
     when(deliveryRequestRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(deliveryRequest));
     stubAssignedCourier(1L, 10L, 20L);
+    DeliveryPickupRequest request = new DeliveryPickupRequest();
+    request.setPickupPhotoUrl("https://example.com/pickup.jpg");
 
-    assertThatThrownBy(() -> deliveryService.confirmPickup(20L, 1L))
+    assertThatThrownBy(() -> deliveryService.confirmPickup(20L, 1L, request))
         .isInstanceOf(InvalidDeliveryTransitionException.class);
   }
 
@@ -570,8 +577,10 @@ class DeliveryServiceTest {
     deliveryRequest.setStatus(DeliveryStatus.MATCHED);
     when(deliveryRequestRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(deliveryRequest));
     stubAssignedCourier(1L, 10L, 20L);
+    DeliveryPickupRequest request = new DeliveryPickupRequest();
+    request.setPickupPhotoUrl("https://example.com/pickup.jpg");
 
-    assertThatThrownBy(() -> deliveryService.confirmPickup(999L, 1L))
+    assertThatThrownBy(() -> deliveryService.confirmPickup(999L, 1L, request))
         .isInstanceOf(DeliveryAccessDeniedException.class);
   }
 

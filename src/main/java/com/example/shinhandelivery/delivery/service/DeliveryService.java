@@ -6,6 +6,7 @@ import com.example.shinhandelivery.delivery.dto.request.DeliveryCompleteRequest;
 import com.example.shinhandelivery.delivery.dto.request.DeliveryCreateRequest;
 import com.example.shinhandelivery.delivery.dto.request.DeliveryEstimateRequest;
 import com.example.shinhandelivery.delivery.dto.request.DeliveryPayRequest;
+import com.example.shinhandelivery.delivery.dto.request.DeliveryPickupRequest;
 import com.example.shinhandelivery.delivery.dto.request.DeliveryUpdateRequest;
 import com.example.shinhandelivery.delivery.dto.response.DeliveryDetailResponseDto;
 import com.example.shinhandelivery.delivery.dto.response.DeliveryEstimateResponse;
@@ -186,10 +187,11 @@ public class DeliveryService {
 
   /**
    * 배송원의 픽업 완료를 처리한다 (DeliveryRequest Entity 리턴). 배송원이 콜을 수락한(MATCHED) 배송 요청만 픽업 완료로 전이할 수 있고, 호출자가
-   * 배정된 배송원 본인이 아니면 DeliveryAccessDeniedException을 던진다.
+   * 배정된 배송원 본인이 아니면 DeliveryAccessDeniedException을 던진다. 물품 확인 사진 URL을 같이 기록한다.
    */
   @Transactional
-  public DeliveryRequest confirmPickup(Long callerId, Long deliveryRequestId) {
+  public DeliveryRequest confirmPickup(
+      Long callerId, Long deliveryRequestId, DeliveryPickupRequest request) {
     DeliveryRequest deliveryRequest = findDeliveryRequestForUpdateOrThrow(deliveryRequestId);
     assertCallerIsAssignedCourier(callerId, deliveryRequestId);
     if (deliveryRequest.getStatus() != DeliveryStatus.MATCHED) {
@@ -197,7 +199,7 @@ public class DeliveryService {
           deliveryRequest.getStatus(), DeliveryStatus.PICKED_UP);
     }
     LocalDateTime pickedUpAt = LocalDateTime.now();
-    deliveryRequest.pickUp(pickedUpAt);
+    deliveryRequest.pickUp(request.getPickupPhotoUrl(), pickedUpAt);
     eventPublisher.publishEvent(
         new DeliveryStatusChangedEvent(deliveryRequestId, DeliveryStatus.PICKED_UP, pickedUpAt));
     return deliveryRequest;

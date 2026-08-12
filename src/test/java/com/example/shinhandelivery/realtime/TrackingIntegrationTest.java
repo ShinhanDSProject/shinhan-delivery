@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.example.shinhandelivery.common.security.JwtProvider;
 import com.example.shinhandelivery.delivery.dto.request.DeliveryCreateRequest;
+import com.example.shinhandelivery.delivery.dto.request.DeliveryPickupRequest;
 import com.example.shinhandelivery.delivery.dto.response.DeliveryResponse;
 import com.example.shinhandelivery.delivery.entity.DeliveryRequest;
 import com.example.shinhandelivery.delivery.entity.DeliveryStatus;
@@ -174,7 +175,7 @@ class TrackingIntegrationTest {
   void broadcastStatusChangeShouldReachOwner() throws Exception {
     BlockingQueue<DeliveryStatusBroadcastResponse> received = subscribeToStatusAsCustomer();
 
-    deliveryService.confirmPickup(courierId, deliveryId);
+    deliveryService.confirmPickup(courierId, deliveryId, pickupRequest());
 
     DeliveryStatusBroadcastResponse broadcast = received.poll(5, TimeUnit.SECONDS);
 
@@ -192,7 +193,7 @@ class TrackingIntegrationTest {
         "/topic/delivery/" + deliveryId + "/status",
         frameHandler(strangerReceived, DeliveryStatusBroadcastResponse.class));
 
-    deliveryService.confirmPickup(courierId, deliveryId);
+    deliveryService.confirmPickup(courierId, deliveryId, pickupRequest());
 
     assertThat(strangerReceived.poll(2, TimeUnit.SECONDS)).isNull();
   }
@@ -275,6 +276,12 @@ class TrackingIntegrationTest {
     request.setDropoffLatitude(38.0);
     request.setDropoffLongitude(127.0);
     request.setItemSize(ItemSize.MEDIUM);
+    return request;
+  }
+
+  private DeliveryPickupRequest pickupRequest() {
+    DeliveryPickupRequest request = new DeliveryPickupRequest();
+    request.setPickupPhotoUrl("https://example.com/pickup.jpg");
     return request;
   }
 
