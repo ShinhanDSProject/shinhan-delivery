@@ -7,12 +7,15 @@ import com.example.shinhandelivery.member.entity.Member;
 import com.example.shinhandelivery.member.service.MemberService;
 import com.example.shinhandelivery.payment.dto.request.PinVerifyRequestDto;
 import com.example.shinhandelivery.payment.dto.request.PointChargeRequest;
+import com.example.shinhandelivery.payment.dto.request.PointRefundRequest;
 import com.example.shinhandelivery.payment.dto.request.PointUseRequest;
 import com.example.shinhandelivery.payment.dto.request.PointWalletCreateRequest;
 import com.example.shinhandelivery.payment.dto.response.PinVerifyResponseDto;
 import com.example.shinhandelivery.payment.dto.response.PointBalanceResponse;
+import com.example.shinhandelivery.payment.dto.response.PointRefundResponse;
 import com.example.shinhandelivery.payment.dto.response.PointUseResultResponse;
 import com.example.shinhandelivery.payment.entity.PointHistory;
+import com.example.shinhandelivery.payment.entity.PointHistoryType;
 import com.example.shinhandelivery.payment.entity.PointWallet;
 import com.example.shinhandelivery.payment.repository.PaymentRepository;
 import com.example.shinhandelivery.payment.repository.PointHistoryRepository;
@@ -129,6 +132,37 @@ public class PaymentService {
                 wallet.getBalance(),
                 idempotencyKey));
     return new PointUseResultResponse(
+        wallet.getBalance(), request.getAmount(), history.getCreatedAt());
+  }
+
+  /** 동일 멱등 키의 환불은 한 번만 지갑에 반영하고 최초 환불 결과를 반환한다. */
+  @Transactional
+  public PointRefundResponse refundPoint(
+      Long memberId, String idempotencyKey, PointRefundRequest request) {
+    memberService.getById(memberId);
+
+    PointWallet wallet = findWalletByMemberForUpdateOrThrow(memberId);
+    PointHistory existing =
+        pointHistoryRepository
+            .findByTypeAndReferenceId(PointHistoryType.REFUND, request.getReferenceId())
+            .orElse(null);
+    if (existing != null) {
+      return new PointRefundResponse(
+          existing.getBalanceAfter(), existing.getAmount(), existing.getCreatedAt());
+    }
+
+    wallet.charge(request.getAmount());
+    PointHistory history =
+        pointHistoryRepository.save(
+            PointHistory.ofRefund(
+                memberId,
+                wallet.getId(),
+                request.getAmount(),
+                wallet.getBalance(),
+                idempotencyKey,
+                request.getReferenceId(),
+                request.getDescription()));
+    return new PointRefundResponse(
         wallet.getBalance(), request.getAmount(), history.getCreatedAt());
   }
 

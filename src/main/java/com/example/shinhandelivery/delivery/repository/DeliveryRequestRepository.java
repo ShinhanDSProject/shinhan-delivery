@@ -3,6 +3,7 @@ package com.example.shinhandelivery.delivery.repository;
 import com.example.shinhandelivery.delivery.entity.DeliveryRequest;
 import com.example.shinhandelivery.delivery.entity.DeliveryStatus;
 import jakarta.persistence.LockModeType;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
@@ -39,4 +40,16 @@ public interface DeliveryRequestRepository extends JpaRepository<DeliveryRequest
 
   Optional<DeliveryRequest> findByMemberIdAndPaymentIdempotencyKey(
       Long memberId, String paymentIdempotencyKey);
+
+  /** 설정된 배치 크기만큼 만료된 미배정 배송 요청 ID를 오래된 순서로 조회한다. */
+  @Query(
+      "select d.id from DeliveryRequest d "
+          + "where d.status = :status and d.createdAt <= :cutoff "
+          + "and (d.timeoutNextRetryAt is null or d.timeoutNextRetryAt <= :eligibleAt) "
+          + "order by d.createdAt asc, d.id asc")
+  List<Long> findTimedOutCandidateIds(
+      @Param("status") DeliveryStatus status,
+      @Param("cutoff") LocalDateTime cutoff,
+      @Param("eligibleAt") LocalDateTime eligibleAt,
+      Pageable pageable);
 }

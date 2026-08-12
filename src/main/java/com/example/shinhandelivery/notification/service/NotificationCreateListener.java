@@ -1,6 +1,7 @@
 package com.example.shinhandelivery.notification.service;
 
 import com.example.shinhandelivery.common.exception.EntityNotFoundException;
+import com.example.shinhandelivery.delivery.entity.DeliveryCancellationReason;
 import com.example.shinhandelivery.delivery.entity.DeliveryRequest;
 import com.example.shinhandelivery.delivery.entity.DeliveryStatus;
 import com.example.shinhandelivery.delivery.entity.Matching;
@@ -40,12 +41,12 @@ public class NotificationCreateListener {
 
   @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
   public void onDeliveryStatusChanged(DeliveryStatusChangedEvent event) {
-    DeliveryNotificationTemplate template = DeliveryNotificationTemplate.forStatus(event.status());
+    DeliveryRequest deliveryRequest = deliveryService.getDeliveryRequest(event.deliveryRequestId());
+    DeliveryNotificationTemplate template =
+        DeliveryNotificationTemplate.forDelivery(deliveryRequest, event.status());
     if (template == null) {
       return;
     }
-
-    DeliveryRequest deliveryRequest = deliveryService.getDeliveryRequest(event.deliveryRequestId());
     notify(deliveryRequest.getMemberId(), template.customerTitle(), template.customerMessage());
 
     if (template.hasCourierCopy()) {
@@ -92,7 +93,10 @@ public class NotificationCreateListener {
     MATCHED("배송기사 매칭 완료", "배송기사가 배정되어 곧 픽업을 시작합니다.", "새 배송 배정", "배송 요청이 배정되었습니다. 픽업을 진행해주세요."),
     PICKED_UP("픽업 완료", "배송기사가 물품을 픽업했습니다.", null, null),
     COMPLETED("배송 완료", "배송이 완료되었습니다. 이용해주셔서 감사합니다.", "배송 완료 처리됨", "배송을 완료 처리했습니다."),
-    CANCELLED("배송 취소", "배송 요청이 취소되었습니다.", "배정 취소", "배정된 배송이 취소되었습니다.");
+    CANCELLED("배송 취소", "배송 요청이 취소되었습니다.", "배정 취소", "배정된 배송이 취소되었습니다."),
+    AUTO_TIMEOUT_CANCELLED("배송 자동 취소", "30분 동안 배송원이 배정되지 않아 배송이 자동 취소되었습니다.", null, null),
+    AUTO_TIMEOUT_CANCELLED_AND_REFUNDED(
+        "배송 자동 취소 및 환불 완료", "30분 동안 배송원이 배정되지 않아 배송이 취소되고 결제 포인트가 환불되었습니다.", null, null);
 
     private final String customerTitle;
     private final String customerMessage;
@@ -108,7 +112,14 @@ public class NotificationCreateListener {
     }
 
     /** 이 리스너가 다루지 않는 상태(예: REQUESTED)면 null. */
-    private static DeliveryNotificationTemplate forStatus(DeliveryStatus status) {
+    private static DeliveryNotificationTemplate forDelivery(
+        DeliveryRequest deliveryRequest, DeliveryStatus status) {
+      if (status == DeliveryStatus.CANCELLED
+          && deliveryRequest.getCancellationReason() == DeliveryCancellationReason.AUTO_TIMEOUT) {
+        return deliveryRequest.getRefundedAt() == null
+            ? AUTO_TIMEOUT_CANCELLED
+            : AUTO_TIMEOUT_CANCELLED_AND_REFUNDED;
+      }
       return switch (status) {
         case MATCHED -> MATCHED;
         case PICKED_UP -> PICKED_UP;

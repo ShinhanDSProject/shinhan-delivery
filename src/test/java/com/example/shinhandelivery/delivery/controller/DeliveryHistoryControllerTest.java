@@ -145,7 +145,10 @@ class DeliveryHistoryControllerTest {
             createdAt,
             matchedAt,
             pickedUpAt,
-            completedAt);
+            completedAt,
+            null,
+            null,
+            null);
     when(deliveryService.getDeliveryRequestDetail(1L, 1L)).thenReturn(response);
 
     mockMvc
