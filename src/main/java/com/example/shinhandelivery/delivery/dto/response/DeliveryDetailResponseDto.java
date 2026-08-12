@@ -38,7 +38,11 @@ public record DeliveryDetailResponseDto(
     LocalDateTime completedAt,
     DeliveryCancellationReason cancellationReason,
     LocalDateTime cancelledAt,
-    LocalDateTime refundedAt) {
+    LocalDateTime refundedAt,
+    Long cancellationFee,
+    Long refundAmount,
+    Long courierCompensation,
+    LocalDateTime compensatedAt) {
 
   /**
    * DeliveryRequest 엔티티를 상세 응답 DTO로 변환한다. courierName·vehicleType·matchedAt은 아직 매칭된 배송원이 없으면 모두
@@ -78,6 +82,10 @@ public record DeliveryDetailResponseDto(
         entity.getCompletedAt(),
         entity.getCancellationReason(),
         entity.getCancelledAt(),
-        entity.getRefundedAt());
+        entity.getRefundedAt(),
+        entity.getCancellationFee(),
+        entity.getRefundAmount(),
+        entity.getCourierCompensation(),
+        entity.getCompensatedAt());
   }
 }

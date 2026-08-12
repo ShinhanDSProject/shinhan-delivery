@@ -4,5 +4,6 @@ package com.example.shinhandelivery.payment.entity;
 public enum PointHistoryType {
   CHARGE,
   USE,
-  REFUND
+  REFUND,
+  COURIER_COMPENSATION
 }

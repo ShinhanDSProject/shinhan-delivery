@@ -128,4 +128,26 @@ public class PointHistory {
         .createdAt(LocalDateTime.now())
         .build();
   }
+
+  /** 고객 취소로 배정 배송원에게 지급한 이동 보상 이력을 생성한다. */
+  public static PointHistory ofCourierCompensation(
+      Long memberId,
+      Long walletId,
+      long amount,
+      long balanceAfter,
+      String idempotencyKey,
+      Long referenceId,
+      String description) {
+    return PointHistory.builder()
+        .memberId(memberId)
+        .walletId(walletId)
+        .amount(amount)
+        .balanceAfter(balanceAfter)
+        .type(PointHistoryType.COURIER_COMPENSATION)
+        .idempotencyKey(idempotencyKey)
+        .referenceId(referenceId)
+        .description(description)
+        .createdAt(LocalDateTime.now())
+        .build();
+  }
 }

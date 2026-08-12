@@ -97,6 +97,12 @@ erDiagram
         LocalDateTime refundedAt
         int timeoutRetryCount
         LocalDateTime timeoutNextRetryAt
+        Long cancellationFee
+        Long refundAmount
+        Long courierCompensation
+        Long cancelledByMemberId
+        LocalDateTime compensatedAt
+        DeliveryStatus cancellationPreviousStatus
     }
 
     MATCHING {
@@ -120,7 +126,7 @@ erDiagram
         Long walletId FK
         long amount
         long balanceAfter
-        PointHistoryType type "CHARGE, USE, REFUND"
+        PointHistoryType type "CHARGE, USE, REFUND, COURIER_COMPENSATION"
         PaymentMethod paymentMethod "CARD, BANK_TRANSFER, EASY_PAY (nullable)"
         String idempotencyKey
         Long referenceId "배송 요청 ID (nullable)"
