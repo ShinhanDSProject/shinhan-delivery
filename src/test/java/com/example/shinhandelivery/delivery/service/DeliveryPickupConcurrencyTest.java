@@ -2,6 +2,7 @@ package com.example.shinhandelivery.delivery.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.example.shinhandelivery.delivery.dto.request.DeliveryPickupRequest;
 import com.example.shinhandelivery.delivery.entity.DeliveryRequest;
 import com.example.shinhandelivery.delivery.entity.DeliveryStatus;
 import com.example.shinhandelivery.delivery.entity.Matching;
@@ -114,6 +115,8 @@ class DeliveryPickupConcurrencyTest {
     AtomicInteger successCount = new AtomicInteger();
     AtomicInteger invalidTransitionCount = new AtomicInteger();
     List<Throwable> unexpectedFailures = new CopyOnWriteArrayList<>();
+    DeliveryPickupRequest pickupRequest = new DeliveryPickupRequest();
+    pickupRequest.setPickupPhotoUrl("https://example.com/pickup-concurrency-test.jpg");
 
     for (int i = 0; i < REQUEST_COUNT; i++) {
       executorService.submit(
@@ -121,7 +124,7 @@ class DeliveryPickupConcurrencyTest {
             readyLatch.countDown();
             try {
               startLatch.await();
-              deliveryService.confirmPickup(courierId, deliveryRequestId);
+              deliveryService.confirmPickup(courierId, deliveryRequestId, pickupRequest);
               successCount.incrementAndGet();
             } catch (InvalidDeliveryTransitionException e) {
               invalidTransitionCount.incrementAndGet();

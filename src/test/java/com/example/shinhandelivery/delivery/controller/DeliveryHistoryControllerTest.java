@@ -17,6 +17,7 @@ import com.example.shinhandelivery.common.exception.ErrorCode;
 import com.example.shinhandelivery.common.security.JwtProvider;
 import com.example.shinhandelivery.delivery.dto.request.DeliveryCompleteRequest;
 import com.example.shinhandelivery.delivery.dto.request.DeliveryCreateRequest;
+import com.example.shinhandelivery.delivery.dto.request.DeliveryPickupRequest;
 import com.example.shinhandelivery.delivery.dto.response.DeliveryDetailResponseDto;
 import com.example.shinhandelivery.delivery.dto.response.ProofPhotoResponse;
 import com.example.shinhandelivery.delivery.entity.DeliveryInstructionType;
@@ -137,6 +138,7 @@ class DeliveryHistoryControllerTest {
             "박배송",
             VehicleType.CAR,
             null,
+            "https://example.com/pickup.jpg",
             DeliveryInstructionType.ENTRANCE_CODE,
             "#1234*",
             "101동 1403호",
@@ -162,6 +164,7 @@ class DeliveryHistoryControllerTest {
         .andExpect(jsonPath("$.vehicleType").value("CAR"))
         .andExpect(jsonPath("$.deliveryInstructionType").value("ENTRANCE_CODE"))
         .andExpect(jsonPath("$.entranceCode").value("#1234*"))
+        .andExpect(jsonPath("$.pickupPhotoUrl").value("https://example.com/pickup.jpg"))
         .andExpect(jsonPath("$.createdAt").exists())
         .andExpect(jsonPath("$.matchedAt").exists())
         .andExpect(jsonPath("$.pickedUpAt").exists())
@@ -384,7 +387,15 @@ class DeliveryHistoryControllerTest {
   @Test
   @DisplayName("인증 토큰이 없으면 픽업 완료 요청은 403을 반환한다")
   void confirmPickupUnauthenticatedShouldReturn403() throws Exception {
-    mockMvc.perform(patch("/api/v1/delivery-requests/1/pickup")).andExpect(status().isForbidden());
+    DeliveryPickupRequest request = new DeliveryPickupRequest();
+    request.setPickupPhotoUrl("https://example.com/pickup.jpg");
+
+    mockMvc
+        .perform(
+            patch("/api/v1/delivery-requests/1/pickup")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isForbidden());
   }
 
   @Test

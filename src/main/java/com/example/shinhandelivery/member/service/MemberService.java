@@ -196,11 +196,16 @@ public class MemberService {
   }
 
   private Vehicle createDefaultVehicle(Long memberId, MemberCreateRequest request) {
+    double distance =
+        (request.getMaxDistance() != null && request.getMaxDistance() > 0)
+            ? request.getMaxDistance()
+            : resolveMaxDistance(request.getVehicleType());
     return Vehicle.createDefault(
         memberId,
+        request.getEquipmentName(),
         request.getVehicleType(),
         resolveMaxWeight(request.getPreferredWeight()),
-        resolveMaxDistance(request.getVehicleType()));
+        distance);
   }
 
   private double resolveMaxWeight(Double preferredWeight) {

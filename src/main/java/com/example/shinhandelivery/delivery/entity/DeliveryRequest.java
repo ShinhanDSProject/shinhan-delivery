@@ -105,6 +105,9 @@ public class DeliveryRequest {
   @Column(name = "proof_photo_url", length = 255)
   private String proofPhotoUrl;
 
+  @Column(name = "pickup_photo_url", length = 255)
+  private String pickupPhotoUrl;
+
   @Enumerated(EnumType.STRING)
   @Column(name = "delivery_instruction_type", nullable = false, length = 40)
   @Builder.Default
@@ -260,9 +263,10 @@ public class DeliveryRequest {
     return this;
   }
 
-  /** 픽업 완료 처리를 수행하는 도메인 비즈니스 메서드. PICKED_UP 상태로 전이하고 픽업 시각을 기록한다. */
-  public DeliveryRequest pickUp(LocalDateTime pickedUpAt) {
+  /** 픽업 완료 처리를 수행하는 도메인 비즈니스 메서드. PICKED_UP 상태로 전이하고 픽업 시각과 물품 확인 사진을 기록한다. */
+  public DeliveryRequest pickUp(String pickupPhotoUrl, LocalDateTime pickedUpAt) {
     this.status = DeliveryStatus.PICKED_UP;
+    this.pickupPhotoUrl = pickupPhotoUrl;
     this.pickedUpAt = pickedUpAt;
     return this;
   }
