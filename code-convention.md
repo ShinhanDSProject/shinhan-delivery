@@ -531,7 +531,7 @@ public class DeliveryController {
 
 ## 12.1 동시성 제어
 
-고객 취소처럼 하나의 유스케이스에서 배송 상태와 여러 회원 지갑을 함께 변경할 때는 `DeliveryRequest → Vehicle → 고객 PointWallet → 배송원 PointWallet` 순서로 비관적 락을 획득하고 단일 트랜잭션으로 처리한다. 상세 근거와 검증 기준은 [ADR-0004](docs/adr/0004-고객-취소-원자적-포인트-정산.md)를 따른다.
+고객 취소처럼 하나의 유스케이스에서 배송 상태와 여러 회원 지갑을 함께 변경할 때는 `DeliveryRequest → Matching → Vehicle → 고객 PointWallet → 배송원 PointWallet` 순서로 비관적 락을 획득하고 단일 트랜잭션으로 처리한다. 일부 자원만 사용하는 흐름도 자신이 사용하는 락을 이 순서와 반대로 획득하지 않는다. 상세 근거와 검증 기준은 [ADR-0004](docs/adr/0004-고객-취소-원자적-포인트-정산.md)를 따른다.
 
 동시 요청으로 정확성이 깨지면 안 되는 자원(포인트 잔액, 차량 배정, 배송 매칭 등)은 **비관적 락(Pessimistic Lock)**으로 보호한다. 상세 원리·데드락 회피·테스트 작성법은 `docs/concurrency-control-guide.md`를 참고하고, 여기서는 코딩 전에 알아야 할 핵심만 정리한다.
 

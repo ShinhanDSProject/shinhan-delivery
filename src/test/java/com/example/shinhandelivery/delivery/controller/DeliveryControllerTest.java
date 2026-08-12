@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -110,6 +111,26 @@ class DeliveryControllerTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.cancellationFee").value(1000))
         .andExpect(jsonPath("$.refundAmount").value(2000));
+  }
+
+  @Test
+  @DisplayName("기존 DELETE 취소 API는 로그인한 고객 ID로 취소하고 204를 반환한다")
+  void deleteDeliveryRequestReturnsNoContent() throws Exception {
+    CustomUserDetails userDetails =
+        new CustomUserDetails(1L, "user@test.com", "password", "CUSTOMER");
+    UsernamePasswordAuthenticationToken auth =
+        new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+    SecurityContextHolder.getContext().setAuthentication(auth);
+
+    mockMvc.perform(delete("/api/v1/delivery-requests/10")).andExpect(status().isNoContent());
+
+    verify(deliveryCancellationService).cancel(1L, 10L);
+  }
+
+  @Test
+  @DisplayName("인증 없이 기존 DELETE 취소 API를 호출하면 401을 반환한다")
+  void deleteDeliveryRequestWithoutAuthenticationReturnsUnauthorized() throws Exception {
+    mockMvc.perform(delete("/api/v1/delivery-requests/10")).andExpect(status().isUnauthorized());
   }
 
   @Test
