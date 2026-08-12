@@ -315,16 +315,23 @@
             </div>
             <div id="instructionSlot"></div>
             <div class="warning-note">⚠ 수락 후 무단 취소 시 서비스 이용 정지(노쇼 패널티)가 부과될 수 있습니다.</div>
-            <button class="pickup-button" id="pickupButton" type="button" ${alreadyPickedUp ? 'disabled' : ''}>
-                ${alreadyPickedUp ? '픽업 완료됨' : '픽업 완료'}
+            <button class="pickup-button" id="pickupButton" type="button">
+                ${alreadyPickedUp ? '배송 완료 처리하기' : '픽업 완료'}
             </button>
         `;
         sheet.querySelector('[data-field="pickupAddress"]').textContent = detail.pickupAddress;
         appendInstructionRows(sheet.querySelector('#instructionSlot'), detail);
 
-        if (!alreadyPickedUp) {
-            document.getElementById('pickupButton').addEventListener('click', () => confirmPickup(detail.id));
+        const pickupButton = document.getElementById('pickupButton');
+        if (alreadyPickedUp) {
+            pickupButton.addEventListener('click', () => goToCompletePhoto(detail.id));
+        } else {
+            pickupButton.addEventListener('click', () => confirmPickup(detail.id));
         }
+    }
+
+    function goToCompletePhoto(id) {
+        location.href = `/delivery-complete-photo?id=${id}`;
     }
 
     async function confirmPickup(id) {
@@ -337,7 +344,7 @@
             });
             if (res.ok) {
                 showToast('🎉 픽업 완료 처리되었습니다. 목적지로 이동해주세요.');
-                button.textContent = '픽업 완료됨';
+                setTimeout(() => goToCompletePhoto(id), 1200);
                 return;
             }
             const errData = await res.json().catch(() => ({}));

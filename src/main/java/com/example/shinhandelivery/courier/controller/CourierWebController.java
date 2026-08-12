@@ -41,4 +41,9 @@ public class CourierWebController {
   public String deliveryInProgress() {
     return "delivery-in-progress";
   }
+
+  @GetMapping("/delivery-complete-photo")
+  public String deliveryCompletePhoto() {
+    return "delivery-complete-photo";
+  }
 }
