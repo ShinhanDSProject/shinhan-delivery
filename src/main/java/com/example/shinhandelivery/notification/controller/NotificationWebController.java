@@ -1,6 +1,7 @@
 package com.example.shinhandelivery.notification.controller;
 
 import com.example.shinhandelivery.common.security.CustomUserDetails;
+import com.example.shinhandelivery.common.security.WebSecurityUtils;
 import com.example.shinhandelivery.notice.dto.response.NoticeResponse;
 import com.example.shinhandelivery.notice.service.NoticeService;
 import com.example.shinhandelivery.notification.entity.Notification;
@@ -23,14 +24,16 @@ public class NotificationWebController {
 
   @GetMapping("/notifications")
   public String notifications(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
-    if (userDetails != null && userDetails.getId() != null) {
-      try {
-        Page<Notification> notifications =
-            notificationService.list(userDetails.getId(), null, PageRequest.of(0, 30));
-        model.addAttribute("notifications", notifications.getContent());
-      } catch (Exception ignored) {
-      }
-    }
+    WebSecurityUtils.getUserId(userDetails)
+        .ifPresent(
+            userId -> {
+              try {
+                Page<Notification> notifications =
+                    notificationService.list(userId, null, PageRequest.of(0, 30));
+                model.addAttribute("notifications", notifications.getContent());
+              } catch (Exception ignored) {
+              }
+            });
     try {
       Page<NoticeResponse> notices =
           noticeService.list(null, PageRequest.of(0, 30)).map(NoticeResponse::from);

@@ -1,6 +1,7 @@
 package com.example.shinhandelivery.delivery.controller;
 
 import com.example.shinhandelivery.common.security.CustomUserDetails;
+import com.example.shinhandelivery.common.security.WebSecurityUtils;
 import com.example.shinhandelivery.delivery.entity.DeliveryRequest;
 import com.example.shinhandelivery.delivery.entity.DeliveryStatus;
 import com.example.shinhandelivery.delivery.service.DeliveryService;
@@ -23,33 +24,37 @@ public class DeliveryWebController {
   @GetMapping("/delivery-history")
   public String deliveryHistory(
       @AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
-    if (userDetails != null && userDetails.getId() != null) {
-      try {
-        List<DeliveryRequest> deliveries =
-            deliveryService
-                .getMyDeliveryRequests(userDetails.getId(), null, PageRequest.of(0, 20))
-                .getContent();
-        model.addAttribute("deliveries", deliveries);
-      } catch (Exception ignored) {
-      }
-    }
+    WebSecurityUtils.getUserId(userDetails)
+        .ifPresent(
+            userId -> {
+              try {
+                List<DeliveryRequest> deliveries =
+                    deliveryService
+                        .getMyDeliveryRequests(userId, null, PageRequest.of(0, 20))
+                        .getContent();
+                model.addAttribute("deliveries", deliveries);
+              } catch (Exception ignored) {
+              }
+            });
     return "delivery-history";
   }
 
   @GetMapping("/delivery-cancel-list")
   public String deliveryCancelList(
       @AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
-    if (userDetails != null && userDetails.getId() != null) {
-      try {
-        List<DeliveryRequest> deliveries =
-            deliveryService
-                .getMyDeliveryRequests(
-                    userDetails.getId(), DeliveryStatus.CANCELLED, PageRequest.of(0, 20))
-                .getContent();
-        model.addAttribute("deliveries", deliveries);
-      } catch (Exception ignored) {
-      }
-    }
+    WebSecurityUtils.getUserId(userDetails)
+        .ifPresent(
+            userId -> {
+              try {
+                List<DeliveryRequest> deliveries =
+                    deliveryService
+                        .getMyDeliveryRequests(
+                            userId, DeliveryStatus.CANCELLED, PageRequest.of(0, 20))
+                        .getContent();
+                model.addAttribute("deliveries", deliveries);
+              } catch (Exception ignored) {
+              }
+            });
     return "delivery-cancel-list";
   }
 

@@ -3,6 +3,7 @@ package com.example.shinhandelivery.address.controller;
 import com.example.shinhandelivery.address.entity.Address;
 import com.example.shinhandelivery.address.service.AddressService;
 import com.example.shinhandelivery.common.security.CustomUserDetails;
+import com.example.shinhandelivery.common.security.WebSecurityUtils;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -20,13 +21,15 @@ public class AddressWebController {
   @GetMapping("/address-management")
   public String addressManagement(
       @AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
-    if (userDetails != null && userDetails.getId() != null) {
-      try {
-        List<Address> addresses = addressService.list(userDetails.getId());
-        model.addAttribute("addresses", addresses);
-      } catch (Exception ignored) {
-      }
-    }
+    WebSecurityUtils.getUserId(userDetails)
+        .ifPresent(
+            userId -> {
+              try {
+                List<Address> addresses = addressService.list(userId);
+                model.addAttribute("addresses", addresses);
+              } catch (Exception ignored) {
+              }
+            });
     return "address-management";
   }
 
