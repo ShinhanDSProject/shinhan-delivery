@@ -4,10 +4,8 @@ import com.example.shinhandelivery.common.security.CustomUserDetails;
 import com.example.shinhandelivery.common.security.WebSecurityUtils;
 import com.example.shinhandelivery.notice.dto.response.NoticeResponse;
 import com.example.shinhandelivery.notice.service.NoticeService;
-import com.example.shinhandelivery.notification.entity.Notification;
 import com.example.shinhandelivery.notification.service.NotificationService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -24,22 +22,20 @@ public class NotificationWebController {
 
   @GetMapping("/notifications")
   public String notifications(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
-    WebSecurityUtils.getUserId(userDetails)
-        .ifPresent(
-            userId -> {
-              try {
-                Page<Notification> notifications =
-                    notificationService.list(userId, null, PageRequest.of(0, 30));
-                model.addAttribute("notifications", notifications.getContent());
-              } catch (Exception ignored) {
-              }
-            });
-    try {
-      Page<NoticeResponse> notices =
-          noticeService.list(null, PageRequest.of(0, 30)).map(NoticeResponse::from);
-      model.addAttribute("notices", notices.getContent());
-    } catch (Exception ignored) {
-    }
+    WebSecurityUtils.ifAuthenticated(
+        userDetails,
+        userId ->
+            WebSecurityUtils.safeAddAttribute(
+                model,
+                "notifications",
+                () -> notificationService.list(userId, null, PageRequest.of(0, 30)).getContent()));
+
+    WebSecurityUtils.safeAddAttribute(
+        model,
+        "notices",
+        () ->
+            noticeService.list(null, PageRequest.of(0, 30)).map(NoticeResponse::from).getContent());
+
     return "notifications";
   }
 }

@@ -1,10 +1,8 @@
 package com.example.shinhandelivery.address.controller;
 
-import com.example.shinhandelivery.address.entity.Address;
 import com.example.shinhandelivery.address.service.AddressService;
 import com.example.shinhandelivery.common.security.CustomUserDetails;
 import com.example.shinhandelivery.common.security.WebSecurityUtils;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -21,15 +19,11 @@ public class AddressWebController {
   @GetMapping("/address-management")
   public String addressManagement(
       @AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
-    WebSecurityUtils.getUserId(userDetails)
-        .ifPresent(
-            userId -> {
-              try {
-                List<Address> addresses = addressService.list(userId);
-                model.addAttribute("addresses", addresses);
-              } catch (Exception ignored) {
-              }
-            });
+    WebSecurityUtils.ifAuthenticated(
+        userDetails,
+        userId ->
+            WebSecurityUtils.safeAddAttribute(
+                model, "addresses", () -> addressService.list(userId)));
     return "address-management";
   }
 

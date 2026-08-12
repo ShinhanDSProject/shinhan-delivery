@@ -2,10 +2,8 @@ package com.example.shinhandelivery.delivery.controller;
 
 import com.example.shinhandelivery.common.security.CustomUserDetails;
 import com.example.shinhandelivery.common.security.WebSecurityUtils;
-import com.example.shinhandelivery.delivery.entity.DeliveryRequest;
 import com.example.shinhandelivery.delivery.entity.DeliveryStatus;
 import com.example.shinhandelivery.delivery.service.DeliveryService;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -24,48 +22,41 @@ public class DeliveryWebController {
   @GetMapping("/delivery-history")
   public String deliveryHistory(
       @AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
-    WebSecurityUtils.getUserId(userDetails)
-        .ifPresent(
-            userId -> {
-              try {
-                List<DeliveryRequest> deliveries =
+    WebSecurityUtils.ifAuthenticated(
+        userDetails,
+        userId ->
+            WebSecurityUtils.safeAddAttribute(
+                model,
+                "deliveries",
+                () ->
                     deliveryService
                         .getMyDeliveryRequests(userId, null, PageRequest.of(0, 20))
-                        .getContent();
-                model.addAttribute("deliveries", deliveries);
-              } catch (Exception ignored) {
-              }
-            });
+                        .getContent()));
     return "delivery-history";
   }
 
   @GetMapping("/delivery-cancel-list")
   public String deliveryCancelList(
       @AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
-    WebSecurityUtils.getUserId(userDetails)
-        .ifPresent(
-            userId -> {
-              try {
-                List<DeliveryRequest> deliveries =
+    WebSecurityUtils.ifAuthenticated(
+        userDetails,
+        userId ->
+            WebSecurityUtils.safeAddAttribute(
+                model,
+                "deliveries",
+                () ->
                     deliveryService
                         .getMyDeliveryRequests(
                             userId, DeliveryStatus.CANCELLED, PageRequest.of(0, 20))
-                        .getContent();
-                model.addAttribute("deliveries", deliveries);
-              } catch (Exception ignored) {
-              }
-            });
+                        .getContent()));
     return "delivery-cancel-list";
   }
 
   @GetMapping("/delivery-detail")
   public String deliveryDetail(@RequestParam(required = false) Long id, Model model) {
     if (id != null) {
-      try {
-        DeliveryRequest delivery = deliveryService.getDeliveryRequest(id);
-        model.addAttribute("delivery", delivery);
-      } catch (Exception ignored) {
-      }
+      WebSecurityUtils.safeAddAttribute(
+          model, "delivery", () -> deliveryService.getDeliveryRequest(id));
     }
     return "delivery-detail";
   }
@@ -83,11 +74,8 @@ public class DeliveryWebController {
   @GetMapping("/cancel-detail")
   public String cancelDetail(@RequestParam(required = false) Long id, Model model) {
     if (id != null) {
-      try {
-        DeliveryRequest delivery = deliveryService.getDeliveryRequest(id);
-        model.addAttribute("delivery", delivery);
-      } catch (Exception ignored) {
-      }
+      WebSecurityUtils.safeAddAttribute(
+          model, "delivery", () -> deliveryService.getDeliveryRequest(id));
     }
     return "cancel-detail";
   }
@@ -95,11 +83,8 @@ public class DeliveryWebController {
   @GetMapping("/matching-wait")
   public String matchingWait(@RequestParam(required = false) Long id, Model model) {
     if (id != null) {
-      try {
-        DeliveryRequest delivery = deliveryService.getDeliveryRequest(id);
-        model.addAttribute("delivery", delivery);
-      } catch (Exception ignored) {
-      }
+      WebSecurityUtils.safeAddAttribute(
+          model, "delivery", () -> deliveryService.getDeliveryRequest(id));
     }
     return "matching-wait";
   }
@@ -107,11 +92,8 @@ public class DeliveryWebController {
   @GetMapping("/matching-complete")
   public String matchingComplete(@RequestParam(required = false) Long id, Model model) {
     if (id != null) {
-      try {
-        DeliveryRequest delivery = deliveryService.getDeliveryRequest(id);
-        model.addAttribute("delivery", delivery);
-      } catch (Exception ignored) {
-      }
+      WebSecurityUtils.safeAddAttribute(
+          model, "delivery", () -> deliveryService.getDeliveryRequest(id));
     }
     return "matching-complete";
   }

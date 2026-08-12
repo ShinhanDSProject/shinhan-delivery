@@ -1,7 +1,7 @@
 package com.example.shinhandelivery.common.advice;
 
 import com.example.shinhandelivery.common.security.CustomUserDetails;
-import com.example.shinhandelivery.member.entity.Member;
+import com.example.shinhandelivery.common.security.WebSecurityUtils;
 import com.example.shinhandelivery.member.service.MemberService;
 import com.example.shinhandelivery.payment.entity.PointWallet;
 import com.example.shinhandelivery.payment.service.PaymentService;
@@ -28,32 +28,28 @@ public class GlobalWebModelAdvice {
   @ModelAttribute
   public void populateGlobalWebModel(Model model) {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    if (authentication == null
-        || !(authentication.getPrincipal() instanceof CustomUserDetails userDetails)) {
-      return;
-    }
+    if (authentication != null
+        && authentication.getPrincipal() instanceof CustomUserDetails userDetails) {
+      WebSecurityUtils.ifAuthenticated(
+          userDetails,
+          userId -> {
+            MemberService memberService = memberServiceProvider.getIfAvailable();
+            if (memberService != null) {
+              WebSecurityUtils.safeAddAttribute(
+                  model, "member", () -> memberService.getMyProfile(userId));
+            }
 
-    Long userId = userDetails.getId();
-    if (userId == null) {
-      return;
-    }
-
-    MemberService memberService = memberServiceProvider.getIfAvailable();
-    if (memberService != null) {
-      try {
-        Member member = memberService.getMyProfile(userId);
-        model.addAttribute("member", member);
-      } catch (Exception ignored) {
-      }
-    }
-
-    PaymentService paymentService = paymentServiceProvider.getIfAvailable();
-    if (paymentService != null) {
-      try {
-        PointWallet wallet = paymentService.getByMemberId(userId);
-        model.addAttribute("wallet", wallet != null ? wallet : PointWallet.createEmpty(userId));
-      } catch (Exception ignored) {
-      }
+            PaymentService paymentService = paymentServiceProvider.getIfAvailable();
+            if (paymentService != null) {
+              WebSecurityUtils.safeAddAttribute(
+                  model,
+                  "wallet",
+                  () -> {
+                    PointWallet wallet = paymentService.getByMemberId(userId);
+                    return wallet != null ? wallet : PointWallet.createEmpty(userId);
+                  });
+            }
+          });
     }
   }
 }
