@@ -19,6 +19,7 @@ import com.example.shinhandelivery.delivery.dto.request.DeliveryCreateRequest;
 import com.example.shinhandelivery.delivery.dto.request.DeliveryEstimateRequest;
 import com.example.shinhandelivery.delivery.dto.request.DeliveryPayLocationRequest;
 import com.example.shinhandelivery.delivery.dto.request.DeliveryPayRequest;
+import com.example.shinhandelivery.delivery.dto.request.DeliveryPickupRequest;
 import com.example.shinhandelivery.delivery.dto.request.DeliveryUpdateRequest;
 import com.example.shinhandelivery.delivery.dto.response.DeliveryDetailResponseDto;
 import com.example.shinhandelivery.delivery.dto.response.DeliveryEstimateResponse;
@@ -467,17 +468,28 @@ class DeliveryServiceTest {
     assertThat(created.getFeePoint()).isEqualTo(estimate.totalFee().longValueExact());
   }
 
+  /** confirmPickup/completeDelivery의 배정된 배송원 판정에 쓰이는 매칭·차량을 courierId 소유로 스텁한다. */
+  private void stubAssignedCourier(Long deliveryRequestId, Long vehicleId, Long courierId) {
+    Matching matching = new Matching();
+    matching.setVehicleId(vehicleId);
+    when(matchingRepository.findByDeliveryRequestId(deliveryRequestId))
+        .thenReturn(Optional.of(matching));
+    when(vehicleService.getById(vehicleId))
+        .thenReturn(Vehicle.builder().id(vehicleId).memberId(courierId).build());
+  }
+
   @Test
-  @DisplayName("PICKED_UP 상태면 완료 처리하고 증거사진 URL을 저장한다")
+  @DisplayName("배정된 배송원이 처리하면 PICKED_UP 상태면 완료 처리하고 증거사진 URL을 저장한다")
   void completeDeliverySavePhotoUrlSuccess() {
     DeliveryRequest deliveryRequest = new DeliveryRequest();
     deliveryRequest.setStatus(DeliveryStatus.PICKED_UP);
     when(deliveryRequestRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(deliveryRequest));
+    stubAssignedCourier(1L, 10L, 20L);
 
     DeliveryCompleteRequest request = new DeliveryCompleteRequest();
     request.setProofPhotoUrl("https://example.com/proof.jpg");
 
-    DeliveryRequest response = deliveryService.completeDelivery(1L, request);
+    DeliveryRequest response = deliveryService.completeDelivery(20L, 1L, request);
 
     assertThat(response.getStatus()).isEqualTo(DeliveryStatus.COMPLETED);
     assertThat(deliveryRequest.getProofPhotoUrl()).isEqualTo("https://example.com/proof.jpg");
@@ -496,25 +508,46 @@ class DeliveryServiceTest {
     DeliveryRequest deliveryRequest = new DeliveryRequest();
     deliveryRequest.setStatus(DeliveryStatus.MATCHED);
     when(deliveryRequestRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(deliveryRequest));
+    stubAssignedCourier(1L, 10L, 20L);
 
     DeliveryCompleteRequest request = new DeliveryCompleteRequest();
     request.setProofPhotoUrl("https://example.com/proof.jpg");
 
-    assertThatThrownBy(() -> deliveryService.completeDelivery(1L, request))
+    assertThatThrownBy(() -> deliveryService.completeDelivery(20L, 1L, request))
         .isInstanceOf(InvalidDeliveryTransitionException.class);
   }
 
   @Test
-  @DisplayName("MATCHED 상태면 픽업 완료로 전이하고 픽업시각을 저장한다")
+  @DisplayName("배정된 배송원이 아니면 완료 처리 시 DeliveryAccessDeniedException을 던진다")
+  void completeDeliveryNonAssignedCourierShouldThrowException() {
+    DeliveryRequest deliveryRequest = new DeliveryRequest();
+    deliveryRequest.setStatus(DeliveryStatus.PICKED_UP);
+    when(deliveryRequestRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(deliveryRequest));
+    stubAssignedCourier(1L, 10L, 20L);
+
+    DeliveryCompleteRequest request = new DeliveryCompleteRequest();
+    request.setProofPhotoUrl("https://example.com/proof.jpg");
+
+    assertThatThrownBy(() -> deliveryService.completeDelivery(999L, 1L, request))
+        .isInstanceOf(DeliveryAccessDeniedException.class);
+  }
+
+  @Test
+  @DisplayName("배정된 배송원이 처리하면 MATCHED 상태면 픽업 완료로 전이하고 픽업시각을 저장한다")
   void confirmPickupSuccess() {
     DeliveryRequest deliveryRequest = new DeliveryRequest();
     deliveryRequest.setStatus(DeliveryStatus.MATCHED);
     when(deliveryRequestRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(deliveryRequest));
+    stubAssignedCourier(1L, 10L, 20L);
 
-    DeliveryRequest response = deliveryService.confirmPickup(1L);
+    DeliveryPickupRequest request = new DeliveryPickupRequest();
+    request.setPickupPhotoUrl("https://example.com/pickup.jpg");
+
+    DeliveryRequest response = deliveryService.confirmPickup(20L, 1L, request);
 
     assertThat(response.getStatus()).isEqualTo(DeliveryStatus.PICKED_UP);
     assertThat(deliveryRequest.getPickedUpAt()).isNotNull();
+    assertThat(deliveryRequest.getPickupPhotoUrl()).isEqualTo("https://example.com/pickup.jpg");
     verify(eventPublisher)
         .publishEvent(
             argThat(
@@ -529,9 +562,26 @@ class DeliveryServiceTest {
     DeliveryRequest deliveryRequest = new DeliveryRequest();
     deliveryRequest.setStatus(DeliveryStatus.REQUESTED);
     when(deliveryRequestRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(deliveryRequest));
+    stubAssignedCourier(1L, 10L, 20L);
+    DeliveryPickupRequest request = new DeliveryPickupRequest();
+    request.setPickupPhotoUrl("https://example.com/pickup.jpg");
 
-    assertThatThrownBy(() -> deliveryService.confirmPickup(1L))
+    assertThatThrownBy(() -> deliveryService.confirmPickup(20L, 1L, request))
         .isInstanceOf(InvalidDeliveryTransitionException.class);
+  }
+
+  @Test
+  @DisplayName("배정된 배송원이 아니면 픽업 처리 시 DeliveryAccessDeniedException을 던진다")
+  void confirmPickupNonAssignedCourierShouldThrowException() {
+    DeliveryRequest deliveryRequest = new DeliveryRequest();
+    deliveryRequest.setStatus(DeliveryStatus.MATCHED);
+    when(deliveryRequestRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(deliveryRequest));
+    stubAssignedCourier(1L, 10L, 20L);
+    DeliveryPickupRequest request = new DeliveryPickupRequest();
+    request.setPickupPhotoUrl("https://example.com/pickup.jpg");
+
+    assertThatThrownBy(() -> deliveryService.confirmPickup(999L, 1L, request))
+        .isInstanceOf(DeliveryAccessDeniedException.class);
   }
 
   @Test

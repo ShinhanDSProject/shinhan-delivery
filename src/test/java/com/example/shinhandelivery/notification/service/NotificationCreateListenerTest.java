@@ -13,6 +13,7 @@ import static org.mockito.Mockito.when;
 
 import com.example.shinhandelivery.common.exception.EntityNotFoundException;
 import com.example.shinhandelivery.common.exception.ErrorCode;
+import com.example.shinhandelivery.delivery.entity.DeliveryCancellationReason;
 import com.example.shinhandelivery.delivery.entity.DeliveryRequest;
 import com.example.shinhandelivery.delivery.entity.DeliveryStatus;
 import com.example.shinhandelivery.delivery.entity.Matching;
@@ -125,6 +126,62 @@ class NotificationCreateListenerTest {
             eq("/topic/members/" + CUSTOMER_ID + "/notifications"),
             any(NotificationResponse.class));
     verifyNoMoreInteractions(messagingTemplate);
+  }
+
+  @Test
+  @DisplayName("환불된 30분 미배정 자동 취소는 고객에게 환불 완료 알림을 보낸다")
+  void onRefundedAutoTimeoutCancellationShouldNotifyCustomerOfRefund() {
+    DeliveryRequest deliveryRequest =
+        DeliveryRequest.builder()
+            .id(DELIVERY_REQUEST_ID)
+            .memberId(CUSTOMER_ID)
+            .status(DeliveryStatus.CANCELLED)
+            .cancellationReason(DeliveryCancellationReason.AUTO_TIMEOUT)
+            .refundedAt(LocalDateTime.now())
+            .build();
+    when(deliveryService.getDeliveryRequest(DELIVERY_REQUEST_ID)).thenReturn(deliveryRequest);
+    when(notificationRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+    listener.onDeliveryStatusChanged(
+        new DeliveryStatusChangedEvent(
+            DELIVERY_REQUEST_ID, DeliveryStatus.CANCELLED, LocalDateTime.now()));
+
+    ArgumentCaptor<Notification> savedCaptor = ArgumentCaptor.forClass(Notification.class);
+    verify(notificationRepository).save(savedCaptor.capture());
+    Assertions.assertThat(savedCaptor.getValue().getTitle()).contains("자동 취소", "환불");
+    Assertions.assertThat(savedCaptor.getValue().getMessage()).contains("30분", "환불");
+    verify(matchingService, never()).getMatchingByDeliveryRequestId(anyLong());
+    verify(messagingTemplate)
+        .convertAndSend(
+            eq("/topic/members/" + CUSTOMER_ID + "/notifications"),
+            any(NotificationResponse.class));
+    verifyNoMoreInteractions(messagingTemplate);
+  }
+
+  @Test
+  @DisplayName("미결제 30분 미배정 자동 취소는 고객에게 환불 문구 없이 알린다")
+  void onUnpaidAutoTimeoutCancellationShouldNotMentionRefund() {
+    DeliveryRequest deliveryRequest =
+        DeliveryRequest.builder()
+            .id(DELIVERY_REQUEST_ID)
+            .memberId(CUSTOMER_ID)
+            .status(DeliveryStatus.CANCELLED)
+            .cancellationReason(DeliveryCancellationReason.AUTO_TIMEOUT)
+            .build();
+    when(deliveryService.getDeliveryRequest(DELIVERY_REQUEST_ID)).thenReturn(deliveryRequest);
+    when(notificationRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+    listener.onDeliveryStatusChanged(
+        new DeliveryStatusChangedEvent(
+            DELIVERY_REQUEST_ID, DeliveryStatus.CANCELLED, LocalDateTime.now()));
+
+    ArgumentCaptor<Notification> savedCaptor = ArgumentCaptor.forClass(Notification.class);
+    verify(notificationRepository).save(savedCaptor.capture());
+    Assertions.assertThat(savedCaptor.getValue().getTitle()).contains("자동 취소").doesNotContain("환불");
+    Assertions.assertThat(savedCaptor.getValue().getMessage())
+        .contains("30분", "자동 취소")
+        .doesNotContain("환불");
+    verify(matchingService, never()).getMatchingByDeliveryRequestId(anyLong());
   }
 
   @Test

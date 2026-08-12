@@ -105,6 +105,9 @@ public class DeliveryRequest {
   @Column(name = "proof_photo_url", length = 255)
   private String proofPhotoUrl;
 
+  @Column(name = "pickup_photo_url", length = 255)
+  private String pickupPhotoUrl;
+
   @Enumerated(EnumType.STRING)
   @Column(name = "delivery_instruction_type", nullable = false, length = 40)
   @Builder.Default
@@ -130,6 +133,23 @@ public class DeliveryRequest {
 
   @Column(name = "created_at")
   private LocalDateTime createdAt;
+
+  @Enumerated(EnumType.STRING)
+  @Column(name = "cancellation_reason", length = 30)
+  private DeliveryCancellationReason cancellationReason;
+
+  @Column(name = "cancelled_at")
+  private LocalDateTime cancelledAt;
+
+  @Column(name = "refunded_at")
+  private LocalDateTime refundedAt;
+
+  @Column(name = "timeout_retry_count", nullable = false)
+  @Builder.Default
+  private int timeoutRetryCount = 0;
+
+  @Column(name = "timeout_next_retry_at")
+  private LocalDateTime timeoutNextRetryAt;
 
   public double getPickupLatitude() {
     return pickupLocation != null ? pickupLocation.getLatitude() : 0.0;
@@ -224,9 +244,10 @@ public class DeliveryRequest {
     return this;
   }
 
-  /** 픽업 완료 처리를 수행하는 도메인 비즈니스 메서드. PICKED_UP 상태로 전이하고 픽업 시각을 기록한다. */
-  public DeliveryRequest pickUp(LocalDateTime pickedUpAt) {
+  /** 픽업 완료 처리를 수행하는 도메인 비즈니스 메서드. PICKED_UP 상태로 전이하고 픽업 시각과 물품 확인 사진을 기록한다. */
+  public DeliveryRequest pickUp(String pickupPhotoUrl, LocalDateTime pickedUpAt) {
     this.status = DeliveryStatus.PICKED_UP;
+    this.pickupPhotoUrl = pickupPhotoUrl;
     this.pickedUpAt = pickedUpAt;
     return this;
   }
@@ -243,5 +264,21 @@ public class DeliveryRequest {
   public DeliveryRequest changeStatus(DeliveryStatus newStatus) {
     this.status = newStatus;
     return this;
+  }
+
+  /** 30분 미배정 타임아웃으로 요청을 취소하고, 결제 요청이면 환불 완료 시각을 함께 기록한다. */
+  public DeliveryRequest cancelByTimeout(LocalDateTime processedAt, boolean refunded) {
+    this.status = DeliveryStatus.CANCELLED;
+    this.cancellationReason = DeliveryCancellationReason.AUTO_TIMEOUT;
+    this.cancelledAt = processedAt;
+    this.refundedAt = refunded ? processedAt : null;
+    this.timeoutNextRetryAt = null;
+    return this;
+  }
+
+  /** 자동 타임아웃 실패 횟수와 다음 재시도 시각을 기록해 같은 실패 요청이 후보 배치를 계속 독점하지 않게 한다. */
+  public void scheduleTimeoutRetry(LocalDateTime nextRetryAt) {
+    this.timeoutRetryCount++;
+    this.timeoutNextRetryAt = nextRetryAt;
   }
 }

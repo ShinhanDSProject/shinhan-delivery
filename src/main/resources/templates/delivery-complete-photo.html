@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>배송 완료 촬영 - Shinhan Delivery</title>
+    <link rel="stylesheet" href="/css/design-system.css">
+    <style>
+        :root {
+            --primary: var(--color-blue-30);
+            --text-dark: var(--color-black-200);
+            --text-muted: var(--color-grey-300);
+            --border: var(--color-grey-50);
+            --surface: #FAFBFD;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: var(--font-family-base);
+        }
+
+        body {
+            min-height: 100vh;
+            color: var(--text-dark);
+            background: var(--color-white-100);
+        }
+
+        .page {
+            max-width: 480px;
+            margin: 0 auto;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header.top {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 20px;
+        }
+
+        .back-button {
+            width: 32px;
+            height: 32px;
+            min-width: 32px;
+            border-radius: 999px;
+            border: 0;
+            background: rgba(0, 0, 0, 0.02);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        header.top h1 {
+            font-size: 18px;
+            font-weight: 800;
+        }
+
+        .content {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            padding: 20px;
+            flex: 1;
+        }
+
+        .dropoff-card {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            padding: 16px;
+            background: var(--surface);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+
+        .dropoff-card .label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #94A3B8;
+        }
+
+        .dropoff-card .address {
+            font-size: 16px;
+            font-weight: 800;
+        }
+
+        .photo-section label {
+            display: block;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .photo-upload {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 32px 20px;
+            background: var(--surface);
+            border: 1px dashed var(--border);
+            border-radius: 12px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .photo-upload svg {
+            width: 28px;
+            height: 28px;
+            color: #4A5568;
+        }
+
+        .photo-upload span {
+            font-size: 13px;
+            font-weight: 600;
+            color: #4A5568;
+        }
+
+        .photo-preview {
+            display: none;
+            width: 100%;
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .photo-preview.visible {
+            display: block;
+        }
+
+        .photo-preview img {
+            width: 100%;
+            height: 260px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .photo-preview button {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: 0;
+            background: rgba(0, 0, 0, 0.6);
+            color: #fff;
+            cursor: pointer;
+        }
+
+        .note {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .status-message {
+            padding: 40px 20px;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        footer.bottom {
+            padding: 16px 20px;
+        }
+
+        .complete-button {
+            width: 100%;
+            padding: 16px;
+            border: 0;
+            border-radius: 12px;
+            background: var(--primary);
+            color: var(--color-white-100);
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .complete-button:disabled {
+            background: var(--color-grey-100);
+            cursor: not-allowed;
+        }
+
+        .toast-popup {
+            display: none;
+            position: fixed;
+            left: 50%;
+            bottom: 100px;
+            transform: translateX(-50%);
+            background: var(--color-black-200);
+            color: var(--color-white-100);
+            padding: 10px 18px;
+            border-radius: 999px;
+            font-size: 13px;
+            z-index: 20;
+            white-space: nowrap;
+        }
+
+        .toast-popup.toast-error {
+            background: var(--color-red-100);
+        }
+    </style>
+</head>
+<body>
+<main class="page">
+    <header class="top">
+        <button class="back-button" type="button" aria-label="뒤로 가기" onclick="history.back()">
+            <svg viewBox="0 0 24 24" fill="none" width="20" height="20"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <h1>배송 완료 촬영</h1>
+    </header>
+
+    <div class="content" id="content">
+        <div class="status-message">불러오는 중...</div>
+    </div>
+
+    <footer class="bottom" id="footer" hidden>
+        <button class="complete-button" id="completeButton" type="button" disabled>배송 완료</button>
+    </footer>
+</main>
+
+<div class="toast-popup" id="toast"></div>
+
+<script>
+    const deliveryId = new URLSearchParams(location.search).get('id');
+    let uploadedPhotoUrl = null;
+    let photoSelectionVersion = 0;
+
+    function authHeader() {
+        const token = localStorage.getItem('accessToken');
+        const tokenType = localStorage.getItem('tokenType') || 'Bearer';
+        if (!token) return null;
+        return `${tokenType} ${token}`;
+    }
+
+    function showToast(message, isError = false) {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+        toast.className = `toast-popup ${isError ? 'toast-error' : ''}`;
+        toast.style.display = 'block';
+        setTimeout(() => { toast.style.display = 'none'; }, 2500);
+    }
+
+    function renderContent(detail) {
+        const content = document.getElementById('content');
+        content.innerHTML = `
+            <div class="dropoff-card">
+                <span class="label">배송지</span>
+                <span class="address" data-field="dropoffAddress"></span>
+            </div>
+            <div class="photo-section">
+                <label>배송 완료 증거 사진</label>
+                <button type="button" class="photo-upload" id="photoUploadBtn">
+                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/><path d="M4 7h3l2-3h6l2 3h3v13H4z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+                    <span id="photoUploadLabel">사진 찍어 추가하기</span>
+                </button>
+                <input type="file" id="photoInput" accept="image/jpeg,image/png,image/webp" hidden>
+                <div class="photo-preview" id="photoPreview">
+                    <img id="photoPreviewImg" alt="배송 완료 증거 사진 미리보기">
+                    <button type="button" id="photoRemoveBtn" aria-label="사진 삭제">×</button>
+                </div>
+                <p class="note">문 앞에 놓인 물품이 잘 보이도록 촬영해주세요.</p>
+            </div>
+        `;
+        content.querySelector('[data-field="dropoffAddress"]').textContent = detail.dropoffAddress;
+
+        document.getElementById('photoUploadBtn').addEventListener('click', () => {
+            document.getElementById('photoInput').click();
+        });
+        document.getElementById('photoInput').addEventListener('change', onPhotoSelected);
+        document.getElementById('photoRemoveBtn').addEventListener('click', removePhoto);
+
+        document.getElementById('footer').hidden = false;
+        document.getElementById('completeButton').addEventListener('click', () => completeDelivery(detail.id));
+    }
+
+    async function onPhotoSelected(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const selectionVersion = ++photoSelectionVersion;
+
+        const label = document.getElementById('photoUploadLabel');
+        label.textContent = '업로드 중...';
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+            const response = await fetch('/api/v1/uploads/image', {
+                method: 'POST',
+                headers: { Authorization: authHeader() },
+                body: formData
+            });
+            if (!response.ok) throw new Error('upload failed');
+            const result = await response.json();
+            if (selectionVersion !== photoSelectionVersion) return;   // 그 사이 다른 사진이 선택/삭제됨 — 이 응답은 버림
+            uploadedPhotoUrl = result.imageUrl;
+
+            document.getElementById('photoPreviewImg').src = uploadedPhotoUrl;
+            document.getElementById('photoPreview').classList.add('visible');
+            document.getElementById('photoUploadBtn').style.display = 'none';
+            document.getElementById('completeButton').disabled = false;
+        } catch (error) {
+            if (selectionVersion === photoSelectionVersion) {
+                event.target.value = '';   // 같은 파일을 다시 선택해도 change가 발생하도록 초기화(재시도 가능하게)
+                label.textContent = '업로드에 실패했어요. 다시 시도해주세요';
+            }
+        }
+    }
+
+    function removePhoto() {
+        photoSelectionVersion++;
+        uploadedPhotoUrl = null;
+        document.getElementById('photoInput').value = '';
+        document.getElementById('photoPreview').classList.remove('visible');
+        document.getElementById('photoUploadBtn').style.display = 'flex';
+        document.getElementById('photoUploadLabel').textContent = '사진 찍어 추가하기';
+        document.getElementById('completeButton').disabled = true;
+    }
+
+    async function completeDelivery(id) {
+        if (!uploadedPhotoUrl) return;
+        const button = document.getElementById('completeButton');
+        button.disabled = true;
+        try {
+            const res = await fetch(`/api/v1/delivery-requests/${id}/complete`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json', Authorization: authHeader() },
+                body: JSON.stringify({ proofPhotoUrl: uploadedPhotoUrl })
+            });
+            if (res.ok) {
+                showToast('🎉 배송이 완료 처리되었습니다!');
+                setTimeout(() => { location.href = '/courier-home'; }, 1200);
+                return;
+            }
+            const errData = await res.json().catch(() => ({}));
+            showToast(`❌ ${errData.message || '처리에 실패했습니다.'}`, true);
+            button.disabled = false;
+        } catch (error) {
+            showToast('❌ 네트워크 오류가 발생했습니다.', true);
+            button.disabled = false;
+        }
+    }
+
+    async function load() {
+        const header = authHeader();
+        const response = await fetch(`/api/v1/delivery-requests/${deliveryId}`, {
+            headers: { Authorization: header },
+            cache: 'no-store'
+        });
+        if (response.status === 401) {
+            location.replace('/courier-login');
+            return;
+        }
+        if (!response.ok) {
+            throw new Error('배송 정보를 불러오지 못했어요.');
+        }
+        const detail = await response.json();
+        if (detail.status === 'COMPLETED') {
+            throw new Error('이미 완료 처리된 배송이에요.');
+        }
+        if (detail.status !== 'PICKED_UP') {
+            throw new Error('아직 픽업 완료 처리되지 않은 배송이에요.');
+        }
+        renderContent(detail);
+    }
+
+    (function init() {
+        if (!authHeader()) {
+            location.replace('/courier-login');
+            return;
+        }
+        if (!deliveryId) {
+            location.replace('/courier-home');
+            return;
+        }
+        load().catch((error) => {
+            document.getElementById('content').innerHTML =
+                `<div class="status-message">${error.message}</div>`;
+        });
+    })();
+</script>
+</body>
+</html>
