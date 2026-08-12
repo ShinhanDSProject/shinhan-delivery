@@ -166,6 +166,35 @@ public class PaymentService {
         wallet.getBalance(), request.getAmount(), history.getCreatedAt());
   }
 
+  /** 동일 배송에 대한 배송원 이동 보상은 한 번만 지갑에 반영한다. */
+  @Transactional
+  public void compensateCourier(
+      Long courierId, String idempotencyKey, Long deliveryRequestId, long amount) {
+    if (amount <= 0) {
+      return;
+    }
+    memberService.getById(courierId);
+    PointWallet wallet = findWalletByMemberForUpdateOrThrow(courierId);
+    PointHistory existing =
+        pointHistoryRepository
+            .findByTypeAndReferenceId(PointHistoryType.COURIER_COMPENSATION, deliveryRequestId)
+            .orElse(null);
+    if (existing != null) {
+      return;
+    }
+
+    wallet.charge(amount);
+    pointHistoryRepository.save(
+        PointHistory.ofCourierCompensation(
+            courierId,
+            wallet.getId(),
+            amount,
+            wallet.getBalance(),
+            idempotencyKey,
+            deliveryRequestId,
+            "고객 취소 배송원 이동 보상"));
+  }
+
   @Transactional
   public void delete(Long walletId) {
     PointWallet wallet = findWalletOrThrow(walletId);

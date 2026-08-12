@@ -9,6 +9,8 @@ import com.example.shinhandelivery.delivery.dto.request.DeliveryEstimateRequest;
 import com.example.shinhandelivery.delivery.dto.request.DeliveryPayRequest;
 import com.example.shinhandelivery.delivery.dto.request.DeliveryUpdateRequest;
 import com.example.shinhandelivery.delivery.dto.response.AvailableDeliveryResponse;
+import com.example.shinhandelivery.delivery.dto.response.DeliveryCancellationPreviewResponse;
+import com.example.shinhandelivery.delivery.dto.response.DeliveryCancellationResponse;
 import com.example.shinhandelivery.delivery.dto.response.DeliveryDetailResponseDto;
 import com.example.shinhandelivery.delivery.dto.response.DeliveryEstimateResponse;
 import com.example.shinhandelivery.delivery.dto.response.DeliveryListResponseDto;
@@ -19,6 +21,7 @@ import com.example.shinhandelivery.delivery.dto.response.ProofPhotoResponse;
 import com.example.shinhandelivery.delivery.entity.DeliveryRequest;
 import com.example.shinhandelivery.delivery.entity.DeliveryStatus;
 import com.example.shinhandelivery.delivery.entity.Matching;
+import com.example.shinhandelivery.delivery.service.DeliveryCancellationService;
 import com.example.shinhandelivery.delivery.service.DeliveryMatchingService;
 import com.example.shinhandelivery.delivery.service.DeliveryService;
 import com.example.shinhandelivery.member.service.MemberService;
@@ -59,6 +62,7 @@ public class DeliveryController {
 
   private final DeliveryService deliveryService;
   private final DeliveryMatchingService deliveryMatchingService;
+  private final DeliveryCancellationService deliveryCancellationService;
   private final MemberService memberService;
 
   /** 로그인한 고객 본인 명의로 배송을 요청한다. */
@@ -164,11 +168,30 @@ public class DeliveryController {
     return ResponseEntity.ok(DeliveryResponse.from(updated));
   }
 
-  /** 배송 요청을 삭제한다. */
+  /** 기존 클라이언트 호환용 고객 취소 API. 물리 삭제하지 않고 취소·정산한 뒤 기존과 동일하게 204를 반환한다. */
   @DeleteMapping("/{deliveryRequestId}")
+  @PreAuthorize("isAuthenticated()")
   public ResponseEntity<Void> deleteDeliveryRequest(@PathVariable Long deliveryRequestId) {
-    deliveryService.deleteDeliveryRequest(deliveryRequestId);
+    deliveryCancellationService.cancel(resolveUserDetails().getId(), deliveryRequestId);
     return ResponseEntity.noContent().build();
+  }
+
+  /** 취소 전 상태별 수수료와 예상 환불·배송원 보상액을 반환한다. */
+  @GetMapping("/{deliveryRequestId}/cancellation-preview")
+  @PreAuthorize("isAuthenticated()")
+  public ResponseEntity<DeliveryCancellationPreviewResponse> previewCancellation(
+      @PathVariable Long deliveryRequestId) {
+    return ResponseEntity.ok(
+        deliveryCancellationService.preview(resolveUserDetails().getId(), deliveryRequestId));
+  }
+
+  /** 고객 취소를 수행하고 실제 수수료·환불·배송원 보상 결과를 반환한다. */
+  @PostMapping("/{deliveryRequestId}/cancel")
+  @PreAuthorize("isAuthenticated()")
+  public ResponseEntity<DeliveryCancellationResponse> cancelDeliveryRequest(
+      @PathVariable Long deliveryRequestId) {
+    return ResponseEntity.ok(
+        deliveryCancellationService.cancel(resolveUserDetails().getId(), deliveryRequestId));
   }
 
   /** 배송원의 픽업 완료를 처리한다. 배정된 배송원 본인만 처리할 수 있다. */

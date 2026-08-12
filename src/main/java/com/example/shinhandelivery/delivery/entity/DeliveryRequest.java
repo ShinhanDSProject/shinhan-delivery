@@ -148,6 +148,25 @@ public class DeliveryRequest {
   @Column(name = "timeout_next_retry_at")
   private LocalDateTime timeoutNextRetryAt;
 
+  @Column(name = "cancellation_fee")
+  private Long cancellationFee;
+
+  @Column(name = "refund_amount")
+  private Long refundAmount;
+
+  @Column(name = "courier_compensation")
+  private Long courierCompensation;
+
+  @Column(name = "cancelled_by_member_id")
+  private Long cancelledByMemberId;
+
+  @Column(name = "compensated_at")
+  private LocalDateTime compensatedAt;
+
+  @Enumerated(EnumType.STRING)
+  @Column(name = "cancellation_previous_status", length = 20)
+  private DeliveryStatus cancellationPreviousStatus;
+
   public double getPickupLatitude() {
     return pickupLocation != null ? pickupLocation.getLatitude() : 0.0;
   }
@@ -276,5 +295,25 @@ public class DeliveryRequest {
   public void scheduleTimeoutRetry(LocalDateTime nextRetryAt) {
     this.timeoutRetryCount++;
     this.timeoutNextRetryAt = nextRetryAt;
+  }
+
+  /** 고객 요청 취소의 정산 결과와 감사 시각을 배송에 기록한다. */
+  public void cancelByCustomer(
+      Long customerId,
+      DeliveryStatus previousStatus,
+      long fee,
+      long refund,
+      long compensation,
+      LocalDateTime processedAt) {
+    this.status = DeliveryStatus.CANCELLED;
+    this.cancellationReason = DeliveryCancellationReason.CUSTOMER_REQUEST;
+    this.cancellationPreviousStatus = previousStatus;
+    this.cancellationFee = fee;
+    this.refundAmount = refund;
+    this.courierCompensation = compensation;
+    this.cancelledByMemberId = customerId;
+    this.cancelledAt = processedAt;
+    this.refundedAt = refund > 0 ? processedAt : null;
+    this.compensatedAt = compensation > 0 ? processedAt : null;
   }
 }

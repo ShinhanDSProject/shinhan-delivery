@@ -148,6 +148,10 @@ class DeliveryHistoryControllerTest {
             completedAt,
             null,
             null,
+            null,
+            null,
+            null,
+            null,
             null);
     when(deliveryService.getDeliveryRequestDetail(1L, 1L)).thenReturn(response);
 

@@ -17,6 +17,7 @@ import com.example.shinhandelivery.delivery.dto.request.DeliveryCompleteRequest;
 import com.example.shinhandelivery.delivery.dto.request.DeliveryEstimateRequest;
 import com.example.shinhandelivery.delivery.dto.request.DeliveryPayLocationRequest;
 import com.example.shinhandelivery.delivery.dto.request.DeliveryPayRequest;
+import com.example.shinhandelivery.delivery.dto.response.DeliveryCancellationPreviewResponse;
 import com.example.shinhandelivery.delivery.dto.response.DeliveryEstimateResponse;
 import com.example.shinhandelivery.delivery.dto.response.DeliveryPaymentResponse;
 import com.example.shinhandelivery.delivery.dto.response.ProofPhotoResponse;
@@ -26,6 +27,7 @@ import com.example.shinhandelivery.delivery.entity.ItemSize;
 import com.example.shinhandelivery.delivery.exception.DeliveryAccessDeniedException;
 import com.example.shinhandelivery.delivery.exception.InvalidDeliveryTransitionException;
 import com.example.shinhandelivery.delivery.exception.ProofPhotoNotFoundException;
+import com.example.shinhandelivery.delivery.service.DeliveryCancellationService;
 import com.example.shinhandelivery.delivery.service.DeliveryMatchingService;
 import com.example.shinhandelivery.delivery.service.DeliveryService;
 import com.example.shinhandelivery.member.service.MemberService;
@@ -52,6 +54,7 @@ class DeliveryControllerTest {
 
   @MockitoBean private DeliveryService deliveryService;
   @MockitoBean private DeliveryMatchingService deliveryMatchingService;
+  @MockitoBean private DeliveryCancellationService deliveryCancellationService;
   @MockitoBean private MemberService memberService;
 
   @AfterEach
@@ -86,6 +89,26 @@ class DeliveryControllerTest {
                 .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.totalFee").value(217823));
+  }
+
+  @Test
+  @DisplayName("취소 예상 조회는 상태별 수수료와 환불액을 반환한다")
+  void previewCancellationReturnsSettlement() throws Exception {
+    CustomUserDetails userDetails =
+        new CustomUserDetails(1L, "user@test.com", "password", "CUSTOMER");
+    UsernamePasswordAuthenticationToken auth =
+        new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+    SecurityContextHolder.getContext().setAuthentication(auth);
+    when(deliveryCancellationService.preview(1L, 10L))
+        .thenReturn(
+            new DeliveryCancellationPreviewResponse(
+                10L, DeliveryStatus.MATCHED, 3000L, 1000L, 2000L, 1000L));
+
+    mockMvc
+        .perform(get("/api/v1/delivery-requests/10/cancellation-preview"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.cancellationFee").value(1000))
+        .andExpect(jsonPath("$.refundAmount").value(2000));
   }
 
   @Test

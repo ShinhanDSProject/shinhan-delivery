@@ -97,6 +97,12 @@ erDiagram
         LocalDateTime refundedAt
         int timeoutRetryCount
         LocalDateTime timeoutNextRetryAt
+        Long cancellationFee
+        Long refundAmount
+        Long courierCompensation
+        Long cancelledByMemberId
+        LocalDateTime compensatedAt
+        DeliveryStatus cancellationPreviousStatus
     }
 
     MATCHING {

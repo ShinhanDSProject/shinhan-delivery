@@ -282,7 +282,11 @@
                 </div>
                 <div class="info-row">
                     <span class="info-label">환불 금액</span>
-                    <span class="info-value">${detail.refundedAt ? `${detail.feePoint.toLocaleString()} P` : '환불 대상 아님'}</span>
+                    <span class="info-value">${detail.refundAmount != null ? `${detail.refundAmount.toLocaleString()} P` : (detail.refundedAt ? `${detail.feePoint.toLocaleString()} P` : '환불 대상 아님')}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">취소 수수료</span>
+                    <span class="info-value">${(detail.cancellationFee || 0).toLocaleString()} P</span>
                 </div>
                 <hr class="divider">
                 <div class="info-row">

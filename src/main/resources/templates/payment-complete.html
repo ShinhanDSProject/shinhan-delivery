@@ -42,7 +42,7 @@
     </section>
 
     <div class="cta">
-        <button type="button" class="primary-btn" onclick="location.href='/matching-wait'">매칭 대기 화면으로 이동</button>
+        <button type="button" class="primary-btn" id="matchingWaitButton">매칭 대기 화면으로 이동</button>
         <button type="button" class="secondary-btn" onclick="location.href='/home'">홈으로 돌아가기</button>
     </div>
 </main>
@@ -70,6 +70,14 @@
             formatPoint(draft.paymentResult.paidAmount || draft.paymentEstimate.totalFee);
         document.getElementById('remainingBalance').textContent = formatPoint(remainingBalance);
         document.getElementById('matchingStatus').textContent = draft.paymentResult.matchedStatus || 'MATCHING';
+        const deliveryId = draft.paymentResult.deliveryRequestId;
+        if (!deliveryId) {
+            location.replace('/home');
+            return;
+        }
+        document.getElementById('matchingWaitButton').addEventListener('click', () => {
+            location.href = `/matching-wait?id=${encodeURIComponent(deliveryId)}`;
+        });
     })();
 </script>
 </body>

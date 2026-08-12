@@ -347,16 +347,29 @@
         }
         stopPolling();
         try {
-            const response = await fetch(`/api/v1/delivery-requests/${deliveryId}`, {
-                method: 'DELETE',
+            const previewResponse = await fetch(`/api/v1/delivery-requests/${deliveryId}/cancellation-preview`, {
                 headers: { Authorization: header }
             });
-            if (response.status === 204) {
-                location.replace('/home');
+            if (!previewResponse.ok) throw new Error('preview failed');
+            const preview = await previewResponse.json();
+            const confirmed = window.confirm(
+                `취소 수수료 ${preview.cancellationFee.toLocaleString()}P\n` +
+                `예상 환불 ${preview.refundAmount.toLocaleString()}P\n\n배송을 취소하시겠어요?`
+            );
+            if (!confirmed) {
+                pollTimer = setInterval(pollStatus, POLL_INTERVAL_MS);
+                return;
+            }
+            const response = await fetch(`/api/v1/delivery-requests/${deliveryId}/cancel`, {
+                method: 'POST',
+                headers: { Authorization: header }
+            });
+            if (response.ok) {
+                location.replace(`/cancel-detail?id=${encodeURIComponent(deliveryId)}`);
                 return;
             }
             if (response.status === 409 || response.status === 400) {
-                showToast('이미 배송원이 매칭되어 취소할 수 없어요.');
+                showToast('현재 배송 단계에서는 취소할 수 없어요.');
                 pollStatus();
                 pollTimer = setInterval(pollStatus, POLL_INTERVAL_MS);
                 return;

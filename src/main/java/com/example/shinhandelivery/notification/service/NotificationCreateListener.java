@@ -96,7 +96,14 @@ public class NotificationCreateListener {
     CANCELLED("배송 취소", "배송 요청이 취소되었습니다.", "배정 취소", "배정된 배송이 취소되었습니다."),
     AUTO_TIMEOUT_CANCELLED("배송 자동 취소", "30분 동안 배송원이 배정되지 않아 배송이 자동 취소되었습니다.", null, null),
     AUTO_TIMEOUT_CANCELLED_AND_REFUNDED(
-        "배송 자동 취소 및 환불 완료", "30분 동안 배송원이 배정되지 않아 배송이 취소되고 결제 포인트가 환불되었습니다.", null, null);
+        "배송 자동 취소 및 환불 완료", "30분 동안 배송원이 배정되지 않아 배송이 취소되고 결제 포인트가 환불되었습니다.", null, null),
+    CUSTOMER_CANCELLED_BEFORE_MATCHING(
+        "배송 취소 및 전액 환불 완료", "배송원 배정 전 취소되어 결제 포인트가 전액 환불되었습니다.", null, null),
+    CUSTOMER_CANCELLED_AFTER_MATCHING(
+        "배송 취소 및 환불 완료",
+        "배송원 이동 보상 수수료를 제외한 결제 포인트가 환불되었습니다.",
+        "배정 취소 및 이동 보상 지급",
+        "고객 취소로 배송 배정이 취소되고 이동 보상 포인트가 지급되었습니다.");
 
     private final String customerTitle;
     private final String customerMessage;
@@ -119,6 +126,14 @@ public class NotificationCreateListener {
         return deliveryRequest.getRefundedAt() == null
             ? AUTO_TIMEOUT_CANCELLED
             : AUTO_TIMEOUT_CANCELLED_AND_REFUNDED;
+      }
+      if (status == DeliveryStatus.CANCELLED
+          && deliveryRequest.getCancellationReason()
+              == DeliveryCancellationReason.CUSTOMER_REQUEST) {
+        return deliveryRequest.getCourierCompensation() != null
+                && deliveryRequest.getCourierCompensation() > 0
+            ? CUSTOMER_CANCELLED_AFTER_MATCHING
+            : CUSTOMER_CANCELLED_BEFORE_MATCHING;
       }
       return switch (status) {
         case MATCHED -> MATCHED;

@@ -43,6 +43,7 @@ graph TD
 | :--- | :--- | :--- | :--- | :--- |
 | [**ADR-0001**](./0001-무상태-JWT-인증-체계.md) | JWT 기반 무상태 인증 체계 채택 | 🟢 ACCEPTED | 2026-07-28 | [#70](https://github.com/ShinhanDSProject/shinhan-delivery/issues/70) / [#84](https://github.com/ShinhanDSProject/shinhan-delivery/pull/84) |
 | [**ADR-0003**](./0003-배송-타임아웃-락과-멱등-환불.md) | 배송 타임아웃 DB 락과 멱등 환불 | 🟡 PROPOSED | 2026-08-11 | [#285](https://github.com/ShinhanDSProject/shinhan-delivery/issues/285) |
+| [**ADR-0004**](./0004-고객-취소-원자적-포인트-정산.md) | 고객 취소 원자적 포인트 정산과 락 순서 | 🟡 PROPOSED | 2026-08-12 | 단계별 취소 수수료 및 배송원 이동 보상 |
 
 ---
 
