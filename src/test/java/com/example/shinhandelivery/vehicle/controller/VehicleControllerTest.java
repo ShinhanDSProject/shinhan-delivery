@@ -11,27 +11,42 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.example.shinhandelivery.common.domain.Location;
 import com.example.shinhandelivery.common.exception.EntityNotFoundException;
 import com.example.shinhandelivery.common.exception.ErrorCode;
+import com.example.shinhandelivery.common.exception.GlobalExceptionHandler;
 import com.example.shinhandelivery.vehicle.dto.request.VehicleCreateRequest;
 import com.example.shinhandelivery.vehicle.entity.Vehicle;
 import com.example.shinhandelivery.vehicle.entity.VehicleStatus;
 import com.example.shinhandelivery.vehicle.entity.VehicleType;
 import com.example.shinhandelivery.vehicle.service.VehicleService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.security.web.method.annotation.AuthenticationPrincipalArgumentResolver;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import tools.jackson.databind.ObjectMapper;
 
-@WebMvcTest(VehicleController.class)
+@ExtendWith(MockitoExtension.class)
 class VehicleControllerTest {
 
-  @Autowired private MockMvc mockMvc;
-  @Autowired private ObjectMapper objectMapper;
+  private MockMvc mockMvc;
+  private final ObjectMapper objectMapper = new ObjectMapper();
 
-  @MockitoBean private VehicleService vehicleService;
+  @Mock private VehicleService vehicleService;
+  @InjectMocks private VehicleController vehicleController;
+
+  @BeforeEach
+  void setUp() {
+    mockMvc =
+        MockMvcBuilders.standaloneSetup(vehicleController)
+            .setCustomArgumentResolvers(new AuthenticationPrincipalArgumentResolver())
+            .setControllerAdvice(new GlobalExceptionHandler())
+            .build();
+  }
 
   @Test
   @DisplayName("차량 생성 요청을 받으면 생성된 차량을 반환한다")
@@ -41,6 +56,8 @@ class VehicleControllerTest {
     request.setType(VehicleType.CAR);
     request.setMaxWeight(500);
     request.setMaxDistance(100);
+    request.setLicensePlateNumber("12가 3456");
+    request.setInsurancePhotoUrl("https://example.com/insurance.jpg");
 
     Vehicle vehicle =
         Vehicle.builder()
@@ -72,6 +89,8 @@ class VehicleControllerTest {
     request.setType(VehicleType.CAR);
     request.setMaxWeight(500);
     request.setMaxDistance(100);
+    request.setLicensePlateNumber("12가 3456");
+    request.setInsurancePhotoUrl("https://example.com/insurance.jpg");
     request.setLatitude(37.5);
     request.setLongitude(200);
 
