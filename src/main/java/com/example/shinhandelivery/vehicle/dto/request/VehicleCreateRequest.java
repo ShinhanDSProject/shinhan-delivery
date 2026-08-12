@@ -10,14 +10,17 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import jakarta.validation.constraints.AssertTrue;
+
 /** 운송수단 등록 요청 DTO. */
 @Getter
 @Setter
 @NoArgsConstructor
 public class VehicleCreateRequest {
 
-  @NotNull(message = "회원 id는 필수입니다.")
   private Long memberId;
+
+  private String name;
 
   @NotNull(message = "운송수단 종류는 필수입니다.")
   private VehicleType type;
@@ -25,8 +28,15 @@ public class VehicleCreateRequest {
   @DecimalMin(value = "0.0", inclusive = false, message = "최대 적재 무게는 0보다 커야 합니다.")
   private double maxWeight;
 
-  @DecimalMin(value = "0.0", inclusive = false, message = "최대 운행 거리는 0보다 커야 합니다.")
   private double maxDistance;
+
+  private Integer displacement;
+
+  private String licensePlateNumber;
+
+  private String insurancePhotoUrl;
+
+  private String photoUrl;
 
   @DecimalMin(value = "-90.0", message = "위도는 -90 이상이어야 합니다.")
   @DecimalMax(value = "90.0", message = "위도는 90 이하이어야 합니다.")
@@ -35,6 +45,14 @@ public class VehicleCreateRequest {
   @DecimalMin(value = "-180.0", message = "경도는 -180 이상이어야 합니다.")
   @DecimalMax(value = "180.0", message = "경도는 180 이하이어야 합니다.")
   private double longitude;
+
+  @AssertTrue(message = "오토바이 및 자동차 선택 시 보험 증명서 사본이 필수입니다.")
+  public boolean isMotorVehicleValid() {
+    if (type == VehicleType.MOTORCYCLE || type == VehicleType.CAR) {
+      return insurancePhotoUrl != null && !insurancePhotoUrl.isBlank();
+    }
+    return true;
+  }
 
   @JsonIgnore
   public Location getLocation() {

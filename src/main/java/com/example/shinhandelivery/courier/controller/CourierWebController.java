@@ -41,4 +41,9 @@ public class CourierWebController {
   public String deliveryInProgress() {
     return "delivery-in-progress";
   }
+
+  @GetMapping("/courier-equipment")
+  public String courierEquipment() {
+    return "courier-equipment";
+  }
 }

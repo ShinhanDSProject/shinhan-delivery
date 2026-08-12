@@ -15,6 +15,9 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.shinhandelivery.common.exception.BusinessException;
+import com.example.shinhandelivery.vehicle.entity.VehicleApprovalStatus;
+
 /** Vehicle 관련 유스케이스(등록/조회/수정/삭제)를 담당하는 서비스. */
 @Service
 public class VehicleService {
@@ -33,6 +36,9 @@ public class VehicleService {
   /** 소유자(Member) 존재 여부와 무게/거리 유효성을 검증한 뒤 Vehicle을 등록한다 (Entity 리턴). */
   @Transactional
   public Vehicle create(VehicleCreateRequest request) {
+    if (request.getMemberId() == null) {
+      throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE, "회원 ID 정보가 필수입니다.");
+    }
     memberService.getById(request.getMemberId());
     return vehicleRepository.save(Vehicle.from(request));
   }
@@ -57,7 +63,7 @@ public class VehicleService {
   /** 소유자(MemberId) 기준 차량 목록을 조회한다. */
   @Transactional(readOnly = true)
   public List<Vehicle> getVehiclesByMemberId(Long memberId) {
-    return vehicleRepository.findAllByMemberId(memberId);
+    return vehicleRepository.findAllByMemberIdOrderByIdDesc(memberId);
   }
 
   /** 소유자(MemberId) 기준 차량과 Member 정보를 Fetch Join으로 한 번에 조회한다. */
@@ -99,6 +105,44 @@ public class VehicleService {
   @Transactional
   public void markAvailable(Long vehicleId) {
     findVehicleOrThrow(vehicleId).markAs(VehicleStatus.AVAILABLE);
+  }
+
+  /**
+   * 배송원의 장비 중 단 1개만 활성화(Exclusive Toggle) 트랜잭션.
+   * 승인 완료(APPROVED) 상태인 장비만 활성화 허용.
+   */
+  @Transactional
+  public Vehicle activateVehicle(Long memberId, Long vehicleId) {
+    Vehicle target = findVehicleOrThrow(vehicleId);
+    if (!target.getMemberId().equals(memberId)) {
+      throw new BusinessException(ErrorCode.ACCESS_DENIED);
+    }
+    if (target.getApprovalStatus() != VehicleApprovalStatus.APPROVED) {
+      throw new BusinessException(ErrorCode.VEHICLE_NOT_APPROVED);
+    }
+
+    List<Vehicle> memberVehicles = vehicleRepository.findAllByMemberId(memberId);
+    for (Vehicle v : memberVehicles) {
+      v.deactivate();
+    }
+    target.activate();
+    return target;
+  }
+
+  /** 관리자가 장비를 승인한다. */
+  @Transactional
+  public Vehicle approveVehicle(Long vehicleId) {
+    Vehicle vehicle = findVehicleOrThrow(vehicleId);
+    vehicle.approve();
+    return vehicle;
+  }
+
+  /** 관리자가 장비를 반려한다. */
+  @Transactional
+  public Vehicle rejectVehicle(Long vehicleId) {
+    Vehicle vehicle = findVehicleOrThrow(vehicleId);
+    vehicle.reject();
+    return vehicle;
   }
 
   /**

@@ -19,6 +19,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.shinhandelivery.common.security.CustomUserDetails;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.PatchMapping;
+
 /** Vehicle CRUD API를 제공하는 컨트롤러. */
 @RestController
 @RequestMapping("/api/v1/vehicles")
@@ -30,9 +35,35 @@ public class VehicleController {
   /** 운송수단을 등록한다. */
   @PostMapping
   public ResponseEntity<VehicleResponse> registerVehicle(
-      @RequestBody @Valid VehicleCreateRequest request) {
+      @RequestBody @Valid VehicleCreateRequest request,
+      @AuthenticationPrincipal CustomUserDetails userDetails) {
+    if (userDetails != null) {
+      request.setMemberId(userDetails.getId());
+    }
+    if (request.getMemberId() == null || request.getMemberId() <= 0) {
+      throw new com.example.shinhandelivery.common.exception.BusinessException(
+          com.example.shinhandelivery.common.exception.ErrorCode.INVALID_INPUT_VALUE,
+          "회원 인증 정보가 유효하지 않습니다.");
+    }
     Vehicle created = vehicleService.create(request);
     return ResponseEntity.status(HttpStatus.CREATED).body(VehicleResponse.from(created));
+  }
+
+  /** 내 소유의 운송수단 목록을 조회한다. */
+  @GetMapping("/my")
+  public ResponseEntity<List<VehicleResponse>> getMyVehicles(
+      @AuthenticationPrincipal CustomUserDetails userDetails) {
+    if (userDetails == null) {
+      throw new com.example.shinhandelivery.common.exception.BusinessException(
+          com.example.shinhandelivery.common.exception.ErrorCode.ACCESS_DENIED,
+          "로그인이 필요합니다.");
+    }
+    Long memberId = userDetails.getId();
+    List<VehicleResponse> responses =
+        vehicleService.getVehiclesByMemberId(memberId).stream()
+            .map(VehicleResponse::from)
+            .toList();
+    return ResponseEntity.ok(responses);
   }
 
   /** 운송수단 단건을 조회한다. */
@@ -47,6 +78,32 @@ public class VehicleController {
     List<VehicleResponse> responses =
         vehicleService.list().stream().map(VehicleResponse::from).toList();
     return ResponseEntity.ok(responses);
+  }
+
+  /** 운송수단을 단일 활성화(Exclusive Toggle)한다. */
+  @PatchMapping("/{vehicleId}/activate")
+  public ResponseEntity<VehicleResponse> activateVehicle(
+      @PathVariable Long vehicleId,
+      @AuthenticationPrincipal CustomUserDetails userDetails) {
+    Long memberId = userDetails.getId();
+    Vehicle activated = vehicleService.activateVehicle(memberId, vehicleId);
+    return ResponseEntity.ok(VehicleResponse.from(activated));
+  }
+
+  /** 관리자가 운송수단을 승인한다. */
+  @PatchMapping("/{vehicleId}/approve")
+  @PreAuthorize("hasRole('ADMIN')")
+  public ResponseEntity<VehicleResponse> approveVehicle(@PathVariable Long vehicleId) {
+    Vehicle approved = vehicleService.approveVehicle(vehicleId);
+    return ResponseEntity.ok(VehicleResponse.from(approved));
+  }
+
+  /** 관리자가 운송수단을 반려한다. */
+  @PatchMapping("/{vehicleId}/reject")
+  @PreAuthorize("hasRole('ADMIN')")
+  public ResponseEntity<VehicleResponse> rejectVehicle(@PathVariable Long vehicleId) {
+    Vehicle rejected = vehicleService.rejectVehicle(vehicleId);
+    return ResponseEntity.ok(VehicleResponse.from(rejected));
   }
 
   /** 운송수단 정보를 수정한다. */

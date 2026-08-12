@@ -188,7 +188,6 @@
       color: #94A3B8;
     }
 
-    /* 토스트 알림 */
     .toast-popup {
       position: fixed;
       bottom: 24px;
@@ -201,6 +200,40 @@
       box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
       display: none;
       z-index: 1000;
+    }
+
+    .tab-menu {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .tab-btn {
+      background: var(--card-bg);
+      color: #94A3B8;
+      border: 1px solid var(--border-color);
+      padding: 10px 20px;
+      border-radius: var(--radius-md);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .tab-btn.active {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+    }
+
+    .status-approved {
+      background: #DCFCE7;
+      color: #15803D;
+    }
+
+    .status-rejected {
+      background: #FEE2E2;
+      color: #B91C1C;
     }
   </style>
 </head>
@@ -217,37 +250,97 @@
   </nav>
 
   <main class="admin-layout">
-    <h1 class="page-title">🚴 배송원 자격 심사 관리</h1>
-    <p class="page-sub">신규 배송원의 제출 증빙 서류를 검토하고 자격을 승인 또는 거절 처리합니다.</p>
+    <div class="tab-menu">
+      <button class="tab-btn active" id="tabCouriers" onclick="switchTab('couriers')">🚴 배송원 자격 심사</button>
+      <button class="tab-btn" id="tabVehicles" onclick="switchTab('vehicles')">🛵 운송 수단 (장비) 심사</button>
+    </div>
 
-    <div class="table-card">
-      <table class="admin-table">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>이름</th>
-            <th>이메일 / 연락처</th>
-            <th>활동 지역</th>
-            <th>증빙 서류</th>
-            <th>상태</th>
-            <th>심사 처리</th>
-          </tr>
-        </thead>
-        <tbody id="pendingCourierList">
-          <tr>
-            <td colspan="7" class="empty-msg">목록을 불러오는 중입니다...</td>
-          </tr>
-        </tbody>
-      </table>
+    <!-- 탭 1: 배송원 자격 심사 -->
+    <div id="sectionCouriers">
+      <h1 class="page-title">🚴 배송원 자격 심사 관리</h1>
+      <p class="page-sub">신규 배송원의 제출 증빙 서류를 검토하고 자격을 승인 또는 거절 처리합니다.</p>
+
+      <div class="table-card">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>이름</th>
+              <th>이메일 / 연락처</th>
+              <th>활동 지역</th>
+              <th>증빙 서류</th>
+              <th>상태</th>
+              <th>심사 처리</th>
+            </tr>
+          </thead>
+          <tbody id="pendingCourierList">
+            <tr>
+              <td colspan="7" class="empty-msg">목록을 불러오는 중입니다...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 탭 2: 운송수단(장비) 심사 -->
+    <div id="sectionVehicles" style="display: none;">
+      <h1 class="page-title">🛵 운송 수단 (장비) 심사 관리</h1>
+      <p class="page-sub">배송원이 등록한 이동 수단(오토바이, 자동차, 드론 등)을 검토하고 승인 또는 반려 처리합니다.</p>
+
+      <div class="table-card">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>장비 ID</th>
+              <th>배송원 ID</th>
+              <th>이동수단 종류</th>
+              <th>장비 이름</th>
+              <th>스펙 (주행거리/적재무게)</th>
+              <th>증빙 서류 (보험 사본)</th>
+              <th>승인 상태</th>
+              <th>심사 처리</th>
+            </tr>
+          </thead>
+          <tbody id="vehicleList">
+            <tr>
+              <td colspan="8" class="empty-msg">목록을 불러오는 중입니다...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </main>
 
   <div id="toast" class="toast-popup"></div>
 
   <script>
+    let currentTab = 'couriers';
+
     document.addEventListener("DOMContentLoaded", () => {
       loadPendingCouriers();
     });
+
+    function switchTab(tab) {
+      currentTab = tab;
+      const sectionCouriers = document.getElementById('sectionCouriers');
+      const sectionVehicles = document.getElementById('sectionVehicles');
+      const tabCouriers = document.getElementById('tabCouriers');
+      const tabVehicles = document.getElementById('tabVehicles');
+
+      if (tab === 'couriers') {
+        sectionCouriers.style.display = 'block';
+        sectionVehicles.style.display = 'none';
+        tabCouriers.classList.add('active');
+        tabVehicles.classList.remove('active');
+        loadPendingCouriers();
+      } else {
+        sectionCouriers.style.display = 'none';
+        sectionVehicles.style.display = 'block';
+        tabCouriers.classList.remove('active');
+        tabVehicles.classList.add('active');
+        loadPendingVehicles();
+      }
+    }
 
     async function loadPendingCouriers() {
       const token = localStorage.getItem('accessToken');
@@ -360,6 +453,143 @@
       }
     }
 
+    function getVehicleTypeName(type) {
+      const names = {
+        'MOTORCYCLE': '오토바이',
+        'CAR': '자동차',
+        'BICYCLE': '자전거',
+        'KICKBOARD': '전동 킥보드',
+        'DRONE': '드론',
+        'WALK': '도보'
+      };
+      return names[type] || type || '기타';
+    }
+
+    async function loadPendingVehicles() {
+      const token = localStorage.getItem('accessToken');
+      if (!token) {
+        window.location.href = '/admin-login';
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/v1/vehicles', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (res.status === 401 || res.status === 403) {
+          showToast('⚠️ 관리자 권한이 필요합니다.');
+          return;
+        }
+
+        const vehicles = await res.json();
+        const tbody = document.getElementById('vehicleList');
+
+        tbody.textContent = '';
+        if (!Array.isArray(vehicles) || vehicles.length === 0) {
+          const emptyTr = document.createElement('tr');
+          const emptyTd = document.createElement('td');
+          emptyTd.colSpan = 8;
+          emptyTd.className = 'empty-msg';
+          emptyTd.textContent = '🎉 현재 등록된 운송 수단이 없습니다.';
+          emptyTr.appendChild(emptyTd);
+          tbody.appendChild(emptyTr);
+          return;
+        }
+
+        vehicles.forEach(v => {
+          const tr = document.createElement('tr');
+
+          const tdId = document.createElement('td');
+          tdId.textContent = v.id;
+          tr.appendChild(tdId);
+
+          const tdMember = document.createElement('td');
+          tdMember.textContent = `배송원 #${v.memberId}`;
+          tr.appendChild(tdMember);
+
+          const tdType = document.createElement('td');
+          const typeBadge = document.createElement('strong');
+          typeBadge.textContent = getVehicleTypeName(v.type);
+          tdType.appendChild(typeBadge);
+          tr.appendChild(tdType);
+
+          const tdName = document.createElement('td');
+          tdName.textContent = v.name || '-';
+          tr.appendChild(tdName);
+
+          const tdSpec = document.createElement('td');
+          tdSpec.textContent = `${v.maxDistance}km / ${v.maxWeight}kg`;
+          tr.appendChild(tdSpec);
+
+          const tdDoc = document.createElement('td');
+          if (v.insurancePhotoUrl) {
+            const docLink = document.createElement('a');
+            docLink.href = v.insurancePhotoUrl;
+            docLink.target = '_blank';
+            docLink.rel = 'noopener noreferrer';
+            docLink.className = 'doc-link';
+            docLink.textContent = '📄 서류/사진 확인';
+            tdDoc.appendChild(docLink);
+          } else {
+            const noDocSpan = document.createElement('span');
+            noDocSpan.style.color = '#94A3B8';
+            noDocSpan.textContent = '미제출 (자동승인)';
+            tdDoc.appendChild(noDocSpan);
+          }
+          tr.appendChild(tdDoc);
+
+          const tdStatus = document.createElement('td');
+          const statusSpan = document.createElement('span');
+          let statusText = '승인 대기';
+          let statusClass = 'status-pending';
+          if (v.approvalStatus === 'APPROVED') {
+            statusText = '승인 완료';
+            statusClass = 'status-approved';
+          } else if (v.approvalStatus === 'REJECTED') {
+            statusText = '반려됨';
+            statusClass = 'status-rejected';
+          }
+          statusSpan.className = `status-pill ${statusClass}`;
+          statusSpan.textContent = statusText;
+          tdStatus.appendChild(statusSpan);
+          tr.appendChild(tdStatus);
+
+          const tdActions = document.createElement('td');
+          const actionDiv = document.createElement('div');
+          actionDiv.className = 'action-btns';
+
+          if (v.approvalStatus === 'PENDING' || !v.approvalStatus) {
+            const btnApprove = document.createElement('button');
+            btnApprove.className = 'btn-approve';
+            btnApprove.textContent = '승인';
+            btnApprove.addEventListener('click', () => approveVehicle(v.id, v.name || getVehicleTypeName(v.type)));
+
+            const btnReject = document.createElement('button');
+            btnReject.className = 'btn-reject';
+            btnReject.textContent = '거절';
+            btnReject.addEventListener('click', () => rejectVehicle(v.id, v.name || getVehicleTypeName(v.type)));
+
+            actionDiv.appendChild(btnApprove);
+            actionDiv.appendChild(btnReject);
+          } else {
+            const doneSpan = document.createElement('span');
+            doneSpan.style.color = '#94A3B8';
+            doneSpan.style.fontSize = '12px';
+            doneSpan.textContent = '처리완료';
+            actionDiv.appendChild(doneSpan);
+          }
+
+          tdActions.appendChild(actionDiv);
+          tr.appendChild(tdActions);
+
+          tbody.appendChild(tr);
+        });
+      } catch (err) {
+        showToast('❌ 운송수단 목록을 불러오지 못했습니다.');
+      }
+    }
+
     async function approveCourier(id, name) {
       if (!confirm(`'${name}' 기사의 배송원 자격을 승인하시겠습니까?`)) return;
       await processApproval(`/api/v1/admin/couriers/${id}/approve`, 'PATCH', `'${name}' 기사님이 승인되었습니다!`);
@@ -370,7 +600,17 @@
       await processApproval(`/api/v1/admin/couriers/${id}/reject`, 'PATCH', `'${name}' 기사 자격이 거절되었습니다.`);
     }
 
-    async function processApproval(url, method, successMsg) {
+    async function approveVehicle(id, name) {
+      if (!confirm(`'${name}' 장비를 승인하시겠습니까?`)) return;
+      await processApproval(`/api/v1/vehicles/${id}/approve`, 'PATCH', `'${name}' 장비가 승인되었습니다!`, () => loadPendingVehicles());
+    }
+
+    async function rejectVehicle(id, name) {
+      if (!confirm(`'${name}' 장비를 반려하시겠습니까?`)) return;
+      await processApproval(`/api/v1/vehicles/${id}/reject`, 'PATCH', `'${name}' 장비가 반려되었습니다.`, () => loadPendingVehicles());
+    }
+
+    async function processApproval(url, method, successMsg, callback) {
       const token = localStorage.getItem('accessToken');
       try {
         const res = await fetch(url, {
@@ -383,9 +623,13 @@
 
         if (res.ok) {
           showToast(`🎉 ${successMsg}`);
-          loadPendingCouriers();
+          if (callback) {
+            callback();
+          } else {
+            loadPendingCouriers();
+          }
         } else {
-          const err = await res.json();
+          const err = await res.json().catch(() => ({}));
           showToast(`❌ 처리 실패: ${err.message || '오류 발생'}`);
         }
       } catch (err) {

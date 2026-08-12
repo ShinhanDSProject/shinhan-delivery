@@ -242,4 +242,30 @@ class VehicleServiceTest {
 
     assertThat(candidates).containsExactly(nearbyVehicle);
   }
+
+  @Test
+  @DisplayName("승인 완료된 장비면 단일 활성화(Exclusive Toggle)를 성공적으로 수행한다")
+  void activateVehicleSuccess() {
+    Vehicle v1 = Vehicle.builder().id(1L).memberId(10L).approvalStatus(com.example.shinhandelivery.vehicle.entity.VehicleApprovalStatus.APPROVED).isActive(true).build();
+    Vehicle v2 = Vehicle.builder().id(2L).memberId(10L).approvalStatus(com.example.shinhandelivery.vehicle.entity.VehicleApprovalStatus.APPROVED).isActive(false).build();
+
+    when(vehicleRepository.findById(2L)).thenReturn(Optional.of(v2));
+    when(vehicleRepository.findAllByMemberId(10L)).thenReturn(List.of(v1, v2));
+
+    Vehicle activated = vehicleService.activateVehicle(10L, 2L);
+
+    assertThat(activated.isActive()).isTrue();
+    assertThat(v1.isActive()).isFalse();
+  }
+
+  @Test
+  @DisplayName("승인되지 않은 장비(PENDING) 활성화 시 BusinessException을 던진다")
+  void activateVehicleNotApprovedShouldThrowException() {
+    Vehicle v1 = Vehicle.builder().id(1L).memberId(10L).approvalStatus(com.example.shinhandelivery.vehicle.entity.VehicleApprovalStatus.PENDING).isActive(false).build();
+
+    when(vehicleRepository.findById(1L)).thenReturn(Optional.of(v1));
+
+    assertThatThrownBy(() -> vehicleService.activateVehicle(10L, 1L))
+        .isInstanceOf(com.example.shinhandelivery.common.exception.BusinessException.class);
+  }
 }

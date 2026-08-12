@@ -36,22 +36,25 @@ public class MemberCreateRequest {
 
   private VehicleType vehicleType;
 
+  private String equipmentName;
+
   private String activityRegion;
 
-  @DecimalMin(value = "0.1", message = "선호 중량은 0보다 커야 합니다.")
+  @DecimalMin(value = "0.1", message = "최대 적재 무게는 0보다 커야 합니다.")
   private Double preferredWeight;
+
+  @DecimalMin(value = "0.1", message = "최대 주행 거리는 0보다 커야 합니다.")
+  private Double maxDistance;
 
   private String proofDocumentUrl;
 
   // 이 메서드는 결과가 반드시 true여야 통과
-  @AssertTrue(message = "배송원 회원가입 시 차량 종류, 활동 지역, 선호 중량, 자격 증빙 서류는 필수입니다.")
+  @AssertTrue(message = "배송원 회원가입 시 차량 종류, 최대 적재 무게, 자격 증빙 서류는 필수입니다.")
   public boolean isCourierProfileValid() {
     if (role != MemberRole.COURIER) {
       return true;
     }
     return vehicleType != null
-        && activityRegion != null
-        && !activityRegion.isBlank()
         && preferredWeight != null
         && preferredWeight > 0
         && proofDocumentUrl != null

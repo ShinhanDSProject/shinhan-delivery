@@ -4,5 +4,8 @@ package com.example.shinhandelivery.vehicle.entity;
 public enum VehicleType {
   DRONE,
   MOTORCYCLE,
-  CAR
+  CAR,
+  BICYCLE,
+  KICKBOARD,
+  WALK
 }

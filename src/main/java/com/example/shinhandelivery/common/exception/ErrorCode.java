@@ -42,6 +42,7 @@ public enum ErrorCode {
   // Vehicle Domain Errors (continued)
   VEHICLE_CAPACITY_MISMATCH(HttpStatus.BAD_REQUEST, "V002", "차량이 배송 조건을 감당할 수 없습니다."),
   VEHICLE_NOT_AVAILABLE(HttpStatus.CONFLICT, "V003", "이미 배정되어 사용할 수 없는 차량입니다."),
+  VEHICLE_NOT_APPROVED(HttpStatus.BAD_REQUEST, "V004", "승인 완료된 장비만 활성화할 수 있습니다."),
 
   // Payment Domain Errors
   POINT_WALLET_NOT_FOUND(HttpStatus.NOT_FOUND, "P001", "포인트 지갑 정보를 찾을 수 없습니다."),
