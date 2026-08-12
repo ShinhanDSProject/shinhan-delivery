@@ -36,4 +36,9 @@ public class CourierWebController {
   public String pickupMap() {
     return "pickup-map";
   }
+
+  @GetMapping("/delivery-in-progress")
+  public String deliveryInProgress() {
+    return "delivery-in-progress";
+  }
 }
