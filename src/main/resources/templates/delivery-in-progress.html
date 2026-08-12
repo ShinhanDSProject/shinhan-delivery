@@ -14,6 +14,7 @@
             --text-muted: var(--color-grey-300);
             --border: var(--color-grey-50);
             --accent-soft: var(--color-blue-50);
+            --surface: #FAFBFD;
         }
 
         * {
@@ -138,6 +139,71 @@
             text-align: right;
         }
 
+        .photo-section label {
+            display: block;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .photo-upload {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 24px 20px;
+            background: var(--surface);
+            border: 1px dashed var(--border);
+            border-radius: 12px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .photo-upload svg {
+            width: 24px;
+            height: 24px;
+            color: #4A5568;
+        }
+
+        .photo-upload span {
+            font-size: 13px;
+            font-weight: 600;
+            color: #4A5568;
+        }
+
+        .photo-preview {
+            display: none;
+            width: 100%;
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .photo-preview.visible {
+            display: block;
+        }
+
+        .photo-preview img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .photo-preview button {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: 0;
+            background: rgba(0, 0, 0, 0.6);
+            color: #fff;
+            cursor: pointer;
+        }
+
         .warning-note {
             display: flex;
             align-items: center;
@@ -198,7 +264,7 @@
             <svg viewBox="0 0 24 24" fill="none" width="20" height="20"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
         <div class="title-group">
-            <h1>픽업하러 가는 길</h1>
+            <h1 id="legTitle">픽업하러 가는 길</h1>
             <p id="etaNote">예상시간 확인 중...</p>
         </div>
     </header>
@@ -228,7 +294,11 @@
     const deliveryId = new URLSearchParams(location.search).get('id');
     let map;
     let courierMarker;
+    let destinationMarker;
     let pickup;
+    let dropoff;
+    let uploadedPickupPhotoUrl = null;
+    let photoSelectionVersion = 0;
 
     function authHeader() {
         const token = localStorage.getItem('accessToken');
@@ -245,30 +315,39 @@
         setTimeout(() => { toast.style.display = 'none'; }, 2500);
     }
 
-    function updateEta(courierLat, courierLng) {
-        const km = haversineKm(courierLat, courierLng, pickup.lat, pickup.lng);
+    function updateEta(courierLat, courierLng, target) {
+        const km = haversineKm(courierLat, courierLng, target.lat, target.lng);
         const minutes = Math.max(1, Math.round((km / ASSUMED_SPEED_KMH) * 60));
         document.getElementById('etaNote').textContent = `예상시간 ${minutes}분`;
     }
 
-    function initMap(courierLat, courierLng) {
-        const container = document.getElementById('map');
-        map = new kakao.maps.Map(container, {
-            center: new kakao.maps.LatLng(courierLat, courierLng),
-            level: 5
-        });
+    // 처음 호출되면 지도를 새로 만들고, 이미 만들어져 있으면(픽업완료 후 배송 구간으로 전환) 마커/중심만 옮긴다.
+    function ensureMap(courierLat, courierLng, target) {
+        const courierPos = new kakao.maps.LatLng(courierLat, courierLng);
+        if (!map) {
+            const container = document.getElementById('map');
+            map = new kakao.maps.Map(container, { center: courierPos, level: 5 });
+            courierMarker = new kakao.maps.Marker({ position: courierPos, map });
+            destinationMarker = new kakao.maps.Marker({ position: new kakao.maps.LatLng(target.lat, target.lng), map });
+        } else {
+            courierMarker.setPosition(courierPos);
+            destinationMarker.setPosition(new kakao.maps.LatLng(target.lat, target.lng));
+            map.setCenter(courierPos);
+        }
+        updateEta(courierLat, courierLng, target);
+    }
 
-        courierMarker = new kakao.maps.Marker({
-            position: new kakao.maps.LatLng(courierLat, courierLng),
-            map
+    function locateAndShowMap(target) {
+        kakao.maps.load(() => {
+            if (!navigator.geolocation) {
+                ensureMap(target.lat, target.lng, target);
+                return;
+            }
+            navigator.geolocation.getCurrentPosition(
+                (position) => ensureMap(position.coords.latitude, position.coords.longitude, target),
+                () => ensureMap(target.lat, target.lng, target)
+            );
         });
-
-        new kakao.maps.Marker({
-            position: new kakao.maps.LatLng(pickup.lat, pickup.lng),
-            map
-        });
-
-        updateEta(courierLat, courierLng);
     }
 
     function createRow(label, value) {
@@ -303,8 +382,17 @@
     }
 
     function renderSheet(detail) {
+        document.getElementById('legTitle').textContent =
+            detail.status === 'PICKED_UP' ? '배송하러 가는 길' : '픽업하러 가는 길';
         const sheet = document.getElementById('bottomSheet');
-        const alreadyPickedUp = detail.status === 'PICKED_UP';
+        if (detail.status === 'PICKED_UP') {
+            renderDropoffLeg(sheet, detail);
+        } else {
+            renderPickupLeg(sheet, detail);
+        }
+    }
+
+    function renderPickupLeg(sheet, detail) {
         sheet.innerHTML = `
             <div class="pickup-card">
                 <span class="label">픽업지</span>
@@ -313,31 +401,109 @@
             <div class="info-box">
                 <div class="row"><span class="k">물품 정보</span><span class="v">${ITEM_SIZE_LABELS[detail.itemSize] || detail.itemSize} · ${Number(detail.weight).toFixed(1)}kg</span></div>
             </div>
-            <div id="instructionSlot"></div>
+            <div class="photo-section">
+                <label>물품 확인 사진</label>
+                <button type="button" class="photo-upload" id="photoUploadBtn">
+                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/><path d="M4 7h3l2-3h6l2 3h3v13H4z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+                    <span id="photoUploadLabel">사진 찍어 추가하기</span>
+                </button>
+                <input type="file" id="photoInput" accept="image/jpeg,image/png,image/webp" hidden>
+                <div class="photo-preview" id="photoPreview">
+                    <img id="photoPreviewImg" alt="물품 확인 사진 미리보기">
+                    <button type="button" id="photoRemoveBtn" aria-label="사진 삭제">×</button>
+                </div>
+            </div>
             <div class="warning-note">⚠ 수락 후 무단 취소 시 서비스 이용 정지(노쇼 패널티)가 부과될 수 있습니다.</div>
-            <button class="pickup-button" id="pickupButton" type="button" ${alreadyPickedUp ? 'disabled' : ''}>
-                ${alreadyPickedUp ? '픽업 완료됨' : '픽업 완료'}
-            </button>
+            <button class="pickup-button" id="pickupButton" type="button" disabled>픽업 완료</button>
         `;
         sheet.querySelector('[data-field="pickupAddress"]').textContent = detail.pickupAddress;
-        appendInstructionRows(sheet.querySelector('#instructionSlot'), detail);
 
-        if (!alreadyPickedUp) {
-            document.getElementById('pickupButton').addEventListener('click', () => confirmPickup(detail.id));
+        document.getElementById('photoUploadBtn').addEventListener('click', () => {
+            document.getElementById('photoInput').click();
+        });
+        document.getElementById('photoInput').addEventListener('change', onPickupPhotoSelected);
+        document.getElementById('photoRemoveBtn').addEventListener('click', removePickupPhoto);
+        document.getElementById('pickupButton').addEventListener('click', () => confirmPickup(detail.id));
+    }
+
+    function renderDropoffLeg(sheet, detail) {
+        sheet.innerHTML = `
+            <div class="pickup-card">
+                <span class="label">배송지</span>
+                <span class="address" data-field="dropoffAddress"></span>
+            </div>
+            <div id="instructionSlot"></div>
+            <div class="warning-note">⚠ 수락 후 무단 취소 시 서비스 이용 정지(노쇼 패널티)가 부과될 수 있습니다.</div>
+            <button class="pickup-button" id="pickupButton" type="button">배송 완료 처리하기</button>
+        `;
+        sheet.querySelector('[data-field="dropoffAddress"]').textContent = detail.dropoffAddress;
+        appendInstructionRows(sheet.querySelector('#instructionSlot'), detail);
+        document.getElementById('pickupButton').addEventListener('click', () => goToCompletePhoto(detail.id));
+    }
+
+    async function onPickupPhotoSelected(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const selectionVersion = ++photoSelectionVersion;
+
+        const label = document.getElementById('photoUploadLabel');
+        label.textContent = '업로드 중...';
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+            const response = await fetch('/api/v1/uploads/image', {
+                method: 'POST',
+                headers: { Authorization: authHeader() },
+                body: formData
+            });
+            if (!response.ok) throw new Error('upload failed');
+            const result = await response.json();
+            if (selectionVersion !== photoSelectionVersion) return;   // 그 사이 다른 사진이 선택/삭제됨 — 이 응답은 버림
+            uploadedPickupPhotoUrl = result.imageUrl;
+
+            document.getElementById('photoPreviewImg').src = uploadedPickupPhotoUrl;
+            document.getElementById('photoPreview').classList.add('visible');
+            document.getElementById('photoUploadBtn').style.display = 'none';
+            document.getElementById('pickupButton').disabled = false;
+        } catch (error) {
+            if (selectionVersion === photoSelectionVersion) {
+                event.target.value = '';   // 같은 파일을 다시 선택해도 change가 발생하도록 초기화(재시도 가능하게)
+                label.textContent = '업로드에 실패했어요. 다시 시도해주세요';
+            }
         }
     }
 
+    function removePickupPhoto() {
+        photoSelectionVersion++;
+        uploadedPickupPhotoUrl = null;
+        document.getElementById('photoInput').value = '';
+        document.getElementById('photoPreview').classList.remove('visible');
+        document.getElementById('photoUploadBtn').style.display = 'flex';
+        document.getElementById('photoUploadLabel').textContent = '사진 찍어 추가하기';
+        document.getElementById('pickupButton').disabled = true;
+    }
+
+    function goToCompletePhoto(id) {
+        location.href = `/delivery-complete-photo?id=${id}`;
+    }
+
     async function confirmPickup(id) {
+        if (!uploadedPickupPhotoUrl) return;
         const button = document.getElementById('pickupButton');
         button.disabled = true;
         try {
             const res = await fetch(`/api/v1/delivery-requests/${id}/pickup`, {
                 method: 'PATCH',
-                headers: { Authorization: authHeader() }
+                headers: { 'Content-Type': 'application/json', Authorization: authHeader() },
+                body: JSON.stringify({ pickupPhotoUrl: uploadedPickupPhotoUrl })
             });
             if (res.ok) {
-                showToast('🎉 픽업 완료 처리되었습니다. 목적지로 이동해주세요.');
-                button.textContent = '픽업 완료됨';
+                showToast('🎉 픽업 완료 처리되었습니다. 배송지로 이동해주세요.');
+                const detail = await fetchDeliveryDetail(id);
+                if (detail) {
+                    renderSheet(detail);
+                    locateAndShowMap(dropoff);
+                }
                 return;
             }
             const errData = await res.json().catch(() => ({}));
@@ -349,37 +515,33 @@
         }
     }
 
-    async function load() {
+    async function fetchDeliveryDetail(id) {
         const header = authHeader();
-        const response = await fetch(`/api/v1/delivery-requests/${deliveryId}`, {
+        const response = await fetch(`/api/v1/delivery-requests/${id}`, {
             headers: { Authorization: header },
             cache: 'no-store'
         });
         if (response.status === 401) {
             location.replace('/courier-login');
-            return;
+            return null;
         }
         if (!response.ok) {
             throw new Error('배송 정보를 불러오지 못했어요.');
         }
-        const detail = await response.json();
+        return response.json();
+    }
+
+    async function load() {
+        const detail = await fetchDeliveryDetail(deliveryId);
+        if (!detail) return;
         if (detail.status !== 'MATCHED' && detail.status !== 'PICKED_UP') {
             throw new Error('이미 종료되었거나 진행할 수 없는 배송 요청이에요.');
         }
 
         pickup = { lat: detail.pickupLatitude, lng: detail.pickupLongitude };
+        dropoff = { lat: detail.dropoffLatitude, lng: detail.dropoffLongitude };
         renderSheet(detail);
-
-        kakao.maps.load(() => {
-            if (!navigator.geolocation) {
-                initMap(pickup.lat, pickup.lng);
-                return;
-            }
-            navigator.geolocation.getCurrentPosition(
-                (position) => initMap(position.coords.latitude, position.coords.longitude),
-                () => initMap(pickup.lat, pickup.lng)
-            );
-        });
+        locateAndShowMap(detail.status === 'PICKED_UP' ? dropoff : pickup);
     }
 
     (function init() {

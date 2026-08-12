@@ -67,6 +67,12 @@ public class PointHistory {
   @Column(name = "created_at", nullable = false)
   private LocalDateTime createdAt;
 
+  @Column(name = "reference_id")
+  private Long referenceId;
+
+  @Column(length = 100)
+  private String description;
+
   /** 포인트 충전 이력을 생성하는 정적 팩토리 메서드. */
   public static PointHistory ofCharge(
       Long memberId,
@@ -97,6 +103,28 @@ public class PointHistory {
         .balanceAfter(balanceAfter)
         .type(PointHistoryType.USE)
         .idempotencyKey(idempotencyKey)
+        .createdAt(LocalDateTime.now())
+        .build();
+  }
+
+  /** 배송 취소로 반환된 포인트 이력을 생성한다. */
+  public static PointHistory ofRefund(
+      Long memberId,
+      Long walletId,
+      long amount,
+      long balanceAfter,
+      String idempotencyKey,
+      Long referenceId,
+      String description) {
+    return PointHistory.builder()
+        .memberId(memberId)
+        .walletId(walletId)
+        .amount(amount)
+        .balanceAfter(balanceAfter)
+        .type(PointHistoryType.REFUND)
+        .idempotencyKey(idempotencyKey)
+        .referenceId(referenceId)
+        .description(description)
         .createdAt(LocalDateTime.now())
         .build();
   }

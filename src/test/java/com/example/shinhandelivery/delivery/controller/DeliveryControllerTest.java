@@ -17,12 +17,14 @@ import com.example.shinhandelivery.delivery.dto.request.DeliveryCompleteRequest;
 import com.example.shinhandelivery.delivery.dto.request.DeliveryEstimateRequest;
 import com.example.shinhandelivery.delivery.dto.request.DeliveryPayLocationRequest;
 import com.example.shinhandelivery.delivery.dto.request.DeliveryPayRequest;
+import com.example.shinhandelivery.delivery.dto.request.DeliveryPickupRequest;
 import com.example.shinhandelivery.delivery.dto.response.DeliveryEstimateResponse;
 import com.example.shinhandelivery.delivery.dto.response.DeliveryPaymentResponse;
 import com.example.shinhandelivery.delivery.dto.response.ProofPhotoResponse;
 import com.example.shinhandelivery.delivery.entity.DeliveryRequest;
 import com.example.shinhandelivery.delivery.entity.DeliveryStatus;
 import com.example.shinhandelivery.delivery.entity.ItemSize;
+import com.example.shinhandelivery.delivery.exception.DeliveryAccessDeniedException;
 import com.example.shinhandelivery.delivery.exception.InvalidDeliveryTransitionException;
 import com.example.shinhandelivery.delivery.exception.ProofPhotoNotFoundException;
 import com.example.shinhandelivery.delivery.service.DeliveryMatchingService;
@@ -237,6 +239,12 @@ class DeliveryControllerTest {
   @Test
   @DisplayName("완료 처리 요청을 받으면 완료된 배송 요청을 반환한다")
   void completeDeliveryProcessRequest() throws Exception {
+    CustomUserDetails customUser =
+        new CustomUserDetails(20L, "courier@example.com", "pass", "COURIER");
+    UsernamePasswordAuthenticationToken auth =
+        new UsernamePasswordAuthenticationToken(customUser, null, customUser.getAuthorities());
+    SecurityContextHolder.getContext().setAuthentication(auth);
+
     DeliveryCompleteRequest request = new DeliveryCompleteRequest();
     request.setProofPhotoUrl("https://example.com/proof.jpg");
 
@@ -245,11 +253,12 @@ class DeliveryControllerTest {
     completedEntity.setStatus(DeliveryStatus.COMPLETED);
     completedEntity.setFeePoint(78776L);
     completedEntity.setItemSize(ItemSize.MEDIUM);
-    when(deliveryService.completeDelivery(eq(1L), any())).thenReturn(completedEntity);
+    when(deliveryService.completeDelivery(eq(20L), eq(1L), any())).thenReturn(completedEntity);
 
     mockMvc
         .perform(
             patch("/api/v1/delivery-requests/1/complete")
+                .with(authentication(auth))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isOk())
@@ -286,10 +295,16 @@ class DeliveryControllerTest {
   @Test
   @DisplayName("MATCHED가 아닌 배송을 완료 처리하면 409를 반환한다")
   void completeDeliveryNotMatchedStatusShouldReturn409() throws Exception {
+    CustomUserDetails customUser =
+        new CustomUserDetails(20L, "courier@example.com", "pass", "COURIER");
+    UsernamePasswordAuthenticationToken auth =
+        new UsernamePasswordAuthenticationToken(customUser, null, customUser.getAuthorities());
+    SecurityContextHolder.getContext().setAuthentication(auth);
+
     DeliveryCompleteRequest request = new DeliveryCompleteRequest();
     request.setProofPhotoUrl("https://example.com/proof.jpg");
 
-    when(deliveryService.completeDelivery(eq(1L), any()))
+    when(deliveryService.completeDelivery(eq(20L), eq(1L), any()))
         .thenThrow(
             new InvalidDeliveryTransitionException(
                 DeliveryStatus.REQUESTED, DeliveryStatus.COMPLETED));
@@ -297,36 +312,133 @@ class DeliveryControllerTest {
     mockMvc
         .perform(
             patch("/api/v1/delivery-requests/1/complete")
+                .with(authentication(auth))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isConflict());
   }
 
   @Test
+  @DisplayName("배정된 배송원이 아니면 완료 처리 요청은 403을 반환한다")
+  void completeDeliveryNonAssignedCourierShouldReturn403() throws Exception {
+    CustomUserDetails customUser =
+        new CustomUserDetails(999L, "stranger@example.com", "pass", "COURIER");
+    UsernamePasswordAuthenticationToken auth =
+        new UsernamePasswordAuthenticationToken(customUser, null, customUser.getAuthorities());
+    SecurityContextHolder.getContext().setAuthentication(auth);
+
+    DeliveryCompleteRequest request = new DeliveryCompleteRequest();
+    request.setProofPhotoUrl("https://example.com/proof.jpg");
+
+    when(deliveryService.completeDelivery(eq(999L), eq(1L), any()))
+        .thenThrow(new DeliveryAccessDeniedException(1L, 999L));
+
+    mockMvc
+        .perform(
+            patch("/api/v1/delivery-requests/1/complete")
+                .with(authentication(auth))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isForbidden());
+  }
+
+  @Test
   @DisplayName("픽업 완료 요청을 받으면 PICKED_UP 상태의 배송 요청을 반환한다")
   void confirmPickupProcessRequest() throws Exception {
+    CustomUserDetails customUser =
+        new CustomUserDetails(20L, "courier@example.com", "pass", "COURIER");
+    UsernamePasswordAuthenticationToken auth =
+        new UsernamePasswordAuthenticationToken(customUser, null, customUser.getAuthorities());
+    SecurityContextHolder.getContext().setAuthentication(auth);
+
+    DeliveryPickupRequest request = new DeliveryPickupRequest();
+    request.setPickupPhotoUrl("https://example.com/pickup.jpg");
+
     DeliveryRequest pickedUpEntity = new DeliveryRequest();
     pickedUpEntity.setMemberId(1L);
     pickedUpEntity.setStatus(DeliveryStatus.PICKED_UP);
     pickedUpEntity.setFeePoint(78776L);
     pickedUpEntity.setItemSize(ItemSize.MEDIUM);
-    when(deliveryService.confirmPickup(1L)).thenReturn(pickedUpEntity);
+    when(deliveryService.confirmPickup(eq(20L), eq(1L), any())).thenReturn(pickedUpEntity);
 
     mockMvc
-        .perform(patch("/api/v1/delivery-requests/1/pickup"))
+        .perform(
+            patch("/api/v1/delivery-requests/1/pickup")
+                .with(authentication(auth))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.status").value("PICKED_UP"));
   }
 
   @Test
+  @DisplayName("물품 확인 사진 URL이 없으면 픽업 완료 요청은 400을 반환한다")
+  void confirmPickupNoPhotoUrlShouldReturn400() throws Exception {
+    CustomUserDetails customUser =
+        new CustomUserDetails(20L, "courier@example.com", "pass", "COURIER");
+    UsernamePasswordAuthenticationToken auth =
+        new UsernamePasswordAuthenticationToken(customUser, null, customUser.getAuthorities());
+    SecurityContextHolder.getContext().setAuthentication(auth);
+
+    DeliveryPickupRequest request = new DeliveryPickupRequest();
+
+    mockMvc
+        .perform(
+            patch("/api/v1/delivery-requests/1/pickup")
+                .with(authentication(auth))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
   @DisplayName("MATCHED가 아닌 배송을 픽업 처리하면 409를 반환한다")
   void confirmPickupNotMatchedStatusShouldReturn409() throws Exception {
-    when(deliveryService.confirmPickup(1L))
+    CustomUserDetails customUser =
+        new CustomUserDetails(20L, "courier@example.com", "pass", "COURIER");
+    UsernamePasswordAuthenticationToken auth =
+        new UsernamePasswordAuthenticationToken(customUser, null, customUser.getAuthorities());
+    SecurityContextHolder.getContext().setAuthentication(auth);
+
+    DeliveryPickupRequest request = new DeliveryPickupRequest();
+    request.setPickupPhotoUrl("https://example.com/pickup.jpg");
+
+    when(deliveryService.confirmPickup(eq(20L), eq(1L), any()))
         .thenThrow(
             new InvalidDeliveryTransitionException(
                 DeliveryStatus.REQUESTED, DeliveryStatus.PICKED_UP));
 
-    mockMvc.perform(patch("/api/v1/delivery-requests/1/pickup")).andExpect(status().isConflict());
+    mockMvc
+        .perform(
+            patch("/api/v1/delivery-requests/1/pickup")
+                .with(authentication(auth))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isConflict());
+  }
+
+  @Test
+  @DisplayName("배정된 배송원이 아니면 픽업 처리 요청은 403을 반환한다")
+  void confirmPickupNonAssignedCourierShouldReturn403() throws Exception {
+    CustomUserDetails customUser =
+        new CustomUserDetails(999L, "stranger@example.com", "pass", "COURIER");
+    UsernamePasswordAuthenticationToken auth =
+        new UsernamePasswordAuthenticationToken(customUser, null, customUser.getAuthorities());
+    SecurityContextHolder.getContext().setAuthentication(auth);
+
+    DeliveryPickupRequest request = new DeliveryPickupRequest();
+    request.setPickupPhotoUrl("https://example.com/pickup.jpg");
+
+    when(deliveryService.confirmPickup(eq(999L), eq(1L), any()))
+        .thenThrow(new DeliveryAccessDeniedException(1L, 999L));
+
+    mockMvc
+        .perform(
+            patch("/api/v1/delivery-requests/1/pickup")
+                .with(authentication(auth))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isForbidden());
   }
 
   @Test

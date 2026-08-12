@@ -7,6 +7,7 @@ import com.example.shinhandelivery.delivery.dto.request.DeliveryCompleteRequest;
 import com.example.shinhandelivery.delivery.dto.request.DeliveryCreateRequest;
 import com.example.shinhandelivery.delivery.dto.request.DeliveryEstimateRequest;
 import com.example.shinhandelivery.delivery.dto.request.DeliveryPayRequest;
+import com.example.shinhandelivery.delivery.dto.request.DeliveryPickupRequest;
 import com.example.shinhandelivery.delivery.dto.request.DeliveryUpdateRequest;
 import com.example.shinhandelivery.delivery.dto.response.AvailableDeliveryResponse;
 import com.example.shinhandelivery.delivery.dto.response.DeliveryDetailResponseDto;
@@ -171,18 +172,24 @@ public class DeliveryController {
     return ResponseEntity.noContent().build();
   }
 
-  /** 배송원의 픽업 완료를 처리한다. */
+  /** 배송원의 픽업 완료를 처리하고 물품 확인 사진 URL을 저장한다. 배정된 배송원 본인만 처리할 수 있다. */
   @PatchMapping("/{deliveryRequestId}/pickup")
-  public ResponseEntity<DeliveryResponse> confirmPickup(@PathVariable Long deliveryRequestId) {
-    DeliveryRequest pickedUp = deliveryService.confirmPickup(deliveryRequestId);
+  @PreAuthorize("isAuthenticated()")
+  public ResponseEntity<DeliveryResponse> confirmPickup(
+      @PathVariable Long deliveryRequestId, @RequestBody @Valid DeliveryPickupRequest request) {
+    Long memberId = resolveUserDetails().getId();
+    DeliveryRequest pickedUp = deliveryService.confirmPickup(memberId, deliveryRequestId, request);
     return ResponseEntity.ok(DeliveryResponse.from(pickedUp));
   }
 
-  /** 배송을 완료 처리하고 증거 사진 URL을 저장한다. */
+  /** 배송을 완료 처리하고 증거 사진 URL을 저장한다. 배정된 배송원 본인만 처리할 수 있다. */
   @PatchMapping("/{deliveryRequestId}/complete")
+  @PreAuthorize("isAuthenticated()")
   public ResponseEntity<DeliveryResponse> completeDelivery(
       @PathVariable Long deliveryRequestId, @RequestBody @Valid DeliveryCompleteRequest request) {
-    DeliveryRequest completed = deliveryService.completeDelivery(deliveryRequestId, request);
+    Long memberId = resolveUserDetails().getId();
+    DeliveryRequest completed =
+        deliveryService.completeDelivery(memberId, deliveryRequestId, request);
     return ResponseEntity.ok(DeliveryResponse.from(completed));
   }
 

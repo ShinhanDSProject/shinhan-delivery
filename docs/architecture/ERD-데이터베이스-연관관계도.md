@@ -1,7 +1,7 @@
 ---
 metadata:
   ssot_owner: "docs/architecture/ERD-데이터베이스-연관관계도.md"
-  last_updated: "2026-08-05"
+  last_updated: "2026-08-11"
   status: "APPROVED (SSOT Primary)"
 ---
 
@@ -91,6 +91,12 @@ erDiagram
         LocalDateTime completedAt
         LocalDateTime pickedUpAt
         LocalDateTime createdAt
+        String paymentIdempotencyKey
+        DeliveryCancellationReason cancellationReason "AUTO_TIMEOUT (nullable)"
+        LocalDateTime cancelledAt
+        LocalDateTime refundedAt
+        int timeoutRetryCount
+        LocalDateTime timeoutNextRetryAt
     }
 
     MATCHING {
@@ -114,9 +120,11 @@ erDiagram
         Long walletId FK
         long amount
         long balanceAfter
-        PointHistoryType type "CHARGE, USE"
+        PointHistoryType type "CHARGE, USE, REFUND"
         PaymentMethod paymentMethod "CARD, BANK_TRANSFER, EASY_PAY (nullable)"
         String idempotencyKey
+        Long referenceId "배송 요청 ID (nullable)"
+        String description
         LocalDateTime createdAt
     }
 

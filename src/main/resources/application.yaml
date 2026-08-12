@@ -28,6 +28,11 @@ spring:
 app:
   data-seed:
     enabled: ${DATA_SEED_ENABLED:false}
+  delivery-timeout:
+    enabled: ${DELIVERY_TIMEOUT_ENABLED:true}
+    timeout-minutes: ${DELIVERY_TIMEOUT_MINUTES:30}
+    fixed-delay-ms: ${DELIVERY_TIMEOUT_FIXED_DELAY_MS:60000}
+    batch-size: ${DELIVERY_TIMEOUT_BATCH_SIZE:100}
   upload:
     dir: ${UPLOAD_DIR:uploads}
     base-url: /uploads

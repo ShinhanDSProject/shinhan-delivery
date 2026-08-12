@@ -1,6 +1,7 @@
 package com.example.shinhandelivery.payment.repository;
 
 import com.example.shinhandelivery.payment.entity.PointHistory;
+import com.example.shinhandelivery.payment.entity.PointHistoryType;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -8,4 +9,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface PointHistoryRepository extends JpaRepository<PointHistory, Long> {
 
   Optional<PointHistory> findByMemberIdAndIdempotencyKey(Long memberId, String idempotencyKey);
+
+  Optional<PointHistory> findByTypeAndReferenceId(PointHistoryType type, Long referenceId);
 }
