@@ -184,10 +184,14 @@ public class DeliveryService {
     deliveryRequestRepository.delete(deliveryRequest);
   }
 
-  /** 배송원의 픽업 완료를 처리한다 (DeliveryRequest Entity 리턴). 배송원이 콜을 수락한(MATCHED) 배송 요청만 픽업 완료로 전이할 수 있다. */
+  /**
+   * 배송원의 픽업 완료를 처리한다 (DeliveryRequest Entity 리턴). 배송원이 콜을 수락한(MATCHED) 배송 요청만 픽업 완료로 전이할 수 있고, 호출자가
+   * 배정된 배송원 본인이 아니면 DeliveryAccessDeniedException을 던진다.
+   */
   @Transactional
-  public DeliveryRequest confirmPickup(Long deliveryRequestId) {
+  public DeliveryRequest confirmPickup(Long callerId, Long deliveryRequestId) {
     DeliveryRequest deliveryRequest = findDeliveryRequestForUpdateOrThrow(deliveryRequestId);
+    assertCallerIsAssignedCourier(callerId, deliveryRequestId);
     if (deliveryRequest.getStatus() != DeliveryStatus.MATCHED) {
       throw new InvalidDeliveryTransitionException(
           deliveryRequest.getStatus(), DeliveryStatus.PICKED_UP);
@@ -201,11 +205,14 @@ public class DeliveryService {
 
   /**
    * 배송을 완료 처리한다 (DeliveryRequest Entity 리턴). 픽업을 완료한(PICKED_UP) 배송 요청만 완료할 수 있으며, 완료와 동시에 증거 사진
-   * URL을 저장한다. 사진 파일 자체는 이 메서드 호출 전에 {@code POST /api/v1/uploads/image}로 이미 업로드되어 있어야 한다.
+   * URL을 저장한다. 사진 파일 자체는 이 메서드 호출 전에 {@code POST /api/v1/uploads/image}로 이미 업로드되어 있어야 한다. 호출자가 배정된
+   * 배송원 본인이 아니면 DeliveryAccessDeniedException을 던진다.
    */
   @Transactional
-  public DeliveryRequest completeDelivery(Long deliveryRequestId, DeliveryCompleteRequest request) {
+  public DeliveryRequest completeDelivery(
+      Long callerId, Long deliveryRequestId, DeliveryCompleteRequest request) {
     DeliveryRequest deliveryRequest = findDeliveryRequestForUpdateOrThrow(deliveryRequestId);
+    assertCallerIsAssignedCourier(callerId, deliveryRequestId);
     if (deliveryRequest.getStatus() != DeliveryStatus.PICKED_UP) {
       throw new InvalidDeliveryTransitionException(
           deliveryRequest.getStatus(), DeliveryStatus.COMPLETED);
@@ -238,6 +245,18 @@ public class DeliveryService {
   /** 매칭이 있으면 그 차량 소유주(Member) id를, 매칭이 없으면(아직 아무도 안 맡았으면) null을 반환한다. */
   private Long courierIdOf(Matching matching) {
     return matching == null ? null : vehicleService.getById(matching.getVehicleId()).getMemberId();
+  }
+
+  /**
+   * 호출자가 배송 요청에 배정된 배송원 본인이 아니면 DeliveryAccessDeniedException을 던진다. 픽업·완료 처리는 고객이 아니라 배정된 배송원만 할 수
+   * 있다(조회와 달리 고객 본인은 허용하지 않음 — {@link #assertCallerHasAccess}와 다른 점).
+   */
+  private void assertCallerIsAssignedCourier(Long callerId, Long deliveryRequestId) {
+    Matching matching = matchingRepository.findByDeliveryRequestId(deliveryRequestId).orElse(null);
+    Long courierId = courierIdOf(matching);
+    if (!callerId.equals(courierId)) {
+      throw new DeliveryAccessDeniedException(deliveryRequestId, callerId);
+    }
   }
 
   /** 호출자가 배송 요청의 고객 본인이거나 배정된 배송원 본인이 아니면 DeliveryAccessDeniedException을 던진다. */
