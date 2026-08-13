@@ -8,7 +8,7 @@ import com.example.shinhandelivery.member.dto.request.LoginRequest;
 import com.example.shinhandelivery.member.dto.request.MemberCreateRequest;
 import com.example.shinhandelivery.member.dto.request.MemberPasswordUpdateRequest;
 import com.example.shinhandelivery.member.dto.request.MemberPaymentPinUpdateRequest;
-import com.example.shinhandelivery.member.dto.request.MemberProfileUpdateRequestDto;
+import com.example.shinhandelivery.member.dto.request.MemberProfileUpdateRequest;
 import com.example.shinhandelivery.member.dto.request.MemberUpdateRequest;
 import com.example.shinhandelivery.member.dto.response.TokenResponse;
 import com.example.shinhandelivery.member.entity.CourierApprovalStatus;
@@ -100,7 +100,7 @@ public class MemberService {
 
   /** 로그인한 본인의 프로필 정보(이름, 연락처)를 수정한다. */
   @Transactional
-  public Member updateMyProfile(Long memberId, MemberProfileUpdateRequestDto request) {
+  public Member updateMyProfile(Long memberId, MemberProfileUpdateRequest request) {
     return findMemberOrThrow(memberId).updateProfileBy(request);
   }
 

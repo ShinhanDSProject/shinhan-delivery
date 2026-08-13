@@ -22,7 +22,7 @@ import com.example.shinhandelivery.delivery.dto.request.DeliveryPayLocationReque
 import com.example.shinhandelivery.delivery.dto.request.DeliveryPayRequest;
 import com.example.shinhandelivery.delivery.dto.request.DeliveryPickupRequest;
 import com.example.shinhandelivery.delivery.dto.request.DeliveryUpdateRequest;
-import com.example.shinhandelivery.delivery.dto.response.DeliveryDetailResponseDto;
+import com.example.shinhandelivery.delivery.dto.response.DeliveryDetailResponse;
 import com.example.shinhandelivery.delivery.dto.response.DeliveryEstimateResponse;
 import com.example.shinhandelivery.delivery.dto.response.DeliveryPaymentResponse;
 import com.example.shinhandelivery.delivery.dto.response.DeliveryReorderResponse;
@@ -844,7 +844,7 @@ class DeliveryServiceTest {
     courier.setName("박배송");
     when(memberService.getById(20L)).thenReturn(courier);
 
-    DeliveryDetailResponseDto response = deliveryService.getDeliveryRequestDetail(1L, 1L);
+    DeliveryDetailResponse response = deliveryService.getDeliveryRequestDetail(1L, 1L);
 
     assertThat(response.courierName()).isEqualTo("박배송");
   }
@@ -858,7 +858,7 @@ class DeliveryServiceTest {
     when(deliveryRequestRepository.findById(1L)).thenReturn(Optional.of(deliveryRequest));
     when(matchingRepository.findByDeliveryRequestId(1L)).thenReturn(Optional.empty());
 
-    DeliveryDetailResponseDto response = deliveryService.getDeliveryRequestDetail(1L, 1L);
+    DeliveryDetailResponse response = deliveryService.getDeliveryRequestDetail(1L, 1L);
 
     assertThat(response.courierName()).isNull();
   }
@@ -882,7 +882,7 @@ class DeliveryServiceTest {
     courier.setName("박배송");
     when(memberService.getById(20L)).thenReturn(courier);
 
-    DeliveryDetailResponseDto response = deliveryService.getDeliveryRequestDetail(20L, 1L);
+    DeliveryDetailResponse response = deliveryService.getDeliveryRequestDetail(20L, 1L);
 
     assertThat(response.courierName()).isEqualTo("박배송");
   }

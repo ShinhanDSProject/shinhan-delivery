@@ -16,7 +16,7 @@ import com.example.shinhandelivery.common.exception.GlobalExceptionHandler;
 import com.example.shinhandelivery.common.security.CustomUserDetails;
 import com.example.shinhandelivery.member.dto.request.MemberCreateRequest;
 import com.example.shinhandelivery.member.dto.request.MemberPasswordUpdateRequest;
-import com.example.shinhandelivery.member.dto.request.MemberProfileUpdateRequestDto;
+import com.example.shinhandelivery.member.dto.request.MemberProfileUpdateRequest;
 import com.example.shinhandelivery.member.entity.Member;
 import com.example.shinhandelivery.member.entity.MemberRole;
 import com.example.shinhandelivery.member.service.MemberService;
@@ -184,8 +184,7 @@ class MemberControllerTest {
         new UsernamePasswordAuthenticationToken(customUser, null, customUser.getAuthorities());
     SecurityContextHolder.getContext().setAuthentication(auth);
 
-    MemberProfileUpdateRequestDto request =
-        new MemberProfileUpdateRequestDto("김철수", "010-9876-5432");
+    MemberProfileUpdateRequest request = new MemberProfileUpdateRequest("김철수", "010-9876-5432");
 
     Member updatedMember =
         Member.builder()
@@ -257,8 +256,7 @@ class MemberControllerTest {
         new UsernamePasswordAuthenticationToken(customUser, null, customUser.getAuthorities());
     SecurityContextHolder.getContext().setAuthentication(auth);
 
-    MemberProfileUpdateRequestDto request =
-        new MemberProfileUpdateRequestDto("김철수", "invalid-phone");
+    MemberProfileUpdateRequest request = new MemberProfileUpdateRequest("김철수", "invalid-phone");
 
     mockMvc
         .perform(

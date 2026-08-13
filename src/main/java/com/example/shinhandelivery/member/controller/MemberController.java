@@ -7,11 +7,11 @@ import com.example.shinhandelivery.member.dto.request.LoginRequest;
 import com.example.shinhandelivery.member.dto.request.MemberCreateRequest;
 import com.example.shinhandelivery.member.dto.request.MemberPasswordUpdateRequest;
 import com.example.shinhandelivery.member.dto.request.MemberPaymentPinUpdateRequest;
-import com.example.shinhandelivery.member.dto.request.MemberProfileUpdateRequestDto;
+import com.example.shinhandelivery.member.dto.request.MemberProfileUpdateRequest;
 import com.example.shinhandelivery.member.dto.request.MemberRoleUpdateRequest;
 import com.example.shinhandelivery.member.dto.request.MemberUpdateRequest;
 import com.example.shinhandelivery.member.dto.request.ProofDocumentUpdateRequest;
-import com.example.shinhandelivery.member.dto.response.MemberProfileResponseDto;
+import com.example.shinhandelivery.member.dto.response.MemberProfileResponse;
 import com.example.shinhandelivery.member.dto.response.MemberResponse;
 import com.example.shinhandelivery.member.dto.response.TokenResponse;
 import com.example.shinhandelivery.member.entity.Member;
@@ -58,21 +58,21 @@ public class MemberController {
 
   /** 인증된 본인의 프로필 정보를 조회한다. */
   @GetMapping("/me")
-  public ResponseEntity<MemberProfileResponseDto> getMyProfile(
+  public ResponseEntity<MemberProfileResponse> getMyProfile(
       @AuthenticationPrincipal CustomUserDetails userDetails) {
     CustomUserDetails resolved = resolveUserDetails(userDetails);
     return ResponseEntity.ok(
-        MemberProfileResponseDto.from(memberService.getMyProfile(resolved.getId())));
+        MemberProfileResponse.from(memberService.getMyProfile(resolved.getId())));
   }
 
   /** 인증된 본인의 프로필 정보(이름, 연락처)를 수정한다. */
   @PatchMapping("/me")
-  public ResponseEntity<MemberProfileResponseDto> updateMyProfile(
+  public ResponseEntity<MemberProfileResponse> updateMyProfile(
       @AuthenticationPrincipal CustomUserDetails userDetails,
-      @Valid @RequestBody MemberProfileUpdateRequestDto request) {
+      @Valid @RequestBody MemberProfileUpdateRequest request) {
     CustomUserDetails resolved = resolveUserDetails(userDetails);
     return ResponseEntity.ok(
-        MemberProfileResponseDto.from(memberService.updateMyProfile(resolved.getId(), request)));
+        MemberProfileResponse.from(memberService.updateMyProfile(resolved.getId(), request)));
   }
 
   /** 인증된 본인의 비밀번호를 변경한다. */
@@ -97,12 +97,12 @@ public class MemberController {
 
   /** 인증된 본인의 자격 증빙 서류 이미지 URL을 등록/재제출한다. */
   @PatchMapping("/me/proof-document")
-  public ResponseEntity<MemberProfileResponseDto> updateProofDocument(
+  public ResponseEntity<MemberProfileResponse> updateProofDocument(
       @AuthenticationPrincipal CustomUserDetails userDetails,
       @Valid @RequestBody ProofDocumentUpdateRequest request) {
     CustomUserDetails resolved = resolveUserDetails(userDetails);
     return ResponseEntity.ok(
-        MemberProfileResponseDto.from(
+        MemberProfileResponse.from(
             memberService.updateProofDocumentUrl(resolved.getId(), request.getProofDocumentUrl())));
   }
 
