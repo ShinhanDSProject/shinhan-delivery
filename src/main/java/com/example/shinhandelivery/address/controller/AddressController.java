@@ -36,7 +36,9 @@ public class AddressController {
   public ResponseEntity<List<AddressResponse>> getAddresses(
       @AuthenticationPrincipal CustomUserDetails customUser) {
     List<AddressResponse> responses =
-        addressService.list(customUser.getId()).stream().map(AddressResponse::from).toList();
+        addressService.list(extractMemberId(customUser)).stream()
+            .map(AddressResponse::from)
+            .toList();
     return ResponseEntity.ok(responses);
   }
 
@@ -45,7 +47,7 @@ public class AddressController {
   public ResponseEntity<AddressResponse> createAddress(
       @AuthenticationPrincipal CustomUserDetails principal,
       @RequestBody @Valid AddressCreateRequest request) {
-    Long memberId = principal.getId();
+    Long memberId = extractMemberId(principal);
     Address created = addressService.create(memberId, request);
     return ResponseEntity.status(HttpStatus.CREATED).body(AddressResponse.from(created));
   }

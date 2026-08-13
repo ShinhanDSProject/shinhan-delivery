@@ -703,3 +703,5 @@ void 도메인은_다른_도메인의_repository를_직접_참조하지_않는�
    - 신규 UI 요소 추가나 디자인 스펙 수정 시 반드시 `docs/architecture/UI-공통-디자인-시스템.md` 가이드북과 `http://localhost:8080/style-guide.html` 라이브 가이드 페이지를 소스 코드와 세트로 최신화해야 합니다.
 8. **전체 유저 플로우 가이드 동기화 필수:**
    - 신규 화면(`*.html`)이나 새로운 기능/유스케이스가 추가될 때, 개발자는 반드시 단일 원본 문서인 `docs/architecture/전체-유저-플로우-가이드.md`에 해당 화면과 유저 여정, 화면-서비스 매핑표를 필수로 동기화 반영해야 합니다.
+9. **주소 퀵 칩 표준:**
+   - 저장 주소 선택 UI는 공통 `addressQuickChipSelector` 프래그먼트와 디자인 시스템 클래스를 사용하며, 상세 동작은 `docs/design/address-quick-chips-design.md`를 단일 원본으로 참조합니다.

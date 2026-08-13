@@ -109,5 +109,20 @@
     상태
   </span>
 
+  <!-- 자주 쓰는 주소를 출발지 또는 목적지에 적용하는 퀵 선택기. 주소 칩은 본인 주소 API 응답으로 안전하게 렌더링한다. -->
+  <section th:fragment="addressQuickChipSelector" class="quick-address-section" aria-labelledby="quickAddressTitle">
+    <div class="quick-address-heading">
+      <span id="quickAddressTitle">자주 쓰는 주소</span>
+      <a href="/address-management">주소 관리</a>
+    </div>
+    <div class="address-target-selector" role="group" aria-label="주소 입력 대상">
+      <button type="button" class="address-target-button" data-address-target="pickup" aria-pressed="false">출발지</button>
+      <button type="button" class="address-target-button active" data-address-target="dropoff" aria-pressed="true">목적지</button>
+    </div>
+    <div class="quick-address-list" id="quickAddressList" aria-live="polite">
+      <span class="quick-address-empty">주소를 불러오는 중...</span>
+    </div>
+  </section>
+
 </body>
 </html>

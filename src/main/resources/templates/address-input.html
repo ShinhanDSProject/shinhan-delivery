@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -275,6 +275,7 @@
         <div class="reorder-notice" id="reorderNotice" hidden>
             이전 배송 정보를 자동으로 채웠어요. 내용을 확인하고 필요하면 수정해 주세요.
         </div>
+        <div th:replace="~{fragments/components :: addressQuickChipSelector}"></div>
         <div class="field">
             <label>출발지 (문앞 픽업)</label>
             <button type="button" class="field-box" id="pickupField" onclick="goToPickupMap()">
@@ -334,6 +335,9 @@
 
 <script>
     const SIZE_LABEL = { SMALL: '소형', MEDIUM: '중형', LARGE: '대형' };
+    let selectedAddressTarget = 'dropoff';
+    let latestAddressSelectionRequest = 0;
+    const selectedAddressIdByTarget = { pickup: null, dropoff: null };
 
     function authHeader() {
         const token = localStorage.getItem('accessToken');
@@ -342,18 +346,22 @@
         return `${tokenType} ${token}`;
     }
 
-    function notReady() {
+    function showToast(message) {
         const existing = document.getElementById('toast');
         if (existing) existing.remove();
         const toast = document.createElement('div');
         toast.id = 'toast';
-        toast.textContent = '아직 준비 중인 기능입니다.';
+        toast.textContent = message;
         toast.style.cssText =
             'position:fixed;left:50%;bottom:90px;transform:translateX(-50%);' +
             'background:#1e293b;color:#fff;padding:10px 20px;border-radius:999px;' +
             'font-size:13px;z-index:100;';
         document.body.appendChild(toast);
         setTimeout(() => toast.remove(), 2000);
+    }
+
+    function notReady() {
+        showToast('아직 준비 중인 기능입니다.');
     }
 
     function goToPickupMap() {
@@ -375,14 +383,70 @@
         el.classList.remove('placeholder');
     }
 
+    function iconForAlias(alias) {
+        const normalizedAlias = (alias || '').replaceAll(' ', '').toLowerCase();
+        if (normalizedAlias.includes('집') || normalizedAlias.includes('home')) return '🏠';
+        if (normalizedAlias.includes('회사') || normalizedAlias.includes('직장') || normalizedAlias.includes('office')) return '🏢';
+        return '📍';
+    }
+
+    function setAddressTarget(target) {
+        if (target !== 'pickup' && target !== 'dropoff') return;
+        selectedAddressTarget = target;
+        latestAddressSelectionRequest += 1;
+        document.querySelectorAll('[data-address-target]').forEach((button) => {
+            const active = button.dataset.addressTarget === target;
+            button.classList.toggle('active', active);
+            button.setAttribute('aria-pressed', String(active));
+        });
+        document.querySelectorAll('.quick-address-chip').forEach((chip) => {
+            chip.setAttribute('aria-label', `${chip.dataset.addressAlias} 주소를 ${target === 'pickup' ? '출발지' : '목적지'}에 입력`);
+        });
+        renderSelectedAddressChip();
+    }
+
+    function renderSelectedAddressChip() {
+        document.querySelectorAll('.quick-address-chip').forEach((chip) => {
+            const active = Number(chip.dataset.addressId) === selectedAddressIdByTarget[selectedAddressTarget];
+            chip.classList.toggle('active', active);
+            chip.setAttribute('aria-pressed', String(active));
+        });
+    }
+
+    function renderQuickAddressChips(addresses) {
+        const chipList = document.getElementById('quickAddressList');
+        chipList.replaceChildren();
+        if (addresses.length === 0) {
+            const empty = document.createElement('span');
+            empty.className = 'quick-address-empty';
+            empty.textContent = '등록된 주소가 없어요.';
+            chipList.appendChild(empty);
+            return;
+        }
+        addresses.forEach((addr) => {
+            const chip = document.createElement('button');
+            chip.type = 'button';
+            chip.className = 'quick-address-chip';
+            chip.dataset.addressId = String(addr.id);
+            chip.dataset.addressAlias = addr.alias;
+            chip.setAttribute('aria-pressed', 'false');
+            chip.setAttribute('aria-label', `${addr.alias} 주소를 ${selectedAddressTarget === 'pickup' ? '출발지' : '목적지'}에 입력`);
+            chip.textContent = `${iconForAlias(addr.alias)} ${addr.alias}`;
+            chip.addEventListener('click', () => selectSavedAddress(addr));
+            chipList.appendChild(chip);
+        });
+    }
+
     async function loadRecentAddresses() {
         const listEl = document.getElementById('recentList');
+        const chipList = document.getElementById('quickAddressList');
         const header = authHeader();
         if (!header) return;
         try {
             const response = await fetch('/api/v1/addresses', { headers: { Authorization: header } });
             if (!response.ok) throw new Error('failed');
             const addresses = await response.json();
+            renderQuickAddressChips(addresses);
             if (addresses.length === 0) {
                 listEl.innerHTML = '<div class="recent-empty">자주 쓰는 주소가 없어요.</div>';
                 return;
@@ -418,35 +482,45 @@
 
                 item.appendChild(icon);
                 item.appendChild(textWrap);
-                item.addEventListener('click', () => selectRecentAddress(addr));
+                item.addEventListener('click', () => selectSavedAddress(addr));
                 listEl.appendChild(item);
             });
         } catch (error) {
             listEl.innerHTML = '<div class="recent-empty">최근 목록을 불러오지 못했어요.</div>';
+            chipList.replaceChildren();
+            const empty = document.createElement('span');
+            empty.className = 'quick-address-empty';
+            empty.textContent = '주소를 불러오지 못했어요.';
+            chipList.appendChild(empty);
         }
     }
 
-    function selectRecentAddress(addr) {
+    function selectSavedAddress(addr) {
         if (!window.kakao || !window.kakao.maps) {
-            notReady();
+            showToast('지도 서비스를 불러오지 못했어요. 잠시 후 다시 시도해 주세요.');
             return;
         }
+        const target = selectedAddressTarget;
+        const requestId = ++latestAddressSelectionRequest;
         kakao.maps.load(() => {
             const geocoder = new kakao.maps.services.Geocoder();
             geocoder.addressSearch(addr.address, (results, status) => {
+                if (requestId !== latestAddressSelectionRequest) return;
                 if (status !== kakao.maps.services.Status.OK || results.length === 0) {
-                    notReady();
+                    showToast('저장된 주소의 위치를 찾지 못했어요. 주소 관리에서 확인해 주세요.');
                     return;
                 }
                 const draft = loadDraft();
-                draft.dropoff = {
+                draft[target] = {
                     address: addr.address,
                     detail: addr.detailAddress || '',
                     lat: parseFloat(results[0].y),
                     lng: parseFloat(results[0].x)
                 };
                 saveDraft(draft);
-                renderPoint('dropoff', draft.dropoff);
+                selectedAddressIdByTarget[target] = Number(addr.id);
+                renderPoint(target, draft[target]);
+                renderSelectedAddressChip();
                 maybeEstimateFee();
             });
         });
@@ -648,6 +722,9 @@
         renderItemDetailSummary(draft);
         renderPoint('pickup', draft.pickup);
         renderPoint('dropoff', draft.dropoff);
+        document.querySelectorAll('[data-address-target]').forEach((button) => {
+            button.addEventListener('click', () => setAddressTarget(button.dataset.addressTarget));
+        });
         detectCurrentLocation();
         loadRecentAddresses();
         maybeEstimateFee();

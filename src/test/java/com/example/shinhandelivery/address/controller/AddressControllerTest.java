@@ -82,6 +82,14 @@ class AddressControllerTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$[0].alias").value("집"))
         .andExpect(jsonPath("$[0].address").value("서울시 강남구"));
+
+    verify(addressService).list(10L);
+  }
+
+  @Test
+  @DisplayName("인증 정보가 없으면 자주 쓰는 주소를 조회하지 않는다")
+  void getAddressesUnauthenticatedShouldReturnUnauthorized() throws Exception {
+    mockMvc.perform(get("/api/v1/addresses")).andExpect(status().isUnauthorized());
   }
 
   @Test
