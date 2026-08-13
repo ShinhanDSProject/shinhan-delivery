@@ -1,12 +1,11 @@
 package com.example.shinhandelivery.delivery.controller;
 
-import com.example.shinhandelivery.common.security.CustomUserDetails;
+import com.example.shinhandelivery.common.annotation.CurrentUserId;
 import com.example.shinhandelivery.common.security.WebSecurityUtils;
 import com.example.shinhandelivery.delivery.entity.DeliveryStatus;
 import com.example.shinhandelivery.delivery.service.DeliveryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,35 +19,30 @@ public class DeliveryWebController {
   private final DeliveryService deliveryService;
 
   @GetMapping("/delivery-history")
-  public String deliveryHistory(
-      @AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
-    WebSecurityUtils.ifAuthenticated(
-        userDetails,
-        userId ->
-            WebSecurityUtils.safeAddAttribute(
-                model,
-                "deliveries",
-                () ->
-                    deliveryService
-                        .getMyDeliveryRequests(userId, null, PageRequest.of(0, 20))
-                        .getContent()));
+  public String deliveryHistory(@CurrentUserId Long userId, Model model) {
+    if (userId != null) {
+      WebSecurityUtils.safeAddAttribute(
+          model,
+          "deliveries",
+          () ->
+              deliveryService
+                  .getMyDeliveryRequests(userId, null, PageRequest.of(0, 20))
+                  .getContent());
+    }
     return "delivery-history";
   }
 
   @GetMapping("/delivery-cancel-list")
-  public String deliveryCancelList(
-      @AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
-    WebSecurityUtils.ifAuthenticated(
-        userDetails,
-        userId ->
-            WebSecurityUtils.safeAddAttribute(
-                model,
-                "deliveries",
-                () ->
-                    deliveryService
-                        .getMyDeliveryRequests(
-                            userId, DeliveryStatus.CANCELLED, PageRequest.of(0, 20))
-                        .getContent()));
+  public String deliveryCancelList(@CurrentUserId Long userId, Model model) {
+    if (userId != null) {
+      WebSecurityUtils.safeAddAttribute(
+          model,
+          "deliveries",
+          () ->
+              deliveryService
+                  .getMyDeliveryRequests(userId, DeliveryStatus.CANCELLED, PageRequest.of(0, 20))
+                  .getContent());
+    }
     return "delivery-cancel-list";
   }
 

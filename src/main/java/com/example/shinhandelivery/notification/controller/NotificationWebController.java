@@ -1,13 +1,12 @@
 package com.example.shinhandelivery.notification.controller;
 
-import com.example.shinhandelivery.common.security.CustomUserDetails;
+import com.example.shinhandelivery.common.annotation.CurrentUserId;
 import com.example.shinhandelivery.common.security.WebSecurityUtils;
 import com.example.shinhandelivery.notice.dto.response.NoticeResponse;
 import com.example.shinhandelivery.notice.service.NoticeService;
 import com.example.shinhandelivery.notification.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,14 +20,13 @@ public class NotificationWebController {
   private final NoticeService noticeService;
 
   @GetMapping("/notifications")
-  public String notifications(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
-    WebSecurityUtils.ifAuthenticated(
-        userDetails,
-        userId ->
-            WebSecurityUtils.safeAddAttribute(
-                model,
-                "notifications",
-                () -> notificationService.list(userId, null, PageRequest.of(0, 30)).getContent()));
+  public String notifications(@CurrentUserId Long userId, Model model) {
+    if (userId != null) {
+      WebSecurityUtils.safeAddAttribute(
+          model,
+          "notifications",
+          () -> notificationService.list(userId, null, PageRequest.of(0, 30)).getContent());
+    }
 
     WebSecurityUtils.safeAddAttribute(
         model,
