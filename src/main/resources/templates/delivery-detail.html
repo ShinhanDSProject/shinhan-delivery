@@ -151,6 +151,7 @@
             max-width: 480px;
             padding: 24px;
             display: flex;
+            flex-direction: column;
             gap: 10px;
         }
 
@@ -211,7 +212,8 @@
 
 <div class="footer-actions" id="footerActions" hidden>
     <button class="reorder-cta" id="reorderCta" type="button">이 배송 다시 보내기</button>
-    <button class="photo-cta" id="photoCta" type="button">문앞 인증 사진 보기</button>
+    <button class="photo-cta" id="pickupPhotoCta" type="button" hidden>픽업 확인 사진 보기</button>
+    <button class="photo-cta" id="photoCta" type="button" hidden>문앞 인증 사진 보기</button>
 </div>
 
 <script>
@@ -292,6 +294,7 @@
         }
 
         const footerActions = document.getElementById('footerActions');
+        const pickupPhotoCta = document.getElementById('pickupPhotoCta');
         const photoCta = document.getElementById('photoCta');
         const reorderCta = document.getElementById('reorderCta');
         footerActions.hidden = false;
@@ -310,7 +313,18 @@
                 document.getElementById('reorderError').textContent = message;
             });
         });
+        const pickedUp = detail.status === 'PICKED_UP' || detail.status === 'COMPLETED';
+        if (pickedUp) {
+            pickupPhotoCta.hidden = false;
+            pickupPhotoCta.disabled = !detail.pickupPhotoUrl;
+            pickupPhotoCta.addEventListener('click', () => {
+                location.href = `/pickup-photo?id=${deliveryId}`;
+            });
+        } else {
+            pickupPhotoCta.hidden = true;
+        }
         if (detail.status === 'COMPLETED') {
+            photoCta.hidden = false;
             photoCta.disabled = !detail.proofPhotoUrl;
             photoCta.addEventListener('click', () => {
                 location.href = `/door-photo?id=${deliveryId}`;

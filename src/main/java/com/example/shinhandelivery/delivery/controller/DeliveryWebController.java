@@ -32,6 +32,11 @@ public class DeliveryWebController {
     return "door-photo";
   }
 
+  @GetMapping("/pickup-photo")
+  public String pickupPhoto() {
+    return "pickup-photo";
+  }
+
   @GetMapping("/cancel-detail")
   public String cancelDetail() {
     return "cancel-detail";
