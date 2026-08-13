@@ -5,7 +5,7 @@ import com.example.shinhandelivery.member.entity.Member;
 import com.example.shinhandelivery.member.entity.MemberRole;
 
 /** 회원 본인 프로필 조회 응답 DTO. 비밀번호는 노출하지 않는다. */
-public record MemberProfileResponseDto(
+public record MemberProfileResponse(
     Long id,
     String email,
     String name,
@@ -15,9 +15,9 @@ public record MemberProfileResponseDto(
     CourierApprovalStatus courierApprovalStatus,
     String proofDocumentUrl) {
 
-  /** Member 엔티티를 MemberProfileResponseDto로 변환한다. */
-  public static MemberProfileResponseDto from(Member entity) {
-    return new MemberProfileResponseDto(
+  /** Member 엔티티를 MemberProfileResponse로 변환한다. */
+  public static MemberProfileResponse from(Member entity) {
+    return new MemberProfileResponse(
         entity.getId(),
         entity.getEmail(),
         entity.getName(),

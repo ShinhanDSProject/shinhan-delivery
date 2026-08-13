@@ -1,4 +1,4 @@
-package com.example.shinhandelivery.category.controller;
+package com.example.shinhandelivery.common.controller;
 
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;

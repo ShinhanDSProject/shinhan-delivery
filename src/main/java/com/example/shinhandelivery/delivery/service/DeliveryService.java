@@ -8,7 +8,7 @@ import com.example.shinhandelivery.delivery.dto.request.DeliveryEstimateRequest;
 import com.example.shinhandelivery.delivery.dto.request.DeliveryPayRequest;
 import com.example.shinhandelivery.delivery.dto.request.DeliveryPickupRequest;
 import com.example.shinhandelivery.delivery.dto.request.DeliveryUpdateRequest;
-import com.example.shinhandelivery.delivery.dto.response.DeliveryDetailResponseDto;
+import com.example.shinhandelivery.delivery.dto.response.DeliveryDetailResponse;
 import com.example.shinhandelivery.delivery.dto.response.DeliveryEstimateResponse;
 import com.example.shinhandelivery.delivery.dto.response.DeliveryPaymentResponse;
 import com.example.shinhandelivery.delivery.dto.response.DeliveryReorderResponse;
@@ -157,7 +157,7 @@ public class DeliveryService {
    * 던진다. 매칭된 배송원이 있으면 차량 소유자(Member)의 이름과 차량 종류를 courierName·vehicleType으로 함께 담고, 없으면 둘 다 null이다.
    */
   @Transactional(readOnly = true)
-  public DeliveryDetailResponseDto getDeliveryRequestDetail(Long callerId, Long deliveryRequestId) {
+  public DeliveryDetailResponse getDeliveryRequestDetail(Long callerId, Long deliveryRequestId) {
     DeliveryRequest deliveryRequest = findDeliveryRequestOrThrow(deliveryRequestId);
 
     Matching matching = matchingRepository.findByDeliveryRequestId(deliveryRequestId).orElse(null);
@@ -168,7 +168,7 @@ public class DeliveryService {
     String courierName = courierId == null ? null : memberService.getById(courierId).getName();
     LocalDateTime matchedAt = matching == null ? null : matching.getMatchedAt();
     VehicleType vehicleType = vehicle == null ? null : vehicle.getType();
-    return DeliveryDetailResponseDto.from(deliveryRequest, courierName, matchedAt, vehicleType);
+    return DeliveryDetailResponse.from(deliveryRequest, courierName, matchedAt, vehicleType);
   }
 
   /**

@@ -9,7 +9,7 @@ import static org.mockito.Mockito.when;
 import com.example.shinhandelivery.common.exception.BusinessException;
 import com.example.shinhandelivery.common.exception.EntityNotFoundException;
 import com.example.shinhandelivery.member.dto.request.MemberCreateRequest;
-import com.example.shinhandelivery.member.dto.request.MemberProfileUpdateRequestDto;
+import com.example.shinhandelivery.member.dto.request.MemberProfileUpdateRequest;
 import com.example.shinhandelivery.member.entity.CourierApprovalStatus;
 import com.example.shinhandelivery.member.entity.Member;
 import com.example.shinhandelivery.member.entity.MemberRole;
@@ -152,7 +152,7 @@ class MemberServiceTest {
 
     when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
 
-    MemberProfileUpdateRequestDto request = new MemberProfileUpdateRequestDto();
+    MemberProfileUpdateRequest request = new MemberProfileUpdateRequest();
     request.setName("김영희");
     request.setPhoneNumber("010-1111-2222");
 

@@ -3,7 +3,7 @@ package com.example.shinhandelivery.member.entity;
 import com.example.shinhandelivery.common.exception.BusinessException;
 import com.example.shinhandelivery.common.exception.ErrorCode;
 import com.example.shinhandelivery.member.dto.request.MemberCreateRequest;
-import com.example.shinhandelivery.member.dto.request.MemberProfileUpdateRequestDto;
+import com.example.shinhandelivery.member.dto.request.MemberProfileUpdateRequest;
 import com.example.shinhandelivery.member.dto.request.MemberUpdateRequest;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -128,8 +128,8 @@ public class Member {
     return this;
   }
 
-  /** MemberProfileUpdateRequestDto DTO 기반으로 회원 프로필 정보를 수정한다. */
-  public Member updateProfileBy(MemberProfileUpdateRequestDto request) {
+  /** MemberProfileUpdateRequest DTO 기반으로 회원 프로필 정보를 수정한다. */
+  public Member updateProfileBy(MemberProfileUpdateRequest request) {
     this.name = request.getName();
     this.phoneNumber = request.getPhoneNumber();
     return this;

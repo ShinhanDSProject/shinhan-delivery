@@ -12,9 +12,9 @@ import com.example.shinhandelivery.delivery.dto.request.DeliveryUpdateRequest;
 import com.example.shinhandelivery.delivery.dto.response.AvailableDeliveryResponse;
 import com.example.shinhandelivery.delivery.dto.response.DeliveryCancellationPreviewResponse;
 import com.example.shinhandelivery.delivery.dto.response.DeliveryCancellationResponse;
-import com.example.shinhandelivery.delivery.dto.response.DeliveryDetailResponseDto;
+import com.example.shinhandelivery.delivery.dto.response.DeliveryDetailResponse;
 import com.example.shinhandelivery.delivery.dto.response.DeliveryEstimateResponse;
-import com.example.shinhandelivery.delivery.dto.response.DeliveryListResponseDto;
+import com.example.shinhandelivery.delivery.dto.response.DeliveryListResponse;
 import com.example.shinhandelivery.delivery.dto.response.DeliveryPaymentResponse;
 import com.example.shinhandelivery.delivery.dto.response.DeliveryReorderResponse;
 import com.example.shinhandelivery.delivery.dto.response.DeliveryResponse;
@@ -105,7 +105,7 @@ public class DeliveryController {
    */
   @GetMapping("/{deliveryRequestId}")
   @PreAuthorize("isAuthenticated()")
-  public ResponseEntity<DeliveryDetailResponseDto> getDeliveryRequest(
+  public ResponseEntity<DeliveryDetailResponse> getDeliveryRequest(
       @AuthenticationPrincipal CustomUserDetails principal, @PathVariable Long deliveryRequestId) {
     memberService.requirePaymentPinConfigured(principal.getId());
     return ResponseEntity.ok()
@@ -116,15 +116,15 @@ public class DeliveryController {
   /** 로그인 회원 본인의 배송 내역을 최신순으로 페이징 조회한다. status로 선택적 필터링이 가능하다. */
   @GetMapping
   @PreAuthorize("isAuthenticated()")
-  public ResponseEntity<Page<DeliveryListResponseDto>> getDeliveryRequests(
+  public ResponseEntity<Page<DeliveryListResponse>> getDeliveryRequests(
       @RequestParam(required = false) DeliveryStatus status,
       @PageableDefault(size = 10) Pageable pageable) {
     Long memberId = resolveUserDetails().getId();
     memberService.requirePaymentPinConfigured(memberId);
-    Page<DeliveryListResponseDto> responses =
+    Page<DeliveryListResponse> responses =
         deliveryService
             .getMyDeliveryRequests(memberId, status, pageable)
-            .map(DeliveryListResponseDto::from);
+            .map(DeliveryListResponse::from);
     return ResponseEntity.ok(responses);
   }
 

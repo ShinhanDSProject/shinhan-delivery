@@ -18,7 +18,7 @@ import com.example.shinhandelivery.common.security.JwtProvider;
 import com.example.shinhandelivery.delivery.dto.request.DeliveryCompleteRequest;
 import com.example.shinhandelivery.delivery.dto.request.DeliveryCreateRequest;
 import com.example.shinhandelivery.delivery.dto.request.DeliveryPickupRequest;
-import com.example.shinhandelivery.delivery.dto.response.DeliveryDetailResponseDto;
+import com.example.shinhandelivery.delivery.dto.response.DeliveryDetailResponse;
 import com.example.shinhandelivery.delivery.dto.response.PickupPhotoResponse;
 import com.example.shinhandelivery.delivery.dto.response.ProofPhotoResponse;
 import com.example.shinhandelivery.delivery.entity.DeliveryInstructionType;
@@ -122,8 +122,8 @@ class DeliveryHistoryControllerTest {
     LocalDateTime matchedAt = LocalDateTime.of(2026, 7, 31, 9, 5);
     LocalDateTime pickedUpAt = LocalDateTime.of(2026, 7, 31, 9, 20);
     LocalDateTime completedAt = LocalDateTime.of(2026, 7, 31, 9, 40);
-    DeliveryDetailResponseDto response =
-        new DeliveryDetailResponseDto(
+    DeliveryDetailResponse response =
+        new DeliveryDetailResponse(
             1L,
             1L,
             "서울시 강남구",

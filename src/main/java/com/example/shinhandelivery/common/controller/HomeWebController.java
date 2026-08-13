@@ -1,4 +1,4 @@
-package com.example.shinhandelivery.category.controller;
+package com.example.shinhandelivery.common.controller;
 
 import com.example.shinhandelivery.category.dto.response.CategoryResponse;
 import com.example.shinhandelivery.category.service.CategoryService;
