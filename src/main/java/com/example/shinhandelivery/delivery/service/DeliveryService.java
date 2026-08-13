@@ -268,7 +268,10 @@ public class DeliveryService {
     Matching matching = matchingRepository.findByDeliveryRequestId(deliveryRequestId).orElse(null);
     assertCallerHasAccess(callerId, deliveryRequestId, deliveryRequest, courierIdOf(matching));
 
-    if (deliveryRequest.getPickupPhotoUrl() == null) {
+    boolean pickupNotDoneYet =
+        deliveryRequest.getStatus() != DeliveryStatus.PICKED_UP
+            && deliveryRequest.getStatus() != DeliveryStatus.COMPLETED;
+    if (pickupNotDoneYet || deliveryRequest.getPickupPhotoUrl() == null) {
       throw new PickupPhotoNotFoundException(deliveryRequestId);
     }
     return PickupPhotoResponse.from(deliveryRequest);

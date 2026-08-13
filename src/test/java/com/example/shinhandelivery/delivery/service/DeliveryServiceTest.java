@@ -729,6 +729,19 @@ class DeliveryServiceTest {
   }
 
   @Test
+  @DisplayName("MATCHED 상태에서는 사진 URL이 저장되어 있어도 PickupPhotoNotFoundException을 던진다")
+  void getPickupPhotoMatchedStatusWithUrlShouldThrowException() {
+    DeliveryRequest deliveryRequest = new DeliveryRequest();
+    deliveryRequest.setMemberId(1L);
+    deliveryRequest.setStatus(DeliveryStatus.MATCHED);
+    deliveryRequest.setPickupPhotoUrl("https://example.com/pickup.jpg");
+    when(deliveryRequestRepository.findById(1L)).thenReturn(Optional.of(deliveryRequest));
+
+    assertThatThrownBy(() -> deliveryService.getPickupPhoto(1L, 1L))
+        .isInstanceOf(PickupPhotoNotFoundException.class);
+  }
+
+  @Test
   @DisplayName("status가 없으면 회원의 전체 배송 내역을 최신순으로 조회한다")
   void getMyDeliveryRequestsWithoutStatusReturnsAll() {
     Pageable pageable = PageRequest.of(0, 10);
