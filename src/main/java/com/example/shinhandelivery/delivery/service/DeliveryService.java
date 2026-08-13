@@ -13,6 +13,7 @@ import com.example.shinhandelivery.delivery.dto.response.DeliveryEstimateRespons
 import com.example.shinhandelivery.delivery.dto.response.DeliveryPaymentResponse;
 import com.example.shinhandelivery.delivery.dto.response.DeliveryReorderResponse;
 import com.example.shinhandelivery.delivery.dto.response.DeliveryResponse;
+import com.example.shinhandelivery.delivery.dto.response.PickupPhotoResponse;
 import com.example.shinhandelivery.delivery.dto.response.ProofPhotoResponse;
 import com.example.shinhandelivery.delivery.entity.DeliveryRequest;
 import com.example.shinhandelivery.delivery.entity.DeliveryStatus;
@@ -22,6 +23,7 @@ import com.example.shinhandelivery.delivery.event.DeliveryStatusChangedEvent;
 import com.example.shinhandelivery.delivery.exception.AlreadyMatchedException;
 import com.example.shinhandelivery.delivery.exception.DeliveryAccessDeniedException;
 import com.example.shinhandelivery.delivery.exception.InvalidDeliveryTransitionException;
+import com.example.shinhandelivery.delivery.exception.PickupPhotoNotFoundException;
 import com.example.shinhandelivery.delivery.exception.ProofPhotoNotFoundException;
 import com.example.shinhandelivery.delivery.helper.DeliveryFeeCalculator;
 import com.example.shinhandelivery.delivery.repository.DeliveryRequestRepository;
@@ -253,6 +255,23 @@ public class DeliveryService {
       throw new ProofPhotoNotFoundException(deliveryRequestId);
     }
     return ProofPhotoResponse.from(deliveryRequest);
+  }
+
+  /**
+   * 픽업 완료된 배송 요청의 물품 확인 사진을 조회한다. 배송 요청의 고객 본인이거나 배정된 배송원 본인만 조회할 수 있고, 둘 다 아니면
+   * DeliveryAccessDeniedException을 던진다. 픽업이 완료되지 않았거나 사진이 없으면 PickupPhotoNotFoundException.
+   */
+  @Transactional(readOnly = true)
+  public PickupPhotoResponse getPickupPhoto(Long callerId, Long deliveryRequestId) {
+    DeliveryRequest deliveryRequest = findDeliveryRequestOrThrow(deliveryRequestId);
+
+    Matching matching = matchingRepository.findByDeliveryRequestId(deliveryRequestId).orElse(null);
+    assertCallerHasAccess(callerId, deliveryRequestId, deliveryRequest, courierIdOf(matching));
+
+    if (deliveryRequest.getPickupPhotoUrl() == null) {
+      throw new PickupPhotoNotFoundException(deliveryRequestId);
+    }
+    return PickupPhotoResponse.from(deliveryRequest);
   }
 
   /** 매칭이 있으면 그 차량 소유주(Member) id를, 매칭이 없으면(아직 아무도 안 맡았으면) null을 반환한다. */

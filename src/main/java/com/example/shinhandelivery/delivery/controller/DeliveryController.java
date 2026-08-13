@@ -19,6 +19,7 @@ import com.example.shinhandelivery.delivery.dto.response.DeliveryPaymentResponse
 import com.example.shinhandelivery.delivery.dto.response.DeliveryReorderResponse;
 import com.example.shinhandelivery.delivery.dto.response.DeliveryResponse;
 import com.example.shinhandelivery.delivery.dto.response.MatchingResponse;
+import com.example.shinhandelivery.delivery.dto.response.PickupPhotoResponse;
 import com.example.shinhandelivery.delivery.dto.response.ProofPhotoResponse;
 import com.example.shinhandelivery.delivery.entity.DeliveryRequest;
 import com.example.shinhandelivery.delivery.entity.DeliveryStatus;
@@ -233,5 +234,14 @@ public class DeliveryController {
     Long memberId = resolveUserDetails().getId();
     memberService.requirePaymentPinConfigured(memberId);
     return ResponseEntity.ok(deliveryService.getProofPhoto(memberId, deliveryRequestId));
+  }
+
+  /** 픽업 완료 물품 확인 사진을 조회한다. 배송 요청의 고객 본인 또는 배정된 배송원 본인만 조회할 수 있다. */
+  @GetMapping("/{deliveryRequestId}/pickup-photo")
+  @PreAuthorize("isAuthenticated()")
+  public ResponseEntity<PickupPhotoResponse> getPickupPhoto(@PathVariable Long deliveryRequestId) {
+    Long memberId = resolveUserDetails().getId();
+    memberService.requirePaymentPinConfigured(memberId);
+    return ResponseEntity.ok(deliveryService.getPickupPhoto(memberId, deliveryRequestId));
   }
 }

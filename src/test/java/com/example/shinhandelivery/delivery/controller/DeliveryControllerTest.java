@@ -23,12 +23,14 @@ import com.example.shinhandelivery.delivery.dto.response.DeliveryCancellationPre
 import com.example.shinhandelivery.delivery.dto.response.DeliveryEstimateResponse;
 import com.example.shinhandelivery.delivery.dto.response.DeliveryPaymentResponse;
 import com.example.shinhandelivery.delivery.dto.response.DeliveryReorderResponse;
+import com.example.shinhandelivery.delivery.dto.response.PickupPhotoResponse;
 import com.example.shinhandelivery.delivery.dto.response.ProofPhotoResponse;
 import com.example.shinhandelivery.delivery.entity.DeliveryRequest;
 import com.example.shinhandelivery.delivery.entity.DeliveryStatus;
 import com.example.shinhandelivery.delivery.entity.ItemSize;
 import com.example.shinhandelivery.delivery.exception.DeliveryAccessDeniedException;
 import com.example.shinhandelivery.delivery.exception.InvalidDeliveryTransitionException;
+import com.example.shinhandelivery.delivery.exception.PickupPhotoNotFoundException;
 import com.example.shinhandelivery.delivery.exception.ProofPhotoNotFoundException;
 import com.example.shinhandelivery.delivery.service.DeliveryCancellationService;
 import com.example.shinhandelivery.delivery.service.DeliveryMatchingService;
@@ -566,6 +568,44 @@ class DeliveryControllerTest {
 
     mockMvc
         .perform(get("/api/v1/delivery-requests/1/proof-photo").with(authentication(auth)))
+        .andExpect(status().isNotFound());
+  }
+
+  @Test
+  @DisplayName("픽업 사진 조회 요청을 받으면 사진 URL과 픽업시각을 반환한다")
+  void getPickupPhotoProcessRequest() throws Exception {
+    CustomUserDetails customUser =
+        new CustomUserDetails(1L, "pickup@example.com", "pass", "CUSTOMER");
+    UsernamePasswordAuthenticationToken auth =
+        new UsernamePasswordAuthenticationToken(customUser, null, customUser.getAuthorities());
+    SecurityContextHolder.getContext().setAuthentication(auth);
+
+    LocalDateTime pickedUpAt = LocalDateTime.of(2026, 7, 31, 9, 0);
+    when(deliveryService.getPickupPhoto(1L, 1L))
+        .thenReturn(new PickupPhotoResponse(1L, "https://example.com/pickup.jpg", pickedUpAt));
+
+    mockMvc
+        .perform(get("/api/v1/delivery-requests/1/pickup-photo").with(authentication(auth)))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.pickupPhotoUrl").value("https://example.com/pickup.jpg"))
+        .andExpect(jsonPath("$.pickedUpAt").exists());
+
+    verify(memberService).requirePaymentPinConfigured(1L);
+  }
+
+  @Test
+  @DisplayName("픽업 사진이 없는 배송의 픽업사진을 조회하면 404를 반환한다")
+  void getPickupPhotoMissingUrlShouldReturn404() throws Exception {
+    CustomUserDetails customUser =
+        new CustomUserDetails(1L, "pickup@example.com", "pass", "CUSTOMER");
+    UsernamePasswordAuthenticationToken auth =
+        new UsernamePasswordAuthenticationToken(customUser, null, customUser.getAuthorities());
+    SecurityContextHolder.getContext().setAuthentication(auth);
+
+    when(deliveryService.getPickupPhoto(1L, 1L)).thenThrow(new PickupPhotoNotFoundException(1L));
+
+    mockMvc
+        .perform(get("/api/v1/delivery-requests/1/pickup-photo").with(authentication(auth)))
         .andExpect(status().isNotFound());
   }
 
