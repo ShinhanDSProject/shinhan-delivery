@@ -19,12 +19,14 @@ import com.example.shinhandelivery.delivery.dto.request.DeliveryCompleteRequest;
 import com.example.shinhandelivery.delivery.dto.request.DeliveryCreateRequest;
 import com.example.shinhandelivery.delivery.dto.request.DeliveryPickupRequest;
 import com.example.shinhandelivery.delivery.dto.response.DeliveryDetailResponseDto;
+import com.example.shinhandelivery.delivery.dto.response.PickupPhotoResponse;
 import com.example.shinhandelivery.delivery.dto.response.ProofPhotoResponse;
 import com.example.shinhandelivery.delivery.entity.DeliveryInstructionType;
 import com.example.shinhandelivery.delivery.entity.DeliveryRequest;
 import com.example.shinhandelivery.delivery.entity.DeliveryStatus;
 import com.example.shinhandelivery.delivery.entity.ItemSize;
 import com.example.shinhandelivery.delivery.exception.DeliveryAccessDeniedException;
+import com.example.shinhandelivery.delivery.exception.PickupPhotoNotFoundException;
 import com.example.shinhandelivery.delivery.exception.ProofPhotoNotFoundException;
 import com.example.shinhandelivery.delivery.service.DeliveryService;
 import com.example.shinhandelivery.member.service.MemberService;
@@ -243,6 +245,58 @@ class DeliveryHistoryControllerTest {
     mockMvc
         .perform(
             get("/api/v1/delivery-requests/1/proof-photo")
+                .header("Authorization", "Bearer " + token))
+        .andExpect(status().isNotFound());
+  }
+
+  @Test
+  @DisplayName("인증 토큰이 없으면 픽업사진 조회도 403을 반환한다")
+  void getPickupPhotoUnauthenticatedShouldReturn403() throws Exception {
+    mockMvc
+        .perform(get("/api/v1/delivery-requests/1/pickup-photo"))
+        .andExpect(status().isForbidden());
+  }
+
+  @Test
+  @DisplayName("고객 본인이 조회하면 픽업사진 URL과 픽업시각을 반환한다")
+  void getPickupPhotoOwnerCanView() throws Exception {
+    String token = jwtProvider.createAccessToken(1L, "user@test.com", "CUSTOMER");
+    LocalDateTime pickedUpAt = LocalDateTime.of(2026, 7, 31, 9, 0);
+    when(deliveryService.getPickupPhoto(1L, 1L))
+        .thenReturn(new PickupPhotoResponse(1L, "https://example.com/pickup.jpg", pickedUpAt));
+
+    mockMvc
+        .perform(
+            get("/api/v1/delivery-requests/1/pickup-photo")
+                .header("Authorization", "Bearer " + token))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.pickupPhotoUrl").value("https://example.com/pickup.jpg"))
+        .andExpect(jsonPath("$.pickedUpAt").exists());
+  }
+
+  @Test
+  @DisplayName("고객 본인도 배정된 배송원도 아니면 픽업사진 조회 시 403을 반환한다")
+  void getPickupPhotoForbiddenShouldReturn403() throws Exception {
+    String token = jwtProvider.createAccessToken(999L, "stranger@test.com", "CUSTOMER");
+    when(deliveryService.getPickupPhoto(999L, 1L))
+        .thenThrow(new DeliveryAccessDeniedException(1L, 999L));
+
+    mockMvc
+        .perform(
+            get("/api/v1/delivery-requests/1/pickup-photo")
+                .header("Authorization", "Bearer " + token))
+        .andExpect(status().isForbidden());
+  }
+
+  @Test
+  @DisplayName("픽업 사진이 없는 배송의 픽업사진을 조회하면 404를 반환한다")
+  void getPickupPhotoMissingUrlShouldReturn404() throws Exception {
+    String token = jwtProvider.createAccessToken(1L, "user@test.com", "CUSTOMER");
+    when(deliveryService.getPickupPhoto(1L, 1L)).thenThrow(new PickupPhotoNotFoundException(1L));
+
+    mockMvc
+        .perform(
+            get("/api/v1/delivery-requests/1/pickup-photo")
                 .header("Authorization", "Bearer " + token))
         .andExpect(status().isNotFound());
   }

@@ -26,6 +26,7 @@ import com.example.shinhandelivery.delivery.dto.response.DeliveryDetailResponseD
 import com.example.shinhandelivery.delivery.dto.response.DeliveryEstimateResponse;
 import com.example.shinhandelivery.delivery.dto.response.DeliveryPaymentResponse;
 import com.example.shinhandelivery.delivery.dto.response.DeliveryReorderResponse;
+import com.example.shinhandelivery.delivery.dto.response.PickupPhotoResponse;
 import com.example.shinhandelivery.delivery.dto.response.ProofPhotoResponse;
 import com.example.shinhandelivery.delivery.entity.DeliveryInstructionType;
 import com.example.shinhandelivery.delivery.entity.DeliveryRequest;
@@ -39,6 +40,7 @@ import com.example.shinhandelivery.delivery.exception.DeliveryAccessDeniedExcept
 import com.example.shinhandelivery.delivery.exception.InvalidDeliveryDistanceException;
 import com.example.shinhandelivery.delivery.exception.InvalidDeliveryTransitionException;
 import com.example.shinhandelivery.delivery.exception.InvalidDeliveryWeightException;
+import com.example.shinhandelivery.delivery.exception.PickupPhotoNotFoundException;
 import com.example.shinhandelivery.delivery.exception.ProofPhotoNotFoundException;
 import com.example.shinhandelivery.delivery.helper.DeliveryFeeCalculator;
 import com.example.shinhandelivery.delivery.repository.DeliveryRequestRepository;
@@ -661,6 +663,82 @@ class DeliveryServiceTest {
 
     assertThatThrownBy(() -> deliveryService.getProofPhoto(1L, 1L))
         .isInstanceOf(ProofPhotoNotFoundException.class);
+  }
+
+  @Test
+  @DisplayName("고객 본인이 조회하면 픽업 완료된 배송의 물품 확인 사진을 조회한다")
+  void getPickupPhotoSuccess() {
+    LocalDateTime pickedUpAt = LocalDateTime.of(2026, 7, 31, 9, 0);
+    DeliveryRequest deliveryRequest = new DeliveryRequest();
+    deliveryRequest.setMemberId(1L);
+    deliveryRequest.setStatus(DeliveryStatus.PICKED_UP);
+    deliveryRequest.setPickupPhotoUrl("https://example.com/pickup.jpg");
+    deliveryRequest.setPickedUpAt(pickedUpAt);
+    when(deliveryRequestRepository.findById(1L)).thenReturn(Optional.of(deliveryRequest));
+
+    PickupPhotoResponse response = deliveryService.getPickupPhoto(1L, 1L);
+
+    assertThat(response.pickupPhotoUrl()).isEqualTo("https://example.com/pickup.jpg");
+    assertThat(response.pickedUpAt()).isEqualTo(pickedUpAt);
+  }
+
+  @Test
+  @DisplayName("배정된 배송원이 조회하면 픽업 완료된 배송의 물품 확인 사진을 조회한다")
+  void getPickupPhotoAssignedCourierSuccess() {
+    DeliveryRequest deliveryRequest = new DeliveryRequest();
+    deliveryRequest.setMemberId(1L);
+    deliveryRequest.setStatus(DeliveryStatus.COMPLETED);
+    deliveryRequest.setPickupPhotoUrl("https://example.com/pickup.jpg");
+    when(deliveryRequestRepository.findById(1L)).thenReturn(Optional.of(deliveryRequest));
+
+    Matching matching = new Matching();
+    matching.setVehicleId(10L);
+    when(matchingRepository.findByDeliveryRequestId(1L)).thenReturn(Optional.of(matching));
+
+    Vehicle vehicle = Vehicle.builder().id(10L).memberId(20L).build();
+    when(vehicleService.getById(10L)).thenReturn(vehicle);
+
+    PickupPhotoResponse response = deliveryService.getPickupPhoto(20L, 1L);
+
+    assertThat(response.pickupPhotoUrl()).isEqualTo("https://example.com/pickup.jpg");
+  }
+
+  @Test
+  @DisplayName("고객 본인도 배정된 배송원도 아니면 픽업 사진 조회 시 DeliveryAccessDeniedException을 던진다")
+  void getPickupPhotoNonOwnerNonCourierShouldThrowException() {
+    DeliveryRequest deliveryRequest = new DeliveryRequest();
+    deliveryRequest.setMemberId(1L);
+    deliveryRequest.setStatus(DeliveryStatus.PICKED_UP);
+    deliveryRequest.setPickupPhotoUrl("https://example.com/pickup.jpg");
+    when(deliveryRequestRepository.findById(1L)).thenReturn(Optional.of(deliveryRequest));
+
+    assertThatThrownBy(() -> deliveryService.getPickupPhoto(999L, 1L))
+        .isInstanceOf(DeliveryAccessDeniedException.class);
+  }
+
+  @Test
+  @DisplayName("픽업 사진 URL이 없으면 PickupPhotoNotFoundException을 던진다")
+  void getPickupPhotoMissingUrlShouldThrowException() {
+    DeliveryRequest deliveryRequest = new DeliveryRequest();
+    deliveryRequest.setMemberId(1L);
+    deliveryRequest.setStatus(DeliveryStatus.MATCHED);
+    when(deliveryRequestRepository.findById(1L)).thenReturn(Optional.of(deliveryRequest));
+
+    assertThatThrownBy(() -> deliveryService.getPickupPhoto(1L, 1L))
+        .isInstanceOf(PickupPhotoNotFoundException.class);
+  }
+
+  @Test
+  @DisplayName("MATCHED 상태에서는 사진 URL이 저장되어 있어도 PickupPhotoNotFoundException을 던진다")
+  void getPickupPhotoMatchedStatusWithUrlShouldThrowException() {
+    DeliveryRequest deliveryRequest = new DeliveryRequest();
+    deliveryRequest.setMemberId(1L);
+    deliveryRequest.setStatus(DeliveryStatus.MATCHED);
+    deliveryRequest.setPickupPhotoUrl("https://example.com/pickup.jpg");
+    when(deliveryRequestRepository.findById(1L)).thenReturn(Optional.of(deliveryRequest));
+
+    assertThatThrownBy(() -> deliveryService.getPickupPhoto(1L, 1L))
+        .isInstanceOf(PickupPhotoNotFoundException.class);
   }
 
   @Test
