@@ -3,6 +3,7 @@ package com.example.shinhandelivery.address.controller;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -90,6 +91,7 @@ class AddressControllerTest {
   @DisplayName("인증 정보가 없으면 자주 쓰는 주소를 조회하지 않는다")
   void getAddressesUnauthenticatedShouldReturnUnauthorized() throws Exception {
     mockMvc.perform(get("/api/v1/addresses")).andExpect(status().isUnauthorized());
+    verifyNoInteractions(addressService);
   }
 
   @Test

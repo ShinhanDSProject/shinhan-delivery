@@ -495,13 +495,41 @@
         }
     }
 
+    function isValidCoordinate(lat, lng) {
+        return Number.isFinite(lat) && Number.isFinite(lng)
+            && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180;
+    }
+
+    function applySavedAddress(addr, target, requestId, lat, lng) {
+        if (requestId !== latestAddressSelectionRequest || !isValidCoordinate(lat, lng)) return false;
+        const draft = loadDraft();
+        draft[target] = {
+            address: addr.address,
+            detail: addr.detailAddress || '',
+            lat,
+            lng
+        };
+        saveDraft(draft);
+        selectedAddressIdByTarget[target] = Number(addr.id);
+        renderPoint(target, draft[target]);
+        renderSelectedAddressChip();
+        maybeEstimateFee();
+        return true;
+    }
+
     function selectSavedAddress(addr) {
+        const target = selectedAddressTarget;
+        const requestId = ++latestAddressSelectionRequest;
+        const savedLat = Number.parseFloat(addr.latitude);
+        const savedLng = Number.parseFloat(addr.longitude);
+        if (isValidCoordinate(savedLat, savedLng)) {
+            applySavedAddress(addr, target, requestId, savedLat, savedLng);
+            return;
+        }
         if (!window.kakao || !window.kakao.maps) {
             showToast('지도 서비스를 불러오지 못했어요. 잠시 후 다시 시도해 주세요.');
             return;
         }
-        const target = selectedAddressTarget;
-        const requestId = ++latestAddressSelectionRequest;
         kakao.maps.load(() => {
             const geocoder = new kakao.maps.services.Geocoder();
             geocoder.addressSearch(addr.address, (results, status) => {
@@ -510,18 +538,11 @@
                     showToast('저장된 주소의 위치를 찾지 못했어요. 주소 관리에서 확인해 주세요.');
                     return;
                 }
-                const draft = loadDraft();
-                draft[target] = {
-                    address: addr.address,
-                    detail: addr.detailAddress || '',
-                    lat: parseFloat(results[0].y),
-                    lng: parseFloat(results[0].x)
-                };
-                saveDraft(draft);
-                selectedAddressIdByTarget[target] = Number(addr.id);
-                renderPoint(target, draft[target]);
-                renderSelectedAddressChip();
-                maybeEstimateFee();
+                const lat = Number.parseFloat(results[0].y);
+                const lng = Number.parseFloat(results[0].x);
+                if (!applySavedAddress(addr, target, requestId, lat, lng)) {
+                    showToast('주소의 좌표가 올바르지 않아요. 주소 관리에서 확인해 주세요.');
+                }
             });
         });
     }

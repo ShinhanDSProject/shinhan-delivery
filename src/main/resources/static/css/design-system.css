@@ -68,6 +68,8 @@
 
   --spacing-nav-gap: 16px;
 
+  --layout-mobile-max-width: 480px;
+
   /* Border Radius Tokens */
   --radius-sm: 8px;
   --radius-md: 12px;
@@ -436,6 +438,10 @@ body {
   border: 1px solid var(--color-grey-50);
   border-radius: 16px;
   background: var(--color-white-100);
+}
+
+.mobile-preview-container {
+  max-width: var(--layout-mobile-max-width);
 }
 
 .quick-address-heading {
