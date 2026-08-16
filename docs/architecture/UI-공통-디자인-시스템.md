@@ -1,8 +1,8 @@
 ---
 metadata:
-  version: "1.1.0"
+  version: "1.2.0"
   ssot_owner: "docs/architecture/UI-공통-디자인-시스템.md"
-  last_updated: "2026-08-13"
+  last_updated: "2026-08-16"
   status: "APPROVED"
 ---
 
@@ -1301,6 +1301,20 @@ Thymeleaf 템플릿에서 공통 프래그먼트를 불러와 손쉽게 조립�
 ```
 
 동작·보안·동시 선택 처리의 단일 설계 원본은 [`docs/design/address-quick-chips-design.md`](../design/address-quick-chips-design.md)를 참고한다.
+
+### 고객 공통 하단 내비게이션
+
+고객 화면의 `P / Home / 마이페이지` 이동은 `customerBottomNavigation` 프래그먼트를 사용한다. `activeItem`에는 `point`, `home`, `myPage` 중 현재 화면에 해당하는 값을 전달하며, 콘텐츠에는 `customer-bottom-nav-content` 클래스를 적용해 모바일 안전 영역을 확보한다.
+
+```html
+<main class="customer-bottom-nav-content">
+  <!-- 화면 콘텐츠 -->
+</main>
+<nav th:replace="~{fragments/components :: customerBottomNavigation('myPage')}"></nav>
+```
+
+> [!IMPORTANT]
+> `payment-pin-settings?required=1`처럼 다른 화면으로 이동하면 필수 보안 절차를 우회할 수 있는 흐름에서는 서버 렌더링 단계에서 하단 내비게이션을 출력하지 않는다.
 
 ### 1) 템플릿 파일 디렉토리 표준 (`src/main/resources/templates/`)
 - 본 프로젝트의 모든 UI 화면 HTML 파일(`*.html`)은 반드시 `src/main/resources/templates/` 하위에 위치해야 합니다.

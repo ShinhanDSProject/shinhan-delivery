@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -178,7 +178,7 @@
   </style>
 </head>
 <body>
-<main class="shell">
+<main class="shell customer-bottom-nav-content">
   <div class="topbar">
     <button class="icon-btn" type="button" onclick="location.href='/my-page'" aria-label="뒤로가기">‹</button>
     <div class="title-wrap">
@@ -205,6 +205,8 @@
     <div id="historyList" class="history-list"></div>
   </section>
 </main>
+
+<nav th:replace="~{fragments/components :: customerBottomNavigation('point')}"></nav>
 
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 

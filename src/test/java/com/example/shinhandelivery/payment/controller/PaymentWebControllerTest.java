@@ -1,6 +1,9 @@
 package com.example.shinhandelivery.payment.controller;
 
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
@@ -23,6 +26,25 @@ class PaymentWebControllerTest {
     mockMvc
         .perform(get("/point-wallet"))
         .andExpect(status().isOk())
-        .andExpect(view().name("point-wallet"));
+        .andExpect(view().name("point-wallet"))
+        .andExpect(content().string(containsString("class=\"customer-bottom-nav\"")));
+  }
+
+  @Test
+  @DisplayName("일반 결제 PIN 설정 화면에는 고객 하단 내비게이션을 표시한다")
+  void paymentPinSettingsShowsNavigationForNormalEntry() throws Exception {
+    mockMvc
+        .perform(get("/payment-pin-settings"))
+        .andExpect(status().isOk())
+        .andExpect(content().string(containsString("class=\"customer-bottom-nav\"")));
+  }
+
+  @Test
+  @DisplayName("필수 결제 PIN 설정 화면에서는 고객 하단 내비게이션을 표시하지 않는다")
+  void paymentPinSettingsHidesNavigationWhenRequired() throws Exception {
+    mockMvc
+        .perform(get("/payment-pin-settings").param("required", "1"))
+        .andExpect(status().isOk())
+        .andExpect(content().string(not(containsString("class=\"customer-bottom-nav\""))));
   }
 }

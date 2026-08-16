@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -34,7 +34,8 @@
     </style>
 </head>
 <body>
-<main class="page">
+<main class="page"
+      th:classappend="${param.required == null or param.required[0] != '1'} ? ' customer-bottom-nav-content' : ''">
     <header class="top">
         <button id="backButton" class="back-button" type="button" aria-label="뒤로가기">&lt;</button>
         <h1>결제 PIN 설정</h1>
@@ -67,6 +68,10 @@
         <button id="skipButton" type="button" class="secondary-btn">나중에 설정</button>
     </div>
 </main>
+
+<th:block th:if="${param.required == null or param.required[0] != '1'}">
+    <nav th:replace="~{fragments/components :: customerBottomNavigation('myPage')}"></nav>
+</th:block>
 
 <script>
     const params = new URLSearchParams(location.search);

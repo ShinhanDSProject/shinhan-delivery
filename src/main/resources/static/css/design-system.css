@@ -500,3 +500,77 @@ body {
   color: var(--color-grey-500);
   font-size: 13px;
 }
+
+/* ==========================================================================
+   8. Customer Bottom Navigation
+   ========================================================================== */
+.customer-bottom-nav-content {
+  padding-bottom: calc(96px + env(safe-area-inset-bottom)) !important;
+}
+
+.customer-bottom-nav {
+  position: fixed;
+  left: 50%;
+  bottom: 0;
+  z-index: 100;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  align-items: center;
+  width: min(100%, var(--layout-mobile-max-width));
+  min-height: 72px;
+  padding: 8px 20px calc(8px + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--color-grey-50);
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.04);
+  transform: translateX(-50%);
+  backdrop-filter: blur(12px);
+}
+
+.customer-bottom-nav__item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: var(--radius-md);
+  color: var(--color-grey-100);
+  text-decoration: none;
+}
+
+.customer-bottom-nav__item:hover,
+.customer-bottom-nav__item:focus-visible {
+  background: var(--color-blue-50);
+  color: var(--color-blue-100);
+}
+
+.customer-bottom-nav__item:focus-visible {
+  outline: 2px solid var(--color-blue-30);
+  outline-offset: 2px;
+}
+
+.customer-bottom-nav__item.is-active {
+  color: var(--color-blue-100);
+}
+
+.customer-bottom-nav__item svg {
+  width: 24px;
+  height: 24px;
+}
+
+.customer-bottom-nav__point {
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.customer-bottom-nav + .toast {
+  bottom: calc(88px + env(safe-area-inset-bottom)) !important;
+  z-index: 110;
+}
+
+.customer-bottom-nav-preview .customer-bottom-nav {
+  position: relative;
+  left: auto;
+  bottom: auto;
+  transform: none;
+}
