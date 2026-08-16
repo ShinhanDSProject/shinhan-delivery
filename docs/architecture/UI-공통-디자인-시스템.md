@@ -1330,9 +1330,9 @@ Thymeleaf 템플릿에서 공통 프래그먼트를 불러와 손쉽게 조립�
 ```
 
 > [!IMPORTANT]
-> 브라우저 기록 길이만 검사하면 외부 사이트나 로그인 화면으로 돌아갈 수 있다. 반드시 `document.referrer`의 출처와 차단 경로를 검증한 후 `history.back()`을 호출한다.
+> 브라우저 기록 길이나 `history.back()`의 실제 목적지는 신뢰할 수 없다. 반드시 `document.referrer`의 출처와 차단 경로를 검증하고, 검증을 통과한 referrer의 전체 URL로 직접 이동한다.
 
-**WHY / Trade-off:** 쿼리 문자열을 포함한 직전 작업 화면을 그대로 복원하기 위해 서버가 복귀 URL을 재구성하지 않고 브라우저 기록을 사용한다. 다만 안전성을 위해 출처를 확인할 수 없는 기록은 포기하고 `/home` 같은 명시적 fallback으로 이동한다.
+**WHY / Trade-off:** `location.replace()` 등으로 referrer와 실제 이전 히스토리 항목이 달라져도 외부 화면으로 이탈하지 않도록 검증된 referrer로 직접 이동한다. referrer의 전체 `href`를 사용하므로 `deliveryRequestId` 같은 쿼리 문자열은 유지되며, 배송 신청 초안은 기존 `sessionStorage`에서 복원된다. 출처를 확인할 수 없는 경우에는 `/home` 같은 명시적 fallback으로 이동한다.
 
 검증 명령어:
 

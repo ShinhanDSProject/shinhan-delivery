@@ -25,15 +25,30 @@ class MyPageBackNavigationTest {
   }
 
   @Test
-  @DisplayName("뒤로가기는 동일 출처의 안전한 화면만 허용하고 나머지는 홈으로 대체한다")
-  void backNavigationShouldGuardUnsafeHistory() throws IOException {
+  @DisplayName("뒤로가기는 검증한 동일 출처 URL로 직접 이동하고 나머지는 홈으로 대체한다")
+  void backNavigationShouldUseValidatedReferrer() throws IOException {
     String script = readResource("static/js/safe-back-navigation.js");
 
     assertThat(script)
         .contains("referrerUrl.origin === window.location.origin")
         .contains("BLOCKED_RETURN_PATHS")
-        .contains("window.history.back()")
-        .contains("button.dataset.fallbackPath || \"/home\"");
+        .contains("window.location.assign(referrerUrl.href)")
+        .contains("button.dataset.fallbackPath || \"/home\"")
+        .doesNotContain("window.history.back()");
+  }
+
+  @Test
+  @DisplayName("복귀 시 매칭 쿼리 문자열과 세션 배송 초안을 보존한다")
+  void backNavigationShouldPreserveQueryAndDeliveryDraft() throws IOException {
+    String navigationScript = readResource("static/js/safe-back-navigation.js");
+    String storageScript = readResource("static/js/utils/storage.js");
+
+    assertThat(navigationScript)
+        .contains("const referrerUrl = new URL(referrer)")
+        .contains("window.location.assign(referrerUrl.href)");
+    assertThat(storageScript)
+        .contains("sessionStorage.getItem(DRAFT_KEY)")
+        .contains("sessionStorage.setItem(DRAFT_KEY, JSON.stringify(draft))");
   }
 
   @Test
