@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -157,7 +157,7 @@
     </style>
 </head>
 <body>
-<main class="page">
+<main class="page customer-bottom-nav-content">
     <header class="top">
         <button class="back-button" type="button" aria-label="이전으로" onclick="location.href='/my-page'">
             <svg viewBox="0 0 24 24" fill="none" width="20" height="20"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -167,6 +167,8 @@
 
     <div class="list" id="list"></div>
 </main>
+
+<nav th:replace="~{fragments/components :: customerBottomNavigation('myPage')}"></nav>
 
 <script>
     const PAGE_SIZE = 10;
