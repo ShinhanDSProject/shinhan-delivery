@@ -13,8 +13,13 @@ class CustomerBottomNavigationTest {
 
   private static final Map<String, String> AFFECTED_TEMPLATES =
       Map.of(
+          "address-management.html", "myPage",
+          "announcements.html", "myPage",
+          "change-password.html", "myPage",
           "delivery-cancel-list.html", "myPage",
+          "delivery-history.html", "myPage",
           "point-wallet.html", "point",
+          "profile-edit.html", "myPage",
           "payment-pin-settings.html", "myPage");
 
   @Test
