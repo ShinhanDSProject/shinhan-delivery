@@ -1316,6 +1316,30 @@ Thymeleaf 템플릿에서 공통 프래그먼트를 불러와 손쉽게 조립�
 > [!IMPORTANT]
 > `payment-pin-settings?required=1`처럼 다른 화면으로 이동하면 필수 보안 절차를 우회할 수 있는 흐름에서는 서버 렌더링 단계에서 하단 내비게이션을 출력하지 않는다.
 
+### 안전한 헤더 뒤로가기
+
+`safeBackButton` 프래그먼트는 사용자가 직전에 이용하던 동일 출처 화면으로 복귀할 때 사용한다. 버튼은 `safe-back-navigation.js`와 함께 사용하며, 직접 진입했거나 외부·로그인 계열 페이지에서 진입한 경우 전달한 fallback 경로로 이동한다.
+
+```html
+<header class="page-header">
+  <div th:replace="~{fragments/components :: safeBackButton('/home')}"></div>
+  <h1 class="page-title">My Page</h1>
+  <span aria-hidden="true"></span>
+</header>
+<script src="/js/safe-back-navigation.js"></script>
+```
+
+> [!IMPORTANT]
+> 브라우저 기록 길이나 `history.back()`의 실제 목적지는 신뢰할 수 없다. 반드시 `document.referrer`의 출처와 차단 경로를 검증하고, 검증을 통과한 referrer의 전체 URL로 직접 이동한다.
+
+**WHY / Trade-off:** `location.replace()` 등으로 referrer와 실제 이전 히스토리 항목이 달라져도 외부 화면으로 이탈하지 않도록 검증된 referrer로 직접 이동한다. referrer의 전체 `href`를 사용하므로 `deliveryRequestId` 같은 쿼리 문자열은 유지되며, 배송 신청 초안은 기존 `sessionStorage`에서 복원된다. 출처를 확인할 수 없는 경우에는 `/home` 같은 명시적 fallback으로 이동한다.
+
+검증 명령어:
+
+```bash
+./gradlew test --tests 'com.example.shinhandelivery.common.MyPageBackNavigationTest'
+```
+
 ### 1) 템플릿 파일 디렉토리 표준 (`src/main/resources/templates/`)
 - 본 프로젝트의 모든 UI 화면 HTML 파일(`*.html`)은 반드시 `src/main/resources/templates/` 하위에 위치해야 합니다.
 - `src/main/resources/static/` 디렉토리에는 CSS, JavaScript, 이미지 등 순수 정적 자산(Static Assets)만 배치하며, HTML 파일이 `static/`에 위치하여 브라우저에서 `fetch()` API로 화면을 동적 조립하는 CSR 방식 개발은 엄격히 금지됩니다.
