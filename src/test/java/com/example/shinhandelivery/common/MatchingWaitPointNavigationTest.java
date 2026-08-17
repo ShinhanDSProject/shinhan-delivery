@@ -17,7 +17,7 @@ class MatchingWaitPointNavigationTest {
     String components = readTemplate("fragments/components.html");
 
     assertThat(matchingWait)
-        .contains("customerBottomNavigation('')")
+        .contains("th:replace=\"~{fragments/components :: customerBottomNavigation('')}\"")
         .contains("customer-bottom-nav-content")
         .doesNotContain("onclick=\"showToast('아직 준비 중인 기능입니다.')\"");
     assertThat(components)
