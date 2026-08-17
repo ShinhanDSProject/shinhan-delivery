@@ -19,6 +19,7 @@ import com.example.shinhandelivery.member.repository.MemberRepository;
 import com.example.shinhandelivery.vehicle.entity.Vehicle;
 import com.example.shinhandelivery.vehicle.entity.VehicleType;
 import com.example.shinhandelivery.vehicle.service.VehicleService;
+import io.jsonwebtoken.Claims;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -69,6 +70,28 @@ public class MemberService {
     String refreshToken = jwtProvider.createRefreshToken(member.getId(), member.getEmail());
 
     return TokenResponse.of(accessToken, refreshToken);
+  }
+
+  /** 리프레시 토큰을 검증하고 새로운 Access/Refresh 토큰을 발급한다. */
+  @Transactional(readOnly = true)
+  public TokenResponse refresh(String refreshToken) {
+    if (refreshToken == null || !jwtProvider.validateToken(refreshToken)) {
+      throw new BusinessException(ErrorCode.UNAUTHORIZED, "유효하지 않거나 만료된 리프레시 토큰입니다.");
+    }
+
+    Claims claims = jwtProvider.parseClaims(refreshToken);
+    Object idObj = claims.get("id");
+    Long memberId = idObj instanceof Number ? ((Number) idObj).longValue() : null;
+    if (memberId == null) {
+      throw new BusinessException(ErrorCode.UNAUTHORIZED, "리프레시 토큰 정보가 유효하지 않습니다.");
+    }
+
+    Member member = findMemberOrThrow(memberId);
+    String newAccessToken =
+        jwtProvider.createAccessToken(member.getId(), member.getEmail(), member.getRole().name());
+    String newRefreshToken = jwtProvider.createRefreshToken(member.getId(), member.getEmail());
+
+    return TokenResponse.of(newAccessToken, newRefreshToken);
   }
 
   /** id로 회원 단건을 조회한다. 없으면 EntityNotFoundException. */

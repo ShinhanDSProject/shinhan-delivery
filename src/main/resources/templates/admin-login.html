@@ -257,9 +257,8 @@
                     throw new Error('관리자 권한이 없는 계정입니다.');
                 }
 
-                // 토큰 저장
+                // 토큰 저장 (브라우저는 HttpOnly Cookie 자동 수신)
                 localStorage.setItem('accessToken', token);
-                document.cookie = `accessToken=${token}; path=/; max-age=86400;`;
 
                 window.location.href = '/admin-dashboard';
             } catch (err) {

@@ -119,4 +119,46 @@ class MemberSecurityTest {
     assertThatThrownBy(() -> memberService.login(request))
         .isInstanceOf(EntityNotFoundException.class);
   }
+
+  @Test
+  @DisplayName("유효한 리프레시 토큰으로 새 토큰 페어가 재발급되는지 검증")
+  void refreshSuccess() {
+    // given
+    String refreshToken = "valid.refresh.token";
+    io.jsonwebtoken.Claims claims = org.mockito.Mockito.mock(io.jsonwebtoken.Claims.class);
+    given(claims.get("id")).willReturn(1L);
+
+    given(jwtProvider.validateToken(refreshToken)).willReturn(true);
+    given(jwtProvider.parseClaims(refreshToken)).willReturn(claims);
+    given(memberRepository.findById(1L)).willReturn(Optional.of(testMember));
+    given(jwtProvider.createAccessToken(1L, "user@example.com", "CUSTOMER"))
+        .willReturn("new.access.token");
+    given(jwtProvider.createRefreshToken(1L, "user@example.com")).willReturn("new.refresh.token");
+
+    // when
+    TokenResponse tokenResponse = memberService.refresh(refreshToken);
+
+    // then
+    assertThat(tokenResponse).isNotNull();
+    assertThat(tokenResponse.getAccessToken()).isEqualTo("new.access.token");
+    assertThat(tokenResponse.getRefreshToken()).isEqualTo("new.refresh.token");
+  }
+
+  @Test
+  @DisplayName("유효하지 않거나 만료된 리프레시 토큰 입력 시 BusinessException 발생")
+  void refreshWithInvalidToken() {
+    // given
+    given(jwtProvider.validateToken("invalid.token")).willReturn(false);
+
+    // when & then
+    assertThatThrownBy(() -> memberService.refresh("invalid.token"))
+        .isInstanceOf(BusinessException.class);
+  }
+
+  @Test
+  @DisplayName("null 리프레시 토큰 입력 시 BusinessException 발생")
+  void refreshWithNullToken() {
+    // when & then
+    assertThatThrownBy(() -> memberService.refresh(null)).isInstanceOf(BusinessException.class);
+  }
 }

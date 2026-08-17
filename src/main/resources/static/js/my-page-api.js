@@ -56,7 +56,12 @@
     return parseResponse(response);
   }
 
-  function logout() {
+  async function logout() {
+    try {
+      await fetch("/api/v1/members/logout", { method: "POST" });
+    } catch (e) {
+      // ignore network errors
+    }
     localStorage.removeItem("accessToken");
     localStorage.removeItem("refreshToken");
     localStorage.removeItem("tokenType");
