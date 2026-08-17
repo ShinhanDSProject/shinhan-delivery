@@ -2,6 +2,7 @@ package com.example.shinhandelivery.member.controller;
 
 import com.example.shinhandelivery.common.exception.BusinessException;
 import com.example.shinhandelivery.common.exception.ErrorCode;
+import com.example.shinhandelivery.common.security.CookieUtils;
 import com.example.shinhandelivery.common.security.CustomUserDetails;
 import com.example.shinhandelivery.member.dto.request.LoginRequest;
 import com.example.shinhandelivery.member.dto.request.MemberCreateRequest;
@@ -11,19 +12,24 @@ import com.example.shinhandelivery.member.dto.request.MemberProfileUpdateRequest
 import com.example.shinhandelivery.member.dto.request.MemberRoleUpdateRequest;
 import com.example.shinhandelivery.member.dto.request.MemberUpdateRequest;
 import com.example.shinhandelivery.member.dto.request.ProofDocumentUpdateRequest;
+import com.example.shinhandelivery.member.dto.request.RefreshTokenRequest;
 import com.example.shinhandelivery.member.dto.response.MemberProfileResponse;
 import com.example.shinhandelivery.member.dto.response.MemberResponse;
 import com.example.shinhandelivery.member.dto.response.TokenResponse;
 import com.example.shinhandelivery.member.entity.Member;
 import com.example.shinhandelivery.member.service.MemberService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -50,10 +56,36 @@ public class MemberController {
     return ResponseEntity.status(HttpStatus.CREATED).body(MemberResponse.from(created));
   }
 
-  /** 회원 로그인(JWT 토큰 발급)을 처리한다. */
+  /** 회원 로그인(JWT 토큰 발급 및 HttpOnly 쿠키 설정)을 처리한다. */
   @PostMapping("/login")
-  public ResponseEntity<TokenResponse> login(@Valid @RequestBody LoginRequest request) {
-    return ResponseEntity.ok(memberService.login(request));
+  public ResponseEntity<TokenResponse> login(
+      @Valid @RequestBody LoginRequest request, HttpServletResponse response) {
+    TokenResponse tokenResponse = memberService.login(request);
+    addTokenCookies(response, tokenResponse);
+    return ResponseEntity.ok(tokenResponse);
+  }
+
+  /** 리프레시 토큰을 검증하여 새로운 Access/Refresh 토큰을 재발급한다. */
+  @PostMapping("/refresh")
+  public ResponseEntity<TokenResponse> refresh(
+      HttpServletRequest request,
+      HttpServletResponse response,
+      @RequestBody(required = false) RefreshTokenRequest requestBody) {
+    String refreshToken =
+        CookieUtils.extractCookieValue(request, CookieUtils.REFRESH_TOKEN_COOKIE_NAME);
+    if (!StringUtils.hasText(refreshToken) && requestBody != null) {
+      refreshToken = requestBody.getRefreshToken();
+    }
+    TokenResponse tokenResponse = memberService.refresh(refreshToken);
+    addTokenCookies(response, tokenResponse);
+    return ResponseEntity.ok(tokenResponse);
+  }
+
+  /** 로그아웃 처리(인증 쿠키 무효화)를 수행한다. */
+  @PostMapping("/logout")
+  public ResponseEntity<Void> logout(HttpServletResponse response) {
+    clearTokenCookies(response);
+    return ResponseEntity.noContent().build();
   }
 
   /** 인증된 본인의 프로필 정보를 조회한다. */
@@ -154,5 +186,29 @@ public class MemberController {
   public ResponseEntity<Void> deleteMember(@PathVariable Long memberId) {
     memberService.delete(memberId);
     return ResponseEntity.noContent().build();
+  }
+
+  private void addTokenCookies(HttpServletResponse response, TokenResponse tokenResponse) {
+    if (response == null || tokenResponse == null) {
+      return;
+    }
+    response.addHeader(
+        HttpHeaders.SET_COOKIE,
+        CookieUtils.createAccessTokenCookie(tokenResponse.getAccessToken()).toString());
+    response.addHeader(
+        HttpHeaders.SET_COOKIE,
+        CookieUtils.createRefreshTokenCookie(tokenResponse.getRefreshToken()).toString());
+  }
+
+  private void clearTokenCookies(HttpServletResponse response) {
+    if (response == null) {
+      return;
+    }
+    response.addHeader(
+        HttpHeaders.SET_COOKIE,
+        CookieUtils.createClearCookie(CookieUtils.ACCESS_TOKEN_COOKIE_NAME).toString());
+    response.addHeader(
+        HttpHeaders.SET_COOKIE,
+        CookieUtils.createClearCookie(CookieUtils.REFRESH_TOKEN_COOKIE_NAME).toString());
   }
 }

@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.cookie;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -14,12 +15,16 @@ import com.example.shinhandelivery.common.exception.EntityNotFoundException;
 import com.example.shinhandelivery.common.exception.ErrorCode;
 import com.example.shinhandelivery.common.exception.GlobalExceptionHandler;
 import com.example.shinhandelivery.common.security.CustomUserDetails;
+import com.example.shinhandelivery.member.dto.request.LoginRequest;
 import com.example.shinhandelivery.member.dto.request.MemberCreateRequest;
 import com.example.shinhandelivery.member.dto.request.MemberPasswordUpdateRequest;
 import com.example.shinhandelivery.member.dto.request.MemberProfileUpdateRequest;
+import com.example.shinhandelivery.member.dto.request.RefreshTokenRequest;
+import com.example.shinhandelivery.member.dto.response.TokenResponse;
 import com.example.shinhandelivery.member.entity.Member;
 import com.example.shinhandelivery.member.entity.MemberRole;
 import com.example.shinhandelivery.member.service.MemberService;
+import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -271,5 +276,75 @@ class MemberControllerTest {
   @DisplayName("인증되지 않은 사용자가 내 프로필 조회시 401을 반환한다")
   void getMyProfileUnauthenticatedShouldReturn401() throws Exception {
     mockMvc.perform(get("/api/v1/members/me")).andExpect(status().isUnauthorized());
+  }
+
+  @Test
+  @DisplayName("로그인 요청 성공 시 JWT 토큰 응답과 함께 HttpOnly Set-Cookie 헤더를 반환한다")
+  void loginSuccessSetsCookies() throws Exception {
+    LoginRequest request = new LoginRequest("user@example.com", "password123");
+    TokenResponse tokenResponse = TokenResponse.of("access.token.jwt", "refresh.token.jwt");
+
+    when(memberService.login(any(LoginRequest.class))).thenReturn(tokenResponse);
+
+    mockMvc
+        .perform(
+            post("/api/v1/members/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.accessToken").value("access.token.jwt"))
+        .andExpect(jsonPath("$.refreshToken").value("refresh.token.jwt"))
+        .andExpect(cookie().value("accessToken", "access.token.jwt"))
+        .andExpect(cookie().httpOnly("accessToken", true))
+        .andExpect(cookie().value("refreshToken", "refresh.token.jwt"))
+        .andExpect(cookie().httpOnly("refreshToken", true));
+  }
+
+  @Test
+  @DisplayName("리프레시 토큰 쿠키로 재발급 요청 시 새 토큰과 갱신된 Set-Cookie 헤더를 반환한다")
+  void refreshSuccessWithCookie() throws Exception {
+    TokenResponse tokenResponse = TokenResponse.of("new.access.token", "new.refresh.token");
+
+    when(memberService.refresh(eq("valid.refresh.token"))).thenReturn(tokenResponse);
+
+    mockMvc
+        .perform(
+            post("/api/v1/members/refresh")
+                .cookie(new Cookie("refreshToken", "valid.refresh.token")))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.accessToken").value("new.access.token"))
+        .andExpect(jsonPath("$.refreshToken").value("new.refresh.token"))
+        .andExpect(cookie().value("accessToken", "new.access.token"))
+        .andExpect(cookie().httpOnly("accessToken", true))
+        .andExpect(cookie().value("refreshToken", "new.refresh.token"))
+        .andExpect(cookie().httpOnly("refreshToken", true));
+  }
+
+  @Test
+  @DisplayName("리프레시 토큰 본문(Body)으로 재발급 요청 시 새 토큰과 갱신된 Set-Cookie 헤더를 반환한다")
+  void refreshSuccessWithRequestBody() throws Exception {
+    RefreshTokenRequest request = new RefreshTokenRequest("body.refresh.token");
+    TokenResponse tokenResponse = TokenResponse.of("new.access.token", "new.refresh.token");
+
+    when(memberService.refresh(eq("body.refresh.token"))).thenReturn(tokenResponse);
+
+    mockMvc
+        .perform(
+            post("/api/v1/members/refresh")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.accessToken").value("new.access.token"))
+        .andExpect(cookie().value("accessToken", "new.access.token"));
+  }
+
+  @Test
+  @DisplayName("로그아웃 요청 시 204 No Content와 만료된 Set-Cookie(Max-Age=0)를 반환한다")
+  void logoutSuccessClearsCookies() throws Exception {
+    mockMvc
+        .perform(post("/api/v1/members/logout"))
+        .andExpect(status().isNoContent())
+        .andExpect(cookie().maxAge("accessToken", 0))
+        .andExpect(cookie().maxAge("refreshToken", 0));
   }
 }

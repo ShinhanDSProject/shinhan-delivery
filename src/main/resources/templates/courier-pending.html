@@ -308,9 +308,15 @@
       }
     }
 
-    function logout() {
+    async function logout() {
+      try {
+        await fetch('/api/v1/members/logout', { method: 'POST' });
+      } catch (e) {
+        // 네트워크 실패 시에도 로컬 정리 진행
+      }
       localStorage.removeItem('accessToken');
-      document.cookie = "accessToken=; path=/; max-age=0;";
+      localStorage.removeItem('refreshToken');
+      localStorage.removeItem('tokenType');
       window.location.href = '/courier-login';
     }
   </script>

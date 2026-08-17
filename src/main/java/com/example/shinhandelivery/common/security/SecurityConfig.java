@@ -33,7 +33,10 @@ public class SecurityConfig {
                         "/api/members",
                         "/api/members/login",
                         "/api/v1/members",
-                        "/api/v1/members/login")
+                        "/api/v1/members/login",
+                        "/api/v1/members/refresh",
+                        "/api/v1/members/logout",
+                        "/api/v1/auth/**")
                     .permitAll()
                     .requestMatchers(
                         "/swagger-ui",
