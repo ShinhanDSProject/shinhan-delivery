@@ -1,28 +1,4 @@
-:root {
-    --text-dark: var(--color-black-200);
-    --text-muted: var(--color-grey-300);
-    --text-faint: var(--color-grey-100);
-    --border: var(--color-grey-50);
-    --primary: var(--color-blue-30);
-}
-
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-    font-family: var(--font-family-base);
-}
-
-body {
-    min-height: 100vh;
-    color: var(--text-dark);
-}
-
 .page {
-    max-width: 480px;
-    margin: 0 auto;
-    min-height: 100vh;
-    background: #FAFBFD;
     padding-bottom: 96px;
 }
 
@@ -33,48 +9,9 @@ header.top {
     padding: 16px 20px;
 }
 
-.back-button {
-    width: 32px;
-    height: 32px;
-    border-radius: 999px;
-    border: 0;
-    background: rgba(0, 0, 0, 0.02);
-    color: var(--text-dark);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
 header.top h1 {
     font-size: 18px;
     font-weight: 700;
-}
-
-.tabs {
-    display: flex;
-    gap: 8px;
-    padding: 0 20px 16px;
-    overflow-x: auto;
-}
-
-.tabs button {
-    flex: none;
-    padding: 8px 16px;
-    border-radius: 30px;
-    border: 1px solid var(--border);
-    background: #fff;
-    color: var(--text-muted);
-    font-size: 13px;
-    font-weight: 700;
-    cursor: pointer;
-    white-space: nowrap;
-}
-
-.tabs button.active {
-    background: var(--primary);
-    border-color: var(--primary);
-    color: #000;
 }
 
 .history-list {
@@ -89,7 +26,7 @@ header.top h1 {
     width: 100%;
     text-align: left;
     background: #fff;
-    border: 1px solid var(--border);
+    border: 1px solid var(--color-grey-50);
     border-radius: 12px;
     padding: 18px;
     cursor: pointer;
@@ -106,7 +43,7 @@ header.top h1 {
 .card-top .date {
     font-size: 13px;
     font-weight: 500;
-    color: var(--text-faint);
+    color: var(--color-grey-100);
 }
 
 .status-badge {
@@ -119,7 +56,7 @@ header.top h1 {
 
 .status-badge.in-progress { background: var(--color-blue-50); color: var(--color-blue-30); }
 .status-badge.completed { background: var(--color-green-50); color: var(--color-green-200); }
-.status-badge.cancelled { background: var(--color-grey-30); color: var(--text-faint); }
+.status-badge.cancelled { background: var(--color-grey-30); color: var(--color-grey-100); }
 
 .card-mid {
     margin: 12px 0;
@@ -134,11 +71,11 @@ header.top h1 {
 .card-bottom .fee {
     font-size: 15px;
     font-weight: 800;
-    color: var(--primary);
+    color: var(--color-blue-30);
 }
 
 .card-bottom .chevron {
-    color: var(--text-faint);
+    color: var(--color-grey-100);
 }
 
 .reorder-button {
@@ -166,11 +103,4 @@ header.top h1 {
     text-align: center;
     font-size: 13px;
     z-index: 10;
-}
-
-.empty-state, .loading-state {
-    text-align: center;
-    padding: 48px 16px;
-    color: var(--text-muted);
-    font-size: 14px;
 }
