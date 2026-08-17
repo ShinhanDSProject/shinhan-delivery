@@ -3,8 +3,10 @@ package com.example.shinhandelivery.delivery.dto.response;
 import com.example.shinhandelivery.delivery.entity.Matching;
 import com.example.shinhandelivery.delivery.entity.MatchingStatus;
 import java.time.LocalDateTime;
+import lombok.Builder;
 
 /** 매칭 응답 DTO. */
+@Builder
 public record MatchingResponse(
     Long id,
     Long deliveryRequestId,
@@ -14,11 +16,12 @@ public record MatchingResponse(
 
   /** Matching 엔티티를 응답 DTO로 변환한다. */
   public static MatchingResponse from(Matching entity) {
-    return new MatchingResponse(
-        entity.getId(),
-        entity.getDeliveryRequestId(),
-        entity.getVehicleId(),
-        entity.getStatus(),
-        entity.getMatchedAt());
+    return MatchingResponse.builder()
+        .id(entity.getId())
+        .deliveryRequestId(entity.getDeliveryRequestId())
+        .vehicleId(entity.getVehicleId())
+        .status(entity.getStatus())
+        .matchedAt(entity.getMatchedAt())
+        .build();
   }
 }

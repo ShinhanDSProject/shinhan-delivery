@@ -3,9 +3,11 @@ package com.example.shinhandelivery.notice.dto.response;
 import com.example.shinhandelivery.notice.entity.Notice;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
+import lombok.Builder;
 
 /** 공지사항 목록 요약 응답 DTO 레코드입니다. */
 @Schema(description = "공지사항 목록 요약 응답")
+@Builder
 public record NoticeResponse(
     @Schema(description = "공지사항 ID", example = "1") Long id,
     @Schema(description = "제목", example = "[안내] 서비스 정기 점검 안내") String title,
@@ -15,12 +17,13 @@ public record NoticeResponse(
     @Schema(description = "수정 일시", example = "2026-07-30T09:00:00") LocalDateTime updatedAt) {
 
   public static NoticeResponse from(Notice notice) {
-    return new NoticeResponse(
-        notice.getId(),
-        notice.getTitle(),
-        notice.getCategory(),
-        notice.getIsPinned(),
-        notice.getCreatedAt(),
-        notice.getUpdatedAt());
+    return NoticeResponse.builder()
+        .id(notice.getId())
+        .title(notice.getTitle())
+        .category(notice.getCategory())
+        .isPinned(notice.getIsPinned())
+        .createdAt(notice.getCreatedAt())
+        .updatedAt(notice.getUpdatedAt())
+        .build();
   }
 }
