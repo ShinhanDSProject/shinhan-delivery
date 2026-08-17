@@ -705,3 +705,13 @@ void 도메인은_다른_도메인의_repository를_직접_참조하지_않는�
    - 신규 화면(`*.html`)이나 새로운 기능/유스케이스가 추가될 때, 개발자는 반드시 단일 원본 문서인 `docs/architecture/전체-유저-플로우-가이드.md`에 해당 화면과 유저 여정, 화면-서비스 매핑표를 필수로 동기화 반영해야 합니다.
 9. **주소 퀵 칩 표준:**
    - 저장 주소 선택 UI는 공통 `addressQuickChipSelector` 프래그먼트와 디자인 시스템 클래스를 사용하며, 상세 동작은 `docs/design/address-quick-chips-design.md`를 단일 원본으로 참조합니다.
+10. **인라인 style/script 미분리 금지 및 정적 파일 추출 규격 (Static Asset Extraction Rule):**
+   - Thymeleaf HTML 템플릿(`src/main/resources/templates/*.html`) 내부에 인라인 `<style>` 및 `<script>` 블록을 대용량으로 직접 작성하는 행위를 엄격히 금지합니다.
+   - 페이지 전용 스타일과 스크립트는 반드시 `src/main/resources/static/css/pages/{page-name}.css` 및 `src/main/resources/static/js/pages/{page-name}.js` 전용 자산으로 분리하여 HTTP 브라우저 캐싱(`Cache-Control`, `ETag`) 및 관심사 분리(SoC)를 달성해야 합니다.
+   - HTML 템플릿 내부에서는 Thymeleaf 표준 URL 바인딩 문법인 `<link rel="stylesheet" th:href="@{/css/pages/{page-name}.css}">` 및 `<script th:src="@{/js/pages/{page-name}.js}"></script>`를 사용하여 연동합니다.
+11. **CSS 중복 제거 및 3단계 모듈화 수칙 (CSS Deduplication & 3-Tier Rule):**
+   - 모바일 셸 레이아웃(`.page`), 뒤로가기 버튼(`.back-button`), 탭 바(`.tabs`), 상태 UI(`.empty-state`, `.loading-state`) 등 2개 이상의 화면에서 중복 등장하는 CSS 규칙은 페이지 전용 CSS 파일에 중복 정의하지 않고 `src/main/resources/static/css/design-system.css` 공통 클래스로 전격 통합 모듈화해야 합니다.
+   - 페이지 전용 CSS (`static/css/pages/*.css`)에는 해당 화면 고유의 레이아웃 규칙만 경량화하여 작성합니다.
+12. **공통 JavaScript 유틸리티 모듈화 규격 (JS Utility Module Rule):**
+   - 인증 토큰 추출(`authHeader()`), HTML XSS 방어(`escapeHtml()`), 날짜/상대시간 포맷팅(`formatDate()`, `formatRelativeTime()`), 토스트 UI(`showToast()`) 등 복수 스크립트에 중복 작성되던 함수는 개별 스크립트에 재정의하지 않고 `src/main/resources/static/js/utils/` (`auth.js`, `format.js`, `ui.js`) 공통 모듈로 통합해야 합니다.
+   - 각 HTML 템플릿에서는 필요한 공통 유틸리티 모듈을 스크립트 상단에 `<script src="/js/utils/*.js"></script>` 형태로 로드하여 중복 코드를 제거하고 재사용성을 100% 사수해야 합니다.

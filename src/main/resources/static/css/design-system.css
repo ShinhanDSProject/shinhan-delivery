@@ -607,3 +607,66 @@ body {
   bottom: auto;
   transform: none;
 }
+
+/* ==========================================================================
+   10. Common Page Layouts & Component Utilities
+   ========================================================================== */
+.page {
+  max-width: var(--layout-mobile-max-width);
+  margin: 0 auto;
+  min-height: 100vh;
+  background: #FAFBFD;
+}
+
+.back-button {
+  width: 36px;
+  height: 36px;
+  border: 0;
+  background: transparent;
+  color: #334155;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s ease, transform 0.15s ease;
+}
+
+.back-button:hover {
+  color: var(--color-blue-100);
+  transform: translateX(-2px);
+}
+
+.tabs {
+  display: flex;
+  gap: var(--spacing-sm);
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.tabs button {
+  flex: none;
+  padding: 8px 16px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-grey-50);
+  background: #FFFFFF;
+  color: var(--color-grey-300);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.tabs button.active {
+  background: var(--color-blue-30);
+  border-color: var(--color-blue-30);
+  color: #FFFFFF;
+  font-weight: 700;
+}
+
+.empty-state, .loading-state {
+  text-align: center;
+  padding: 48px 16px;
+  color: var(--color-grey-300);
+  font-size: 14px;
+}
+
