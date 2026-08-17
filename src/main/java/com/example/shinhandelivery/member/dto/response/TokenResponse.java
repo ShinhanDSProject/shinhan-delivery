@@ -1,9 +1,11 @@
 package com.example.shinhandelivery.member.dto.response;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 
 @Getter
+@Builder
 @AllArgsConstructor
 public class TokenResponse {
 
@@ -12,6 +14,10 @@ public class TokenResponse {
   private String tokenType;
 
   public static TokenResponse of(String accessToken, String refreshToken) {
-    return new TokenResponse(accessToken, refreshToken, "Bearer");
+    return TokenResponse.builder()
+        .accessToken(accessToken)
+        .refreshToken(refreshToken)
+        .tokenType("Bearer")
+        .build();
   }
 }

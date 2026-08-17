@@ -45,7 +45,7 @@ public class DeliveryFeeCalculator {
         subtotal.multiply(sizeSurchargeRate(itemSize)).setScale(0, RoundingMode.HALF_UP);
     BigDecimal totalFee = subtotal.add(sizeSurcharge);
 
-    return new DeliveryEstimateResponse(
+    return DeliveryEstimateResponse.of(
         ESTIMATE_BASE_FEE, distanceSurcharge, weightSurcharge, sizeSurcharge, totalFee);
   }
 

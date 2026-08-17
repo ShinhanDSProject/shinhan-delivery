@@ -4,8 +4,10 @@ import com.example.shinhandelivery.vehicle.entity.Vehicle;
 import com.example.shinhandelivery.vehicle.entity.VehicleApprovalStatus;
 import com.example.shinhandelivery.vehicle.entity.VehicleStatus;
 import com.example.shinhandelivery.vehicle.entity.VehicleType;
+import lombok.Builder;
 
 /** 운송수단 응답 DTO. */
+@Builder
 public record VehicleResponse(
     Long id,
     Long memberId,
@@ -25,21 +27,22 @@ public record VehicleResponse(
 
   /** Vehicle 엔티티를 응답 DTO로 변환한다. */
   public static VehicleResponse from(Vehicle entity) {
-    return new VehicleResponse(
-        entity.getId(),
-        entity.getMemberId(),
-        entity.getName(),
-        entity.getType(),
-        entity.getMaxWeight(),
-        entity.getMaxDistance(),
-        entity.getDisplacement(),
-        entity.getLicensePlateNumber(),
-        entity.getInsurancePhotoUrl(),
-        entity.getPhotoUrl(),
-        entity.getLatitude(),
-        entity.getLongitude(),
-        entity.getStatus(),
-        entity.getApprovalStatus(),
-        entity.isActive());
+    return VehicleResponse.builder()
+        .id(entity.getId())
+        .memberId(entity.getMemberId())
+        .name(entity.getName())
+        .type(entity.getType())
+        .maxWeight(entity.getMaxWeight())
+        .maxDistance(entity.getMaxDistance())
+        .displacement(entity.getDisplacement())
+        .licensePlateNumber(entity.getLicensePlateNumber())
+        .insurancePhotoUrl(entity.getInsurancePhotoUrl())
+        .photoUrl(entity.getPhotoUrl())
+        .latitude(entity.getLatitude())
+        .longitude(entity.getLongitude())
+        .status(entity.getStatus())
+        .approvalStatus(entity.getApprovalStatus())
+        .isActive(entity.isActive())
+        .build();
   }
 }

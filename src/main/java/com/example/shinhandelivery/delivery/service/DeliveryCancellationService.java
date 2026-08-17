@@ -46,7 +46,7 @@ public class DeliveryCancellationService {
     DeliveryRequest deliveryRequest = findDeliveryRequestOrThrow(deliveryRequestId);
     assertOwner(customerId, deliveryRequest);
     Settlement settlement = calculateSettlement(deliveryRequest);
-    return new DeliveryCancellationPreviewResponse(
+    return DeliveryCancellationPreviewResponse.of(
         deliveryRequestId,
         deliveryRequest.getStatus(),
         settlement.paidAmount(),

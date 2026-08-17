@@ -7,8 +7,10 @@ import com.example.shinhandelivery.delivery.entity.DeliveryStatus;
 import com.example.shinhandelivery.delivery.entity.ItemSize;
 import com.example.shinhandelivery.vehicle.entity.VehicleType;
 import java.time.LocalDateTime;
+import lombok.Builder;
 
 /** 배송 요청 상세 조회 응답 DTO. 목록용 {@link DeliveryListResponse}와 달리 배송원 이름·차량 종류·증거사진·타임라인 시각까지 포함한다. */
+@Builder
 public record DeliveryDetailResponse(
     Long id,
     Long memberId,
@@ -53,39 +55,40 @@ public record DeliveryDetailResponse(
       String courierName,
       LocalDateTime matchedAt,
       VehicleType vehicleType) {
-    return new DeliveryDetailResponse(
-        entity.getId(),
-        entity.getMemberId(),
-        entity.getPickupAddress(),
-        entity.getDropoffAddress(),
-        entity.getWeight(),
-        entity.getDistance(),
-        entity.getStatus(),
-        entity.getFeePoint(),
-        entity.getPickupLatitude(),
-        entity.getPickupLongitude(),
-        entity.getDropoffLatitude(),
-        entity.getDropoffLongitude(),
-        entity.getItemSize(),
-        courierName,
-        vehicleType,
-        entity.getProofPhotoUrl(),
-        entity.getPickupPhotoUrl(),
-        entity.getDeliveryInstructionType(),
-        entity.getEntranceCode(),
-        entity.getUnitDetail(),
-        entity.getDeliveryNote(),
-        entity.getDeliveryReferencePhotoUrl(),
-        entity.getCreatedAt(),
-        matchedAt,
-        entity.getPickedUpAt(),
-        entity.getCompletedAt(),
-        entity.getCancellationReason(),
-        entity.getCancelledAt(),
-        entity.getRefundedAt(),
-        entity.getCancellationFee(),
-        entity.getRefundAmount(),
-        entity.getCourierCompensation(),
-        entity.getCompensatedAt());
+    return DeliveryDetailResponse.builder()
+        .id(entity.getId())
+        .memberId(entity.getMemberId())
+        .pickupAddress(entity.getPickupAddress())
+        .dropoffAddress(entity.getDropoffAddress())
+        .weight(entity.getWeight())
+        .distance(entity.getDistance())
+        .status(entity.getStatus())
+        .feePoint(entity.getFeePoint())
+        .pickupLatitude(entity.getPickupLatitude())
+        .pickupLongitude(entity.getPickupLongitude())
+        .dropoffLatitude(entity.getDropoffLatitude())
+        .dropoffLongitude(entity.getDropoffLongitude())
+        .itemSize(entity.getItemSize())
+        .courierName(courierName)
+        .vehicleType(vehicleType)
+        .proofPhotoUrl(entity.getProofPhotoUrl())
+        .pickupPhotoUrl(entity.getPickupPhotoUrl())
+        .deliveryInstructionType(entity.getDeliveryInstructionType())
+        .entranceCode(entity.getEntranceCode())
+        .unitDetail(entity.getUnitDetail())
+        .deliveryNote(entity.getDeliveryNote())
+        .deliveryReferencePhotoUrl(entity.getDeliveryReferencePhotoUrl())
+        .createdAt(entity.getCreatedAt())
+        .matchedAt(matchedAt)
+        .pickedUpAt(entity.getPickedUpAt())
+        .completedAt(entity.getCompletedAt())
+        .cancellationReason(entity.getCancellationReason())
+        .cancelledAt(entity.getCancelledAt())
+        .refundedAt(entity.getRefundedAt())
+        .cancellationFee(entity.getCancellationFee())
+        .refundAmount(entity.getRefundAmount())
+        .courierCompensation(entity.getCourierCompensation())
+        .compensatedAt(entity.getCompensatedAt())
+        .build();
   }
 }
