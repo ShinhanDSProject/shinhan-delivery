@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -172,46 +172,6 @@
             font-size: 14px;
         }
 
-        nav.bottom-tab-bar {
-            position: fixed;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 100%;
-            max-width: 480px;
-            background: #fff;
-            border-top: 1px solid var(--color-grey-50);
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            padding: 16px 32px calc(16px + env(safe-area-inset-bottom));
-        }
-
-        nav.bottom-tab-bar button,
-        nav.bottom-tab-bar a {
-            border: 0;
-            background: transparent;
-            color: var(--color-grey-100);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 2px 6px;
-            text-decoration: none;
-            cursor: pointer;
-        }
-
-        nav.bottom-tab-bar svg {
-            width: 30px;
-            height: 30px;
-        }
-
-        nav.bottom-tab-bar .point-icon {
-            font-size: 28px;
-            font-weight: 700;
-            color: var(--primary);
-            line-height: 1;
-        }
-
         #toast {
             position: fixed;
             left: 50%;
@@ -228,7 +188,7 @@
     </style>
 </head>
 <body>
-<main class="page" id="page">
+<main class="page customer-bottom-nav-content" id="page">
     <div class="body-area">
         <div class="animation-area">
             <div class="pulse-outer"></div>
@@ -253,15 +213,7 @@
     </div>
 </main>
 
-<nav class="bottom-tab-bar" aria-label="하단 메뉴">
-    <button type="button" aria-label="포인트" onclick="showToast('아직 준비 중인 기능입니다.')"><span class="point-icon" aria-hidden="true">P</span></button>
-    <a href="/home" aria-label="홈">
-        <svg viewBox="0 0 24 24" fill="none"><path d="M4 11 12 4l8 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 10v9a1 1 0 0 0 1 1h4v-6h2v6h4a1 1 0 0 0 1-1v-9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-    </a>
-    <a href="/my-page" aria-label="마이페이지">
-        <svg viewBox="0 0 24 24" fill="none"><path d="M5 7h14M5 12h14M5 17h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-    </a>
-</nav>
+<nav th:replace="~{fragments/components :: customerBottomNavigation('')}"></nav>
 
 <script>
     const deliveryId = new URLSearchParams(location.search).get('id');

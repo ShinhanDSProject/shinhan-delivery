@@ -18,6 +18,7 @@ class CustomerBottomNavigationTest {
           "change-password.html", "myPage",
           "delivery-cancel-list.html", "myPage",
           "delivery-history.html", "myPage",
+          "matching-wait.html", "",
           "point-wallet.html", "point",
           "profile-edit.html", "myPage",
           "payment-pin-settings.html", "myPage");
@@ -35,7 +36,7 @@ class CustomerBottomNavigationTest {
   }
 
   @Test
-  @DisplayName("누락됐던 세 화면은 공통 하단 내비게이션과 콘텐츠 안전 여백을 사용한다")
+  @DisplayName("고객 화면은 공통 하단 내비게이션과 콘텐츠 안전 여백을 사용한다")
   void affectedTemplatesShouldUseSharedNavigation() throws IOException {
     for (Map.Entry<String, String> entry : AFFECTED_TEMPLATES.entrySet()) {
       String html = readTemplate(entry.getKey());
