@@ -1,0 +1,318 @@
+:root {
+    --primary: var(--color-blue-100);
+    --primary-hover: var(--color-blue-500);
+    --text-dark: var(--color-black-200);
+    --text-muted: var(--color-grey-300);
+    --surface: var(--color-grey-30);
+    --border: var(--color-grey-50);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: var(--font-family-base);
+}
+
+body {
+    min-height: 100vh;
+    color: var(--text-dark);
+}
+
+.page {
+    max-width: 480px;
+    margin: 0 auto;
+    min-height: 100vh;
+    background: #FAFBFD;
+    display: flex;
+    flex-direction: column;
+    padding: 24px 20px 96px;
+}
+
+header.top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+}
+
+.greeting p {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--color-grey-500);
+    letter-spacing: -1px;
+    margin-bottom: 4px;
+}
+
+.greeting h1 {
+    font-size: 35px;
+    font-weight: 800;
+    color: var(--color-black-100);
+}
+
+.top-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.icon-button {
+    position: relative;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: #334155;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.icon-button svg {
+    width: 20px;
+    height: 20px;
+}
+
+.unread-badge {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #ef4444;
+    display: none;
+}
+
+.avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: #BFC1C5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+}
+
+.avatar svg {
+    width: 40px;
+    height: 40px;
+}
+
+section {
+    margin-bottom: 28px;
+}
+
+section h2 {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--color-grey-500);
+    margin-bottom: 12px;
+}
+
+.delivery-card {
+    background: var(--color-blue-500);
+    color: #fff;
+    border-radius: 30px;
+    padding: 26px;
+    margin-bottom: 12px;
+}
+
+.delivery-card .status-badge {
+    display: inline-block;
+    background: #fff;
+    color: #111827;
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -0.75px;
+    text-align: center;
+    margin-bottom: 12px;
+}
+
+.delivery-card .route {
+    font-size: 30px;
+    font-weight: 700;
+    letter-spacing: -1.5px;
+    margin-bottom: 4px;
+}
+
+.delivery-card .eta {
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -0.75px;
+    margin-bottom: 16px;
+}
+
+.delivery-card .actions {
+    display: flex;
+    gap: 8px;
+}
+
+.delivery-card .actions button {
+    flex: 1;
+    height: 44px;
+    border: 0;
+    border-radius: 12px;
+    background: #fff;
+    color: #111827;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -0.75px;
+    text-align: center;
+    cursor: pointer;
+}
+
+.waiting-card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: 0px 4px 24px -8px rgba(0, 0, 0, 0.07);
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.waiting-card .title {
+    font-size: 22px;
+    font-weight: 800;
+    color: #1A202C;
+    margin-bottom: 12px;
+}
+
+.waiting-card .route {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+}
+
+.waiting-card .loading-dots {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+}
+
+.waiting-card .loading-dots span {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--color-blue-30);
+    animation: dot-pulse 1.2s ease-in-out infinite;
+}
+
+.waiting-card .loading-dots span:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.waiting-card .loading-dots span:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes dot-pulse {
+    0%, 100% { opacity: 0.2; }
+    50% { opacity: 1; }
+}
+
+.quick-request-card {
+    display: flex;
+    align-items: center;
+    gap: 35px;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: 0px 4px 24px -8px rgba(0, 0, 0, 0.07);
+    cursor: pointer;
+    width: 100%;
+    text-align: left;
+}
+
+.quick-request-card .plus {
+    width: 50px;
+    height: 50px;
+    min-width: 50px;
+    border-radius: 10px;
+    background: var(--color-blue-50);
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.quick-request-card .plus svg {
+    width: 24px;
+    height: 24px;
+}
+
+.quick-request-card .title {
+    font-size: 25px;
+    font-weight: 700;
+}
+
+.quick-request-card .desc {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--color-grey-500);
+    margin-top: 4px;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 32px 16px;
+    color: var(--text-muted);
+    font-size: 14px;
+    background: var(--surface);
+    border-radius: 16px;
+    border: 1px dashed var(--border);
+}
+
+nav.bottom-tab-bar {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 480px;
+    background: #fff;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 16px 32px calc(16px + env(safe-area-inset-bottom));
+}
+
+nav.bottom-tab-bar button,
+nav.bottom-tab-bar a {
+    border: 0;
+    background: transparent;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px 6px;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+nav.bottom-tab-bar button svg,
+nav.bottom-tab-bar a svg {
+    width: 30px;
+    height: 30px;
+}
+
+nav.bottom-tab-bar .point-icon {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--primary);
+    line-height: 1;
+}
+
+nav.bottom-tab-bar .active {
+    color: var(--primary);
+}

@@ -1,0 +1,145 @@
+:root {
+    --primary: var(--color-blue-100);
+    --text-dark: var(--color-black-200);
+    --text-muted: var(--color-grey-300);
+    --surface: var(--color-grey-30);
+    --border: var(--color-grey-50);
+    --cat-delivery: var(--color-orange-100);
+    --cat-matching: var(--color-blue-100);
+    --cat-point: var(--color-green-100);
+    --cat-notice: var(--color-brown-100);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: var(--font-family-base);
+}
+
+body {
+    min-height: 100vh;
+    color: var(--text-dark);
+}
+
+.page {
+    max-width: 480px;
+    margin: 0 auto;
+    min-height: 100vh;
+    background: #FAFBFD;
+    padding: 16px 20px 40px;
+}
+
+header.top {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.back-button {
+    width: 36px;
+    height: 36px;
+    border: 0;
+    background: transparent;
+    color: #334155;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+header.top h1 {
+    flex: 1;
+    text-align: center;
+    font-size: 18px;
+    font-weight: 700;
+    margin-right: 36px;
+}
+
+.tabs {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    margin-bottom: 16px;
+}
+
+.tabs button {
+    flex: none;
+    padding: 8px 16px;
+    border-radius: 999px;
+    border: 0;
+    background: #F4F6FA;
+    color: var(--color-grey-300);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.tabs button.active {
+    background: var(--color-blue-30);
+    color: #fff;
+    font-weight: 700;
+}
+
+.notification-card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 12px;
+    cursor: pointer;
+}
+
+.notification-card .meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.notification-card .category {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.notification-card .category .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+.notification-card .time {
+    font-size: 11px;
+    color: var(--color-grey-100);
+}
+
+.notification-card .title {
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.notification-card .body {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.5;
+}
+
+.notification-card.read .title {
+    font-weight: 500;
+    color: var(--color-grey-300);
+}
+
+.empty-state, .loading-state {
+    text-align: center;
+    padding: 48px 16px;
+    color: var(--text-muted);
+    font-size: 14px;
+}
