@@ -7,21 +7,6 @@ let isLastPage = false;
 let isLoading = false;
 let requestGeneration = 0;
 
-function authHeader() {
-    const token = localStorage.getItem('accessToken');
-    const tokenType = localStorage.getItem('tokenType') || 'Bearer';
-    if (!token) return null;
-    return `${tokenType} ${token}`;
-}
-
-function formatDate(isoString) {
-    const date = new Date(isoString);
-    const yyyy = date.getFullYear();
-    const mm = String(date.getMonth() + 1).padStart(2, '0');
-    const dd = String(date.getDate()).padStart(2, '0');
-    return `${yyyy}.${mm}.${dd}`;
-}
-
 function badgeFor(status) {
     if (status === 'COMPLETED') return { className: 'completed', label: '완료' };
     if (status === 'CANCELLED') return { className: 'cancelled', label: '취소' };
@@ -29,7 +14,7 @@ function badgeFor(status) {
 }
 
 async function fetchPage(tab, page) {
-    const header = authHeader();
+    const header = typeof authHeader === 'function' ? authHeader() : null;
     if (!header) return null;
     const statusParam = tab === 'COMPLETED' || tab === 'CANCELLED' ? `&status=${tab}` : '';
     const response = await fetch(`/api/v1/delivery-requests?page=${page}&size=${PAGE_SIZE}${statusParam}`, {
@@ -79,6 +64,10 @@ function renderCard(item) {
 }
 
 function showReorderError(message) {
+    if (typeof showToast === 'function') {
+        showToast(message);
+        return;
+    }
     const existing = document.getElementById('reorderError');
     if (existing) existing.remove();
     const error = document.createElement('div');
@@ -163,7 +152,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (scrolledToBottom) loadNextPage();
     });
 
-    if (!authHeader()) {
+    if (typeof authHeader === 'function' && !authHeader()) {
         location.replace('/login');
     } else {
         loadNextPage();

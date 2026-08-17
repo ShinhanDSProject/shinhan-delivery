@@ -2,15 +2,6 @@ const API_PATH = "/api/v1/addresses";
 let editingId = null;
 let addresses = [];
 
-function escapeHtml(value = "") {
-  return String(value)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
-}
-
 function renderAddresses() {
   const addressList = document.getElementById("addressList");
   if (!addressList) return;

@@ -11,28 +11,8 @@ let pendingLiveNotifications = [];
 let loadRequestId = 0;
 const noticeDetailCache = new Map();
 
-function authHeader() {
-    const token = localStorage.getItem('accessToken');
-    const tokenType = localStorage.getItem('tokenType') || 'Bearer';
-    if (!token) {
-        return null;
-    }
-    return `${tokenType} ${token}`;
-}
-
-function formatRelativeTime(isoString) {
-    const diffMs = Date.now() - new Date(isoString).getTime();
-    const minutes = Math.floor(diffMs / 60000);
-    if (minutes < 1) return '방금 전';
-    if (minutes < 60) return `${minutes}분 전`;
-    const hours = Math.floor(minutes / 60);
-    if (hours < 24) return `${hours}시간 전`;
-    const days = Math.floor(hours / 24);
-    return `${days}일 전`;
-}
-
 async function fetchNotifications(category) {
-    const header = authHeader();
+    const header = typeof authHeader === 'function' ? authHeader() : null;
     if (!header) {
         return [];
     }
@@ -82,7 +62,7 @@ function renderCard(item) {
     if (item.source === 'notification') {
         card.dataset.notificationId = item.id;
     }
-    const meta = CATEGORY_META[item.category] || { label: item.category, color: 'var(--text-muted)' };
+    const meta = CATEGORY_META[item.category] || { label: item.category, color: 'var(--color-grey-300)' };
     card.innerHTML = `
         <div class="meta">
             <span class="category" style="color:${meta.color}">
@@ -106,7 +86,7 @@ async function markNotificationRead(id, card) {
     if (card.classList.contains('read')) {
         return;
     }
-    const header = authHeader();
+    const header = typeof authHeader === 'function' ? authHeader() : null;
     const response = await fetch(`/api/v1/notifications/${id}/read`, {
         method: 'PATCH',
         headers: { Authorization: header }
@@ -207,7 +187,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    if (!authHeader()) {
+    if (typeof authHeader === 'function' && !authHeader()) {
         location.replace('/login');
     } else {
         loadTab(currentTab);

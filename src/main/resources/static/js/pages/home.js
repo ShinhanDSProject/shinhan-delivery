@@ -1,27 +1,3 @@
-function notReady() {
-    const existing = document.getElementById('toast');
-    if (existing) existing.remove();
-
-    const toast = document.createElement('div');
-    toast.id = 'toast';
-    toast.textContent = '아직 준비 중인 기능입니다.';
-    toast.style.cssText =
-        'position:fixed;left:50%;bottom:90px;transform:translateX(-50%);' +
-        'background:#1e293b;color:#fff;padding:10px 20px;border-radius:999px;' +
-        'font-size:13px;z-index:100;';
-    document.body.appendChild(toast);
-    setTimeout(() => toast.remove(), 2000);
-}
-
-function authHeader() {
-    const token = localStorage.getItem('accessToken');
-    const tokenType = localStorage.getItem('tokenType') || 'Bearer';
-    if (!token) {
-        return null;
-    }
-    return `${tokenType} ${token}`;
-}
-
 function greetingByHour() {
     const hour = new Date().getHours();
     if (hour < 12) return 'Good morning';
@@ -119,7 +95,7 @@ function renderActiveDeliveries(deliveries) {
 }
 
 async function loadHome() {
-    const header = authHeader();
+    const header = typeof authHeader === 'function' ? authHeader() : null;
     if (!header) {
         location.replace('/login');
         return;
