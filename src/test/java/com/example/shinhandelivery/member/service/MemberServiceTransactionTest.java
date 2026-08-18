@@ -8,6 +8,7 @@ import static org.mockito.Mockito.doThrow;
 import com.example.shinhandelivery.member.dto.request.MemberCreateRequest;
 import com.example.shinhandelivery.member.entity.MemberRole;
 import com.example.shinhandelivery.member.repository.MemberRepository;
+import com.example.shinhandelivery.payment.repository.PaymentRepository;
 import com.example.shinhandelivery.vehicle.entity.VehicleType;
 import com.example.shinhandelivery.vehicle.repository.VehicleRepository;
 import org.junit.jupiter.api.DisplayName;
@@ -23,6 +24,7 @@ class MemberServiceTransactionTest {
 
   @Autowired private MemberService memberService;
   @Autowired private MemberRepository memberRepository;
+  @Autowired private PaymentRepository paymentRepository;
 
   @MockitoBean private VehicleRepository vehicleRepository;
 
@@ -43,5 +45,6 @@ class MemberServiceTransactionTest {
 
     assertThatThrownBy(() -> memberService.create(request)).isInstanceOf(RuntimeException.class);
     assertThat(memberRepository.findByEmail("rollback-courier@example.com")).isEmpty();
+    assertThat(paymentRepository.findByMemberId(1L)).isEmpty();
   }
 }

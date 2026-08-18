@@ -50,6 +50,7 @@ class PaymentServiceTest {
   @Mock private MemberService memberService;
   @Mock private PointHistoryRepository pointHistoryRepository;
   @Mock private PasswordEncoder passwordEncoder;
+  @Mock private PointWalletProvisioningService pointWalletProvisioningService;
   @InjectMocks private PaymentService paymentService;
 
   @Test
@@ -133,8 +134,8 @@ class PaymentServiceTest {
     PointWalletCreateRequest request = new PointWalletCreateRequest();
     request.setMemberId(1L);
 
-    when(paymentRepository.save(any(PointWallet.class)))
-        .thenAnswer(invocation -> invocation.getArgument(0));
+    when(memberService.getById(1L)).thenReturn(new Member());
+    when(pointWalletProvisioningService.ensureWallet(1L)).thenReturn(PointWallet.createEmpty(1L));
 
     PointWallet response = paymentService.create(request);
 
@@ -265,6 +266,8 @@ class PaymentServiceTest {
     when(memberService.getById(1L)).thenReturn(member);
     when(pointHistoryRepository.findByMemberIdAndIdempotencyKey(1L, "idem-2"))
         .thenReturn(Optional.empty());
+    when(pointWalletProvisioningService.ensureWallet(1L))
+        .thenReturn(PointWallet.createEmpty(1L));
 
     PointWallet wallet = new PointWallet();
     wallet.setId(10L);
@@ -338,6 +341,8 @@ class PaymentServiceTest {
     when(memberService.getById(1L)).thenReturn(member);
     when(pointHistoryRepository.findByMemberIdAndIdempotencyKey(1L, "pay-1"))
         .thenReturn(Optional.empty());
+    when(pointWalletProvisioningService.ensureWallet(1L))
+        .thenReturn(PointWallet.createEmpty(1L));
 
     PointWallet wallet = new PointWallet();
     wallet.setId(10L);
@@ -393,7 +398,37 @@ class PaymentServiceTest {
     assertThat(response.usedAmount()).isEqualTo(2000L);
     assertThat(response.paidAt()).isEqualTo(LocalDateTime.of(2026, 8, 4, 10, 0));
     verify(paymentRepository, never()).findByMemberIdForUpdate(1L);
+    verify(pointWalletProvisioningService, never()).ensureWallet(1L);
     verify(pointHistoryRepository, never()).save(any(PointHistory.class));
+  }
+
+  @Test
+  @DisplayName("지갑이 없는 회원도 첫 포인트 충전 시 지갑을 자동 생성한 뒤 성공한다")
+  void chargePointCreatesWalletWhenMissing() {
+    Member member = new Member();
+    member.setId(1L);
+    when(memberService.getById(1L)).thenReturn(member);
+    when(pointHistoryRepository.findByMemberIdAndIdempotencyKey(1L, "idem-first"))
+        .thenReturn(Optional.empty());
+    when(pointWalletProvisioningService.ensureWallet(1L))
+        .thenReturn(PointWallet.createEmpty(1L));
+
+    PointWallet wallet = new PointWallet();
+    wallet.setId(20L);
+    wallet.setMemberId(1L);
+    wallet.setBalance(0L);
+    when(paymentRepository.findByMemberIdForUpdate(1L)).thenReturn(Optional.of(wallet));
+    when(pointHistoryRepository.save(any(PointHistory.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
+
+    PointChargeRequest request = new PointChargeRequest();
+    request.setAmount(7000L);
+    request.setPaymentMethod(PaymentMethod.CARD);
+
+    PointBalanceResponse response = paymentService.chargePoint(1L, "idem-first", request);
+
+    assertThat(response.balance()).isEqualTo(7000L);
+    verify(pointWalletProvisioningService).ensureWallet(1L);
   }
 
   @Test

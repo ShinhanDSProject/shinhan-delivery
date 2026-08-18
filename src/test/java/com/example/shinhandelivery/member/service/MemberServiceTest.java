@@ -15,6 +15,8 @@ import com.example.shinhandelivery.member.entity.Member;
 import com.example.shinhandelivery.member.entity.MemberRole;
 import com.example.shinhandelivery.member.exception.DuplicateMemberException;
 import com.example.shinhandelivery.member.repository.MemberRepository;
+import com.example.shinhandelivery.payment.entity.PointWallet;
+import com.example.shinhandelivery.payment.service.PointWalletProvisioningService;
 import com.example.shinhandelivery.vehicle.entity.Vehicle;
 import com.example.shinhandelivery.vehicle.entity.VehicleType;
 import com.example.shinhandelivery.vehicle.service.VehicleService;
@@ -34,6 +36,7 @@ class MemberServiceTest {
   @Mock private MemberRepository memberRepository;
   @Mock private PasswordEncoder passwordEncoder;
   @Mock private VehicleService vehicleService;
+  @Mock private PointWalletProvisioningService pointWalletProvisioningService;
   @InjectMocks private MemberService memberService;
 
   @Test
@@ -55,12 +58,15 @@ class MemberServiceTest {
               member.setId(1L);
               return member;
             });
+    when(pointWalletProvisioningService.ensureWallet(1L))
+        .thenReturn(PointWallet.createEmpty(1L));
 
     Member response = memberService.create(request);
 
     assertThat(response.getEmail()).isEqualTo("user@example.com");
     assertThat(response.getRole()).isEqualTo(MemberRole.CUSTOMER);
     assertThat(response.getCourierApprovalStatus()).isEqualTo(CourierApprovalStatus.APPROVED);
+    verify(pointWalletProvisioningService).ensureWallet(1L);
   }
 
   @Test
@@ -86,6 +92,8 @@ class MemberServiceTest {
               member.setId(10L);
               return member;
             });
+    when(pointWalletProvisioningService.ensureWallet(10L))
+        .thenReturn(PointWallet.createEmpty(10L));
     when(vehicleService.save(any(Vehicle.class)))
         .thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -95,6 +103,7 @@ class MemberServiceTest {
     assertThat(response.getCourierApprovalStatus()).isEqualTo(CourierApprovalStatus.PENDING);
     assertThat(response.getProofDocumentUrl())
         .isEqualTo("http://localhost:8080/uploads/license.png");
+    verify(pointWalletProvisioningService).ensureWallet(10L);
     verify(vehicleService).save(any(Vehicle.class));
   }
 
