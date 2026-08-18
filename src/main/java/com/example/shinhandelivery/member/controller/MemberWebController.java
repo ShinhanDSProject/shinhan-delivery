@@ -26,6 +26,7 @@ public class MemberWebController {
                   MemberProfileResponse.from(memberService.getMyProfile(memberId));
               model.addAttribute("member", profile);
             });
+    model.addAttribute("homePath", webAuthHelper.getHomePath());
     return "my-page";
   }
 

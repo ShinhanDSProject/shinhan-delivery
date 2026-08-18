@@ -1,14 +1,22 @@
 package com.example.shinhandelivery.courier.controller;
 
+import com.example.shinhandelivery.common.security.WebAuthHelper;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
 /** 배송원(Courier) 도메인 화면의 SSR 라우팅을 담당하는 Web Controller입니다. */
 @Controller
+@RequiredArgsConstructor
 public class CourierWebController {
+
+  private final WebAuthHelper webAuthHelper;
 
   @GetMapping("/courier-home")
   public String courierHome() {
+    if (webAuthHelper.currentUserHasRole("CUSTOMER")) {
+      return "redirect:/home";
+    }
     return "courier-home";
   }
 

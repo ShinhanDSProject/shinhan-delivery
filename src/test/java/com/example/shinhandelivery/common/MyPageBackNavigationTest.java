@@ -16,7 +16,9 @@ class MyPageBackNavigationTest {
     String myPage = readResource("templates/my-page.html");
     String components = readResource("templates/fragments/components.html");
 
-    assertThat(myPage).contains("safeBackButton('/home')").contains("/js/safe-back-navigation.js");
+    assertThat(myPage)
+        .contains("safeBackButton(${homePath})")
+        .contains("/js/safe-back-navigation.js");
     assertThat(components)
         .contains("th:fragment=\"safeBackButton(fallbackPath)\"")
         .contains("aria-label=\"이전 화면으로 돌아가기\"")
