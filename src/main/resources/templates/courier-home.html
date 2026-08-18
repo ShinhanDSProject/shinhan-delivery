@@ -709,6 +709,7 @@
       <div class="offer-sheet-header">
         <span class="offer-sheet-title">새로운 배송 콜 도착</span>
         <span id="offerCountdownBadge" class="badge badge-danger">수락 대기 30초</span>
+        <span id="offerQueueBadge" class="badge badge-primary" style="display: none;">+0개 대기 중</span>
       </div>
 
       <div class="offer-info-card">
@@ -766,6 +767,7 @@
     let currentLat = 37.5665;
     let currentLng = 126.9780;
     let currentOffer = null;
+    let offerQueue = [];
     let offerCountdownInterval = null;
     const OFFER_COUNTDOWN_SECONDS = 30;
     let locationHeartbeatInterval = null;
@@ -775,7 +777,7 @@
       fetchCourierProfile();
       fetchActiveVehicle();
       fetchWorkStatus();
-      subscribeToOffers((offer) => showOfferModal(offer));
+      subscribeToOffers((offer) => enqueueOffer(offer));
     });
 
     function authHeader() {
@@ -1197,22 +1199,36 @@
           setTimeout(() => {
             window.location.href = `/delivery-in-progress?id=${deliveryRequestId}`;
           }, 1200);
+          return true;
         } else if (res.status === 409) {
           showToast('⚠️ 이미 다른 배송원에게 배차된 주문입니다.', true);
           loadAvailableDeliveries();
+          return false;
         } else {
           const errData = await res.json();
           showToast(`❌ 수락 실패: ${errData.message || '오류가 발생했습니다.'}`, true);
+          return false;
         }
       } catch (err) {
         showToast('🎉 주문이 수락되었습니다! (테스트 모드)');
         setTimeout(() => {
           window.location.href = `/delivery-in-progress?id=${deliveryRequestId}`;
         }, 1200);
+        return true;
       }
     }
 
     // 5. 신규 배송 콜 오퍼(실시간 push) 수락/거절 모달
+    /** 오퍼가 이미 하나 떠 있으면 화면은 건드리지 않고 큐에 쌓아, 먼저 온 오퍼가 뒤에 온 오퍼에 덮어써지지 않게 한다. */
+    function enqueueOffer(offer) {
+      if (currentOffer) {
+        offerQueue.push(offer);
+        updateOfferQueueBadge();
+        return;
+      }
+      showOfferModal(offer);
+    }
+
     function showOfferModal(offer) {
       currentOffer = offer;
       document.getElementById('offerPickupAddress').textContent = offer.pickupAddress || '-';
@@ -1221,8 +1237,19 @@
       document.getElementById('offerWeight').textContent = `${Number(offer.weight || 0).toFixed(1)}kg`;
       document.getElementById('offerFee').textContent = `${Number(offer.feePoint || 0).toLocaleString()}P`;
 
+      updateOfferQueueBadge();
       document.getElementById('offerOverlay').classList.add('is-visible');
       startOfferCountdown(OFFER_COUNTDOWN_SECONDS);
+    }
+
+    function updateOfferQueueBadge() {
+      const badge = document.getElementById('offerQueueBadge');
+      if (offerQueue.length > 0) {
+        badge.textContent = `+${offerQueue.length}개 대기 중`;
+        badge.style.display = '';
+      } else {
+        badge.style.display = 'none';
+      }
     }
 
     function startOfferCountdown(secondsLeft) {
@@ -1241,10 +1268,20 @@
       }, 1000);
     }
 
-    function closeOfferModal() {
+    /** 모달을 화면에서만 숨긴다 — currentOffer·offerQueue는 건드리지 않는다. */
+    function hideOfferModalUi() {
       window.clearInterval(offerCountdownInterval);
       document.getElementById('offerOverlay').classList.remove('is-visible');
+    }
+
+    /** 모달을 닫고 큐에 남은 다음 오퍼를 바로 보여준다. 수락은 결과가 나올 때까지 다음 오퍼를 보여주면 안 되므로 이 함수를 쓰지 않는다. */
+    function closeOfferModal() {
+      hideOfferModalUi();
       currentOffer = null;
+
+      if (offerQueue.length > 0) {
+        showOfferModal(offerQueue.shift());
+      }
     }
 
     /** 오퍼가 수락되지 않고 닫힌 경우(타임아웃/거절), 콜은 여전히 대기 상태로 남으므로 목록을 다시 불러와 반영한다. */
@@ -1260,13 +1297,19 @@
       closeOfferModalWithoutAccept();
     }
 
-    function acceptOffer() {
+    /** 수락 결과가 나오기 전에 다음 큐 오퍼를 보여주면 안 되므로, catchDelivery가 끝난 뒤에만 큐를 진행시킨다. */
+    async function acceptOffer() {
       if (!currentOffer) {
         return;
       }
       const offerId = currentOffer.id;
-      closeOfferModal();
-      catchDelivery(offerId);
+      hideOfferModalUi();
+      const accepted = await catchDelivery(offerId);
+      currentOffer = null;
+
+      if (!accepted && offerQueue.length > 0) {
+        showOfferModal(offerQueue.shift());
+      }
     }
 
     function showToast(msg, isError = false) {
