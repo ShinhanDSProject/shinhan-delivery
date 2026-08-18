@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
 
 import com.example.shinhandelivery.common.domain.Location;
 import com.example.shinhandelivery.delivery.dto.response.AvailableDeliveryResponse;
@@ -12,6 +13,7 @@ import com.example.shinhandelivery.delivery.entity.DeliveryStatus;
 import com.example.shinhandelivery.delivery.entity.ItemSize;
 import com.example.shinhandelivery.delivery.entity.Matching;
 import com.example.shinhandelivery.delivery.entity.MatchingStatus;
+import com.example.shinhandelivery.delivery.event.DeliveryStatusChangedEvent;
 import com.example.shinhandelivery.delivery.exception.AlreadyMatchedException;
 import com.example.shinhandelivery.delivery.helper.DeliveryFeeCalculator;
 import com.example.shinhandelivery.delivery.repository.DeliveryRequestRepository;
@@ -29,9 +31,11 @@ import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 
 @ExtendWith(MockitoExtension.class)
 class DeliveryMatchingServiceTest {
@@ -41,6 +45,7 @@ class DeliveryMatchingServiceTest {
   @Mock private DeliveryRequestRepository deliveryRequestRepository;
   @Mock private MatchingRepository matchingRepository;
   @Mock private DeliveryFeeCalculator feeCalculator;
+  @Mock private ApplicationEventPublisher eventPublisher;
 
   @InjectMocks private DeliveryMatchingService deliveryMatchingService;
 
@@ -146,6 +151,50 @@ class DeliveryMatchingServiceTest {
     assertThat(result.getDeliveryRequestId()).isEqualTo(deliveryRequestId);
     assertThat(result.getVehicleId()).isEqualTo(vehicle.getId());
     assertThat(request.getStatus()).isEqualTo(DeliveryStatus.MATCHED);
+  }
+
+  @Test
+  @DisplayName("주문을 수락(Catch)하면 MATCHED 상태 변경 이벤트가 발행되어 매칭 대기 화면의 WebSocket 구독으로 전달된다")
+  void catchDeliveryPublishesStatusChangedEvent() {
+    // given
+    Long courierId = 1L;
+    Long deliveryRequestId = 100L;
+
+    Member courier = Member.builder().id(courierId).role(MemberRole.COURIER).build();
+    Vehicle vehicle =
+        Vehicle.builder()
+            .id(10L)
+            .memberId(courierId)
+            .type(VehicleType.MOTORCYCLE)
+            .status(VehicleStatus.AVAILABLE)
+            .build();
+    DeliveryRequest request =
+        DeliveryRequest.builder().id(deliveryRequestId).status(DeliveryStatus.REQUESTED).build();
+    Matching expectedMatching =
+        Matching.builder()
+            .id(1L)
+            .deliveryRequestId(deliveryRequestId)
+            .vehicleId(vehicle.getId())
+            .status(MatchingStatus.MATCHED)
+            .matchedAt(LocalDateTime.now())
+            .build();
+
+    given(memberService.getById(courierId)).willReturn(courier);
+    given(vehicleService.getVehiclesByMemberId(courierId)).willReturn(List.of(vehicle));
+    given(deliveryRequestRepository.findByIdForUpdate(deliveryRequestId))
+        .willReturn(Optional.of(request));
+    given(matchingRepository.saveAndFlush(any(Matching.class))).willReturn(expectedMatching);
+
+    // when
+    deliveryMatchingService.catchDelivery(courierId, deliveryRequestId);
+
+    // then
+    ArgumentCaptor<DeliveryStatusChangedEvent> eventCaptor =
+        ArgumentCaptor.forClass(DeliveryStatusChangedEvent.class);
+    verify(eventPublisher).publishEvent(eventCaptor.capture());
+    assertThat(eventCaptor.getValue().deliveryRequestId()).isEqualTo(deliveryRequestId);
+    assertThat(eventCaptor.getValue().status()).isEqualTo(DeliveryStatus.MATCHED);
+    assertThat(eventCaptor.getValue().timestamp()).isNotNull();
   }
 
   @Test
