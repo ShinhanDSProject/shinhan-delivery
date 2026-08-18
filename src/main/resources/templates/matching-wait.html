@@ -281,6 +281,9 @@
             statusClient.subscribe(`/topic/delivery/${deliveryId}/status`, (message) => {
                 handleStatusUpdate(JSON.parse(message.body).status);
             });
+            // activate() 호출 시점과 실제 구독 등록(SUBSCRIBE 프레임 전송) 사이에도 핸드셰이크 시간만큼 틈이 있어,
+            // 그 사이에 놓쳤을 수 있는 전이를 구독 등록 직후 스냅샷으로 다시 한번 따라잡는다.
+            checkStatusOnce();
         };
 
         statusClient.activate();
@@ -365,8 +368,9 @@
     if (!authHeader() || !deliveryId) {
         location.replace(authHeader() ? '/home' : '/login');
     } else {
-        // 구독을 먼저 걸어야, 그 직후 REST 확인 사이의 짧은 틈에 상태가 바뀌어도 이벤트를 놓치지 않는다.
-        // handleStatusUpdate가 settled 플래그로 멱등하게 처리하므로 두 경로가 동시에 들어와도 안전하다.
+        // 구독 연결을 먼저 시작하고, 최초 진입 시 1회(연결 대기 중 대비)와 구독이 실제로 등록된 직후(핸드셰이크 중 대비)
+        // 이렇게 두 시점에 상태 스냅샷을 확인해 그 사이 틈에 놓칠 수 있는 전이를 따라잡는다.
+        // handleStatusUpdate가 settled 플래그로 멱등하게 처리하므로 여러 경로가 겹쳐도 안전하다.
         subscribeToStatus();
         checkStatusOnce();
     }
