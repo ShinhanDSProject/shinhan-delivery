@@ -194,6 +194,7 @@ class DeliveryMatchingServiceTest {
     verify(eventPublisher).publishEvent(eventCaptor.capture());
     assertThat(eventCaptor.getValue().deliveryRequestId()).isEqualTo(deliveryRequestId);
     assertThat(eventCaptor.getValue().status()).isEqualTo(DeliveryStatus.MATCHED);
+    assertThat(eventCaptor.getValue().timestamp()).isNotNull();
   }
 
   @Test
