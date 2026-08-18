@@ -33,6 +33,7 @@ import com.example.shinhandelivery.payment.dto.request.PointUseRequest;
 import com.example.shinhandelivery.payment.dto.response.PointUseResultResponse;
 import com.example.shinhandelivery.payment.service.PaymentService;
 import com.example.shinhandelivery.vehicle.entity.Vehicle;
+import com.example.shinhandelivery.vehicle.entity.VehicleStatus;
 import com.example.shinhandelivery.vehicle.entity.VehicleType;
 import com.example.shinhandelivery.vehicle.service.VehicleService;
 import java.time.LocalDateTime;
@@ -221,7 +222,7 @@ public class DeliveryService {
   /**
    * 배송을 완료 처리한다 (DeliveryRequest Entity 리턴). 픽업을 완료한(PICKED_UP) 배송 요청만 완료할 수 있으며, 완료와 동시에 증거 사진
    * URL을 저장한다. 사진 파일 자체는 이 메서드 호출 전에 {@code POST /api/v1/uploads/image}로 이미 업로드되어 있어야 한다. 호출자가 배정된
-   * 배송원 본인이 아니면 DeliveryAccessDeniedException을 던진다.
+   * 배송원 본인이 아니면 DeliveryAccessDeniedException을 던진다. 매칭된 차량은 다시 AVAILABLE로 되돌려 새 오퍼를 받을 수 있게 한다.
    */
   @Transactional
   public DeliveryRequest completeDelivery(
@@ -232,6 +233,13 @@ public class DeliveryService {
       throw new InvalidDeliveryTransitionException(
           deliveryRequest.getStatus(), DeliveryStatus.COMPLETED);
     }
+    Matching matching =
+        matchingRepository
+            .findByDeliveryRequestIdForUpdate(deliveryRequestId)
+            .orElseThrow(() -> new EntityNotFoundException(ErrorCode.MATCHING_NOT_FOUND));
+    Vehicle vehicle = vehicleService.getVehicleForUpdate(matching.getVehicleId());
+    vehicle.markAs(VehicleStatus.AVAILABLE);
+
     LocalDateTime completedAt = LocalDateTime.now();
     deliveryRequest.complete(request, completedAt);
     eventPublisher.publishEvent(

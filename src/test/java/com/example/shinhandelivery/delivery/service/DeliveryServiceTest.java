@@ -50,6 +50,7 @@ import com.example.shinhandelivery.member.service.MemberService;
 import com.example.shinhandelivery.payment.dto.response.PointUseResultResponse;
 import com.example.shinhandelivery.payment.service.PaymentService;
 import com.example.shinhandelivery.vehicle.entity.Vehicle;
+import com.example.shinhandelivery.vehicle.entity.VehicleStatus;
 import com.example.shinhandelivery.vehicle.service.VehicleService;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -490,6 +491,13 @@ class DeliveryServiceTest {
     when(deliveryRequestRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(deliveryRequest));
     stubAssignedCourier(1L, 10L, 20L);
 
+    Matching matchingForUpdate = new Matching();
+    matchingForUpdate.setVehicleId(10L);
+    when(matchingRepository.findByDeliveryRequestIdForUpdate(1L))
+        .thenReturn(Optional.of(matchingForUpdate));
+    Vehicle vehicle = Vehicle.builder().id(10L).memberId(20L).status(VehicleStatus.BUSY).build();
+    when(vehicleService.getVehicleForUpdate(10L)).thenReturn(vehicle);
+
     DeliveryCompleteRequest request = new DeliveryCompleteRequest();
     request.setProofPhotoUrl("https://example.com/proof.jpg");
 
@@ -498,6 +506,9 @@ class DeliveryServiceTest {
     assertThat(response.getStatus()).isEqualTo(DeliveryStatus.COMPLETED);
     assertThat(deliveryRequest.getProofPhotoUrl()).isEqualTo("https://example.com/proof.jpg");
     assertThat(deliveryRequest.getCompletedAt()).isNotNull();
+    assertThat(vehicle.getStatus())
+        .as("배송 완료 시 매칭된 차량은 다시 AVAILABLE로 되돌아가야 한다")
+        .isEqualTo(VehicleStatus.AVAILABLE);
     verify(eventPublisher)
         .publishEvent(
             argThat(
