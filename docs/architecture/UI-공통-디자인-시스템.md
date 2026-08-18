@@ -373,8 +373,6 @@ metadata:
 
 ## 5. Spacing & Layout Tokens (여백 규격)
 
----
-
 ### Screen / Frame 기준
 
 | 토큰명 | 값 | 주요 사용처 |
@@ -483,8 +481,6 @@ metadata:
 
 ## 6. Button Components (버튼 컴포넌트)
 
----
-
 ### Primary 버튼 (메인 CTA)
 
 | Class | 텍스트 예시 | 크기 | Radius | 배경색 | 설명 |
@@ -575,8 +571,6 @@ metadata:
 ---
 
 ## 7. Form & Input Components (입력창 컴포넌트)
-
----
 
 ### 기본 텍스트 입력 필드
 
@@ -814,9 +808,7 @@ metadata:
 
 ## 8. Card & Badge Components (카드 및 배지)
 
----
-
-# Card (카드)
+### Card (카드)
 
 ### 역할 선택 카드 (온보딩)
 
@@ -1038,7 +1030,7 @@ metadata:
 
 ---
 
-# Badge Components (상태 배지)
+### Badge Components (상태 배지)
 
 ### Status Badge (상태 표시)
 
@@ -1137,8 +1129,6 @@ metadata:
 ## 9. Thymeleaf Fragment 사용법 (공통 컴포넌트)
 
 Thymeleaf 템플릿에서 공통 프래그먼트를 불러와 손쉽게 조립할 수 있습니다:
-
----
 
 ### 버튼 프래그먼트
 
