@@ -266,8 +266,7 @@ class PaymentServiceTest {
     when(memberService.getById(1L)).thenReturn(member);
     when(pointHistoryRepository.findByMemberIdAndIdempotencyKey(1L, "idem-2"))
         .thenReturn(Optional.empty());
-    when(pointWalletProvisioningService.ensureWallet(1L))
-        .thenReturn(PointWallet.createEmpty(1L));
+    when(pointWalletProvisioningService.ensureWallet(1L)).thenReturn(PointWallet.createEmpty(1L));
 
     PointWallet wallet = new PointWallet();
     wallet.setId(10L);
@@ -341,8 +340,7 @@ class PaymentServiceTest {
     when(memberService.getById(1L)).thenReturn(member);
     when(pointHistoryRepository.findByMemberIdAndIdempotencyKey(1L, "pay-1"))
         .thenReturn(Optional.empty());
-    when(pointWalletProvisioningService.ensureWallet(1L))
-        .thenReturn(PointWallet.createEmpty(1L));
+    when(pointWalletProvisioningService.ensureWallet(1L)).thenReturn(PointWallet.createEmpty(1L));
 
     PointWallet wallet = new PointWallet();
     wallet.setId(10L);
@@ -410,8 +408,7 @@ class PaymentServiceTest {
     when(memberService.getById(1L)).thenReturn(member);
     when(pointHistoryRepository.findByMemberIdAndIdempotencyKey(1L, "idem-first"))
         .thenReturn(Optional.empty());
-    when(pointWalletProvisioningService.ensureWallet(1L))
-        .thenReturn(PointWallet.createEmpty(1L));
+    when(pointWalletProvisioningService.ensureWallet(1L)).thenReturn(PointWallet.createEmpty(1L));
 
     PointWallet wallet = new PointWallet();
     wallet.setId(20L);

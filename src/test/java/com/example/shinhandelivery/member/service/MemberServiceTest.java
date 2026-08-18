@@ -58,8 +58,7 @@ class MemberServiceTest {
               member.setId(1L);
               return member;
             });
-    when(pointWalletProvisioningService.ensureWallet(1L))
-        .thenReturn(PointWallet.createEmpty(1L));
+    when(pointWalletProvisioningService.ensureWallet(1L)).thenReturn(PointWallet.createEmpty(1L));
 
     Member response = memberService.create(request);
 
