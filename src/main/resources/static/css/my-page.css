@@ -33,7 +33,7 @@ a {
 
 body.mypage-body .page {
   position: relative;
-  width: min(100%, 430px);
+  width: min(100%, var(--layout-mobile-max-width));
   min-height: 100vh;
   margin: 0 auto;
   padding: 28px 20px 104px;
