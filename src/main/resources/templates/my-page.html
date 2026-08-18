@@ -21,8 +21,8 @@
   <section class="profile-card" aria-label="내 프로필">
     <div class="avatar" aria-hidden="true"></div>
     <div>
-      <p id="memberName" class="profile-card__name skeleton">사용자 이름</p>
-      <p id="memberRole" class="profile-card__role skeleton">회원 유형</p>
+      <p id="memberName" class="profile-card__name" th:text="${member != null ? member.name : '사용자 이름'}">사용자 이름</p>
+      <p id="memberRole" class="profile-card__role" th:text="${member != null ? (member.role == 'COURIER' ? '배달원 회원' : '일반 고객 회원') : '회원 유형'}">회원 유형</p>
     </div>
   </section>
 

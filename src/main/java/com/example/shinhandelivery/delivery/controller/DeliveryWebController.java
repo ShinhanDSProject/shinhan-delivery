@@ -1,19 +1,58 @@
 package com.example.shinhandelivery.delivery.controller;
 
+import com.example.shinhandelivery.common.security.WebAuthHelper;
+import com.example.shinhandelivery.delivery.dto.response.DeliveryResponse;
+import com.example.shinhandelivery.delivery.entity.DeliveryStatus;
+import com.example.shinhandelivery.delivery.service.DeliveryService;
+import java.util.List;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
 /** 배송(Delivery) 도메인 화면의 SSR 라우팅을 담당하는 Web Controller입니다. */
 @Controller
+@RequiredArgsConstructor
 public class DeliveryWebController {
 
+  private final DeliveryService deliveryService;
+  private final WebAuthHelper webAuthHelper;
+
   @GetMapping("/delivery-history")
-  public String deliveryHistory() {
+  public String deliveryHistory(Model model) {
+    webAuthHelper
+        .getCurrentMemberId()
+        .ifPresent(
+            memberId -> {
+              List<DeliveryResponse> deliveries =
+                  deliveryService
+                      .getMyDeliveryRequests(memberId, null, PageRequest.of(0, 10))
+                      .getContent()
+                      .stream()
+                      .map(DeliveryResponse::from)
+                      .toList();
+              model.addAttribute("deliveries", deliveries);
+            });
     return "delivery-history";
   }
 
   @GetMapping("/delivery-cancel-list")
-  public String deliveryCancelList() {
+  public String deliveryCancelList(Model model) {
+    webAuthHelper
+        .getCurrentMemberId()
+        .ifPresent(
+            memberId -> {
+              List<DeliveryResponse> cancelledDeliveries =
+                  deliveryService
+                      .getMyDeliveryRequests(
+                          memberId, DeliveryStatus.CANCELLED, PageRequest.of(0, 10))
+                      .getContent()
+                      .stream()
+                      .map(DeliveryResponse::from)
+                      .toList();
+              model.addAttribute("cancelledDeliveries", cancelledDeliveries);
+            });
     return "delivery-cancel-list";
   }
 

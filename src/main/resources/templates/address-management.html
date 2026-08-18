@@ -25,7 +25,22 @@
   <section id="contentView" class="content-view">
     <button id="addButton" class="add-address-button" type="button">＋ 새 주소 추가</button>
     <div id="addressList" class="address-list" aria-live="polite">
-      <div class="empty-state">주소 목록을 불러오는 중입니다.</div>
+      <div th:if="${addresses == null or addresses.empty}" class="empty-state">등록된 배송 주소가 없습니다.<br>새 주소를 추가해보세요.</div>
+      <article th:each="item : ${addresses}" class="address-card">
+        <div>
+          <span class="address-badge" th:text="${item.alias}">우리집</span>
+          <p class="address-main" th:text="${item.address}">서울시 강남구</p>
+          <p class="address-detail" th:text="${item.detailAddress != null ? item.detailAddress : '상세 주소 없음'}">101동 1001호</p>
+        </div>
+        <div class="address-actions">
+          <button class="address-action" type="button" data-action="edit" th:data-id="${item.id}" th:aria-label="${item.alias + ' 주소 수정'}">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m4 16-.7 4.7L8 20l11-11-4-4L4 16Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="m13.5 6.5 4 4" stroke="currentColor" stroke-width="1.8"/></svg>
+          </button>
+          <button class="address-action address-action--delete" type="button" data-action="delete" th:data-id="${item.id}" th:aria-label="${item.alias + ' 주소 삭제'}">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 7h14M9 7V4h6v3m2 0-1 13H8L7 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+      </article>
     </div>
   </section>
 

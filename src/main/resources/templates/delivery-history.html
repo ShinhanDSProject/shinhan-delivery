@@ -29,7 +29,21 @@
         <button type="button" data-tab="CANCELLED">취소</button>
     </nav>
 
-    <div class="history-list" id="list"></div>
+    <div class="history-list" id="list">
+        <article th:each="item : ${deliveries}" class="history-card" tabindex="0" role="link" th:onclick="|location.href='${item.status == 'CANCELLED' ? '/cancel-detail?id=' + item.id : '/delivery-detail?id=' + item.id}'|">
+            <div class="card-top">
+                <span class="date" th:text="${item.createdAt != null ? #temporals.format(item.createdAt, 'yyyy.MM.dd') : ''}">2026.08.18</span>
+                <span class="status-badge" th:classappend="${item.status == 'COMPLETED' ? 'completed' : (item.status == 'CANCELLED' ? 'cancelled' : 'in-progress')}" th:text="${item.status == 'COMPLETED' ? '완료' : (item.status == 'CANCELLED' ? '취소' : '진행중')}">완료</span>
+            </div>
+            <div class="card-mid">
+                <div class="route" th:text="${item.pickupAddress + ' → ' + item.dropoffAddress}">픽업지 → 배송지</div>
+            </div>
+            <div class="card-bottom">
+                <span class="fee" th:text="${#numbers.formatInteger(item.feePoint, 0, 'COMMA') + ' P'}">0 P</span>
+                <button class="reorder-button" type="button">이 배송 다시 보내기</button>
+            </div>
+        </article>
+    </div>
 </main>
 
 <nav th:replace="~{fragments/components :: customerBottomNavigation('myPage')}"></nav>
