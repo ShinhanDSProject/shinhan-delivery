@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="/css/design-system.css">
     <script src="/js/utils/geo.js"></script>
     <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=bc0d2e17087637bd52851cb9a43d19df&libraries=services&autoload=false"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@7.0.0/bundles/stomp.umd.min.js"></script>
     <style>
         :root {
             --primary: var(--color-blue-30);
@@ -300,11 +301,27 @@
     let uploadedPickupPhotoUrl = null;
     let photoSelectionVersion = 0;
 
+    // 배송원의 이동 좌표를 주기적으로 서버에 발행해, 고객의 realtime-tracking.html 지도 마커가 실시간으로 움직이게 한다.
+    const LOCATION_PUBLISH_INTERVAL_MS = 5000;
+    let locationClient = null;
+    let locationWatchId = null;
+    let latestPosition = null;
+    let locationPublishTimer = null;
+    let locationPermissionWarningShown = false;
+
     function authHeader() {
         const token = localStorage.getItem('accessToken');
         const tokenType = localStorage.getItem('tokenType') || 'Bearer';
         if (!token) return null;
         return `${tokenType} ${token}`;
+    }
+
+    // LocalDateTime은 타임존 정보가 없는 "그 자리 시각"이라, UTC 기준인 toISOString()을 그대로 잘라 보내면
+    // 실제 로컬 시각과 시차만큼(KST 기준 9시간) 어긋난 값이 저장된다. 로컬 벽시계 시각을 직접 조립해서 보낸다.
+    function toLocalIsoString(date) {
+        const pad = (n, len = 2) => String(n).padStart(len, '0');
+        return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}` +
+            `T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}.${pad(date.getMilliseconds(), 3)}`;
     }
 
     function showToast(message, isError = false) {
@@ -349,6 +366,64 @@
             );
         });
     }
+
+    // offer-subscription.js의 연결 패턴(JWT 인증 헤더, 재연결)을 재사용한다.
+    function startLocationPublishing() {
+        if (!navigator.geolocation) {
+            showToast('이 기기에서는 위치 공유를 사용할 수 없어요.', true);
+            return;
+        }
+        const header = authHeader();
+        if (!header) return;
+
+        locationWatchId = navigator.geolocation.watchPosition(
+            (position) => { latestPosition = position; },
+            () => {
+                if (locationPermissionWarningShown) return;
+                locationPermissionWarningShown = true;
+                showToast('위치 접근 권한이 없어 실시간 위치 공유가 꺼져 있어요.', true);
+            },
+            { enableHighAccuracy: true }
+        );
+
+        const protocol = location.protocol === 'https:' ? 'wss' : 'ws';
+        locationClient = new StompJs.Client({
+            brokerURL: `${protocol}://${location.host}/ws`,
+            connectHeaders: { Authorization: header },
+            reconnectDelay: 4000
+        });
+        locationClient.activate();
+
+        locationPublishTimer = setInterval(() => {
+            if (!latestPosition || !locationClient.connected) return;
+            locationClient.publish({
+                destination: `/app/delivery/${deliveryId}/location`,
+                body: JSON.stringify({
+                    deliveryId: Number(deliveryId),
+                    latitude: latestPosition.coords.latitude,
+                    longitude: latestPosition.coords.longitude,
+                    timestamp: toLocalIsoString(new Date())
+                })
+            });
+        }, LOCATION_PUBLISH_INTERVAL_MS);
+    }
+
+    function stopLocationPublishing() {
+        if (locationWatchId !== null) {
+            navigator.geolocation.clearWatch(locationWatchId);
+            locationWatchId = null;
+        }
+        if (locationPublishTimer) {
+            clearInterval(locationPublishTimer);
+            locationPublishTimer = null;
+        }
+        if (locationClient) {
+            locationClient.deactivate();
+            locationClient = null;
+        }
+    }
+
+    window.addEventListener('pagehide', stopLocationPublishing);
 
     function createRow(label, value) {
         const row = document.createElement('div');
@@ -542,6 +617,7 @@
         dropoff = { lat: detail.dropoffLatitude, lng: detail.dropoffLongitude };
         renderSheet(detail);
         locateAndShowMap(detail.status === 'PICKED_UP' ? dropoff : pickup);
+        startLocationPublishing();
     }
 
     (function init() {
