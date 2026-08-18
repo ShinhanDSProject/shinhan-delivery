@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>포인트 지갑 - Shinhan Delivery</title>
   <link rel="stylesheet" href="/css/design-system.css">
+  <link rel="stylesheet" href="/css/my-page.css">
   <style>
     :root {
       --wallet-bg: linear-gradient(160deg, #eff6ff 0%, #ffffff 62%);
@@ -13,20 +14,14 @@
       --wallet-line: var(--color-grey-50);
     }
     * { box-sizing: border-box; }
-    body {
-      min-height: 100vh;
-      margin: 0;
+    body.mypage-body {
       color: var(--wallet-ink);
       background:
           radial-gradient(circle at top left, rgba(47, 115, 224, 0.14), transparent 32%),
           linear-gradient(180deg, #f7fbff 0%, #eef3f8 100%);
-      font-family: var(--font-family-base);
     }
-    .shell {
-      width: min(100%, 430px);
-      min-height: 100vh;
-      margin: 0 auto;
-      padding: 24px 20px 120px;
+    body.mypage-body .page.point-wallet-page {
+      padding-top: 24px;
     }
     .topbar {
       display: flex;
@@ -180,8 +175,8 @@
     .toast.is-visible { opacity: 1; }
   </style>
 </head>
-<body>
-<main class="shell customer-bottom-nav-content">
+<body class="mypage-body">
+<main class="page point-wallet-page customer-bottom-nav-content">
   <div class="topbar">
     <button class="icon-btn" type="button" onclick="location.href='/my-page'" aria-label="뒤로가기">‹</button>
     <div class="title-wrap">

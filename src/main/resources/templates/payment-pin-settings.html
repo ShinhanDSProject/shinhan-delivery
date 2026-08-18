@@ -5,20 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>결제 PIN 설정 - Shinhan Delivery</title>
     <link rel="stylesheet" href="/css/design-system.css">
+    <link rel="stylesheet" href="/css/my-page.css">
     <script src="/js/my-page-api.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font-family-base); }
-        body { min-height: 100vh; background: linear-gradient(180deg, #eef4ff 0%, #ffffff 42%); color: var(--color-black-200); }
-        .page { max-width: 480px; min-height: 100vh; margin: 0 auto; display: flex; flex-direction: column; padding: 20px; }
+        body.mypage-body { background: linear-gradient(180deg, var(--color-blue-50) 0%, #FAFBFD 42%); }
+        body.mypage-body .page { display: flex; flex-direction: column; padding-top: 20px; }
         .top { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
-        .back-button { width: 36px; height: 36px; border: 0; border-radius: 999px; background: rgba(0, 0, 0, 0.04); cursor: pointer; font-size: 18px; }
+        .back-button { width: 36px; height: 36px; border: 0; border-radius: 999px; background: var(--color-white-100); box-shadow: var(--shadow-sm); color: var(--color-black-200); cursor: pointer; font-size: 18px; }
         .top h1 { font-size: 18px; font-weight: 800; }
-        .hero { background: #fff; border: 1px solid var(--color-blue-50); border-radius: 24px; padding: 24px; box-shadow: var(--shadow-md); margin-bottom: 20px; }
+        .hero { background: var(--color-white-100); border: 1px solid var(--color-blue-50); border-radius: 24px; padding: 24px; box-shadow: var(--shadow-md); margin-bottom: 20px; }
         .eyebrow { color: var(--color-blue-100); font-size: 12px; font-weight: 800; letter-spacing: 0.08em; }
         .hero h2 { margin-top: 10px; font-size: 28px; font-weight: 800; line-height: 1.25; }
         .hero p { margin-top: 10px; font-size: 14px; color: var(--color-grey-300); line-height: 1.6; }
         .hero.required { border-color: var(--color-blue-100); }
-        .form-card { background: #fff; border-radius: 24px; padding: 22px; box-shadow: var(--shadow-sm); border: 1px solid var(--color-grey-50); }
+        .form-card { background: var(--color-white-100); border-radius: 24px; padding: 22px; box-shadow: var(--shadow-sm); border: 1px solid var(--color-grey-50); }
         .field + .field { margin-top: 16px; }
         .field label { display: block; margin-bottom: 8px; font-size: 14px; font-weight: 700; }
         .field input { width: 100%; height: 54px; border-radius: 16px; border: 1px solid var(--color-grey-50); padding: 0 16px; font-size: 16px; letter-spacing: 0.3em; }
@@ -28,12 +29,12 @@
         .helper.ok { color: var(--color-green-300); }
         .cta { margin-top: auto; padding-top: 20px; display: flex; flex-direction: column; gap: 10px; }
         .primary-btn, .secondary-btn { height: 56px; border-radius: 16px; border: 0; font-size: 16px; font-weight: 800; cursor: pointer; }
-        .primary-btn { background: var(--color-blue-500); color: #fff; box-shadow: var(--shadow-lg); }
+        .primary-btn { background: var(--color-blue-100); color: var(--color-white-100); box-shadow: var(--shadow-lg); }
         .secondary-btn { background: transparent; color: var(--color-grey-300); border: 1px solid var(--color-grey-50); }
         .secondary-btn[hidden] { display: none; }
     </style>
 </head>
-<body>
+<body class="mypage-body">
 <main class="page"
       th:classappend="${param.required == null or param.required[0] != '1'} ? ' customer-bottom-nav-content' : ''">
     <header class="top">
