@@ -91,8 +91,7 @@ class MemberServiceTest {
               member.setId(10L);
               return member;
             });
-    when(pointWalletProvisioningService.ensureWallet(10L))
-        .thenReturn(PointWallet.createEmpty(10L));
+    when(pointWalletProvisioningService.ensureWallet(10L)).thenReturn(PointWallet.createEmpty(10L));
     when(vehicleService.save(any(Vehicle.class)))
         .thenAnswer(invocation -> invocation.getArgument(0));
 
