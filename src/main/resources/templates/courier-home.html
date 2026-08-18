@@ -1199,18 +1199,22 @@
           setTimeout(() => {
             window.location.href = `/delivery-in-progress?id=${deliveryRequestId}`;
           }, 1200);
+          return true;
         } else if (res.status === 409) {
           showToast('⚠️ 이미 다른 배송원에게 배차된 주문입니다.', true);
           loadAvailableDeliveries();
+          return false;
         } else {
           const errData = await res.json();
           showToast(`❌ 수락 실패: ${errData.message || '오류가 발생했습니다.'}`, true);
+          return false;
         }
       } catch (err) {
         showToast('🎉 주문이 수락되었습니다! (테스트 모드)');
         setTimeout(() => {
           window.location.href = `/delivery-in-progress?id=${deliveryRequestId}`;
         }, 1200);
+        return true;
       }
     }
 
@@ -1264,9 +1268,15 @@
       }, 1000);
     }
 
-    function closeOfferModal() {
+    /** 모달을 화면에서만 숨긴다 — currentOffer·offerQueue는 건드리지 않는다. */
+    function hideOfferModalUi() {
       window.clearInterval(offerCountdownInterval);
       document.getElementById('offerOverlay').classList.remove('is-visible');
+    }
+
+    /** 모달을 닫고 큐에 남은 다음 오퍼를 바로 보여준다. 수락은 결과가 나올 때까지 다음 오퍼를 보여주면 안 되므로 이 함수를 쓰지 않는다. */
+    function closeOfferModal() {
+      hideOfferModalUi();
       currentOffer = null;
 
       if (offerQueue.length > 0) {
@@ -1287,13 +1297,19 @@
       closeOfferModalWithoutAccept();
     }
 
-    function acceptOffer() {
+    /** 수락 결과가 나오기 전에 다음 큐 오퍼를 보여주면 안 되므로, catchDelivery가 끝난 뒤에만 큐를 진행시킨다. */
+    async function acceptOffer() {
       if (!currentOffer) {
         return;
       }
       const offerId = currentOffer.id;
-      closeOfferModal();
-      catchDelivery(offerId);
+      hideOfferModalUi();
+      const accepted = await catchDelivery(offerId);
+      currentOffer = null;
+
+      if (!accepted && offerQueue.length > 0) {
+        showOfferModal(offerQueue.shift());
+      }
     }
 
     function showToast(msg, isError = false) {
