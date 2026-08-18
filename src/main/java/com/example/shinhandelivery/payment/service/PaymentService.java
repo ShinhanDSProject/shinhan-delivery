@@ -12,6 +12,7 @@ import com.example.shinhandelivery.payment.dto.request.PointUseRequest;
 import com.example.shinhandelivery.payment.dto.request.PointWalletCreateRequest;
 import com.example.shinhandelivery.payment.dto.response.PinVerifyResponseDto;
 import com.example.shinhandelivery.payment.dto.response.PointBalanceResponse;
+import com.example.shinhandelivery.payment.dto.response.PointHistoryItemResponse;
 import com.example.shinhandelivery.payment.dto.response.PointRefundResponse;
 import com.example.shinhandelivery.payment.dto.response.PointUseResultResponse;
 import com.example.shinhandelivery.payment.entity.PointHistory;
@@ -44,6 +45,15 @@ public class PaymentService {
   @Transactional(readOnly = true)
   public PointWallet getById(Long walletId) {
     return findWalletOrThrow(walletId);
+  }
+
+  @Transactional(readOnly = true)
+  public List<PointHistoryItemResponse> getRecentPointHistories(Long memberId) {
+    memberService.getById(memberId);
+    findWalletByMemberOrThrow(memberId);
+    return pointHistoryRepository.findTop20ByMemberIdOrderByCreatedAtDescIdDesc(memberId).stream()
+        .map(PointHistoryItemResponse::from)
+        .toList();
   }
 
   @Transactional(readOnly = true)
@@ -210,6 +220,12 @@ public class PaymentService {
   private PointWallet findWalletForUpdateOrThrow(Long walletId) {
     return paymentRepository
         .findByIdForUpdate(walletId)
+        .orElseThrow(() -> new EntityNotFoundException(ErrorCode.POINT_WALLET_NOT_FOUND));
+  }
+
+  private PointWallet findWalletByMemberOrThrow(Long memberId) {
+    return paymentRepository
+        .findByMemberId(memberId)
         .orElseThrow(() -> new EntityNotFoundException(ErrorCode.POINT_WALLET_NOT_FOUND));
   }
 

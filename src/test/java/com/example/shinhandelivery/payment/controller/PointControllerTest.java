@@ -3,6 +3,7 @@ package com.example.shinhandelivery.payment.controller;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -11,8 +12,12 @@ import com.example.shinhandelivery.common.exception.GlobalExceptionHandler;
 import com.example.shinhandelivery.common.security.CustomUserDetails;
 import com.example.shinhandelivery.payment.dto.request.PointChargeRequest;
 import com.example.shinhandelivery.payment.dto.response.PointBalanceResponse;
+import com.example.shinhandelivery.payment.dto.response.PointHistoryItemResponse;
 import com.example.shinhandelivery.payment.entity.PaymentMethod;
+import com.example.shinhandelivery.payment.entity.PointHistoryType;
 import com.example.shinhandelivery.payment.service.PaymentService;
+import java.time.LocalDateTime;
+import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -53,7 +58,37 @@ class PointControllerTest {
   }
 
   @Test
-  @DisplayName("인증된 회원이 포인트를 충전하면 잔액과 마지막 충전 시각을 반환한다")
+  @DisplayName("인증 회원은 최근 포인트 이력을 조회할 수 있다")
+  void getRecentPointHistoriesSuccess() throws Exception {
+    CustomUserDetails customUser = new CustomUserDetails(10L, "my@example.com", "pass", "CUSTOMER");
+    UsernamePasswordAuthenticationToken auth =
+        new UsernamePasswordAuthenticationToken(customUser, null, customUser.getAuthorities());
+    SecurityContextHolder.getContext().setAuthentication(auth);
+
+    when(paymentService.getRecentPointHistories(10L))
+        .thenReturn(
+            List.of(
+                PointHistoryItemResponse.builder()
+                    .historyId(1L)
+                    .type(PointHistoryType.CHARGE)
+                    .amount(5000L)
+                    .balanceAfter(15000L)
+                    .paymentMethod(PaymentMethod.CARD)
+                    .createdAt(LocalDateTime.of(2026, 8, 18, 9, 30))
+                    .build()));
+
+    mockMvc
+        .perform(get("/api/v1/points/histories").principal(auth))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$[0].historyId").value(1L))
+        .andExpect(jsonPath("$[0].type").value("CHARGE"))
+        .andExpect(jsonPath("$[0].amount").value(5000L))
+        .andExpect(jsonPath("$[0].paymentMethod").value("CARD"))
+        .andExpect(jsonPath("$[0].createdAt").value("2026-08-18T09:30:00"));
+  }
+
+  @Test
+  @DisplayName("인증 회원이 포인트를 충전하면 잔액과 마지막 충전 시각을 반환한다")
   void chargePointSuccess() throws Exception {
     CustomUserDetails customUser = new CustomUserDetails(10L, "my@example.com", "pass", "CUSTOMER");
     UsernamePasswordAuthenticationToken auth =
@@ -65,8 +100,7 @@ class PointControllerTest {
     request.setPaymentMethod(PaymentMethod.CARD);
 
     when(paymentService.chargePoint(eq(10L), eq("idem-123"), any(PointChargeRequest.class)))
-        .thenReturn(
-            new PointBalanceResponse(15000L, java.time.LocalDateTime.of(2026, 8, 4, 1, 30)));
+        .thenReturn(new PointBalanceResponse(15000L, LocalDateTime.of(2026, 8, 4, 1, 30)));
 
     mockMvc
         .perform(
@@ -81,7 +115,7 @@ class PointControllerTest {
   }
 
   @Test
-  @DisplayName("인증되지 않은 사용자가 포인트 충전을 요청하면 401을 반환한다")
+  @DisplayName("비인증 사용자가 포인트 충전을 요청하면 401을 반환한다")
   void chargePointUnauthenticatedShouldReturn401() throws Exception {
     PointChargeRequest request = new PointChargeRequest();
     request.setAmount(5000L);
