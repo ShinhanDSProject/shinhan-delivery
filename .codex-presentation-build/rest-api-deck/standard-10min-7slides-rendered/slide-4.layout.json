@@ -1,0 +1,2098 @@
+{
+  "schema": "openai.presentation.layout/v4",
+  "unit": "px",
+  "slide": {
+    "aid": "sl/dcbtuw",
+    "id": "dcbtuw",
+    "slide": 4,
+    "layoutId": "06bfce75-d71a-4bce-8739-a05ea9be1716",
+    "layoutName": "Title Slide",
+    "layoutType": "title",
+    "masterLayoutId": "315bb369-7811-46dd-acdf-120a133d6103",
+    "masterLayoutName": "Master",
+    "backgroundColor": "#FFFFFF",
+    "frame": {
+      "left": 0,
+      "top": 0,
+      "width": 1280,
+      "height": 720
+    }
+  },
+  "theme": {
+    "colorSchemeName": "ChatGPT",
+    "colors": {
+      "accent1": "#156082",
+      "accent2": "#E97132",
+      "accent3": "#196B24",
+      "accent4": "#0F9ED5",
+      "accent5": "#A02B93",
+      "accent6": "#4EA72E",
+      "bg1": "#FFFFFF",
+      "bg2": "#000000",
+      "tx1": "#1F1F1F",
+      "tx2": "#FFFFFF",
+      "dk1": "#000000",
+      "lt1": "#FFFFFF",
+      "dk2": "#0E2841",
+      "lt2": "#E8E8E8",
+      "hlink": "#467886",
+      "folHlink": "#96607D"
+    },
+    "typefaces": [
+      "+mn-lt"
+    ]
+  },
+  "inheritedLayers": [
+    {
+      "scope": "layout",
+      "id": "06bfce75-d71a-4bce-8739-a05ea9be1716",
+      "name": "Title Slide",
+      "type": "title",
+      "parentLayoutId": "315bb369-7811-46dd-acdf-120a133d6103",
+      "elements": []
+    },
+    {
+      "scope": "master",
+      "id": "315bb369-7811-46dd-acdf-120a133d6103",
+      "name": "Master",
+      "type": "master",
+      "elements": []
+    }
+  ],
+  "elements": [
+    {
+      "order": 1,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/nq5kn6ts",
+      "id": "1",
+      "bbox": [
+        64,
+        28,
+        520,
+        22
+      ],
+      "geometry": "rect",
+      "text": "SHINHAN DELIVERY · REST API",
+      "textPreview": "SHINHAN DELIVERY · REST API",
+      "resolvedFontSize": 13,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 13,
+        "typeface": "+mn-lt",
+        "color": "#3D8DFF",
+        "bold": true,
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "SHINHAN DELIVERY · REST API"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "SHINHAN DELIVERY · REST API",
+          "resolvedTextStyle": {
+            "fontSize": 13,
+            "color": "#3D8DFF",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "SHINHAN DELIVERY · REST API",
+              "fontSize": 13,
+              "color": "#3D8DFF",
+              "bold": true,
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 2,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/ore1wbad",
+      "id": "2",
+      "bbox": [
+        64,
+        64,
+        1120,
+        56
+      ],
+      "geometry": "rect",
+      "text": "시스템 구조 & REST API 설계 아키텍처",
+      "textPreview": "시스템 구조 & REST API 설계 아키텍처",
+      "resolvedFontSize": 36,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 36,
+        "typeface": "+mn-lt",
+        "color": "#101114",
+        "bold": true,
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "시스템 구조 & REST API 설계 아키텍처"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "시스템 구조 & REST API 설계 아키텍처",
+          "resolvedTextStyle": {
+            "fontSize": 36,
+            "color": "#101114",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "시스템 구조 & REST API 설계 아키텍처",
+              "fontSize": 36,
+              "color": "#101114",
+              "bold": true,
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 3,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/9sn2pgby",
+      "id": "3",
+      "bbox": [
+        1180,
+        31,
+        36,
+        20
+      ],
+      "geometry": "rect",
+      "text": "04",
+      "textPreview": "04",
+      "resolvedFontSize": 12,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 12,
+        "typeface": "+mn-lt",
+        "color": "#616771",
+        "bold": true,
+        "alignment": "right",
+        "verticalAlignment": "top",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "04"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "04",
+          "resolvedTextStyle": {
+            "fontSize": 12,
+            "color": "#616771",
+            "bold": true,
+            "alignment": "right"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "04",
+              "fontSize": 12,
+              "color": "#616771",
+              "bold": true,
+              "alignment": "right"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 4,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/atwjy1sj",
+      "id": "4",
+      "bbox": [
+        64,
+        132,
+        1152,
+        2
+      ],
+      "geometry": "rect",
+      "fillColor": "#101114",
+      "lineWidth": 0
+    },
+    {
+      "order": 5,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/bu5kr6t4",
+      "id": "5",
+      "bbox": [
+        74,
+        175,
+        180,
+        92
+      ],
+      "geometry": "roundRect",
+      "fillColor": "#DDF3FD",
+      "lineColor": "#BBC1C9",
+      "lineWidth": 1
+    },
+    {
+      "order": 6,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/wve10bap",
+      "id": "6",
+      "bbox": [
+        84,
+        193,
+        160,
+        28
+      ],
+      "geometry": "rect",
+      "text": "Thymeleaf 화면",
+      "textPreview": "Thymeleaf 화면",
+      "resolvedFontSize": 18,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 18,
+        "typeface": "+mn-lt",
+        "color": "#101114",
+        "bold": true,
+        "alignment": "center",
+        "verticalAlignment": "top",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Thymeleaf 화면"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Thymeleaf 화면",
+          "resolvedTextStyle": {
+            "fontSize": 18,
+            "color": "#101114",
+            "bold": true,
+            "alignment": "center"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Thymeleaf 화면",
+              "fontSize": 18,
+              "color": "#101114",
+              "bold": true,
+              "alignment": "center"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 7,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/xw72tgbu",
+      "id": "7",
+      "bbox": [
+        84,
+        229,
+        160,
+        22
+      ],
+      "geometry": "rect",
+      "text": "matching-wait.html",
+      "textPreview": "matching-wait.html",
+      "resolvedFontSize": 14,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 14,
+        "typeface": "+mn-lt",
+        "color": "#616771",
+        "alignment": "center",
+        "verticalAlignment": "top",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "matching-wait.html"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "matching-wait.html",
+          "resolvedTextStyle": {
+            "fontSize": 14,
+            "color": "#616771",
+            "alignment": "center"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "matching-wait.html",
+              "fontSize": 14,
+              "color": "#616771",
+              "alignment": "center"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 8,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/qxcjmhsf",
+      "id": "8",
+      "bbox": [
+        261,
+        204,
+        54,
+        36
+      ],
+      "geometry": "rect",
+      "text": "→",
+      "textPreview": "→",
+      "resolvedFontSize": 27,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 27,
+        "typeface": "+mn-lt",
+        "color": "#3D8DFF",
+        "alignment": "center",
+        "verticalAlignment": "top",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "→"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "→",
+          "resolvedTextStyle": {
+            "fontSize": 27,
+            "color": "#3D8DFF",
+            "alignment": "center"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "→",
+              "fontSize": 27,
+              "color": "#3D8DFF",
+              "alignment": "center"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 9,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/ryl0fmtk",
+      "id": "9",
+      "bbox": [
+        325,
+        175,
+        180,
+        92
+      ],
+      "geometry": "roundRect",
+      "fillColor": "#F0F2F4",
+      "lineColor": "#BBC1C9",
+      "lineWidth": 1
+    },
+    {
+      "order": 10,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/r6tsrmls",
+      "id": "10",
+      "bbox": [
+        335,
+        193,
+        160,
+        28
+      ],
+      "geometry": "rect",
+      "text": "REST Controller",
+      "textPreview": "REST Controller",
+      "resolvedFontSize": 18,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 18,
+        "typeface": "+mn-lt",
+        "color": "#101114",
+        "bold": true,
+        "alignment": "center",
+        "verticalAlignment": "top",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "REST Controller"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "REST Controller",
+          "resolvedTextStyle": {
+            "fontSize": 18,
+            "color": "#101114",
+            "bold": true,
+            "alignment": "center"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "REST Controller",
+              "fontSize": 18,
+              "color": "#101114",
+              "bold": true,
+              "alignment": "center"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 11,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/q50bi147",
+      "id": "11",
+      "bbox": [
+        335,
+        229,
+        160,
+        22
+      ],
+      "geometry": "rect",
+      "text": "HTTP·인증·DTO",
+      "textPreview": "HTTP·인증·DTO",
+      "resolvedFontSize": 14,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 14,
+        "typeface": "+mn-lt",
+        "color": "#616771",
+        "alignment": "center",
+        "verticalAlignment": "top",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "HTTP·인증·DTO"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "HTTP·인증·DTO",
+          "resolvedTextStyle": {
+            "fontSize": 14,
+            "color": "#616771",
+            "alignment": "center"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "HTTP·인증·DTO",
+              "fontSize": 14,
+              "color": "#616771",
+              "alignment": "center"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 12,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/d8butw3i",
+      "id": "12",
+      "bbox": [
+        512,
+        204,
+        54,
+        36
+      ],
+      "geometry": "rect",
+      "text": "→",
+      "textPreview": "→",
+      "resolvedFontSize": 27,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 27,
+        "typeface": "+mn-lt",
+        "color": "#3D8DFF",
+        "alignment": "center",
+        "verticalAlignment": "top",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "→"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "→",
+          "resolvedTextStyle": {
+            "fontSize": 27,
+            "color": "#3D8DFF",
+            "alignment": "center"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "→",
+              "fontSize": 27,
+              "color": "#3D8DFF",
+              "alignment": "center"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 13,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/s72tkrmd",
+      "id": "13",
+      "bbox": [
+        576,
+        175,
+        180,
+        92
+      ],
+      "geometry": "roundRect",
+      "fillColor": "#F0F2F4",
+      "lineColor": "#BBC1C9",
+      "lineWidth": 1
+    },
+    {
+      "order": 14,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/329snmlg",
+      "id": "14",
+      "bbox": [
+        586,
+        193,
+        160,
+        28
+      ],
+      "geometry": "rect",
+      "text": "Service",
+      "textPreview": "Service",
+      "resolvedFontSize": 18,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 18,
+        "typeface": "+mn-lt",
+        "color": "#101114",
+        "bold": true,
+        "alignment": "center",
+        "verticalAlignment": "top",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Service"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Service",
+          "resolvedTextStyle": {
+            "fontSize": 18,
+            "color": "#101114",
+            "bold": true,
+            "alignment": "center"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Service",
+              "fontSize": 18,
+              "color": "#101114",
+              "bold": true,
+              "alignment": "center"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 15,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/ih0beh4v",
+      "id": "15",
+      "bbox": [
+        586,
+        229,
+        160,
+        22
+      ],
+      "geometry": "rect",
+      "text": "비즈니스 규칙",
+      "textPreview": "비즈니스 규칙",
+      "resolvedFontSize": 14,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 14,
+        "typeface": "+mn-lt",
+        "color": "#616771",
+        "alignment": "center",
+        "verticalAlignment": "top",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "비즈니스 규칙"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "비즈니스 규칙",
+          "resolvedTextStyle": {
+            "fontSize": 14,
+            "color": "#616771",
+            "alignment": "center"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "비즈니스 규칙",
+              "fontSize": 14,
+              "color": "#616771",
+              "alignment": "center"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 16,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/54rapw3m",
+      "id": "16",
+      "bbox": [
+        763,
+        204,
+        54,
+        36
+      ],
+      "geometry": "rect",
+      "text": "→",
+      "textPreview": "→",
+      "resolvedFontSize": 27,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 27,
+        "typeface": "+mn-lt",
+        "color": "#3D8DFF",
+        "alignment": "center",
+        "verticalAlignment": "top",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "→"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "→",
+          "resolvedTextStyle": {
+            "fontSize": 27,
+            "color": "#3D8DFF",
+            "alignment": "center"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "→",
+              "fontSize": 27,
+              "color": "#3D8DFF",
+              "alignment": "center"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 17,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/43itgrm1",
+      "id": "17",
+      "bbox": [
+        827,
+        175,
+        180,
+        92
+      ],
+      "geometry": "roundRect",
+      "fillColor": "#F0F2F4",
+      "lineColor": "#BBC1C9",
+      "lineWidth": 1
+    },
+    {
+      "order": 18,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/vepsj2lk",
+      "id": "18",
+      "bbox": [
+        837,
+        193,
+        160,
+        28
+      ],
+      "geometry": "rect",
+      "text": "Repository",
+      "textPreview": "Repository",
+      "resolvedFontSize": 18,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 18,
+        "typeface": "+mn-lt",
+        "color": "#101114",
+        "bold": true,
+        "alignment": "center",
+        "verticalAlignment": "top",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Repository"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Repository",
+          "resolvedTextStyle": {
+            "fontSize": 18,
+            "color": "#101114",
+            "bold": true,
+            "alignment": "center"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Repository",
+              "fontSize": 18,
+              "color": "#101114",
+              "bold": true,
+              "alignment": "center"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 19,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/udgbah4z",
+      "id": "19",
+      "bbox": [
+        837,
+        229,
+        160,
+        22
+      ],
+      "geometry": "rect",
+      "text": "JPA·DB 접근",
+      "textPreview": "JPA·DB 접근",
+      "resolvedFontSize": 14,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 14,
+        "typeface": "+mn-lt",
+        "color": "#616771",
+        "alignment": "center",
+        "verticalAlignment": "top",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "JPA·DB 접근"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "JPA·DB 접근",
+          "resolvedTextStyle": {
+            "fontSize": 14,
+            "color": "#616771",
+            "alignment": "center"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "JPA·DB 접근",
+              "fontSize": 14,
+              "color": "#616771",
+              "alignment": "center"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 20,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/y9gbmxor",
+      "id": "20",
+      "bbox": [
+        1014,
+        204,
+        54,
+        36
+      ],
+      "geometry": "rect",
+      "text": "→",
+      "textPreview": "→",
+      "resolvedFontSize": 27,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 27,
+        "typeface": "+mn-lt",
+        "color": "#3D8DFF",
+        "alignment": "center",
+        "verticalAlignment": "top",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "→"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "→",
+          "resolvedTextStyle": {
+            "fontSize": 27,
+            "color": "#3D8DFF",
+            "alignment": "center"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "→",
+              "fontSize": 27,
+              "color": "#3D8DFF",
+              "alignment": "center"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 21,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/zapcv2pc",
+      "id": "21",
+      "bbox": [
+        1078,
+        175,
+        180,
+        92
+      ],
+      "geometry": "roundRect",
+      "fillColor": "#DDF3FD",
+      "lineColor": "#BBC1C9",
+      "lineWidth": 1
+    },
+    {
+      "order": 22,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/kbyto76x",
+      "id": "22",
+      "bbox": [
+        1088,
+        193,
+        160,
+        28
+      ],
+      "geometry": "rect",
+      "text": "MariaDB",
+      "textPreview": "MariaDB",
+      "resolvedFontSize": 18,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 18,
+        "typeface": "+mn-lt",
+        "color": "#101114",
+        "bold": true,
+        "alignment": "center",
+        "verticalAlignment": "top",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "MariaDB"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "MariaDB",
+          "resolvedTextStyle": {
+            "fontSize": 18,
+            "color": "#101114",
+            "bold": true,
+            "alignment": "center"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "MariaDB",
+              "fontSize": 18,
+              "color": "#101114",
+              "bold": true,
+              "alignment": "center"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 23,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/lc7uxc7i",
+      "id": "23",
+      "bbox": [
+        1088,
+        229,
+        160,
+        22
+      ],
+      "geometry": "rect",
+      "text": "배송·매칭",
+      "textPreview": "배송·매칭",
+      "resolvedFontSize": 14,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 14,
+        "typeface": "+mn-lt",
+        "color": "#616771",
+        "alignment": "center",
+        "verticalAlignment": "top",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "배송·매칭"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "배송·매칭",
+          "resolvedTextStyle": {
+            "fontSize": 14,
+            "color": "#616771",
+            "alignment": "center"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "배송·매칭",
+              "fontSize": 14,
+              "color": "#616771",
+              "alignment": "center"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 24,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/mdgbqho3",
+      "id": "24",
+      "bbox": [
+        142,
+        295,
+        996,
+        30
+      ],
+      "geometry": "rect",
+      "text": "GET /api/v1/delivery-requests/{id}   ·   Authorization: Bearer JWT   ·   200 OK + JSON",
+      "textPreview": "GET /api/v1/delivery-requests/{id}   ·   Authorization: Bearer JWT   ·   200 OK + JSON",
+      "resolvedFontSize": 19,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 19,
+        "typeface": "+mn-lt",
+        "color": "#3D8DFF",
+        "bold": true,
+        "alignment": "center",
+        "verticalAlignment": "top",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "GET /api/v1/delivery-requests/{id}   ·   Authorization: Bearer JWT   ·   200 OK + JSON"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "GET /api/v1/delivery-requests/{id}   ·   Authorization: Bearer JWT   ·   200 OK + JSON",
+          "resolvedTextStyle": {
+            "fontSize": 19,
+            "color": "#3D8DFF",
+            "bold": true,
+            "alignment": "center"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "GET /api/v1/delivery-requests/{id}   ·   Authorization: Bearer JWT   ·   200 OK + JSON",
+              "fontSize": 19,
+              "color": "#3D8DFF",
+              "bold": true,
+              "alignment": "center"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 25,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/7epczmp8",
+      "id": "25",
+      "bbox": [
+        64,
+        350,
+        565,
+        218
+      ],
+      "geometry": "roundRect",
+      "fillColor": "#111827",
+      "lineColor": "#111827",
+      "lineWidth": 1
+    },
+    {
+      "order": 26,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/8fidsr6t",
+      "id": "26",
+      "bbox": [
+        84,
+        367,
+        525,
+        184
+      ],
+      "geometry": "rect",
+      "text": "@GetMapping(\"/{deliveryRequestId}\")\npublic ResponseEntity<DeliveryDetailResponse> getDeliveryRequest(...) {\n  return ResponseEntity.ok().cacheControl(CacheControl.noStore())\n      .body(deliveryService.getDeliveryRequestDetail(callerId, deliveryRequestId));\n}",
+      "textPreview": "@GetMapping(\"/{deliveryRequestId}\") | public ResponseEntity<DeliveryDetailResponse> getDeliveryRequest(...) { |   return ResponseEntity.o...",
+      "resolvedFontSize": 15,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 15,
+        "typeface": "+mn-lt",
+        "color": "#E8EFF8",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 6,
+        "lines": [
+          {
+            "index": 1,
+            "text": "@GetMapping(\"/{deliveryRequestId}\")"
+          },
+          {
+            "index": 2,
+            "text": "public ResponseEntity<DeliveryDetailResponse> getDeliveryRequest(...) {"
+          },
+          {
+            "index": 3,
+            "text": "  return ResponseEntity.ok().cacheControl(CacheControl.noStore())"
+          },
+          {
+            "index": 4,
+            "text": "      .body(deliveryService.getDeliveryRequestDetail(callerId,"
+          },
+          {
+            "index": 5,
+            "text": "deliveryRequestId));"
+          },
+          {
+            "index": 6,
+            "text": "}"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "@GetMapping(\"/{deliveryRequestId}\")",
+          "resolvedTextStyle": {
+            "fontSize": 15,
+            "color": "#E8EFF8",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "@GetMapping(\"/{deliveryRequestId}\")",
+              "fontSize": 15,
+              "color": "#E8EFF8",
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        },
+        {
+          "index": 2,
+          "text": "public ResponseEntity<DeliveryDetailResponse> getDeliveryRequest(...) {",
+          "resolvedTextStyle": {
+            "fontSize": 15,
+            "color": "#E8EFF8",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "public ResponseEntity<DeliveryDetailResponse> getDeliveryRequest(...) {",
+              "fontSize": 15,
+              "color": "#E8EFF8",
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        },
+        {
+          "index": 3,
+          "text": "  return ResponseEntity.ok().cacheControl(CacheControl.noStore())",
+          "resolvedTextStyle": {
+            "fontSize": 15,
+            "color": "#E8EFF8",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "  return ResponseEntity.ok().cacheControl(CacheControl.noStore())",
+              "fontSize": 15,
+              "color": "#E8EFF8",
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        },
+        {
+          "index": 4,
+          "text": "      .body(deliveryService.getDeliveryRequestDetail(callerId, deliveryRequestId));",
+          "resolvedTextStyle": {
+            "fontSize": 15,
+            "color": "#E8EFF8",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "      .body(deliveryService.getDeliveryRequestDetail(callerId, deliveryRequestId));",
+              "fontSize": 15,
+              "color": "#E8EFF8",
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        },
+        {
+          "index": 5,
+          "text": "}",
+          "resolvedTextStyle": {
+            "fontSize": 15,
+            "color": "#E8EFF8",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "}",
+              "fontSize": 15,
+              "color": "#E8EFF8",
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 27,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/90ru1w7e",
+      "id": "27",
+      "bbox": [
+        651,
+        350,
+        565,
+        218
+      ],
+      "geometry": "roundRect",
+      "fillColor": "#111827",
+      "lineColor": "#111827",
+      "lineWidth": 1
+    },
+    {
+      "order": 28,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/u10vuhoz",
+      "id": "28",
+      "bbox": [
+        671,
+        367,
+        525,
+        184
+      ],
+      "geometry": "rect",
+      "text": "const response = await fetch(\n  `/api/v1/delivery-requests/${deliveryId}`,\n  { headers: { Authorization: header }, cache: 'no-store' }\n);\nconst detail = await response.json();",
+      "textPreview": "const response = await fetch( |   `/api/v1/delivery-requests/${deliveryId}`, |   { headers: { Authorization: header }, cache: 'no-store' ...",
+      "resolvedFontSize": 15,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 15,
+        "typeface": "+mn-lt",
+        "color": "#E8EFF8",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 5,
+        "lines": [
+          {
+            "index": 1,
+            "text": "const response = await fetch("
+          },
+          {
+            "index": 2,
+            "text": "  `/api/v1/delivery-requests/${deliveryId}`,"
+          },
+          {
+            "index": 3,
+            "text": "  { headers: { Authorization: header }, cache: 'no-store' }"
+          },
+          {
+            "index": 4,
+            "text": ");"
+          },
+          {
+            "index": 5,
+            "text": "const detail = await response.json();"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "const response = await fetch(",
+          "resolvedTextStyle": {
+            "fontSize": 15,
+            "color": "#E8EFF8",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "const response = await fetch(",
+              "fontSize": 15,
+              "color": "#E8EFF8",
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        },
+        {
+          "index": 2,
+          "text": "  `/api/v1/delivery-requests/${deliveryId}`,",
+          "resolvedTextStyle": {
+            "fontSize": 15,
+            "color": "#E8EFF8",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "  `/api/v1/delivery-requests/${deliveryId}`,",
+              "fontSize": 15,
+              "color": "#E8EFF8",
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        },
+        {
+          "index": 3,
+          "text": "  { headers: { Authorization: header }, cache: 'no-store' }",
+          "resolvedTextStyle": {
+            "fontSize": 15,
+            "color": "#E8EFF8",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "  { headers: { Authorization: header }, cache: 'no-store' }",
+              "fontSize": 15,
+              "color": "#E8EFF8",
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        },
+        {
+          "index": 4,
+          "text": ");",
+          "resolvedTextStyle": {
+            "fontSize": 15,
+            "color": "#E8EFF8",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": ");",
+              "fontSize": 15,
+              "color": "#E8EFF8",
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        },
+        {
+          "index": 5,
+          "text": "const detail = await response.json();",
+          "resolvedTextStyle": {
+            "fontSize": 15,
+            "color": "#E8EFF8",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "const detail = await response.json();",
+              "fontSize": 15,
+              "color": "#E8EFF8",
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 29,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/v29c3mpk",
+      "id": "29",
+      "bbox": [
+        64,
+        594,
+        360,
+        25
+      ],
+      "geometry": "rect",
+      "text": "① 단방향 의존성",
+      "textPreview": "① 단방향 의존성",
+      "resolvedFontSize": 17,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 17,
+        "typeface": "+mn-lt",
+        "color": "#3D8DFF",
+        "bold": true,
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "① 단방향 의존성"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "① 단방향 의존성",
+          "resolvedTextStyle": {
+            "fontSize": 17,
+            "color": "#3D8DFF",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "① 단방향 의존성",
+              "fontSize": 17,
+              "color": "#3D8DFF",
+              "bold": true,
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 30,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/5wbetgrm",
+      "id": "30",
+      "bbox": [
+        64,
+        625,
+        360,
+        25
+      ],
+      "geometry": "rect",
+      "text": "Controller → Service → Repository",
+      "textPreview": "Controller → Service → Repository",
+      "resolvedFontSize": 15,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 15,
+        "typeface": "+mn-lt",
+        "color": "#101114",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Controller → Service → Repository"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Controller → Service → Repository",
+          "resolvedTextStyle": {
+            "fontSize": 15,
+            "color": "#101114",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Controller → Service → Repository",
+              "fontSize": 15,
+              "color": "#101114",
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 31,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/4v2xkvq1",
+      "id": "31",
+      "bbox": [
+        448,
+        594,
+        360,
+        25
+      ],
+      "geometry": "rect",
+      "text": "② API 계약 분리",
+      "textPreview": "② API 계약 분리",
+      "resolvedFontSize": 17,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 17,
+        "typeface": "+mn-lt",
+        "color": "#3D8DFF",
+        "bold": true,
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "② API 계약 분리"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "② API 계약 분리",
+          "resolvedTextStyle": {
+            "fontSize": 17,
+            "color": "#3D8DFF",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "② API 계약 분리",
+              "fontSize": 17,
+              "color": "#3D8DFF",
+              "bold": true,
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 32,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/3utwrq9g",
+      "id": "32",
+      "bbox": [
+        448,
+        625,
+        360,
+        25
+      ],
+      "geometry": "rect",
+      "text": "Entity 대신 DeliveryDetailResponse",
+      "textPreview": "Entity 대신 DeliveryDetailResponse",
+      "resolvedFontSize": 15,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 15,
+        "typeface": "+mn-lt",
+        "color": "#101114",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Entity 대신 DeliveryDetailResponse"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Entity 대신 DeliveryDetailResponse",
+          "resolvedTextStyle": {
+            "fontSize": 15,
+            "color": "#101114",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Entity 대신 DeliveryDetailResponse",
+              "fontSize": 15,
+              "color": "#101114",
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 33,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/i9kfil8b",
+      "id": "33",
+      "bbox": [
+        832,
+        594,
+        360,
+        25
+      ],
+      "geometry": "rect",
+      "text": "③ 상태·보안",
+      "textPreview": "③ 상태·보안",
+      "resolvedFontSize": 17,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 17,
+        "typeface": "+mn-lt",
+        "color": "#3D8DFF",
+        "bold": true,
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "③ 상태·보안"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "③ 상태·보안",
+          "resolvedTextStyle": {
+            "fontSize": 17,
+            "color": "#3D8DFF",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "③ 상태·보안",
+              "fontSize": 17,
+              "color": "#3D8DFF",
+              "bold": true,
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 34,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/d0vex0ry",
+      "id": "34",
+      "bbox": [
+        832,
+        625,
+        360,
+        25
+      ],
+      "geometry": "rect",
+      "text": "JWT 권한 확인 + no-store + 상태 코드",
+      "textPreview": "JWT 권한 확인 + no-store + 상태 코드",
+      "resolvedFontSize": 15,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 15,
+        "typeface": "+mn-lt",
+        "color": "#101114",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "JWT 권한 확인 + no-store + 상태 코드"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "JWT 권한 확인 + no-store + 상태 코드",
+          "resolvedTextStyle": {
+            "fontSize": 15,
+            "color": "#101114",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "JWT 권한 확인 + no-store + 상태 코드",
+              "fontSize": 15,
+              "color": "#101114",
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 35,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/szmxovqd",
+      "id": "35",
+      "bbox": [
+        64,
+        683,
+        700,
+        18
+      ],
+      "geometry": "rect",
+      "text": "프로젝트 실제 코드 기반 · 표준 5-Slide",
+      "textPreview": "프로젝트 실제 코드 기반 · 표준 5-Slide",
+      "resolvedFontSize": 11,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 11,
+        "typeface": "+mn-lt",
+        "color": "#616771",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "프로젝트 실제 코드 기반 · 표준 5-Slide"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "프로젝트 실제 코드 기반 · 표준 5-Slide",
+          "resolvedTextStyle": {
+            "fontSize": 11,
+            "color": "#616771",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "프로젝트 실제 코드 기반 · 표준 5-Slide",
+              "fontSize": 11,
+              "color": "#616771",
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    }
+  ],
+  "composeRuns": []
+}

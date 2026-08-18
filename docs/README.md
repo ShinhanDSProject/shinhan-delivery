@@ -127,5 +127,5 @@ LangChain, LangGraph, GraphRAG 및 LLM 기반 소프트웨어 엔지니어링 �
 ---
 
 ### 10. 🎤 [`docs/presentation/`](./presentation/) — 프로젝트 발표 자료 (PPT) 표준 가이드
-* 📖 [**개발자 발표 PPT 표준 템플릿 가이드**](./presentation/개발자-발표-PPT-표준-템플릿-가이드.md) — 6대 표준 슬라이드 덱 양식 및 발표 가이드
-
+* 📖 [**개발자 발표 PPT 표준 템플릿 가이드**](./presentation/개발자-발표-PPT-표준-템플릿-가이드.md) — 5-Slide 표준 덱 양식 및 발표 가이드
+* 🎤 [**신한 딜리버리 REST API 기술 성과 발표**](./presentation/REST-API-기술성과발표-남윤재.md) — 실제 배송 API 코드, `fetch`, 취소 정산, HATEOAS 확장 방향을 담은 7-Slide 발표 자료
