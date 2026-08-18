@@ -3,6 +3,7 @@ package com.example.shinhandelivery.delivery.service;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.example.shinhandelivery.common.domain.Location;
+import com.example.shinhandelivery.common.exception.BusinessException;
 import com.example.shinhandelivery.delivery.entity.DeliveryRequest;
 import com.example.shinhandelivery.delivery.entity.DeliveryStatus;
 import com.example.shinhandelivery.delivery.entity.ItemSize;
@@ -90,6 +91,7 @@ class DeliveryMatchingConcurrencyTest {
               .maxDistance(20.0)
               .location(Location.of(37.5665, 126.9780))
               .status(VehicleStatus.AVAILABLE)
+              .isActive(true)
               .build());
 
       couriers.add(courier);
@@ -139,5 +141,114 @@ class DeliveryMatchingConcurrencyTest {
             .filter(m -> m.getDeliveryRequestId().equals(savedRequest.getId()))
             .count();
     assertThat(matchingCount).isEqualTo(1);
+  }
+
+  @Test
+  @DisplayName("한 배송원(차량)이 서로 다른 두 주문을 동시에 수락 시도하면 단 1건만 성공하고 나머지는 차량 사용 불가로 실패한다")
+  void catchDeliveryConcurrencyTestSameVehicleDoubleBooking() throws InterruptedException {
+    // given: 고객 및 서로 다른 대기 중인 주문 2건 생성
+    long time = System.currentTimeMillis();
+    Member customer =
+        memberRepository.save(
+            Member.builder()
+                .email("customer_double_" + time + "@shinhan.com")
+                .password("password123!")
+                .name("주문고객")
+                .phoneNumber("010-8888-8888")
+                .role(MemberRole.CUSTOMER)
+                .build());
+
+    DeliveryRequest request1 =
+        deliveryRequestRepository.save(
+            DeliveryRequest.builder()
+                .memberId(customer.getId())
+                .pickupAddress("서울시 중구 을지로 100")
+                .dropoffAddress("서울시 명동 20")
+                .pickupLocation(Location.of(37.5665, 126.9780))
+                .dropoffLocation(Location.of(37.5600, 126.9800))
+                .weight(2.5)
+                .distance(1.2)
+                .feePoint(5000L)
+                .status(DeliveryStatus.REQUESTED)
+                .itemSize(ItemSize.MEDIUM)
+                .createdAt(LocalDateTime.now())
+                .build());
+    DeliveryRequest request2 =
+        deliveryRequestRepository.save(
+            DeliveryRequest.builder()
+                .memberId(customer.getId())
+                .pickupAddress("서울시 강남구 테헤란로 200")
+                .dropoffAddress("서울시 서초구 서초대로 50")
+                .pickupLocation(Location.of(37.5010, 127.0396))
+                .dropoffLocation(Location.of(37.4920, 127.0140))
+                .weight(2.5)
+                .distance(1.2)
+                .feePoint(5000L)
+                .status(DeliveryStatus.REQUESTED)
+                .itemSize(ItemSize.MEDIUM)
+                .createdAt(LocalDateTime.now())
+                .build());
+
+    // given: 배송원 1명 및 차량 1대
+    Member courier =
+        memberRepository.save(
+            Member.builder()
+                .email("courier_double_" + time + "@shinhan.com")
+                .password("password123!")
+                .name("배송원")
+                .phoneNumber("010-7777-7777")
+                .role(MemberRole.COURIER)
+                .build());
+    vehicleRepository.save(
+        Vehicle.builder()
+            .memberId(courier.getId())
+            .type(VehicleType.MOTORCYCLE)
+            .maxWeight(10.0)
+            .maxDistance(20.0)
+            .location(Location.of(37.5665, 126.9780))
+            .status(VehicleStatus.AVAILABLE)
+            .isActive(true)
+            .build());
+
+    ExecutorService executorService = Executors.newFixedThreadPool(2);
+    CountDownLatch readyLatch = new CountDownLatch(2);
+    CountDownLatch startLatch = new CountDownLatch(1);
+    CountDownLatch doneLatch = new CountDownLatch(2);
+
+    AtomicInteger successCount = new AtomicInteger(0);
+    AtomicInteger failureCount = new AtomicInteger(0);
+
+    // when: 같은 차량으로 서로 다른 주문 2건을 동시에 수락 시도
+    for (Long deliveryRequestId : List.of(request1.getId(), request2.getId())) {
+      executorService.submit(
+          () -> {
+            readyLatch.countDown();
+            try {
+              startLatch.await();
+              deliveryMatchingService.catchDelivery(courier.getId(), deliveryRequestId);
+              successCount.incrementAndGet();
+            } catch (BusinessException e) {
+              failureCount.incrementAndGet();
+            } catch (Throwable e) {
+              failureCount.incrementAndGet();
+            } finally {
+              doneLatch.countDown();
+            }
+          });
+    }
+
+    readyLatch.await();
+    startLatch.countDown();
+    doneLatch.await();
+
+    // then: 차량 row 자체를 비관적 락으로 잠그기 때문에, 서로 다른 주문이어도 같은 차량으로는 단 1건만 성공한다
+    assertThat(successCount.get()).isEqualTo(1);
+    assertThat(failureCount.get()).isEqualTo(1);
+
+    long matchedCount =
+        deliveryRequestRepository.findAllById(List.of(request1.getId(), request2.getId())).stream()
+            .filter(d -> d.getStatus() == DeliveryStatus.MATCHED)
+            .count();
+    assertThat(matchedCount).isEqualTo(1);
   }
 }

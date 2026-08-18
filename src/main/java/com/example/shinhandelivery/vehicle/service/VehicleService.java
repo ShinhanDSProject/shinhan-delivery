@@ -65,6 +65,36 @@ public class VehicleService {
     return vehicleRepository.findAllByMemberIdOrderByIdDesc(memberId);
   }
 
+  /**
+   * 배송원이 지금 영업에 쓰고 있는(활성화된, {@code isActive=true}) 차량을 조회한다. 차량을 여러 대 등록해뒀어도 그중 실제로 활성화한 한 대만 콜 목록
+   * 필터링·수락에 써야 한다 — 단순히 "가장 최근에 등록한 차량"을 쓰면 배송원이 실제로 활성화한 차량과 다른 차량 기준으로 용량이 걸러지거나 잠길 수 있다.
+   */
+  @Transactional(readOnly = true)
+  public Vehicle getActiveVehicle(Long memberId) {
+    return vehicleRepository
+        .findByMemberIdAndIsActiveTrue(memberId)
+        .orElseThrow(
+            () ->
+                new BusinessException(
+                    ErrorCode.VEHICLE_NOT_FOUND, "활성화된 운송수단이 없습니다. 장비 탭에서 차량을 활성화해주세요."));
+  }
+
+  /**
+   * 활성화된 차량의 id만 조회한다(엔티티를 영속성 컨텍스트에 올리지 않는 id 전용 프로젝션). 같은 트랜잭션에서 뒤이어 {@link
+   * #getVehicleForUpdate}로 비관적 락을 걸 계획이라면 {@link #getActiveVehicle}이 아니라 이 메서드를 써야 한다 — Vehicle
+   * 엔티티를 먼저 로드해두면, 그 엔티티가 1차 캐시에 올라가 있어서 이후 락을 거는 조회가 DB 행 잠금은 정상적으로 걸어도 자바 객체 필드값은 잠금 전 상태 그대로인 그
+   * 캐시된 인스턴스를 그대로 반환해버린다.
+   */
+  @Transactional(readOnly = true)
+  public Long getActiveVehicleId(Long memberId) {
+    return vehicleRepository
+        .findActiveVehicleIdByMemberId(memberId)
+        .orElseThrow(
+            () ->
+                new BusinessException(
+                    ErrorCode.VEHICLE_NOT_FOUND, "활성화된 운송수단이 없습니다. 장비 탭에서 차량을 활성화해주세요."));
+  }
+
   /** 소유자(MemberId) 기준 차량과 Member 정보를 Fetch Join으로 한 번에 조회한다. */
   @Transactional(readOnly = true)
   public List<Vehicle> getVehiclesWithMemberByMemberId(Long memberId) {
