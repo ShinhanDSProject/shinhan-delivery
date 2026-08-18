@@ -16,6 +16,7 @@ import com.example.shinhandelivery.member.entity.Member;
 import com.example.shinhandelivery.member.entity.MemberRole;
 import com.example.shinhandelivery.member.exception.DuplicateMemberException;
 import com.example.shinhandelivery.member.repository.MemberRepository;
+import com.example.shinhandelivery.payment.service.PointWalletProvisioningService;
 import com.example.shinhandelivery.vehicle.entity.Vehicle;
 import com.example.shinhandelivery.vehicle.entity.VehicleType;
 import com.example.shinhandelivery.vehicle.service.VehicleService;
@@ -37,6 +38,7 @@ public class MemberService {
   private final PasswordEncoder passwordEncoder;
   private final JwtProvider jwtProvider;
   private final VehicleService vehicleService;
+  private final PointWalletProvisioningService pointWalletProvisioningService;
 
   /** 이메일 중복을 검증하고 비밀번호를 암호화해 회원을 생성한다 (Entity 리턴). */
   @Transactional
@@ -47,6 +49,7 @@ public class MemberService {
 
     String encodedPassword = passwordEncoder.encode(request.getPassword());
     Member created = memberRepository.save(Member.from(request, encodedPassword));
+    pointWalletProvisioningService.ensureWallet(created.getId());
     if (created.getRole() == MemberRole.COURIER) {
       vehicleService.save(createDefaultVehicle(created.getId(), request));
     }

@@ -35,11 +35,12 @@ public class PaymentService {
   private final MemberService memberService;
   private final PointHistoryRepository pointHistoryRepository;
   private final PasswordEncoder passwordEncoder;
+  private final PointWalletProvisioningService pointWalletProvisioningService;
 
   @Transactional
   public PointWallet create(PointWalletCreateRequest request) {
     memberService.getById(request.getMemberId());
-    return paymentRepository.save(PointWallet.createEmpty(request.getMemberId()));
+    return pointWalletProvisioningService.ensureWallet(request.getMemberId());
   }
 
   @Transactional(readOnly = true)
@@ -104,6 +105,7 @@ public class PaymentService {
       return new PointBalanceResponse(existing.getBalanceAfter(), existing.getCreatedAt());
     }
 
+    pointWalletProvisioningService.ensureWallet(memberId);
     PointWallet wallet = findWalletByMemberForUpdateOrThrow(memberId).charge(request.getAmount());
 
     PointHistory history =
@@ -137,6 +139,7 @@ public class PaymentService {
           existing.getBalanceAfter(), existing.getAmount(), existing.getCreatedAt());
     }
 
+    pointWalletProvisioningService.ensureWallet(memberId);
     PointWallet wallet = findWalletByMemberForUpdateOrThrow(memberId).use(request.getAmount());
     PointHistory history =
         pointHistoryRepository.save(

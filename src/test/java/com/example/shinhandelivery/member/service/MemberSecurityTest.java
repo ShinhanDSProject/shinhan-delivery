@@ -14,6 +14,8 @@ import com.example.shinhandelivery.member.dto.response.TokenResponse;
 import com.example.shinhandelivery.member.entity.Member;
 import com.example.shinhandelivery.member.entity.MemberRole;
 import com.example.shinhandelivery.member.repository.MemberRepository;
+import com.example.shinhandelivery.payment.entity.PointWallet;
+import com.example.shinhandelivery.payment.service.PointWalletProvisioningService;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -34,6 +36,7 @@ class MemberSecurityTest {
   @Spy private PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
   @Mock private JwtProvider jwtProvider;
+  @Mock private PointWalletProvisioningService pointWalletProvisioningService;
 
   @InjectMocks private MemberService memberService;
 
@@ -69,6 +72,7 @@ class MemberSecurityTest {
               saved.setId(2L);
               return saved;
             });
+    given(pointWalletProvisioningService.ensureWallet(2L)).willReturn(PointWallet.createEmpty(2L));
 
     // when
     Member response = memberService.create(request);
