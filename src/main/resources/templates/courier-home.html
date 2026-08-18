@@ -709,6 +709,7 @@
       <div class="offer-sheet-header">
         <span class="offer-sheet-title">새로운 배송 콜 도착</span>
         <span id="offerCountdownBadge" class="badge badge-danger">수락 대기 30초</span>
+        <span id="offerQueueBadge" class="badge badge-primary" style="display: none;">+0개 대기 중</span>
       </div>
 
       <div class="offer-info-card">
@@ -766,6 +767,7 @@
     let currentLat = 37.5665;
     let currentLng = 126.9780;
     let currentOffer = null;
+    let offerQueue = [];
     let offerCountdownInterval = null;
     const OFFER_COUNTDOWN_SECONDS = 30;
     let locationHeartbeatInterval = null;
@@ -775,7 +777,7 @@
       fetchCourierProfile();
       fetchActiveVehicle();
       fetchWorkStatus();
-      subscribeToOffers((offer) => showOfferModal(offer));
+      subscribeToOffers((offer) => enqueueOffer(offer));
     });
 
     function authHeader() {
@@ -1213,6 +1215,16 @@
     }
 
     // 5. 신규 배송 콜 오퍼(실시간 push) 수락/거절 모달
+    /** 오퍼가 이미 하나 떠 있으면 화면은 건드리지 않고 큐에 쌓아, 먼저 온 오퍼가 뒤에 온 오퍼에 덮어써지지 않게 한다. */
+    function enqueueOffer(offer) {
+      if (currentOffer) {
+        offerQueue.push(offer);
+        updateOfferQueueBadge();
+        return;
+      }
+      showOfferModal(offer);
+    }
+
     function showOfferModal(offer) {
       currentOffer = offer;
       document.getElementById('offerPickupAddress').textContent = offer.pickupAddress || '-';
@@ -1221,8 +1233,19 @@
       document.getElementById('offerWeight').textContent = `${Number(offer.weight || 0).toFixed(1)}kg`;
       document.getElementById('offerFee').textContent = `${Number(offer.feePoint || 0).toLocaleString()}P`;
 
+      updateOfferQueueBadge();
       document.getElementById('offerOverlay').classList.add('is-visible');
       startOfferCountdown(OFFER_COUNTDOWN_SECONDS);
+    }
+
+    function updateOfferQueueBadge() {
+      const badge = document.getElementById('offerQueueBadge');
+      if (offerQueue.length > 0) {
+        badge.textContent = `+${offerQueue.length}개 대기 중`;
+        badge.style.display = '';
+      } else {
+        badge.style.display = 'none';
+      }
     }
 
     function startOfferCountdown(secondsLeft) {
@@ -1245,6 +1268,10 @@
       window.clearInterval(offerCountdownInterval);
       document.getElementById('offerOverlay').classList.remove('is-visible');
       currentOffer = null;
+
+      if (offerQueue.length > 0) {
+        showOfferModal(offerQueue.shift());
+      }
     }
 
     /** 오퍼가 수락되지 않고 닫힌 경우(타임아웃/거절), 콜은 여전히 대기 상태로 남으므로 목록을 다시 불러와 반영한다. */
