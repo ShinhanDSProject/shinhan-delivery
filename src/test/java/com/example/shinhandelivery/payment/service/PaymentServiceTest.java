@@ -19,6 +19,7 @@ import com.example.shinhandelivery.payment.dto.request.PointUseRequest;
 import com.example.shinhandelivery.payment.dto.request.PointWalletCreateRequest;
 import com.example.shinhandelivery.payment.dto.response.PinVerifyResponseDto;
 import com.example.shinhandelivery.payment.dto.response.PointBalanceResponse;
+import com.example.shinhandelivery.payment.dto.response.PointHistoryItemResponse;
 import com.example.shinhandelivery.payment.dto.response.PointRefundResponse;
 import com.example.shinhandelivery.payment.dto.response.PointUseResultResponse;
 import com.example.shinhandelivery.payment.entity.PaymentMethod;
@@ -31,6 +32,7 @@ import com.example.shinhandelivery.payment.exception.PointBalanceOverflowExcepti
 import com.example.shinhandelivery.payment.repository.PaymentRepository;
 import com.example.shinhandelivery.payment.repository.PointHistoryRepository;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -444,5 +446,61 @@ class PaymentServiceTest {
     assertThat(response.balance()).isEqualTo(4000L);
     assertThat(wallet.getBalance()).isEqualTo(4000L);
     verify(pointHistoryRepository, never()).save(any(PointHistory.class));
+  }
+
+  @Test
+  @DisplayName("회원 기준 최근 포인트 이력을 최신순 응답 DTO로 반환한다")
+  void getRecentPointHistoriesReturnsMappedResponses() {
+    Member member = new Member();
+    member.setId(1L);
+    when(memberService.getById(1L)).thenReturn(member);
+    when(paymentRepository.findByMemberId(1L))
+        .thenReturn(
+            Optional.of(PointWallet.builder().id(10L).memberId(1L).balance(15000L).build()));
+
+    PointHistory chargeHistory =
+        PointHistory.builder()
+            .id(11L)
+            .memberId(1L)
+            .walletId(10L)
+            .amount(5000L)
+            .balanceAfter(15000L)
+            .type(PointHistoryType.CHARGE)
+            .paymentMethod(PaymentMethod.CARD)
+            .createdAt(LocalDateTime.of(2026, 8, 18, 9, 0))
+            .build();
+    PointHistory useHistory =
+        PointHistory.builder()
+            .id(12L)
+            .memberId(1L)
+            .walletId(10L)
+            .amount(2000L)
+            .balanceAfter(13000L)
+            .type(PointHistoryType.USE)
+            .createdAt(LocalDateTime.of(2026, 8, 18, 8, 30))
+            .build();
+
+    when(pointHistoryRepository.findTop20ByMemberIdOrderByCreatedAtDescIdDesc(1L))
+        .thenReturn(List.of(chargeHistory, useHistory));
+
+    List<PointHistoryItemResponse> responses = paymentService.getRecentPointHistories(1L);
+
+    assertThat(responses).hasSize(2);
+    assertThat(responses.get(0).historyId()).isEqualTo(11L);
+    assertThat(responses.get(0).type()).isEqualTo(PointHistoryType.CHARGE);
+    assertThat(responses.get(0).paymentMethod()).isEqualTo(PaymentMethod.CARD);
+    assertThat(responses.get(1).historyId()).isEqualTo(12L);
+    assertThat(responses.get(1).type()).isEqualTo(PointHistoryType.USE);
+  }
+
+  @Test
+  @DisplayName("포인트 지갑이 없으면 최근 포인트 이력 조회 시 예외를 던진다")
+  void getRecentPointHistoriesWithoutWalletShouldThrowException() {
+    when(memberService.getById(1L)).thenReturn(new Member());
+    when(paymentRepository.findByMemberId(1L)).thenReturn(Optional.empty());
+
+    assertThatThrownBy(() -> paymentService.getRecentPointHistories(1L))
+        .isInstanceOf(EntityNotFoundException.class)
+        .hasMessageContaining(ErrorCode.POINT_WALLET_NOT_FOUND.getMessage());
   }
 }

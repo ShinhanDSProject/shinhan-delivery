@@ -303,17 +303,12 @@
     chargeButton.textContent = "충전 처리 중...";
 
     try {
-      const response = await MyPageApi.request("/api/v1/points/charge", {
+      await MyPageApi.request("/api/v1/points/charge", {
         method: "POST",
         headers: { "Idempotency-Key": idempotencyKey },
         body: JSON.stringify({ amount: selectedAmount, paymentMethod })
       });
 
-      sessionStorage.setItem("pointChargeSnapshot", JSON.stringify({
-        amount: selectedAmount,
-        methodLabel: methodLabel(paymentMethod),
-        lastChargedAt: response.lastChargedAt
-      }));
       location.replace("/point-wallet");
     } catch (error) {
       showToast(error.message);

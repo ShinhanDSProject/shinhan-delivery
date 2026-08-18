@@ -145,6 +145,9 @@
       white-space: nowrap;
       color: var(--color-blue-100);
     }
+    .history-amount.is-negative {
+      color: #d64545;
+    }
     .empty-state strong {
       display: block;
       font-size: 16px;
@@ -187,7 +190,7 @@
     </div>
   </div>
 
-  <section class="wallet-card" aria-label="포인트 잔액">
+  <section class="wallet-card" aria-label="포인트 지갑 요약">
     <div class="label">현재 보유 포인트</div>
     <div id="balance" class="balance" th:text="${pointWallet != null ? #numbers.formatInteger(pointWallet.balance, 0, 'COMMA') + ' P' : '0 P'}">0 P</div>
     <div id="walletHint" class="hint" th:text="${pointWallet != null ? '정상적으로 연동된 지갑입니다.' : '지갑을 확인하는 중입니다.'}">지갑을 확인하는 중입니다.</div>
@@ -238,6 +241,39 @@
     });
   }
 
+  function formatHistoryTitle(entry) {
+    if (entry.type === "CHARGE") return "포인트 충전";
+    if (entry.type === "USE") return "포인트 사용";
+    if (entry.type === "REFUND") return "포인트 환불";
+    if (entry.type === "COURIER_COMPENSATION") return "배송원 보상";
+    return "포인트 내역";
+  }
+
+  function formatPaymentMethod(paymentMethod) {
+    const labels = {
+      CARD: "카드 결제",
+      BANK_TRANSFER: "계좌 이체",
+      EASY_PAY: "간편 결제"
+    };
+    return labels[paymentMethod] || paymentMethod;
+  }
+
+  function formatHistorySubtitle(entry) {
+    const parts = [formatDate(entry.createdAt)];
+    if (entry.paymentMethod) {
+      parts.push(formatPaymentMethod(entry.paymentMethod));
+    }
+    if (entry.description) {
+      parts.push(entry.description);
+    }
+    return parts.join(" · ");
+  }
+
+  function formatHistoryAmount(entry) {
+    const sign = entry.type === "USE" ? "-" : "+";
+    return `${sign}${formatPoint(entry.amount)}`;
+  }
+
   async function resolveWallet(memberId) {
     const wallets = await MyPageApi.request("/api/v1/point-wallets");
     const existing = Array.isArray(wallets) ? wallets.find((wallet) => wallet.memberId === memberId) : null;
@@ -248,34 +284,31 @@
     });
   }
 
-  function renderHistory(wallet, chargeSnapshot) {
+  function renderHistory(entries) {
     const historyList = document.getElementById("historyList");
     const historyCount = document.getElementById("historyCount");
-    const entries = [];
+    historyCount.textContent = `${entries.length}건`;
 
-    if (chargeSnapshot) {
-      entries.push({
-        title: "포인트 충전 완료",
-        subtitle: `${formatDate(chargeSnapshot.lastChargedAt)} · ${chargeSnapshot.methodLabel}`,
-        amountText: `+${formatPoint(chargeSnapshot.amount)}`
-      });
+    if (!entries.length) {
+      historyList.innerHTML = `
+        <div class="empty-state">
+          <strong>아직 포인트 이용 내역이 없습니다.</strong>
+          <p>포인트를 충전하거나 사용하면 실제 이력이 이곳에 표시됩니다.</p>
+        </div>
+      `;
+      return;
     }
 
-    entries.push({
-      title: "현재 포인트 잔액",
-      subtitle: wallet.id ? `지갑 ID ${wallet.id}` : "지갑 정보",
-      amountText: formatPoint(wallet.balance)
-    });
-
-    historyCount.textContent = `${entries.length}건`;
     historyList.innerHTML = entries.map((entry) => `
       <article class="history-item">
         <div class="history-row">
           <div>
-            <div class="history-title">${entry.title}</div>
-            <div class="history-subtitle">${entry.subtitle}</div>
+            <div class="history-title">${formatHistoryTitle(entry)}</div>
+            <div class="history-subtitle">${formatHistorySubtitle(entry)}</div>
           </div>
-          <div class="history-amount">${entry.amountText}</div>
+          <div class="history-amount ${entry.type === "USE" ? "is-negative" : ""}">
+            ${formatHistoryAmount(entry)}
+          </div>
         </div>
       </article>
     `).join("");
@@ -286,20 +319,14 @@
     try {
       const profile = await MyPageApi.request("/api/v1/members/me");
       const wallet = await resolveWallet(profile.id);
-      const chargeSnapshotRaw = sessionStorage.getItem("pointChargeSnapshot");
-      const chargeSnapshot = chargeSnapshotRaw ? JSON.parse(chargeSnapshotRaw) : null;
+      const histories = await MyPageApi.request("/api/v1/points/histories");
 
       document.getElementById("balance").textContent = formatPoint(wallet.balance);
-      document.getElementById("walletHint").textContent = chargeSnapshot
-        ? `최근 충전이 반영되었습니다. 마지막 충전 시각 ${formatDate(chargeSnapshot.lastChargedAt)}`
-        : "포인트를 충전하면 배송 결제에 바로 사용할 수 있습니다.";
+      document.getElementById("walletHint").textContent = histories.length
+        ? `실제 포인트 이력 ${histories.length}건을 최신순으로 불러왔습니다.`
+        : "포인트를 충전하면 실제 이용 내역이 이곳에 누적됩니다.";
 
-      renderHistory(wallet, chargeSnapshot);
-
-      if (chargeSnapshot) {
-        sessionStorage.removeItem("pointChargeSnapshot");
-        showToast("포인트 충전이 완료되었습니다.");
-      }
+      renderHistory(Array.isArray(histories) ? histories : []);
     } catch (error) {
       document.getElementById("walletHint").textContent = "포인트 지갑을 불러오지 못했습니다.";
       document.getElementById("historyList").innerHTML = `
