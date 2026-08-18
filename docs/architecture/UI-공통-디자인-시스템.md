@@ -252,8 +252,6 @@ metadata:
 
 ## 4. Typography System (타이포그래피)
 
----
-
 ### Display / Header
 
 | Style Class | Font Weight | Font Size | Line Height | 주요 사용처 |
@@ -808,7 +806,7 @@ metadata:
 
 ## 8. Card & Badge Components (카드 및 배지)
 
-### Card (카드)
+## Card (카드)
 
 ### 역할 선택 카드 (온보딩)
 
@@ -1030,7 +1028,7 @@ metadata:
 
 ---
 
-### Badge Components (상태 배지)
+## Badge Components (상태 배지)
 
 ### Status Badge (상태 표시)
 
