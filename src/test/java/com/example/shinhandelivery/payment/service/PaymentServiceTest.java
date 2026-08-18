@@ -455,7 +455,8 @@ class PaymentServiceTest {
     member.setId(1L);
     when(memberService.getById(1L)).thenReturn(member);
     when(paymentRepository.findByMemberId(1L))
-        .thenReturn(Optional.of(PointWallet.builder().id(10L).memberId(1L).balance(15000L).build()));
+        .thenReturn(
+            Optional.of(PointWallet.builder().id(10L).memberId(1L).balance(15000L).build()));
 
     PointHistory chargeHistory =
         PointHistory.builder()
