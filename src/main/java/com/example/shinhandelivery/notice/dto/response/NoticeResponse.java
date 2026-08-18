@@ -11,6 +11,7 @@ import lombok.Builder;
 public record NoticeResponse(
     @Schema(description = "공지사항 ID", example = "1") Long id,
     @Schema(description = "제목", example = "[안내] 서비스 정기 점검 안내") String title,
+    @Schema(description = "본문", example = "정기 점검으로 인해 서비스 이용이 일시 중단됩니다.") String content,
     @Schema(description = "카테고리", example = "SYSTEM") String category,
     @Schema(description = "상단 고정 여부", example = "true") Boolean isPinned,
     @Schema(description = "작성 일시", example = "2026-07-30T09:00:00") LocalDateTime createdAt,
@@ -20,6 +21,7 @@ public record NoticeResponse(
     return NoticeResponse.builder()
         .id(notice.getId())
         .title(notice.getTitle())
+        .content(notice.getContent())
         .category(notice.getCategory())
         .isPinned(notice.getIsPinned())
         .createdAt(notice.getCreatedAt())
