@@ -756,6 +756,15 @@
   <div id="toast" class="toast-popup">메시지 내용</div>
 
   <script>
+    // 로그인 없이 /courier-home에 직접 접근하면 화면이 그려지기 전에 로그인 화면으로 보낸다(다른 화면들과 동일한 가드).
+    // location.replace()는 스크립트 실행 자체를 멈추지 않으므로, DOMContentLoaded 핸들러 쪽에서도
+    // authHeader()를 다시 확인해 리다이렉트 도중 초기화 API 호출이 나가지 않도록 막는다.
+    (function requireAuth() {
+      if (!authHeader()) {
+        location.replace('/login');
+      }
+    })();
+
     let kakaoMap = null;
     let currentMarker = null;
     let allDeliveries = [];
@@ -774,6 +783,9 @@
     const LOCATION_HEARTBEAT_INTERVAL_MS = 30000;
 
     document.addEventListener("DOMContentLoaded", () => {
+      if (!authHeader()) {
+        return;
+      }
       fetchCourierProfile();
       fetchActiveVehicle();
       fetchWorkStatus();
@@ -853,6 +865,10 @@
         const res = await fetch('/api/v1/members/me', {
           headers: { 'Authorization': `Bearer ${token}` }
         });
+        if (res.status === 401) {
+          location.replace('/login');
+          return;
+        }
         if (res.ok) {
           const me = await res.json();
           if (me.courierApprovalStatus === 'PENDING' || me.courierApprovalStatus === 'REJECTED') {
