@@ -1,0 +1,1586 @@
+{
+  "schema": "openai.presentation.layout/v4",
+  "unit": "px",
+  "slide": {
+    "aid": "sl/wul3vt",
+    "id": "wul3vt",
+    "slide": 2,
+    "layoutId": "06bfce75-d71a-4bce-8739-a05ea9be1716",
+    "layoutName": "Title Slide",
+    "layoutType": "title",
+    "masterLayoutId": "315bb369-7811-46dd-acdf-120a133d6103",
+    "masterLayoutName": "Master",
+    "backgroundColor": "#FFFFFF",
+    "frame": {
+      "left": 0,
+      "top": 0,
+      "width": 1280,
+      "height": 720
+    }
+  },
+  "theme": {
+    "colorSchemeName": "ChatGPT",
+    "colors": {
+      "accent1": "#156082",
+      "accent2": "#E97132",
+      "accent3": "#196B24",
+      "accent4": "#0F9ED5",
+      "accent5": "#A02B93",
+      "accent6": "#4EA72E",
+      "bg1": "#FFFFFF",
+      "bg2": "#000000",
+      "tx1": "#1F1F1F",
+      "tx2": "#FFFFFF",
+      "dk1": "#000000",
+      "lt1": "#FFFFFF",
+      "dk2": "#0E2841",
+      "lt2": "#E8E8E8",
+      "hlink": "#467886",
+      "folHlink": "#96607D"
+    },
+    "typefaces": [
+      "+mn-lt"
+    ]
+  },
+  "inheritedLayers": [
+    {
+      "scope": "layout",
+      "id": "06bfce75-d71a-4bce-8739-a05ea9be1716",
+      "name": "Title Slide",
+      "type": "title",
+      "parentLayoutId": "315bb369-7811-46dd-acdf-120a133d6103",
+      "elements": []
+    },
+    {
+      "scope": "master",
+      "id": "315bb369-7811-46dd-acdf-120a133d6103",
+      "name": "Master",
+      "type": "master",
+      "elements": []
+    }
+  ],
+  "elements": [
+    {
+      "order": 1,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/7qhcbmhw",
+      "id": "1",
+      "bbox": [
+        64,
+        28,
+        520,
+        22
+      ],
+      "geometry": "rect",
+      "text": "SHINHAN DELIVERY · REST API",
+      "textPreview": "SHINHAN DELIVERY · REST API",
+      "resolvedFontSize": 13,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 13,
+        "typeface": "+mn-lt",
+        "color": "#3D8DFF",
+        "bold": true,
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "SHINHAN DELIVERY · REST API"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "SHINHAN DELIVERY · REST API",
+          "resolvedTextStyle": {
+            "fontSize": 13,
+            "color": "#3D8DFF",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "SHINHAN DELIVERY · REST API",
+              "fontSize": 13,
+              "color": "#3D8DFF",
+              "bold": true,
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 2,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/srad4ri1",
+      "id": "2",
+      "bbox": [
+        64,
+        64,
+        1120,
+        56
+      ],
+      "geometry": "rect",
+      "text": "추진 배경 & 주요 목표",
+      "textPreview": "추진 배경 & 주요 목표",
+      "resolvedFontSize": 36,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 36,
+        "typeface": "+mn-lt",
+        "color": "#101114",
+        "bold": true,
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "추진 배경 & 주요 목표"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "추진 배경 & 주요 목표",
+          "resolvedTextStyle": {
+            "fontSize": 36,
+            "color": "#101114",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "추진 배경 & 주요 목표",
+              "fontSize": 36,
+              "color": "#101114",
+              "bold": true,
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 3,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/tsjudwzm",
+      "id": "3",
+      "bbox": [
+        1180,
+        31,
+        36,
+        20
+      ],
+      "geometry": "rect",
+      "text": "02",
+      "textPreview": "02",
+      "resolvedFontSize": 12,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 12,
+        "typeface": "+mn-lt",
+        "color": "#616771",
+        "bold": true,
+        "alignment": "right",
+        "verticalAlignment": "top",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "02"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "02",
+          "resolvedTextStyle": {
+            "fontSize": 12,
+            "color": "#616771",
+            "bold": true,
+            "alignment": "right"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "02",
+              "fontSize": 12,
+              "color": "#616771",
+              "bold": true,
+              "alignment": "right"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 4,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/utsv6107",
+      "id": "4",
+      "bbox": [
+        64,
+        132,
+        1152,
+        2
+      ],
+      "geometry": "rect",
+      "fillColor": "#101114",
+      "lineWidth": 0
+    },
+    {
+      "order": 5,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/fu1cf6hs",
+      "id": "5",
+      "bbox": [
+        66,
+        150,
+        1110,
+        32
+      ],
+      "geometry": "rect",
+      "text": "신규 프로젝트이므로 ‘과거 장애’가 아니라 구현 전 설계 과제와 적용 결과를 비교했습니다.",
+      "textPreview": "신규 프로젝트이므로 ‘과거 장애’가 아니라 구현 전 설계 과제와 적용 결과를 비교했습니다.",
+      "resolvedFontSize": 18,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 18,
+        "typeface": "+mn-lt",
+        "color": "#616771",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "신규 프로젝트이므로 ‘과거 장애’가 아니라 구현 전 설계 과제와 적용 결과를 비교했습니다."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "신규 프로젝트이므로 ‘과거 장애’가 아니라 구현 전 설계 과제와 적용 결과를 비교했습니다.",
+          "resolvedTextStyle": {
+            "fontSize": 18,
+            "color": "#616771",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "신규 프로젝트이므로 ‘과거 장애’가 아니라 구현 전 설계 과제와 적용 결과를 비교했습니다.",
+              "fontSize": 18,
+              "color": "#616771",
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 6,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/gvad8rid",
+      "id": "6",
+      "bbox": [
+        64,
+        198,
+        165,
+        46
+      ],
+      "geometry": "rect",
+      "fillColor": "#F0F2F4",
+      "lineColor": "#BBC1C9",
+      "lineWidth": 1
+    },
+    {
+      "order": 7,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/hwjuhwzy",
+      "id": "7",
+      "bbox": [
+        76,
+        211,
+        141,
+        24
+      ],
+      "geometry": "rect",
+      "text": "구분",
+      "textPreview": "구분",
+      "resolvedFontSize": 17,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 17,
+        "typeface": "+mn-lt",
+        "color": "#101114",
+        "bold": true,
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "구분"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "구분",
+          "resolvedTextStyle": {
+            "fontSize": 17,
+            "color": "#101114",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "구분",
+              "fontSize": 17,
+              "color": "#101114",
+              "bold": true,
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 8,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/2xsva10j",
+      "id": "8",
+      "bbox": [
+        235,
+        198,
+        465,
+        46
+      ],
+      "geometry": "rect",
+      "fillColor": "#F0F2F4",
+      "lineColor": "#BBC1C9",
+      "lineWidth": 1
+    },
+    {
+      "order": 9,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/3ilcj6ho",
+      "id": "9",
+      "bbox": [
+        247,
+        211,
+        441,
+        24
+      ],
+      "geometry": "rect",
+      "text": "구현 전 설계 과제 (Before)",
+      "textPreview": "구현 전 설계 과제 (Before)",
+      "resolvedFontSize": 17,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 17,
+        "typeface": "+mn-lt",
+        "color": "#101114",
+        "bold": true,
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "구현 전 설계 과제 (Before)"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "구현 전 설계 과제 (Before)",
+          "resolvedTextStyle": {
+            "fontSize": 17,
+            "color": "#101114",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "구현 전 설계 과제 (Before)",
+              "fontSize": 17,
+              "color": "#101114",
+              "bold": true,
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 10,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/j6xcbmpw",
+      "id": "10",
+      "bbox": [
+        710,
+        198,
+        506,
+        46
+      ],
+      "geometry": "rect",
+      "fillColor": "#DDF3FD",
+      "lineColor": "#BBC1C9",
+      "lineWidth": 1
+    },
+    {
+      "order": 11,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/i5obihob",
+      "id": "11",
+      "bbox": [
+        722,
+        211,
+        482,
+        24
+      ],
+      "geometry": "rect",
+      "text": "REST API 적용 결과 (After)",
+      "textPreview": "REST API 적용 결과 (After)",
+      "resolvedFontSize": 17,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 17,
+        "typeface": "+mn-lt",
+        "color": "#132238",
+        "bold": true,
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "REST API 적용 결과 (After)"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "REST API 적용 결과 (After)",
+          "resolvedTextStyle": {
+            "fontSize": 17,
+            "color": "#132238",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "REST API 적용 결과 (After)",
+              "fontSize": 17,
+              "color": "#132238",
+              "bold": true,
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 12,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/58zudc72",
+      "id": "12",
+      "bbox": [
+        64,
+        244,
+        165,
+        112
+      ],
+      "geometry": "rect",
+      "fillColor": "#FFFFFF",
+      "lineColor": "#BBC1C9",
+      "lineWidth": 1
+    },
+    {
+      "order": 13,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/47qdk76h",
+      "id": "13",
+      "bbox": [
+        78,
+        262,
+        137,
+        76
+      ],
+      "geometry": "rect",
+      "text": "구조·역할",
+      "textPreview": "구조·역할",
+      "resolvedFontSize": 18,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 18,
+        "typeface": "+mn-lt",
+        "color": "#101114",
+        "bold": true,
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "구조·역할"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "구조·역할",
+          "resolvedTextStyle": {
+            "fontSize": 18,
+            "color": "#101114",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "구조·역할",
+              "fontSize": 18,
+              "color": "#101114",
+              "bold": true,
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 14,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/v2xc72p0",
+      "id": "14",
+      "bbox": [
+        235,
+        244,
+        465,
+        112
+      ],
+      "geometry": "rect",
+      "fillColor": "#FFFFFF",
+      "lineColor": "#BBC1C9",
+      "lineWidth": 1
+    },
+    {
+      "order": 15,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/u1obexof",
+      "id": "15",
+      "bbox": [
+        249,
+        262,
+        437,
+        76
+      ],
+      "geometry": "rect",
+      "text": "화면 반환과 데이터·비즈니스 처리가\n한 Controller에 섞일 가능성",
+      "textPreview": "화면 반환과 데이터·비즈니스 처리가 | 한 Controller에 섞일 가능성",
+      "resolvedFontSize": 17,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 17,
+        "typeface": "+mn-lt",
+        "color": "#101114",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "화면 반환과 데이터·비즈니스 처리가"
+          },
+          {
+            "index": 2,
+            "text": "한 Controller에 섞일 가능성"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "화면 반환과 데이터·비즈니스 처리가",
+          "resolvedTextStyle": {
+            "fontSize": 17,
+            "color": "#101114",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "화면 반환과 데이터·비즈니스 처리가",
+              "fontSize": 17,
+              "color": "#101114",
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        },
+        {
+          "index": 2,
+          "text": "한 Controller에 섞일 가능성",
+          "resolvedTextStyle": {
+            "fontSize": 17,
+            "color": "#101114",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "한 Controller에 섞일 가능성",
+              "fontSize": 17,
+              "color": "#101114",
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 16,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/h4fu9c7q",
+      "id": "16",
+      "bbox": [
+        710,
+        244,
+        506,
+        112
+      ],
+      "geometry": "rect",
+      "fillColor": "#FFFFFF",
+      "lineColor": "#BBC1C9",
+      "lineWidth": 1
+    },
+    {
+      "order": 17,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/w36tg76l",
+      "id": "17",
+      "bbox": [
+        724,
+        262,
+        478,
+        76
+      ],
+      "geometry": "rect",
+      "text": "@Controller는 HTML, @RestController는 JSON\nController → Service → Repository로 책임 분리",
+      "textPreview": "@Controller는 HTML, @RestController는 JSON | Controller → Service → Repository로 책임 분리",
+      "resolvedFontSize": 17,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 17,
+        "typeface": "+mn-lt",
+        "color": "#132238",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "@Controller는 HTML, @RestController는 JSON"
+          },
+          {
+            "index": 2,
+            "text": "Controller → Service → Repository로 책임 분리"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "@Controller는 HTML, @RestController는 JSON",
+          "resolvedTextStyle": {
+            "fontSize": 17,
+            "color": "#132238",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "@Controller는 HTML, @RestController는 JSON",
+              "fontSize": 17,
+              "color": "#132238",
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        },
+        {
+          "index": 2,
+          "text": "Controller → Service → Repository로 책임 분리",
+          "resolvedTextStyle": {
+            "fontSize": 17,
+            "color": "#132238",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Controller → Service → Repository로 책임 분리",
+              "fontSize": 17,
+              "color": "#132238",
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 18,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/fyhcj654",
+      "id": "18",
+      "bbox": [
+        64,
+        356,
+        165,
+        112
+      ],
+      "geometry": "rect",
+      "fillColor": "#FFFFFF",
+      "lineColor": "#BBC1C9",
+      "lineWidth": 1
+    },
+    {
+      "order": 19,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/ex8vq1oj",
+      "id": "19",
+      "bbox": [
+        78,
+        374,
+        137,
+        76
+      ],
+      "geometry": "rect",
+      "text": "사용자 경험",
+      "textPreview": "사용자 경험",
+      "resolvedFontSize": 18,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 18,
+        "typeface": "+mn-lt",
+        "color": "#101114",
+        "bold": true,
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "사용자 경험"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "사용자 경험",
+          "resolvedTextStyle": {
+            "fontSize": 18,
+            "color": "#101114",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "사용자 경험",
+              "fontSize": 18,
+              "color": "#101114",
+              "bold": true,
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 20,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/atcfi58r",
+      "id": "20",
+      "bbox": [
+        235,
+        356,
+        465,
+        112
+      ],
+      "geometry": "rect",
+      "fillColor": "#FFFFFF",
+      "lineColor": "#BBC1C9",
+      "lineWidth": 1
+    },
+    {
+      "order": 21,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/bulgbqpc",
+      "id": "21",
+      "bbox": [
+        249,
+        374,
+        437,
+        76
+      ],
+      "geometry": "rect",
+      "text": "매칭 여부를 확인하려면 사용자가\n전체 화면을 다시 요청해야 할 가능성",
+      "textPreview": "매칭 여부를 확인하려면 사용자가 | 전체 화면을 다시 요청해야 할 가능성",
+      "resolvedFontSize": 17,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 17,
+        "typeface": "+mn-lt",
+        "color": "#101114",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "매칭 여부를 확인하려면 사용자가"
+          },
+          {
+            "index": 2,
+            "text": "전체 화면을 다시 요청해야 할 가능성"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "매칭 여부를 확인하려면 사용자가",
+          "resolvedTextStyle": {
+            "fontSize": 17,
+            "color": "#101114",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "매칭 여부를 확인하려면 사용자가",
+              "fontSize": 17,
+              "color": "#101114",
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        },
+        {
+          "index": 2,
+          "text": "전체 화면을 다시 요청해야 할 가능성",
+          "resolvedTextStyle": {
+            "fontSize": 17,
+            "color": "#101114",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "전체 화면을 다시 요청해야 할 가능성",
+              "fontSize": 17,
+              "color": "#101114",
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 22,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/cvuxkvqx",
+      "id": "22",
+      "bbox": [
+        710,
+        356,
+        506,
+        112
+      ],
+      "geometry": "rect",
+      "fillColor": "#FFFFFF",
+      "lineColor": "#BBC1C9",
+      "lineWidth": 1
+    },
+    {
+      "order": 23,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/xw3yd07i",
+      "id": "23",
+      "bbox": [
+        724,
+        374,
+        478,
+        76
+      ],
+      "geometry": "rect",
+      "text": "fetch가 GET API를 5초마다 호출\nMATCHED 응답 시 완료 화면으로 자동 이동",
+      "textPreview": "fetch가 GET API를 5초마다 호출 | MATCHED 응답 시 완료 화면으로 자동 이동",
+      "resolvedFontSize": 17,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 17,
+        "typeface": "+mn-lt",
+        "color": "#132238",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "fetch가 GET API를 5초마다 호출"
+          },
+          {
+            "index": 2,
+            "text": "MATCHED 응답 시 완료 화면으로 자동 이동"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "fetch가 GET API를 5초마다 호출",
+          "resolvedTextStyle": {
+            "fontSize": 17,
+            "color": "#132238",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "fetch가 GET API를 5초마다 호출",
+              "fontSize": 17,
+              "color": "#132238",
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        },
+        {
+          "index": 2,
+          "text": "MATCHED 응답 시 완료 화면으로 자동 이동",
+          "resolvedTextStyle": {
+            "fontSize": 17,
+            "color": "#132238",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "MATCHED 응답 시 완료 화면으로 자동 이동",
+              "fontSize": 17,
+              "color": "#132238",
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 24,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/yxcfm583",
+      "id": "24",
+      "bbox": [
+        64,
+        468,
+        165,
+        112
+      ],
+      "geometry": "rect",
+      "fillColor": "#FFFFFF",
+      "lineColor": "#BBC1C9",
+      "lineWidth": 1
+    },
+    {
+      "order": 25,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/zy5gfap8",
+      "id": "25",
+      "bbox": [
+        78,
+        486,
+        137,
+        76
+      ],
+      "geometry": "rect",
+      "text": "리스크·품질",
+      "textPreview": "리스크·품질",
+      "resolvedFontSize": 18,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 18,
+        "typeface": "+mn-lt",
+        "color": "#101114",
+        "bold": true,
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "리스크·품질"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "리스크·품질",
+          "resolvedTextStyle": {
+            "fontSize": 18,
+            "color": "#101114",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "리스크·품질",
+              "fontSize": 18,
+              "color": "#101114",
+              "bold": true,
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 26,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/kzexofqt",
+      "id": "26",
+      "bbox": [
+        235,
+        468,
+        465,
+        112
+      ],
+      "geometry": "rect",
+      "fillColor": "#FFFFFF",
+      "lineColor": "#BBC1C9",
+      "lineWidth": 1
+    },
+    {
+      "order": 27,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/l0nyhk7e",
+      "id": "27",
+      "bbox": [
+        249,
+        486,
+        437,
+        76
+      ],
+      "geometry": "rect",
+      "text": "Entity 직접 노출과 Controller별\n예외 응답 불일치 위험",
+      "textPreview": "Entity 직접 노출과 Controller별 | 예외 응답 불일치 위험",
+      "resolvedFontSize": 17,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 17,
+        "typeface": "+mn-lt",
+        "color": "#101114",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Entity 직접 노출과 Controller별"
+          },
+          {
+            "index": 2,
+            "text": "예외 응답 불일치 위험"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Entity 직접 노출과 Controller별",
+          "resolvedTextStyle": {
+            "fontSize": 17,
+            "color": "#101114",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Entity 직접 노출과 Controller별",
+              "fontSize": 17,
+              "color": "#101114",
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        },
+        {
+          "index": 2,
+          "text": "예외 응답 불일치 위험",
+          "resolvedTextStyle": {
+            "fontSize": 17,
+            "color": "#101114",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "예외 응답 불일치 위험",
+              "fontSize": 17,
+              "color": "#101114",
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 28,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/e1sfal8j",
+      "id": "28",
+      "bbox": [
+        710,
+        468,
+        506,
+        112
+      ],
+      "geometry": "rect",
+      "fillColor": "#FFFFFF",
+      "lineColor": "#BBC1C9",
+      "lineWidth": 1
+    },
+    {
+      "order": 29,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/f21w3694",
+      "id": "29",
+      "bbox": [
+        724,
+        486,
+        478,
+        76
+      ],
+      "geometry": "rect",
+      "text": "응답 DTO와 GlobalExceptionHandler 적용\n401·403·404·409를 의미에 맞게 반환",
+      "textPreview": "응답 DTO와 GlobalExceptionHandler 적용 | 401·403·404·409를 의미에 맞게 반환",
+      "resolvedFontSize": 17,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 17,
+        "typeface": "+mn-lt",
+        "color": "#132238",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "응답 DTO와 GlobalExceptionHandler 적용"
+          },
+          {
+            "index": 2,
+            "text": "401·403·404·409를 의미에 맞게 반환"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "응답 DTO와 GlobalExceptionHandler 적용",
+          "resolvedTextStyle": {
+            "fontSize": 17,
+            "color": "#132238",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "응답 DTO와 GlobalExceptionHandler 적용",
+              "fontSize": 17,
+              "color": "#132238",
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        },
+        {
+          "index": 2,
+          "text": "401·403·404·409를 의미에 맞게 반환",
+          "resolvedTextStyle": {
+            "fontSize": 17,
+            "color": "#132238",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "401·403·404·409를 의미에 맞게 반환",
+              "fontSize": 17,
+              "color": "#132238",
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 30,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/hsrq58vy",
+      "id": "30",
+      "bbox": [
+        64,
+        598,
+        1152,
+        58
+      ],
+      "geometry": "rect",
+      "fillColor": "#132238",
+      "lineColor": "#132238",
+      "lineWidth": 1
+    },
+    {
+      "order": 31,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/g7i9w3ed",
+      "id": "31",
+      "bbox": [
+        88,
+        616,
+        1100,
+        26
+      ],
+      "geometry": "rect",
+      "text": "핵심 가치  |  화면 새로고침 없이 최신 상태를 제공하면서 계층 책임과 API 계약을 명확하게 유지",
+      "textPreview": "핵심 가치  |  화면 새로고침 없이 최신 상태를 제공하면서 계층 책임과 API 계약을 명확하게 유지",
+      "resolvedFontSize": 20,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 20,
+        "typeface": "+mn-lt",
+        "color": "#FFFFFF",
+        "bold": true,
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "핵심 가치  |  화면 새로고침 없이 최신 상태를 제공하면서 계층 책임과 API 계약을 명확하게 유지"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "핵심 가치  |  화면 새로고침 없이 최신 상태를 제공하면서 계층 책임과 API 계약을 명확하게 유지",
+          "resolvedTextStyle": {
+            "fontSize": 20,
+            "color": "#FFFFFF",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "핵심 가치  |  화면 새로고침 없이 최신 상태를 제공하면서 계층 책임과 API 계약을 명확하게 유지",
+              "fontSize": 20,
+              "color": "#FFFFFF",
+              "bold": true,
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 32,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/v6983yds",
+      "id": "32",
+      "bbox": [
+        64,
+        683,
+        700,
+        18
+      ],
+      "geometry": "rect",
+      "text": "프로젝트 실제 코드 기반 · 표준 5-Slide",
+      "textPreview": "프로젝트 실제 코드 기반 · 표준 5-Slide",
+      "resolvedFontSize": 11,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 11,
+        "typeface": "+mn-lt",
+        "color": "#616771",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "프로젝트 실제 코드 기반 · 표준 5-Slide"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "프로젝트 실제 코드 기반 · 표준 5-Slide",
+          "resolvedTextStyle": {
+            "fontSize": 11,
+            "color": "#616771",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "프로젝트 실제 코드 기반 · 표준 5-Slide",
+              "fontSize": 11,
+              "color": "#616771",
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    }
+  ],
+  "composeRuns": []
+}

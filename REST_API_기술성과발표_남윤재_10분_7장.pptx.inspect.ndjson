@@ -1,0 +1,224 @@
+{"kind":"deck","id":"pr/su361z","name":"Deck"}
+{"kind":"layout","layoutId":"315bb369-7811-46dd-acdf-120a133d6103","name":"Master","type":"master"}
+{"kind":"layout","layoutId":"06bfce75-d71a-4bce-8739-a05ea9be1716","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/hy772n","slide":1,"title":"REST API 기술 성과 발표","textShapes":14}
+{"kind":"textbox","id":"sh/hk32xczi","slide":1,"text":"REST API 기술 성과 발표","textPreview":"REST API 기술 성과 발표","textChars":17,"textLines":1,"bbox":[68,58,720,50]}
+{"kind":"textbox","id":"sh/uxcjmh0r","slide":1,"text":"배송 상태를 연결하고,\n취소 정산을 안전하게 만든 API","textPreview":"배송 상태를 연결하고, | 취소 정산을 안전하게 만든 API","textChars":31,"textLines":2,"bbox":[68,145,760,150]}
+{"kind":"textbox","id":"sh/vylkv2hc","slide":1,"text":"남윤재  /  백엔드 & 신한 Delivery","textPreview":"남윤재  /  백엔드 & 신한 Delivery","textChars":25,"textLines":1,"bbox":[72,320,640,34]}
+{"kind":"textbox","id":"sh/4nu1sri9","slide":1,"text":"배송 조회·매칭·취소 흐름을 일관된 HTTP 계약으로 제공하고\n중복·동시 요청에서도 안전한 상태 변경을 보장했습니다.","textPreview":"배송 조회·매칭·취소 흐름을 일관된 HTTP 계약으로 제공하고 | 중복·동시 요청에서도 안전한 상태 변경을 보장했습니다.","textChars":65,"textLines":2,"bbox":[72,385,780,70]}
+{"kind":"shape","id":"sh/5o321wze","slide":1,"bbox":[900,70,280,535]}
+{"kind":"textbox","id":"sh/ilcjqh03","slide":1,"text":"01","textPreview":"01","textChars":2,"textLines":1,"bbox":[930,115,45,26]}
+{"kind":"textbox","id":"sh/3mlkzmho","slide":1,"text":"책임 분리","textPreview":"책임 분리","textChars":5,"textLines":1,"bbox":[930,153,220,32]}
+{"kind":"textbox","id":"sh/kra1gnip","slide":1,"text":"HTML Controller → REST Controller","textPreview":"HTML Controller → REST Controller","textChars":33,"textLines":1,"bbox":[930,197,220,52]}
+{"kind":"shape","id":"sh/lsjipsja","slide":1,"bbox":[930,254,220,1]}
+{"kind":"textbox","id":"sh/98ju9w7i","slide":1,"text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[930,270,45,26]}
+{"kind":"textbox","id":"sh/o7qtgrqx","slide":1,"text":"상태 자동 반영","textPreview":"상태 자동 반영","textChars":8,"textLines":1,"bbox":[930,308,220,32]}
+{"kind":"textbox","id":"sh/n6hc7mpc","slide":1,"text":"수동 새로고침 → 5초 GET 폴링","textPreview":"수동 새로고침 → 5초 GET 폴링","textChars":19,"textLines":1,"bbox":[930,352,220,52]}
+{"kind":"shape","id":"sh/m58beh8r","slide":1,"bbox":[930,409,220,1]}
+{"kind":"textbox","id":"sh/xwjudw7e","slide":1,"text":"03","textPreview":"03","textChars":2,"textLines":1,"bbox":[930,425,45,26]}
+{"kind":"textbox","id":"sh/wvatkrqt","slide":1,"text":"정산 일관성","textPreview":"정산 일관성","textChars":6,"textLines":1,"bbox":[930,463,220,32]}
+{"kind":"textbox","id":"sh/bu1cb6p8","slide":1,"text":"중복 위험 → 트랜잭션·락·멱등","textPreview":"중복 위험 → 트랜잭션·락·멱등","textChars":17,"textLines":1,"bbox":[930,507,220,52]}
+{"kind":"textbox","id":"sh/atsbi183","slide":1,"text":"발표자 남윤재 · 약 10분","textPreview":"발표자 남윤재 · 약 10분","textChars":15,"textLines":1,"bbox":[64,683,700,18]}
+{"kind":"notes","id":"nt/hy772n","slide":1,"text":"안녕하세요. 백엔드와 신한 Delivery 프로젝트를 담당한 남윤재입니다. 오늘은 배송 조회, 매칭, 취소 흐름을 중심으로 저희 프로젝트의 REST API를 설명하겠습니다. 핵심 성과는 세 가지입니다. 첫째, HTML 화면과 JSON API의 책임을 분리했습니다. 둘째, 매칭 대기 상태를 fetch가 5초마다 조회해 화면에 자동 반영했습니다. 셋째, 취소 API에는 트랜잭션과 DB 락, 멱등 처리를 적용해 중복 요청에서도 정산 일관성을 지켰습니다. fetch와 HATEOAS도 다루지만 발표의 중심은 실제 REST API 설계와 코드입니다.\n\n[Sources]\n- docs/presentation/개발자-발표-PPT-표준-템플릿-가이드.md\n- src/main/java/com/example/shinhandelivery/delivery/controller/DeliveryController.java\n- src/main/resources/templates/matching-wait.html"}
+{"kind":"slide","id":"sl/wul3vt","slide":2,"title":"SHINHAN DELIVERY · REST API","textShapes":18}
+{"kind":"textbox","id":"sh/7qhcbmhw","slide":2,"text":"SHINHAN DELIVERY · REST API","textPreview":"SHINHAN DELIVERY · REST API","textChars":27,"textLines":1,"bbox":[64,28,520,22]}
+{"kind":"textbox","id":"sh/srad4ri1","slide":2,"text":"추진 배경 & 주요 목표","textPreview":"추진 배경 & 주요 목표","textChars":13,"textLines":1,"bbox":[64,64,1120,56]}
+{"kind":"textbox","id":"sh/tsjudwzm","slide":2,"text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[1180,31,36,20]}
+{"kind":"shape","id":"sh/utsv6107","slide":2,"bbox":[64,132,1152,2]}
+{"kind":"textbox","id":"sh/fu1cf6hs","slide":2,"text":"신규 프로젝트이므로 ‘과거 장애’가 아니라 구현 전 설계 과제와 적용 결과를 비교했습니다.","textPreview":"신규 프로젝트이므로 ‘과거 장애’가 아니라 구현 전 설계 과제와 적용 결과를 비교했습니다.","textChars":50,"textLines":1,"bbox":[66,150,1110,32]}
+{"kind":"shape","id":"sh/gvad8rid","slide":2,"bbox":[64,198,165,46]}
+{"kind":"textbox","id":"sh/hwjuhwzy","slide":2,"text":"구분","textPreview":"구분","textChars":2,"textLines":1,"bbox":[76,211,141,24]}
+{"kind":"shape","id":"sh/2xsva10j","slide":2,"bbox":[235,198,465,46]}
+{"kind":"textbox","id":"sh/3ilcj6ho","slide":2,"text":"구현 전 설계 과제 (Before)","textPreview":"구현 전 설계 과제 (Before)","textChars":19,"textLines":1,"bbox":[247,211,441,24]}
+{"kind":"shape","id":"sh/j6xcbmpw","slide":2,"bbox":[710,198,506,46]}
+{"kind":"textbox","id":"sh/i5obihob","slide":2,"text":"REST API 적용 결과 (After)","textPreview":"REST API 적용 결과 (After)","textChars":22,"textLines":1,"bbox":[722,211,482,24]}
+{"kind":"shape","id":"sh/58zudc72","slide":2,"bbox":[64,244,165,112]}
+{"kind":"textbox","id":"sh/47qdk76h","slide":2,"text":"구조·역할","textPreview":"구조·역할","textChars":5,"textLines":1,"bbox":[78,262,137,76]}
+{"kind":"shape","id":"sh/v2xc72p0","slide":2,"bbox":[235,244,465,112]}
+{"kind":"textbox","id":"sh/u1obexof","slide":2,"text":"화면 반환과 데이터·비즈니스 처리가\n한 Controller에 섞일 가능성","textPreview":"화면 반환과 데이터·비즈니스 처리가 | 한 Controller에 섞일 가능성","textChars":40,"textLines":2,"bbox":[249,262,437,76]}
+{"kind":"shape","id":"sh/h4fu9c7q","slide":2,"bbox":[710,244,506,112]}
+{"kind":"textbox","id":"sh/w36tg76l","slide":2,"text":"@Controller는 HTML, @RestController는 JSON\nController → Service → Repository로 책임 분리","textPreview":"@Controller는 HTML, @RestController는 JSON | Controller → Service → Repository로 책임 분리","textChars":81,"textLines":2,"bbox":[724,262,478,76]}
+{"kind":"shape","id":"sh/fyhcj654","slide":2,"bbox":[64,356,165,112]}
+{"kind":"textbox","id":"sh/ex8vq1oj","slide":2,"text":"사용자 경험","textPreview":"사용자 경험","textChars":6,"textLines":1,"bbox":[78,374,137,76]}
+{"kind":"shape","id":"sh/atcfi58r","slide":2,"bbox":[235,356,465,112]}
+{"kind":"textbox","id":"sh/bulgbqpc","slide":2,"text":"매칭 여부를 확인하려면 사용자가\n전체 화면을 다시 요청해야 할 가능성","textPreview":"매칭 여부를 확인하려면 사용자가 | 전체 화면을 다시 요청해야 할 가능성","textChars":38,"textLines":2,"bbox":[249,374,437,76]}
+{"kind":"shape","id":"sh/cvuxkvqx","slide":2,"bbox":[710,356,506,112]}
+{"kind":"textbox","id":"sh/xw3yd07i","slide":2,"text":"fetch가 GET API를 5초마다 호출\nMATCHED 응답 시 완료 화면으로 자동 이동","textPreview":"fetch가 GET API를 5초마다 호출 | MATCHED 응답 시 완료 화면으로 자동 이동","textChars":50,"textLines":2,"bbox":[724,374,478,76]}
+{"kind":"shape","id":"sh/yxcfm583","slide":2,"bbox":[64,468,165,112]}
+{"kind":"textbox","id":"sh/zy5gfap8","slide":2,"text":"리스크·품질","textPreview":"리스크·품질","textChars":6,"textLines":1,"bbox":[78,486,137,76]}
+{"kind":"shape","id":"sh/kzexofqt","slide":2,"bbox":[235,468,465,112]}
+{"kind":"textbox","id":"sh/l0nyhk7e","slide":2,"text":"Entity 직접 노출과 Controller별\n예외 응답 불일치 위험","textPreview":"Entity 직접 노출과 Controller별 | 예외 응답 불일치 위험","textChars":38,"textLines":2,"bbox":[249,486,437,76]}
+{"kind":"shape","id":"sh/e1sfal8j","slide":2,"bbox":[710,468,506,112]}
+{"kind":"textbox","id":"sh/f21w3694","slide":2,"text":"응답 DTO와 GlobalExceptionHandler 적용\n401·403·404·409를 의미에 맞게 반환","textPreview":"응답 DTO와 GlobalExceptionHandler 적용 | 401·403·404·409를 의미에 맞게 반환","textChars":60,"textLines":2,"bbox":[724,486,478,76]}
+{"kind":"shape","id":"sh/hsrq58vy","slide":2,"bbox":[64,598,1152,58]}
+{"kind":"textbox","id":"sh/g7i9w3ed","slide":2,"text":"핵심 가치  |  화면 새로고침 없이 최신 상태를 제공하면서 계층 책임과 API 계약을 명확하게 유지","textPreview":"핵심 가치  |  화면 새로고침 없이 최신 상태를 제공하면서 계층 책임과 API 계약을 명확하게 유지","textChars":56,"textLines":1,"bbox":[88,616,1100,26]}
+{"kind":"textbox","id":"sh/v6983yds","slide":2,"text":"프로젝트 실제 코드 기반 · 표준 5-Slide","textPreview":"프로젝트 실제 코드 기반 · 표준 5-Slide","textChars":26,"textLines":1,"bbox":[64,683,700,18]}
+{"kind":"notes","id":"nt/wul3vt","slide":2,"text":"이 프로젝트는 기존 시스템을 REST API로 전환한 사례가 아니라 처음부터 새로 만든 프로젝트입니다. 그래서 Before를 과거의 잘못된 구현이라고 표현하지 않고, REST API를 적용하지 않았다면 생길 수 있었던 설계 과제로 정의했습니다. 첫 번째 과제는 화면과 데이터 로직이 한 Controller에 섞이는 것이었습니다. 이를 HTML을 반환하는 Controller와 JSON을 반환하는 RestController로 분리했습니다. 두 번째는 매칭 상태 확인을 위한 화면 새로고침 문제였습니다. fetch의 5초 GET 폴링으로 해결했습니다. 세 번째는 Entity 노출과 예외 응답 불일치 위험입니다. DTO와 GlobalExceptionHandler를 사용해 외부 계약과 상태 코드를 표준화했습니다. 즉, 신규 프로젝트의 장점을 살려 문제가 생긴 뒤 고친 것이 아니라 설계 단계에서 예방했습니다.\n\n[Sources]\n- src/main/java/com/example/shinhandelivery/delivery/controller/DeliveryWebController.java\n- src/main/java/com/example/shinhandelivery/delivery/controller/DeliveryController.java\n- src/main/java/com/example/shinhandelivery/common/exception/GlobalExceptionHandler.java\n- src/main/resources/templates/matching-wait.html:218-342"}
+{"kind":"slide","id":"sl/1ke41f","slide":3,"title":"SHINHAN DELIVERY · REST API","textShapes":32}
+{"kind":"textbox","id":"sh/kr2xoje9","slide":3,"text":"SHINHAN DELIVERY · REST API","textPreview":"SHINHAN DELIVERY · REST API","textChars":27,"textLines":1,"bbox":[64,28,520,22]}
+{"kind":"textbox","id":"sh/zq9wfydo","slide":3,"text":"배송 요청을 자원과 HTTP 메서드로 표현했다","textPreview":"배송 요청을 자원과 HTTP 메서드로 표현했다","textChars":25,"textLines":1,"bbox":[64,64,1120,56]}
+{"kind":"textbox","id":"sh/yp0fmtw3","slide":3,"text":"03","textPreview":"03","textChars":2,"textLines":1,"bbox":[1180,31,36,20]}
+{"kind":"shape","id":"sh/x4redovi","slide":3,"bbox":[64,132,1152,2]}
+{"kind":"textbox","id":"sh/c3ixkjed","slide":3,"text":"RESOURCE","textPreview":"RESOURCE","textChars":8,"textLines":1,"bbox":[68,158,150,22]}
+{"kind":"textbox","id":"sh/b29wbeds","slide":3,"text":"/api/v1/delivery-requests/{id}","textPreview":"/api/v1/delivery-requests/{id}","textChars":30,"textLines":1,"bbox":[68,190,600,38]}
+{"kind":"textbox","id":"sh/a10fi9w7","slide":3,"text":"명사형 자원 · v1 버전 · Path Variable로 식별","textPreview":"명사형 자원 · v1 버전 · Path Variable로 식별","textChars":34,"textLines":1,"bbox":[68,237,560,26]}
+{"kind":"textbox","id":"sh/p0re94vm","slide":3,"text":"METHOD","textPreview":"METHOD","textChars":6,"textLines":1,"bbox":[68,300,130,22]}
+{"kind":"textbox","id":"sh/ozydgze1","slide":3,"text":"PATH","textPreview":"PATH","textChars":4,"textLines":1,"bbox":[230,300,370,22]}
+{"kind":"textbox","id":"sh/qx0netwb","slide":3,"text":"PROJECT ACTION","textPreview":"PROJECT ACTION","textChars":14,"textLines":1,"bbox":[630,300,330,22]}
+{"kind":"textbox","id":"sh/ry94nyxg","slide":3,"text":"SUCCESS","textPreview":"SUCCESS","textChars":7,"textLines":1,"bbox":[1010,300,180,22]}
+{"kind":"shape","id":"sh/czi5g3e1","slide":3,"bbox":[64,330,1152,47]}
+{"kind":"textbox","id":"sh/d0rmp8fm","slide":3,"text":"GET","textPreview":"GET","textChars":3,"textLines":1,"bbox":[80,343,120,24]}
+{"kind":"textbox","id":"sh/29gnatwz","slide":3,"text":"/{id}","textPreview":"/{id}","textChars":5,"textLines":1,"bbox":[230,343,370,24]}
+{"kind":"textbox","id":"sh/3u94jexk","slide":3,"text":"배송 상세 조회","textPreview":"배송 상세 조회","textChars":8,"textLines":1,"bbox":[630,343,330,24]}
+{"kind":"textbox","id":"sh/4vi5cje5","slide":3,"text":"200 OK","textPreview":"200 OK","textChars":6,"textLines":1,"bbox":[1010,343,180,24]}
+{"kind":"shape","id":"sh/pwrmlofq","slide":3,"bbox":[64,385,1152,47]}
+{"kind":"textbox","id":"sh/u5gn69g3","slide":3,"text":"POST","textPreview":"POST","textChars":4,"textLines":1,"bbox":[80,398,120,24]}
+{"kind":"textbox","id":"sh/f6p4fexo","slide":3,"text":"/","textPreview":"/","textChars":1,"textLines":1,"bbox":[230,398,370,24]}
+{"kind":"textbox","id":"sh/jylsr694","slide":3,"text":"배송 요청 생성","textPreview":"배송 요청 생성","textChars":8,"textLines":1,"bbox":[630,398,330,24]}
+{"kind":"textbox","id":"sh/yxcbyl8j","slide":3,"text":"201 Created","textPreview":"201 Created","textChars":11,"textLines":1,"bbox":[1010,398,180,24]}
+{"kind":"shape","id":"sh/l03atgru","slide":3,"bbox":[64,440,1152,47]}
+{"kind":"textbox","id":"sh/kzut0bqp","slide":3,"text":"PATCH","textPreview":"PATCH","textChars":5,"textLines":1,"bbox":[80,453,120,24]}
+{"kind":"textbox","id":"sh/72lsvq90","slide":3,"text":"/{id}/pickup","textPreview":"/{id}/pickup","textChars":12,"textLines":1,"bbox":[230,453,370,24]}
+{"kind":"textbox","id":"sh/61cb2l8f","slide":3,"text":"픽업 상태 변경","textPreview":"픽업 상태 변경","textChars":8,"textLines":1,"bbox":[630,453,330,24]}
+{"kind":"textbox","id":"sh/to3ux0r6","slide":3,"text":"200 OK","textPreview":"200 OK","textChars":6,"textLines":1,"bbox":[1010,453,180,24]}
+{"kind":"shape","id":"sh/83ut4vql","slide":3,"bbox":[64,495,1152,47]}
+{"kind":"textbox","id":"sh/n61sjm9w","slide":3,"text":"PATCH","textPreview":"PATCH","textChars":5,"textLines":1,"bbox":[80,508,120,24]}
+{"kind":"textbox","id":"sh/m58bq1sb","slide":3,"text":"/{id}/complete","textPreview":"/{id}/complete","textChars":14,"textLines":1,"bbox":[230,508,370,24]}
+{"kind":"textbox","id":"sh/cb6pknq9","slide":3,"text":"배송 완료 처리","textPreview":"배송 완료 처리","textChars":8,"textLines":1,"bbox":[630,508,330,24]}
+{"kind":"textbox","id":"sh/dcfqts7u","slide":3,"text":"200 OK","textPreview":"200 OK","textChars":6,"textLines":1,"bbox":[1010,508,180,24]}
+{"kind":"shape","id":"sh/q9o7ix83","slide":3,"bbox":[64,550,1152,47]}
+{"kind":"textbox","id":"sh/rax8r2po","slide":3,"text":"DELETE","textPreview":"DELETE","textChars":6,"textLines":1,"bbox":[80,563,120,24]}
+{"kind":"textbox","id":"sh/476pwnqx","slide":3,"text":"/{id}","textPreview":"/{id}","textChars":5,"textLines":1,"bbox":[230,563,370,24]}
+{"kind":"textbox","id":"sh/58fqps7i","slide":3,"text":"기존 호환 취소","textPreview":"기존 호환 취소","textChars":8,"textLines":1,"bbox":[630,563,330,24]}
+{"kind":"textbox","id":"sh/i547ud87","slide":3,"text":"204 No Content","textPreview":"204 No Content","textChars":14,"textLines":1,"bbox":[1010,563,180,24]}
+{"kind":"shape","id":"sh/36x8nipc","slide":3,"bbox":[64,620,1152,46]}
+{"kind":"textbox","id":"sh/o3q9s76h","slide":3,"text":"실패도 계약이다  |  401 인증 · 403 권한 · 404 자원 없음 · 409 상태 충돌","textPreview":"실패도 계약이다  |  401 인증 · 403 권한 · 404 자원 없음 · 409 상태 충돌","textChars":52,"textLines":1,"bbox":[91,633,1090,24]}
+{"kind":"textbox","id":"sh/94zq1c7m","slide":3,"text":"프로젝트 실제 코드 기반 · 표준 5-Slide","textPreview":"프로젝트 실제 코드 기반 · 표준 5-Slide","textChars":26,"textLines":1,"bbox":[64,683,700,18]}
+{"kind":"notes","id":"nt/1ke41f","slide":3,"text":"REST API 설계의 기본은 URL과 HTTP 메서드의 역할을 나누는 것입니다. 저희 프로젝트는 배송 요청을 delivery-requests라는 복수형 명사 자원으로 표현하고, 특정 배송은 Path Variable인 ID로 식별합니다. GET은 상세 조회, POST는 배송 요청 생성, PATCH는 픽업이나 완료처럼 일부 상태를 변경하는 데 사용했습니다. 기존 클라이언트 호환 취소는 DELETE와 204 응답을 유지합니다. 성공 응답뿐 아니라 실패도 API 계약입니다. 인증이 없으면 401, 다른 사용자의 배송이면 403, 배송이 없으면 404, 허용되지 않는 상태 전이는 409를 반환합니다. URL과 메서드, 상태 코드만 보아도 API의 의도와 결과를 예측할 수 있도록 설계했습니다.\n\n[Sources]\n- src/main/java/com/example/shinhandelivery/delivery/controller/DeliveryController.java:59-246\n- src/main/java/com/example/shinhandelivery/common/exception/ErrorCode.java\n- docs/architecture/REST-API-설계-규격-가이드.md"}
+{"kind":"slide","id":"sl/dcbtuw","slide":4,"title":"SHINHAN DELIVERY · REST API","textShapes":27}
+{"kind":"textbox","id":"sh/nq5kn6ts","slide":4,"text":"SHINHAN DELIVERY · REST API","textPreview":"SHINHAN DELIVERY · REST API","textChars":27,"textLines":1,"bbox":[64,28,520,22]}
+{"kind":"textbox","id":"sh/ore1wbad","slide":4,"text":"시스템 구조 & REST API 설계 아키텍처","textPreview":"시스템 구조 & REST API 설계 아키텍처","textChars":25,"textLines":1,"bbox":[64,64,1120,56]}
+{"kind":"textbox","id":"sh/9sn2pgby","slide":4,"text":"04","textPreview":"04","textChars":2,"textLines":1,"bbox":[1180,31,36,20]}
+{"kind":"shape","id":"sh/atwjy1sj","slide":4,"bbox":[64,132,1152,2]}
+{"kind":"shape","id":"sh/bu5kr6t4","slide":4,"bbox":[74,175,180,92]}
+{"kind":"textbox","id":"sh/wve10bap","slide":4,"text":"Thymeleaf 화면","textPreview":"Thymeleaf 화면","textChars":12,"textLines":1,"bbox":[84,193,160,28]}
+{"kind":"textbox","id":"sh/xw72tgbu","slide":4,"text":"matching-wait.html","textPreview":"matching-wait.html","textChars":18,"textLines":1,"bbox":[84,229,160,22]}
+{"kind":"textbox","id":"sh/qxcjmhsf","slide":4,"text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[261,204,54,36]}
+{"kind":"shape","id":"sh/ryl0fmtk","slide":4,"bbox":[325,175,180,92]}
+{"kind":"textbox","id":"sh/r6tsrmls","slide":4,"text":"REST Controller","textPreview":"REST Controller","textChars":15,"textLines":1,"bbox":[335,193,160,28]}
+{"kind":"textbox","id":"sh/q50bi147","slide":4,"text":"HTTP·인증·DTO","textPreview":"HTTP·인증·DTO","textChars":11,"textLines":1,"bbox":[335,229,160,22]}
+{"kind":"textbox","id":"sh/d8butw3i","slide":4,"text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[512,204,54,36]}
+{"kind":"shape","id":"sh/s72tkrmd","slide":4,"bbox":[576,175,180,92]}
+{"kind":"textbox","id":"sh/329snmlg","slide":4,"text":"Service","textPreview":"Service","textChars":7,"textLines":1,"bbox":[586,193,160,28]}
+{"kind":"textbox","id":"sh/ih0beh4v","slide":4,"text":"비즈니스 규칙","textPreview":"비즈니스 규칙","textChars":7,"textLines":1,"bbox":[586,229,160,22]}
+{"kind":"textbox","id":"sh/54rapw3m","slide":4,"text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[763,204,54,36]}
+{"kind":"shape","id":"sh/43itgrm1","slide":4,"bbox":[827,175,180,92]}
+{"kind":"textbox","id":"sh/vepsj2lk","slide":4,"text":"Repository","textPreview":"Repository","textChars":10,"textLines":1,"bbox":[837,193,160,28]}
+{"kind":"textbox","id":"sh/udgbah4z","slide":4,"text":"JPA·DB 접근","textPreview":"JPA·DB 접근","textChars":9,"textLines":1,"bbox":[837,229,160,22]}
+{"kind":"textbox","id":"sh/y9gbmxor","slide":4,"text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[1014,204,54,36]}
+{"kind":"shape","id":"sh/zapcv2pc","slide":4,"bbox":[1078,175,180,92]}
+{"kind":"textbox","id":"sh/kbyto76x","slide":4,"text":"MariaDB","textPreview":"MariaDB","textChars":7,"textLines":1,"bbox":[1088,193,160,28]}
+{"kind":"textbox","id":"sh/lc7uxc7i","slide":4,"text":"배송·매칭","textPreview":"배송·매칭","textChars":5,"textLines":1,"bbox":[1088,229,160,22]}
+{"kind":"textbox","id":"sh/mdgbqho3","slide":4,"text":"GET /api/v1/delivery-requests/{id}   ·   Authorization: Bearer JWT   ·   200 OK + JSON","textPreview":"GET /api/v1/delivery-requests/{id}   ·   Authorization: Bearer JWT   ·   200 OK + JSON","textChars":86,"textLines":1,"bbox":[142,295,996,30]}
+{"kind":"shape","id":"sh/7epczmp8","slide":4,"bbox":[64,350,565,218]}
+{"kind":"textbox","id":"sh/8fidsr6t","slide":4,"text":"@GetMapping(\"/{deliveryRequestId}\")\npublic ResponseEntity<DeliveryDetailResponse> getDeliveryRequest(...) {\n  return ResponseEntity.ok().cacheControl(CacheControl.noStore())\n      .body(deliveryService.getDeliveryRequestDetail(callerId, deliveryRequestId));\n}","textPreview":"@GetMapping(\"/{deliveryRequestId}\") | public ResponseEntity<DeliveryDetailResponse> getDeliveryRequest(...) { |   return ResponseEntity.o...","textChars":259,"textLines":5,"bbox":[84,367,525,184]}
+{"kind":"shape","id":"sh/90ru1w7e","slide":4,"bbox":[651,350,565,218]}
+{"kind":"textbox","id":"sh/u10vuhoz","slide":4,"text":"const response = await fetch(\n  `/api/v1/delivery-requests/${deliveryId}`,\n  { headers: { Authorization: header }, cache: 'no-store' }\n);\nconst detail = await response.json();","textPreview":"const response = await fetch( |   `/api/v1/delivery-requests/${deliveryId}`, |   { headers: { Authorization: header }, cache: 'no-store' ...","textChars":175,"textLines":5,"bbox":[671,367,525,184]}
+{"kind":"textbox","id":"sh/v29c3mpk","slide":4,"text":"① 단방향 의존성","textPreview":"① 단방향 의존성","textChars":9,"textLines":1,"bbox":[64,594,360,25]}
+{"kind":"textbox","id":"sh/5wbetgrm","slide":4,"text":"Controller → Service → Repository","textPreview":"Controller → Service → Repository","textChars":33,"textLines":1,"bbox":[64,625,360,25]}
+{"kind":"textbox","id":"sh/4v2xkvq1","slide":4,"text":"② API 계약 분리","textPreview":"② API 계약 분리","textChars":11,"textLines":1,"bbox":[448,594,360,25]}
+{"kind":"textbox","id":"sh/3utwrq9g","slide":4,"text":"Entity 대신 DeliveryDetailResponse","textPreview":"Entity 대신 DeliveryDetailResponse","textChars":32,"textLines":1,"bbox":[448,625,360,25]}
+{"kind":"textbox","id":"sh/i9kfil8b","slide":4,"text":"③ 상태·보안","textPreview":"③ 상태·보안","textChars":7,"textLines":1,"bbox":[832,594,360,25]}
+{"kind":"textbox","id":"sh/d0vex0ry","slide":4,"text":"JWT 권한 확인 + no-store + 상태 코드","textPreview":"JWT 권한 확인 + no-store + 상태 코드","textChars":28,"textLines":1,"bbox":[832,625,360,25]}
+{"kind":"textbox","id":"sh/szmxovqd","slide":4,"text":"프로젝트 실제 코드 기반 · 표준 5-Slide","textPreview":"프로젝트 실제 코드 기반 · 표준 5-Slide","textChars":26,"textLines":1,"bbox":[64,683,700,18]}
+{"kind":"notes","id":"nt/dcbtuw","slide":4,"text":"전체 흐름을 실제 코드로 보겠습니다. 사용자는 먼저 Thymeleaf 매칭 대기 화면을 받습니다. 화면의 JavaScript는 배송 ID를 포함한 GET 요청과 JWT를 REST Controller로 보냅니다. Controller는 HTTP 요청과 인증 정보를 받고 Service를 호출합니다. Service는 배송, 매칭, 차량을 조회하고 고객 본인이나 배정 배송원인지 검사합니다. Repository는 JPA를 통해 MariaDB에 접근합니다. 최종 응답은 Entity가 아니라 DeliveryDetailResponse DTO이며 JSON으로 직렬화됩니다. 화면은 이 JSON을 5초마다 받아 status가 MATCHED이면 완료 화면으로 이동합니다. 클라이언트와 서버 양쪽에 no-store를 적용해 과거 상태가 캐시되지 않게 했습니다. fetch는 REST 자체가 아니라 브라우저가 REST API를 호출하는 수단이라는 점도 중요합니다.\n\n[Sources]\n- src/main/java/com/example/shinhandelivery/delivery/controller/DeliveryController.java:102-114\n- src/main/java/com/example/shinhandelivery/delivery/service/DeliveryService.java:155-172\n- src/main/java/com/example/shinhandelivery/delivery/dto/response/DeliveryDetailResponse.java"}
+{"kind":"slide","id":"sl/xwgyvo","slide":5,"title":"SHINHAN DELIVERY · REST API","textShapes":19}
+{"kind":"textbox","id":"sh/ov2lcfqd","slide":5,"text":"SHINHAN DELIVERY · REST API","textPreview":"SHINHAN DELIVERY · REST API","textChars":27,"textLines":1,"bbox":[64,28,520,22]}
+{"kind":"textbox","id":"sh/3ut4japs","slide":5,"text":"매칭 대기 화면은 GET API를 5초마다 호출한다","textPreview":"매칭 대기 화면은 GET API를 5초마다 호출한다","textChars":28,"textLines":1,"bbox":[64,64,1120,56]}
+{"kind":"textbox","id":"sh/2t03a587","slide":5,"text":"05","textPreview":"05","textChars":2,"textLines":1,"bbox":[1180,31,36,20]}
+{"kind":"shape","id":"sh/1srmh07m","slide":5,"bbox":[64,132,1152,2]}
+{"kind":"shape","id":"sh/gril8fq1","slide":5,"bbox":[64,166,610,300]}
+{"kind":"textbox","id":"sh/fq94fapg","slide":5,"text":"const response = await fetch(\n  `/api/v1/delivery-requests/${deliveryId}`,\n  {\n    headers: { Authorization: header },\n    cache: 'no-store'\n  }\n);\nconst detail = await response.json();","textPreview":"const response = await fetch( |   `/api/v1/delivery-requests/${deliveryId}`, |   { |     headers: { Authorization: header }, |     cache:...","textChars":185,"textLines":8,"bbox":[84,183,570,266]}
+{"kind":"textbox","id":"sh/ep03658v","slide":5,"text":"1","textPreview":"1","textChars":1,"textLines":1,"bbox":[760,168,42,36]}
+{"kind":"shape","id":"sh/tormd07q","slide":5,"bbox":[816,164,350,48]}
+{"kind":"textbox","id":"sh/snil4vq5","slide":5,"text":"GET + JWT","textPreview":"GET + JWT","textChars":9,"textLines":1,"bbox":[836,176,310,24]}
+{"kind":"textbox","id":"sh/e1ojqh8b","slide":5,"text":"↓","textPreview":"↓","textChars":1,"textLines":1,"bbox":[930,221,100,28]}
+{"kind":"textbox","id":"sh/f2x0jm9w","slide":5,"text":"2","textPreview":"2","textChars":1,"textLines":1,"bbox":[760,262,42,36]}
+{"kind":"shape","id":"sh/03q1s7qh","slide":5,"bbox":[816,258,350,48]}
+{"kind":"textbox","id":"sh/14z2lcr2","slide":5,"text":"200 OK + JSON","textPreview":"200 OK + JSON","textChars":13,"textLines":1,"bbox":[836,270,310,24]}
+{"kind":"textbox","id":"sh/qdojmxsf","slide":5,"text":"↓","textPreview":"↓","textChars":1,"textLines":1,"bbox":[930,315,100,28]}
+{"kind":"textbox","id":"sh/rex0f290","slide":5,"text":"3","textPreview":"3","textChars":1,"textLines":1,"bbox":[760,356,42,36]}
+{"kind":"shape","id":"sh/sz61o7a5","slide":5,"bbox":[816,352,350,48]}
+{"kind":"textbox","id":"sh/d0fihcrq","slide":5,"text":"status 확인","textPreview":"status 확인","textChars":9,"textLines":1,"bbox":[836,364,310,24]}
+{"kind":"textbox","id":"sh/i94jixs3","slide":5,"text":"↓","textPreview":"↓","textChars":1,"textLines":1,"bbox":[930,409,100,28]}
+{"kind":"textbox","id":"sh/3ad0bi9o","slide":5,"text":"4","textPreview":"4","textChars":1,"textLines":1,"bbox":[760,450,42,36]}
+{"kind":"shape","id":"sh/n29o3ul4","slide":5,"bbox":[816,446,350,48]}
+{"kind":"textbox","id":"sh/m107up4j","slide":5,"text":"MATCHED → 화면 이동","textPreview":"MATCHED → 화면 이동","textChars":15,"textLines":1,"bbox":[836,458,310,24]}
+{"kind":"textbox","id":"sh/94r6543a","slide":5,"text":"const POLL_INTERVAL_MS = 5000;","textPreview":"const POLL_INTERVAL_MS = 5000;","textChars":30,"textLines":1,"bbox":[64,500,610,30]}
+{"kind":"shape","id":"sh/83ipwzmp","slide":5,"bbox":[64,552,1152,80]}
+{"kind":"textbox","id":"sh/v6t87elg","slide":5,"text":"401 → 로그인  ·  403 → 권한 없음  ·  404 → 배송 없음  ·  response.ok 확인","textPreview":"401 → 로그인  ·  403 → 권한 없음  ·  404 → 배송 없음  ·  response.ok 확인","textChars":60,"textLines":1,"bbox":[88,570,1098,26]}
+{"kind":"textbox","id":"sh/u507y9kv","slide":5,"text":"fetch는 REST가 아니라 브라우저가 REST API를 호출하는 도구","textPreview":"fetch는 REST가 아니라 브라우저가 REST API를 호출하는 도구","textChars":40,"textLines":1,"bbox":[88,603,1098,22]}
+{"kind":"textbox","id":"sh/h8bq9436","slide":5,"text":"프로젝트 실제 코드 기반 · 표준 5-Slide","textPreview":"프로젝트 실제 코드 기반 · 표준 5-Slide","textChars":26,"textLines":1,"bbox":[64,683,700,18]}
+{"kind":"notes","id":"nt/xwgyvo","slide":5,"text":"이 REST API를 화면에서 실제로 사용하는 도구가 fetch입니다. 매칭 대기 화면은 배송 상세 GET API를 즉시 한 번 호출한 뒤 5초마다 반복합니다. Authorization 헤더에는 JWT를 넣고, 캐시된 과거 상태를 사용하지 않도록 no-store를 설정했습니다. 서버 역시 응답에 Cache-Control no-store를 포함합니다. JSON의 status가 REQUESTED이면 계속 기다리고, MATCHED나 PICKED_UP, COMPLETED가 되면 폴링을 중단하고 매칭 완료 화면으로 이동합니다. 오류도 상태 코드별로 처리합니다. 401이면 로그인 화면, 403이면 권한 없음, 404이면 배송 정보 없음 메시지를 보여줍니다. fetch는 404나 500을 자동으로 throw하지 않기 때문에 response.ok를 확인해야 합니다. fetch 자체는 REST가 아니라 브라우저가 REST API를 호출하는 도구입니다.\n\n[Sources]\n- src/main/resources/templates/matching-wait.html:218-342\n- src/main/java/com/example/shinhandelivery/delivery/controller/DeliveryController.java:102-114"}
+{"kind":"slide","id":"sl/vx8zlr","slide":6,"title":"SHINHAN DELIVERY · REST API","textShapes":26}
+{"kind":"textbox","id":"sh/szutcfyp","slide":6,"text":"SHINHAN DELIVERY · REST API","textPreview":"SHINHAN DELIVERY · REST API","textChars":27,"textLines":1,"bbox":[64,28,520,22]}
+{"kind":"textbox","id":"sh/7elsjux4","slide":6,"text":"핵심 기술 구현 — 취소 API의 정산 불일치 방지","textPreview":"핵심 기술 구현 — 취소 API의 정산 불일치 방지","textChars":28,"textLines":1,"bbox":[64,64,1120,56]}
+{"kind":"textbox","id":"sh/6dcbapgj","slide":6,"text":"06","textPreview":"06","textChars":2,"textLines":1,"bbox":[1180,31,36,20]}
+{"kind":"shape","id":"sh/5c3ahkfy","slide":6,"bbox":[64,132,1152,2]}
+{"kind":"textbox","id":"sh/kbut8fyd","slide":6,"text":"GET /{id}/cancellation-preview","textPreview":"GET /{id}/cancellation-preview","textChars":30,"textLines":1,"bbox":[66,151,450,28]}
+{"kind":"textbox","id":"sh/jalsfax8","slide":6,"text":"예상 수수료·환불 조회","textPreview":"예상 수수료·환불 조회","textChars":12,"textLines":1,"bbox":[66,180,400,24]}
+{"kind":"textbox","id":"sh/i9cr65gn","slide":6,"text":"POST /{id}/cancel","textPreview":"POST /{id}/cancel","textChars":17,"textLines":1,"bbox":[530,151,320,28]}
+{"kind":"textbox","id":"sh/p87ut4fi","slide":6,"text":"취소·환불·보상 실행","textPreview":"취소·환불·보상 실행","textChars":11,"textLines":1,"bbox":[530,180,320,24]}
+{"kind":"textbox","id":"sh/47etkjyx","slide":6,"text":"409 Conflict","textPreview":"409 Conflict","textChars":12,"textLines":1,"bbox":[930,151,250,28]}
+{"kind":"textbox","id":"sh/ehszmt0r","slide":6,"text":"허용되지 않은 상태 전이","textPreview":"허용되지 않은 상태 전이","textChars":13,"textLines":1,"bbox":[930,180,250,24]}
+{"kind":"shape","id":"sh/fi10fyhc","slide":6,"bbox":[64,233,548,66]}
+{"kind":"textbox","id":"sh/03uho3ih","slide":6,"text":"P","textPreview":"P","textChars":1,"textLines":1,"bbox":[80,248,42,34]}
+{"kind":"textbox","id":"sh/143ih8z2","slide":6,"text":"Problem","textPreview":"Problem","textChars":7,"textLines":1,"bbox":[136,246,130,26]}
+{"kind":"textbox","id":"sh/qdszit0f","slide":6,"text":"중복 클릭·네트워크 재시도로\n같은 취소 POST가 반복될 수 있음","textPreview":"중복 클릭·네트워크 재시도로 | 같은 취소 POST가 반복될 수 있음","textChars":36,"textLines":2,"bbox":[270,243,325,46]}
+{"kind":"shape","id":"sh/re10byh0","slide":6,"bbox":[64,311,548,66]}
+{"kind":"textbox","id":"sh/sfahk3il","slide":6,"text":"R","textPreview":"R","textChars":1,"textLines":1,"bbox":[80,326,42,34]}
+{"kind":"textbox","id":"sh/dgjid8z6","slide":6,"text":"Root Cause","textPreview":"Root Cause","textChars":10,"textLines":1,"bbox":[136,324,130,26]}
+{"kind":"textbox","id":"sh/a9czud0z","slide":6,"text":"취소가 상태 변경뿐 아니라 환불·보상·\n매칭 취소·차량 복구를 함께 수행","textPreview":"취소가 상태 변경뿐 아니라 환불·보상· | 매칭 취소·차량 복구를 함께 수행","textChars":40,"textLines":2,"bbox":[270,321,325,46]}
+{"kind":"shape","id":"sh/ba50nih4","slide":6,"bbox":[64,389,548,66]}
+{"kind":"textbox","id":"sh/72dozqtk","slide":6,"text":"S","textPreview":"S","textChars":1,"textLines":1,"bbox":[80,404,42,34]}
+{"kind":"textbox","id":"sh/mh4nqlcz","slide":6,"text":"Solution","textPreview":"Solution","textChars":8,"textLines":1,"bbox":[136,402,130,26]}
+{"kind":"textbox","id":"sh/94v610bq","slide":6,"text":"@Transactional + 비관적 락 +\n취소 완료 시 기존 결과 반환","textPreview":"@Transactional + 비관적 락 + | 취소 완료 시 기존 결과 반환","textChars":41,"textLines":2,"bbox":[270,399,325,46]}
+{"kind":"shape","id":"sh/83m5svu5","slide":6,"bbox":[64,467,548,66]}
+{"kind":"textbox","id":"sh/v6xo3qtg","slide":6,"text":"I","textPreview":"I","textChars":1,"textLines":1,"bbox":[80,482,42,34]}
+{"kind":"textbox","id":"sh/u54nulcb","slide":6,"text":"Impact","textPreview":"Impact","textChars":6,"textLines":1,"bbox":[136,480,130,26]}
+{"kind":"textbox","id":"sh/h8f650bm","slide":6,"text":"중복 요청의 이중 정산 방지\n부분 반영 없이 하나의 작업으로 처리","textPreview":"중복 요청의 이중 정산 방지 | 부분 반영 없이 하나의 작업으로 처리","textChars":36,"textLines":2,"bbox":[270,477,325,46]}
+{"kind":"shape","id":"sh/w765wvu1","slide":6,"bbox":[650,233,566,284]}
+{"kind":"textbox","id":"sh/jaxo7ats","slide":6,"text":"@Transactional\npublic DeliveryCancellationResponse cancel(...) {\n  DeliveryRequest delivery =\n      findDeliveryRequestForUpdateOrThrow(id);\n  if (delivery.getStatus() == CANCELLED)\n    return DeliveryCancellationResponse.from(delivery);\n  settlePoints(delivery, courierId, settlement);\n}","textPreview":"@Transactional | public DeliveryCancellationResponse cancel(...) { |   DeliveryRequest delivery = |       findDeliveryRequestForUpdateOrT...","textChars":288,"textLines":8,"bbox":[670,250,526,250]}
+{"kind":"shape","id":"sh/i9ony5c7","slide":6,"bbox":[650,538,566,88]}
+{"kind":"textbox","id":"sh/gfq5ofq5","slide":6,"text":"Repository의 비관적 쓰기 락","textPreview":"Repository의 비관적 쓰기 락","textChars":20,"textLines":1,"bbox":[674,554,300,24]}
+{"kind":"textbox","id":"sh/10zmhkrq","slide":6,"text":"@Lock(PESSIMISTIC_WRITE)  →  동일 배송의 동시 변경 차단","textPreview":"@Lock(PESSIMISTIC_WRITE)  →  동일 배송의 동시 변경 차단","textChars":44,"textLines":1,"bbox":[674,584,510,24]}
+{"kind":"textbox","id":"sh/ed8nm58f","slide":6,"text":"좋은 REST API는 URL뿐 아니라 중복·동시 요청에서도 같은 비즈니스 결과를 보장한다.","textPreview":"좋은 REST API는 URL뿐 아니라 중복·동시 요청에서도 같은 비즈니스 결과를 보장한다.","textChars":51,"textLines":1,"bbox":[100,645,1080,28]}
+{"kind":"textbox","id":"sh/feh4fa90","slide":6,"text":"프로젝트 실제 코드 기반 · 표준 5-Slide","textPreview":"프로젝트 실제 코드 기반 · 표준 5-Slide","textChars":26,"textLines":1,"bbox":[64,683,700,18]}
+{"kind":"notes","id":"nt/vx8zlr","slide":6,"text":"핵심 구현은 배송 취소 API입니다. 먼저 GET cancellation-preview는 서버 상태를 바꾸지 않고 예상 수수료와 환불액만 조회합니다. 사용자가 동의하면 POST cancel이 실제 취소를 수행합니다. 문제는 버튼 중복 클릭이나 네트워크 재시도로 같은 POST가 반복될 수 있다는 점입니다. 취소는 단순 삭제가 아니라 고객 환불, 배송원 보상, 매칭 취소, 차량 상태 복구를 함께 처리하므로 일부만 성공하면 정산 불일치가 발생합니다. 그래서 Service 전체를 트랜잭션으로 묶고, Repository에서는 비관적 쓰기 락으로 배송 행을 조회합니다. 이미 고객 요청으로 취소된 배송이면 다시 정산하지 않고 기존 결과를 반환합니다. 또한 환불과 보상에는 배송 ID 기반 멱등성 키를 사용합니다. 현재 단계에서 취소할 수 없으면 InvalidDeliveryTransitionException이 발생하고 GlobalExceptionHandler가 409 Conflict로 변환합니다. 이 사례는 REST API의 품질이 URI 설계에서 끝나는 것이 아니라는 점을 보여줍니다.\n\n[Sources]\n- src/main/java/com/example/shinhandelivery/delivery/controller/DeliveryController.java:191-207\n- src/main/java/com/example/shinhandelivery/delivery/service/DeliveryCancellationService.java:43-149\n- src/main/java/com/example/shinhandelivery/delivery/repository/DeliveryRequestRepository.java:19-22\n- src/main/java/com/example/shinhandelivery/common/exception/ErrorCode.java:33-40"}
+{"kind":"slide","id":"sl/hftdt8","slide":7,"title":"SHINHAN DELIVERY · REST API","textShapes":18}
+{"kind":"textbox","id":"sh/wrmtcfih","slide":7,"text":"SHINHAN DELIVERY · REST API","textPreview":"SHINHAN DELIVERY · REST API","textChars":27,"textLines":1,"bbox":[64,28,520,22]}
+{"kind":"textbox","id":"sh/vqdc3a1w","slide":7,"text":"회고 & 향후 발전 방향","textPreview":"회고 & 향후 발전 방향","textChars":13,"textLines":1,"bbox":[64,64,1120,56]}
+{"kind":"textbox","id":"sh/apkba50b","slide":7,"text":"07","textPreview":"07","textChars":2,"textLines":1,"bbox":[1180,31,36,20]}
+{"kind":"shape","id":"sh/5gvu9kje","slide":7,"bbox":[64,132,1152,2]}
+{"kind":"textbox","id":"sh/kfmtgzit","slide":7,"text":"KEEP","textPreview":"KEEP","textChars":4,"textLines":1,"bbox":[64,164,330,34]}
+{"kind":"textbox","id":"sh/jedc7u18","slide":7,"text":"계속 유지할 것","textPreview":"계속 유지할 것","textChars":8,"textLines":1,"bbox":[64,205,330,26]}
+{"kind":"shape","id":"sh/id4bep0n","slide":7,"bbox":[64,247,330,205]}
+{"kind":"textbox","id":"sh/lkbax0ju","slide":7,"text":"• Controller·Service·Repository 책임 분리\n• DTO와 공통 ErrorResponse 계약\n• 트랜잭션·락·멱등성 기반 안전성","textPreview":"• Controller·Service·Repository 책임 분리 | • DTO와 공통 ErrorResponse 계약 | • 트랜잭션·락·멱등성 기반 안전성","textChars":84,"textLines":3,"bbox":[84,272,290,150]}
+{"kind":"textbox","id":"sh/0j2t4vi9","slide":7,"text":"PROBLEM","textPreview":"PROBLEM","textChars":7,"textLines":1,"bbox":[448,164,330,34]}
+{"kind":"textbox","id":"sh/id0vud4z","slide":7,"text":"현재의 한계","textPreview":"현재의 한계","textChars":6,"textLines":1,"bbox":[448,205,330,26]}
+{"kind":"shape","id":"sh/je9wni5k","slide":7,"bbox":[448,247,330,205]}
+{"kind":"textbox","id":"sh/kfidw3m5","slide":7,"text":"• 프론트가 API URL을 직접 조합\n• 5초 폴링은 불필요한 요청 발생 가능\n• 외부 클라이언트가 늘면 결합도 증가","textPreview":"• 프론트가 API URL을 직접 조합 | • 5초 폴링은 불필요한 요청 발생 가능 | • 외부 클라이언트가 늘면 결합도 증가","textChars":66,"textLines":3,"bbox":[468,272,290,150]}
+{"kind":"textbox","id":"sh/5grep8nq","slide":7,"text":"TRY","textPreview":"TRY","textChars":3,"textLines":1,"bbox":[832,164,330,34]}
+{"kind":"textbox","id":"sh/6hkfyd4b","slide":7,"text":"다음 확장","textPreview":"다음 확장","textChars":5,"textLines":1,"bbox":[832,205,330,26]}
+{"kind":"shape","id":"sh/7itwri5w","slide":7,"bbox":[832,247,330,205]}
+{"kind":"textbox","id":"sh/sj2x0nmh","slide":7,"text":"• HATEOAS로 상태별 행동 링크 제공\n• WebSocket 이벤트와 조회 API 병행\n• 링크 관계·계약 테스트 추가","textPreview":"• HATEOAS로 상태별 행동 링크 제공 | • WebSocket 이벤트와 조회 API 병행 | • 링크 관계·계약 테스트 추가","textChars":68,"textLines":3,"bbox":[852,272,290,150]}
+{"kind":"textbox","id":"sh/tkbetsnm","slide":7,"text":"현재 JSON","textPreview":"현재 JSON","textChars":7,"textLines":1,"bbox":[68,487,300,24]}
+{"kind":"shape","id":"sh/ulkf2x47","slide":7,"bbox":[64,522,480,70]}
+{"kind":"textbox","id":"sh/f6twv25s","slide":7,"text":"{ \"id\": 123, \"status\": \"REQUESTED\" }","textPreview":"{ \"id\": 123, \"status\": \"REQUESTED\" }","textChars":36,"textLines":1,"bbox":[84,539,440,36]}
+{"kind":"textbox","id":"sh/radwj2l0","slide":7,"text":"HATEOAS 확장 예시","textPreview":"HATEOAS 확장 예시","textChars":13,"textLines":1,"bbox":[660,487,360,24]}
+{"kind":"shape","id":"sh/q94vaxkf","slide":7,"bbox":[656,522,560,92]}
+{"kind":"textbox","id":"sh/dcvelsj6","slide":7,"text":"\"_links\": {\n  \"self\": { \"href\": \".../123\" },\n  \"cancel\": { \"href\": \".../123/cancel\" }\n}","textPreview":"\"_links\": { |   \"self\": { \"href\": \".../123\" }, |   \"cancel\": { \"href\": \".../123/cancel\" } | }","textChars":87,"textLines":4,"bbox":[676,539,520,58]}
+{"kind":"shape","id":"sh/cbmdc72l","slide":7,"bbox":[64,636,1152,2]}
+{"kind":"textbox","id":"sh/3mtcfilo","slide":7,"text":"Key Lesson  |  REST API는 데이터를 반환하는 코드가 아니라 화면과 비즈니스를 연결하는 계약이다.","textPreview":"Key Lesson  |  REST API는 데이터를 반환하는 코드가 아니라 화면과 비즈니스를 연결하는 계약이다.","textChars":63,"textLines":1,"bbox":[88,651,1100,28]}
+{"kind":"textbox","id":"sh/2lkvmdkj","slide":7,"text":"현재 프로젝트에는 Spring HATEOAS가 구현되어 있지 않음","textPreview":"현재 프로젝트에는 Spring HATEOAS가 구현되어 있지 않음","textChars":36,"textLines":1,"bbox":[64,683,700,18]}
+{"kind":"notes","id":"nt/hftdt8","slide":7,"text":"회고입니다. Keep은 계층별 책임 분리, DTO와 공통 에러 계약, 그리고 트랜잭션과 멱등성으로 API 안전성을 확보한 점입니다. Problem은 현재 프론트엔드가 API 경로를 직접 조합하고, 매칭 확인을 위해 5초마다 요청한다는 점입니다. 지금처럼 Thymeleaf와 API가 같은 저장소에 있고 경로가 단순한 규모에서는 구현 복잡도를 낮추는 합리적인 선택입니다. 그래서 HATEOAS는 현재 구현이라고 말하면 안 됩니다. 향후 모바일 앱이나 외부 클라이언트가 늘어난다면 Try로 검토할 수 있습니다. 서버가 응답의 links에 현재 상태에서 가능한 cancel이나 proof-photo 같은 행동을 제공하면 클라이언트의 URL 하드코딩과 상태 판단을 줄일 수 있습니다. 또한 실시간 알림은 WebSocket으로 받고 정확한 현재 상태는 GET API로 확인하는 조합도 발전 방향입니다. 결론적으로 REST API는 JSON 반환 기능이 아니라 화면과 비즈니스 로직 사이의 명확하고 안전한 계약입니다.\n\n[Sources]\n- src/main/resources/templates/matching-wait.html:259-341\n- build.gradle:24-51\n- docs/architecture/REST-API-설계-규격-가이드.md"}
