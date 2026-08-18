@@ -51,6 +51,11 @@ public class PaymentService {
     return paymentRepository.findAll();
   }
 
+  @Transactional(readOnly = true)
+  public java.util.Optional<PointWallet> findWalletByMemberId(Long memberId) {
+    return paymentRepository.findByMemberId(memberId);
+  }
+
   @Transactional(noRollbackFor = BusinessException.class)
   public PinVerifyResponseDto verifyPin(Long memberId, PinVerifyRequestDto request) {
     Member member = memberService.getByIdForUpdate(memberId);

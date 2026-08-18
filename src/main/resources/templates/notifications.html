@@ -29,7 +29,27 @@
         <button type="button" data-tab="NOTICE">공지</button>
     </nav>
 
-    <div id="list"></div>
+    <div id="list">
+        <article th:each="item : ${notifications}" class="notification-card" th:classappend="${item.read ? 'read' : ''}" th:data-notification-id="${item.id}">
+            <div class="meta">
+                <span class="category">
+                    <span class="dot" th:if="${!item.read}"></span>
+                    <span th:text="${item.category}">배송</span>
+                </span>
+                <span class="time" th:text="${item.createdAt != null ? #temporals.format(item.createdAt, 'yyyy.MM.dd') : ''}">2026.08.18</span>
+            </div>
+            <div class="title" th:text="${item.title}">알림 제목</div>
+            <div class="body" th:text="${item.message}">알림 내용</div>
+        </article>
+        <article th:each="notice : ${notices}" class="notification-card read">
+            <div class="meta">
+                <span class="category" style="color:var(--cat-notice)">공지</span>
+                <span class="time" th:text="${notice.createdAt != null ? #temporals.format(notice.createdAt, 'yyyy.MM.dd') : ''}">2026.08.18</span>
+            </div>
+            <div class="title" th:text="${notice.title}">공지사항 제목</div>
+            <div class="body" th:text="${notice.content}">공지사항 내용</div>
+        </article>
+    </div>
 </main>
 </body>
 </html>

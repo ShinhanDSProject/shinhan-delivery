@@ -189,8 +189,8 @@
 
   <section class="wallet-card" aria-label="포인트 잔액">
     <div class="label">현재 보유 포인트</div>
-    <div id="balance" class="balance">0 P</div>
-    <div id="walletHint" class="hint">지갑을 확인하는 중입니다.</div>
+    <div id="balance" class="balance" th:text="${pointWallet != null ? #numbers.formatInteger(pointWallet.balance, 0, 'COMMA') + ' P' : '0 P'}">0 P</div>
+    <div id="walletHint" class="hint" th:text="${pointWallet != null ? '정상적으로 연동된 지갑입니다.' : '지갑을 확인하는 중입니다.'}">지갑을 확인하는 중입니다.</div>
     <div class="actions">
       <button class="btn btn-primary" type="button" onclick="location.href='/point-charge'">포인트 충전</button>
       <button class="btn" type="button" onclick="location.href='/home'" style="background:#fff;border:1px solid var(--wallet-line);color:var(--wallet-ink);">홈으로</button>
