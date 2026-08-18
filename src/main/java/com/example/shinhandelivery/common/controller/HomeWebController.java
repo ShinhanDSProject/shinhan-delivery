@@ -27,6 +27,10 @@ public class HomeWebController {
 
   @GetMapping("/home")
   public String home(Model model) {
+    if (webAuthHelper.currentUserHasRole("COURIER")) {
+      return "redirect:/courier-home";
+    }
+
     List<CategoryResponse> categories =
         categoryService.list().stream().map(CategoryResponse::from).toList();
     model.addAttribute("categories", categories);

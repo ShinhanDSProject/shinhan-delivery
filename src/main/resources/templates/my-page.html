@@ -13,7 +13,7 @@
 <body class="mypage-body">
 <main class="mobile-shell">
   <header class="page-header">
-    <div th:replace="~{fragments/components :: safeBackButton('/home')}"></div>
+    <div th:replace="~{fragments/components :: safeBackButton(${homePath})}"></div>
     <h1 class="page-title">My Page</h1>
     <span aria-hidden="true"></span>
   </header>

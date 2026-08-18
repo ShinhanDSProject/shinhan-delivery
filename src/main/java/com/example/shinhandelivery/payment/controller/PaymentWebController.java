@@ -28,6 +28,7 @@ public class PaymentWebController {
                       wallet ->
                           model.addAttribute("pointWallet", PointWalletResponse.from(wallet)));
             });
+    model.addAttribute("homePath", webAuthHelper.getHomePath());
     return "point-wallet";
   }
 
