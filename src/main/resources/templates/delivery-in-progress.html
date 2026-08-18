@@ -302,7 +302,9 @@
     let photoSelectionVersion = 0;
 
     // 배송원의 이동 좌표를 주기적으로 서버에 발행해, 고객의 realtime-tracking.html 지도 마커가 실시간으로 움직이게 한다.
-    const LOCATION_PUBLISH_INTERVAL_MS = 5000;
+    // 시속 30km 기준 5초면 약 42m씩 튀어 보여서 3초(약 25m)로 좁힘 — 그 아래로는 GPS 노이즈(5~15m)와
+    // 실제 이동거리가 비슷해져 저속 이동(자전거/킥보드) 시 오히려 흔들려 보일 수 있어 3초 정도가 적당한 절충점.
+    const LOCATION_PUBLISH_INTERVAL_MS = 3000;
     let locationClient = null;
     let locationWatchId = null;
     let latestPosition = null;
