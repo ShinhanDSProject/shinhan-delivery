@@ -50,6 +50,7 @@ import com.example.shinhandelivery.member.service.MemberService;
 import com.example.shinhandelivery.payment.dto.response.PointUseResultResponse;
 import com.example.shinhandelivery.payment.service.PaymentService;
 import com.example.shinhandelivery.vehicle.entity.Vehicle;
+import com.example.shinhandelivery.vehicle.entity.VehicleStatus;
 import com.example.shinhandelivery.vehicle.service.VehicleService;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -472,14 +473,13 @@ class DeliveryServiceTest {
     assertThat(created.getFeePoint()).isEqualTo(estimate.totalFee().longValueExact());
   }
 
-  /** confirmPickup/completeDelivery의 배정된 배송원 판정에 쓰이는 매칭·차량을 courierId 소유로 스텁한다. */
+  /** confirmPickup/completeDelivery의 배정된 배송원 판정에 쓰이는 매칭·차량 소유주를 courierId로 스텁한다. */
   private void stubAssignedCourier(Long deliveryRequestId, Long vehicleId, Long courierId) {
     Matching matching = new Matching();
     matching.setVehicleId(vehicleId);
     when(matchingRepository.findByDeliveryRequestId(deliveryRequestId))
         .thenReturn(Optional.of(matching));
-    when(vehicleService.getById(vehicleId))
-        .thenReturn(Vehicle.builder().id(vehicleId).memberId(courierId).build());
+    when(vehicleService.getOwnerMemberId(vehicleId)).thenReturn(courierId);
   }
 
   @Test
@@ -490,6 +490,13 @@ class DeliveryServiceTest {
     when(deliveryRequestRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(deliveryRequest));
     stubAssignedCourier(1L, 10L, 20L);
 
+    Matching matchingForUpdate = new Matching();
+    matchingForUpdate.setVehicleId(10L);
+    when(matchingRepository.findByDeliveryRequestIdForUpdate(1L))
+        .thenReturn(Optional.of(matchingForUpdate));
+    Vehicle vehicle = Vehicle.builder().id(10L).memberId(20L).status(VehicleStatus.BUSY).build();
+    when(vehicleService.getVehicleForUpdate(10L)).thenReturn(vehicle);
+
     DeliveryCompleteRequest request = new DeliveryCompleteRequest();
     request.setProofPhotoUrl("https://example.com/proof.jpg");
 
@@ -498,6 +505,9 @@ class DeliveryServiceTest {
     assertThat(response.getStatus()).isEqualTo(DeliveryStatus.COMPLETED);
     assertThat(deliveryRequest.getProofPhotoUrl()).isEqualTo("https://example.com/proof.jpg");
     assertThat(deliveryRequest.getCompletedAt()).isNotNull();
+    assertThat(vehicle.getStatus())
+        .as("배송 완료 시 매칭된 차량은 다시 AVAILABLE로 되돌아가야 한다")
+        .isEqualTo(VehicleStatus.AVAILABLE);
     verify(eventPublisher)
         .publishEvent(
             argThat(
@@ -619,9 +629,7 @@ class DeliveryServiceTest {
     Matching matching = new Matching();
     matching.setVehicleId(10L);
     when(matchingRepository.findByDeliveryRequestId(1L)).thenReturn(Optional.of(matching));
-
-    Vehicle vehicle = Vehicle.builder().id(10L).memberId(20L).build();
-    when(vehicleService.getById(10L)).thenReturn(vehicle);
+    when(vehicleService.getOwnerMemberId(10L)).thenReturn(20L);
 
     ProofPhotoResponse response = deliveryService.getProofPhoto(20L, 1L);
 
@@ -694,9 +702,7 @@ class DeliveryServiceTest {
     Matching matching = new Matching();
     matching.setVehicleId(10L);
     when(matchingRepository.findByDeliveryRequestId(1L)).thenReturn(Optional.of(matching));
-
-    Vehicle vehicle = Vehicle.builder().id(10L).memberId(20L).build();
-    when(vehicleService.getById(10L)).thenReturn(vehicle);
+    when(vehicleService.getOwnerMemberId(10L)).thenReturn(20L);
 
     PickupPhotoResponse response = deliveryService.getPickupPhoto(20L, 1L);
 

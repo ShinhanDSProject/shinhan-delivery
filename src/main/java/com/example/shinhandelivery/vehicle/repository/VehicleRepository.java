@@ -35,6 +35,13 @@ public interface VehicleRepository extends JpaRepository<Vehicle, Long> {
   @Query("select v.id from Vehicle v where v.memberId = :memberId and v.isActive = true")
   Optional<Long> findActiveVehicleIdByMemberId(@Param("memberId") Long memberId);
 
+  /**
+   * 차량 id 기준으로 소유주(memberId)만 프로젝션으로 조회한다. Vehicle 엔티티를 영속성 컨텍스트에 올리지 않아, 같은 트랜잭션에서 뒤이어 {@code
+   * findByIdForUpdate}로 비관적 락을 걸 때 1차 캐시된 옛 값을 돌려받는 문제를 피할 수 있다.
+   */
+  @Query("select v.memberId from Vehicle v where v.id = :vehicleId")
+  Optional<Long> findMemberIdById(@Param("vehicleId") Long vehicleId);
+
   /** 회원(배송원) 정보까지 한 번의 DB 쿼리로 조인 조회하는 Fetch Join 메서드. */
   @Query("select v from Vehicle v join fetch v.member where v.memberId = :memberId")
   List<Vehicle> findAllByMemberIdWithMember(@Param("memberId") Long memberId);
