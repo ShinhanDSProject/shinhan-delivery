@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>매칭 대기 - 신한 딜리버리</title>
     <link rel="stylesheet" href="/css/design-system.css">
+    <script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@7.0.0/bundles/stomp.umd.min.js"></script>
     <style>
         :root {
             --text-dark: var(--color-black-200);
@@ -217,8 +218,8 @@
 
 <script>
     const deliveryId = new URLSearchParams(location.search).get('id');
-    const POLL_INTERVAL_MS = 5000;
-    let pollTimer = null;
+    let settled = false;
+    let statusClient = null;
 
     function authHeader() {
         const token = localStorage.getItem('accessToken');
@@ -242,14 +243,50 @@
     }
     // message는 이 파일 안에서만 정의된 고정 문자열만 넘기므로 innerHTML로 꽂아도 XSS 위험이 없다.
 
-    function stopPolling() {
-        if (pollTimer) {
-            clearInterval(pollTimer);
-            pollTimer = null;
+    function disconnectStatusClient() {
+        if (statusClient) {
+            statusClient.deactivate();
+            statusClient = null;
         }
     }
 
-    async function pollStatus() {
+    function handleStatusUpdate(status) {
+        if (settled) return;
+        if (status === 'MATCHED' || status === 'PICKED_UP' || status === 'COMPLETED') {
+            settled = true;
+            disconnectStatusClient();
+            location.replace(`/matching-complete?id=${encodeURIComponent(deliveryId)}`);
+            return;
+        }
+        if (status === 'CANCELLED') {
+            settled = true;
+            disconnectStatusClient();
+            showStatusMessage('배송 요청이 취소됐어요.');
+        }
+    }
+
+    // offer-subscription.js의 연결 패턴(JWT 인증 헤더, 재연결)을 재사용한다.
+    function subscribeToStatus() {
+        const header = authHeader();
+        if (!header || settled) return;
+
+        const protocol = location.protocol === 'https:' ? 'wss' : 'ws';
+        statusClient = new StompJs.Client({
+            brokerURL: `${protocol}://${location.host}/ws`,
+            connectHeaders: { Authorization: header },
+            reconnectDelay: 4000
+        });
+
+        statusClient.onConnect = () => {
+            statusClient.subscribe(`/topic/delivery/${deliveryId}/status`, (message) => {
+                handleStatusUpdate(JSON.parse(message.body).status);
+            });
+        };
+
+        statusClient.activate();
+    }
+
+    async function checkStatusOnce() {
         const header = authHeader();
         if (!header) {
             location.replace('/login');
@@ -265,29 +302,21 @@
                 return;
             }
             if (response.status === 403) {
-                stopPolling();
+                settled = true;
                 showStatusMessage('이 배송 요청을 볼 권한이 없어요.');
                 return;
             }
             if (response.status === 400 || response.status === 404) {
-                stopPolling();
+                settled = true;
                 showStatusMessage('배송 요청 정보를 확인할 수 없어요.');
                 return;
             }
             if (!response.ok) return;
 
             const detail = await response.json();
-            if (detail.status === 'MATCHED' || detail.status === 'PICKED_UP' || detail.status === 'COMPLETED') {
-                stopPolling();
-                location.replace(`/matching-complete?id=${encodeURIComponent(deliveryId)}`);
-                return;
-            }
-            if (detail.status === 'CANCELLED') {
-                stopPolling();
-                showStatusMessage('배송 요청이 취소됐어요.');
-            }
+            handleStatusUpdate(detail.status);
         } catch (error) {
-            // 일시적인 네트워크 오류는 다음 폴링에서 다시 시도한다.
+            // 최초 1회 확인 실패는 이후 WebSocket 구독으로 상태를 받는다.
         }
     }
 
@@ -297,7 +326,6 @@
             location.replace('/login');
             return;
         }
-        stopPolling();
         try {
             const previewResponse = await fetch(`/api/v1/delivery-requests/${deliveryId}/cancellation-preview`, {
                 headers: { Authorization: header }
@@ -308,37 +336,35 @@
                 `취소 수수료 ${preview.cancellationFee.toLocaleString()}P\n` +
                 `예상 환불 ${preview.refundAmount.toLocaleString()}P\n\n배송을 취소하시겠어요?`
             );
-            if (!confirmed) {
-                pollTimer = setInterval(pollStatus, POLL_INTERVAL_MS);
-                return;
-            }
+            if (!confirmed) return;
+
             const response = await fetch(`/api/v1/delivery-requests/${deliveryId}/cancel`, {
                 method: 'POST',
                 headers: { Authorization: header }
             });
             if (response.ok) {
+                settled = true;
+                disconnectStatusClient();
                 location.replace(`/cancel-detail?id=${encodeURIComponent(deliveryId)}`);
                 return;
             }
             if (response.status === 409 || response.status === 400) {
                 showToast('현재 배송 단계에서는 취소할 수 없어요.');
-                pollStatus();
-                pollTimer = setInterval(pollStatus, POLL_INTERVAL_MS);
+                checkStatusOnce();
                 return;
             }
             showToast('취소에 실패했어요. 다시 시도해 주세요.');
-            pollTimer = setInterval(pollStatus, POLL_INTERVAL_MS);
         } catch (error) {
             showToast('취소에 실패했어요. 다시 시도해 주세요.');
-            pollTimer = setInterval(pollStatus, POLL_INTERVAL_MS);
         }
     });
 
     if (!authHeader() || !deliveryId) {
         location.replace(authHeader() ? '/home' : '/login');
     } else {
-        pollStatus();
-        pollTimer = setInterval(pollStatus, POLL_INTERVAL_MS);
+        checkStatusOnce().then(() => {
+            if (!settled) subscribeToStatus();
+        });
     }
 </script>
 </body>
