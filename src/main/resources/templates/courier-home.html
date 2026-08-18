@@ -758,6 +758,9 @@
     let kakaoMap = null;
     let currentMarker = null;
     let allDeliveries = [];
+    let queueLoadError = false;
+    let queueRefreshInterval = null;
+    const QUEUE_REFRESH_INTERVAL_MS = 10000;
     let isExpanded = false;
     let isCurrentOnline = false;
     let currentLat = 37.5665;
@@ -949,6 +952,7 @@
         }
         loadAvailableDeliveries();
         startLocationHeartbeat();
+        startQueueAutoRefresh();
       } else {
         textElem.textContent = '오프라인';
         textElem.className = 'status-text-badge status-badge-offline';
@@ -957,7 +961,19 @@
         mapSection.style.display = 'none';
         queueSection.style.display = 'none';
         stopLocationHeartbeat();
+        stopQueueAutoRefresh();
       }
+    }
+
+    /** 온라인인 동안 대기 목록을 주기적으로 새로고침해, 새 콜이 뜨거나 다른 배송원이 가져간 콜이 빠지는 걸 화면에 반영한다. */
+    function startQueueAutoRefresh() {
+      stopQueueAutoRefresh();
+      queueRefreshInterval = window.setInterval(loadAvailableDeliveries, QUEUE_REFRESH_INTERVAL_MS);
+    }
+
+    function stopQueueAutoRefresh() {
+      window.clearInterval(queueRefreshInterval);
+      queueRefreshInterval = null;
     }
 
     /** 온라인인 동안 주기적으로 현재 GPS를 서버에 조용히 보고해 Vehicle 위치를 최신으로 유지한다. */
@@ -1083,48 +1099,16 @@
         });
         if (res.ok) {
           allDeliveries = await res.json();
-          if (!allDeliveries || allDeliveries.length === 0) {
-            allDeliveries = getMockDeliveries();
-          }
+          queueLoadError = false;
         } else {
-          allDeliveries = getMockDeliveries();
+          allDeliveries = [];
+          queueLoadError = true;
         }
       } catch (err) {
-        allDeliveries = getMockDeliveries();
+        allDeliveries = [];
+        queueLoadError = true;
       }
       renderQueueList();
-    }
-
-    function getMockDeliveries() {
-      return [
-        {
-          deliveryRequestId: 101,
-          distanceToPickupKm: 0.8,
-          feePoint: 4500,
-          pickupAddress: '서울 마포구 백범로 31 (신한DS 건물)',
-          dropoffAddress: '서울 마포구 독막로 12 (상수빌딩)',
-          distanceKm: 2.1,
-          itemSize: '소형'
-        },
-        {
-          deliveryRequestId: 102,
-          distanceToPickupKm: 1.4,
-          feePoint: 6000,
-          pickupAddress: '서울 영등포구 여의대로 108 (더현대)',
-          dropoffAddress: '서울 영등포구 신길로 45 (아파트 102동)',
-          distanceKm: 3.5,
-          itemSize: '중형'
-        },
-        {
-          deliveryRequestId: 103,
-          distanceToPickupKm: 2.1,
-          feePoint: 5200,
-          pickupAddress: '서울 용산구 한강대로 40 (아모레타워)',
-          dropoffAddress: '서울 용산구 이태원로 15 (카페거리)',
-          distanceKm: 2.8,
-          itemSize: '소형'
-        }
-      ];
     }
 
     // 대기 건수와 그려지는 카드 개수 100% 동기화
@@ -1135,6 +1119,15 @@
       const count = allDeliveries ? allDeliveries.length : 0;
       badge.textContent = `${count}건`;
 
+      if (queueLoadError) {
+        queueList.innerHTML = `
+          <div class="card-box" style="text-align: center; color: var(--color-grey-300); padding: 30px 20px;">
+            <p style="font-size: 15px; font-weight: 700; margin-bottom: 6px;">대기 목록을 불러오지 못했어요 ⚠️</p>
+            <p style="font-size: 13px;">잠시 후 자동으로 다시 시도합니다.</p>
+          </div>`;
+        return;
+      }
+
       if (count === 0) {
         queueList.innerHTML = `
           <div class="card-box" style="text-align: center; color: var(--color-grey-300); padding: 30px 20px;">
@@ -1144,23 +1137,33 @@
         return;
       }
 
-      // 전체 대기 배달 내역 렌더링
-      queueList.innerHTML = allDeliveries.map(item => `
-        <div class="delivery-card">
-          <div class="delivery-header">
-            <span class="badge badge-primary">픽업 ${item.distanceToPickupKm ? item.distanceToPickupKm.toFixed(1) : 1.0}km</span>
-            <span class="fee-badge">${item.feePoint ? item.feePoint.toLocaleString() : '4,000'} P</span>
-          </div>
-          <div class="route-info">
-            <div class="route-line">📍 픽업: <strong>${item.pickupAddress}</strong></div>
-            <div class="route-line">🏁 배송: <strong>${item.dropoffAddress}</strong></div>
-          </div>
-          <div class="card-footer">
-            <span class="meta-text">이동거리 ${item.distanceKm ? item.distanceKm.toFixed(1) : 2.0}km | ${item.itemSize || '소형'}</span>
-            <button class="btn btn-primary btn-sm" onclick="catchDelivery(${item.deliveryRequestId})">⚡ 주문 수락</button>
-          </div>
+      // 전체 대기 배달 내역 렌더링. pickupAddress/dropoffAddress는 고객이 자유 입력한 텍스트라
+      // 템플릿 문자열로 innerHTML에 바로 꽂지 않고 DOM API + textContent로만 채워 스크립트 삽입(XSS)을 막는다.
+      queueList.innerHTML = '';
+      allDeliveries.forEach(item => queueList.appendChild(createDeliveryCard(item)));
+    }
+
+    function createDeliveryCard(item) {
+      const card = document.createElement('div');
+      card.className = 'delivery-card';
+      card.innerHTML = `
+        <div class="delivery-header">
+          <span class="badge badge-primary">픽업 ${item.distanceToPickupKm ? item.distanceToPickupKm.toFixed(1) : 1.0}km</span>
+          <span class="fee-badge">${item.feePoint ? item.feePoint.toLocaleString() : '4,000'} P</span>
         </div>
-      `).join('');
+        <div class="route-info">
+          <div class="route-line">📍 픽업: <strong data-field="pickupAddress"></strong></div>
+          <div class="route-line">🏁 배송: <strong data-field="dropoffAddress"></strong></div>
+        </div>
+        <div class="card-footer">
+          <span class="meta-text">이동거리 ${item.distanceKm ? item.distanceKm.toFixed(1) : 2.0}km | ${item.itemSize || '소형'}</span>
+          <button class="btn btn-primary btn-sm" type="button">⚡ 주문 수락</button>
+        </div>
+      `;
+      card.querySelector('[data-field="pickupAddress"]').textContent = item.pickupAddress;
+      card.querySelector('[data-field="dropoffAddress"]').textContent = item.dropoffAddress;
+      card.querySelector('button').addEventListener('click', () => catchDelivery(item.deliveryRequestId));
+      return card;
     }
 
     // 전체보기 / 접기 아코디언 토글 실행
