@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>배송 취소 내역 - 신한 딜리버리</title>
     <link rel="stylesheet" href="/css/design-system.css">
+    <link rel="stylesheet" href="/css/my-page.css">
     <style>
         :root {
             --text-dark: var(--color-black-200);
@@ -21,16 +22,12 @@
             font-family: var(--font-family-base);
         }
 
-        body {
-            min-height: 100vh;
+        body.mypage-body {
             color: var(--text-dark);
-            background: #F8F8F8;
+            background: var(--color-grey-30);
         }
 
-        .page {
-            max-width: 480px;
-            margin: 0 auto;
-            min-height: 100vh;
+        body.mypage-body .page.cancel-list-page {
             padding-bottom: 40px;
         }
 
@@ -46,7 +43,8 @@
             height: 32px;
             border-radius: 999px;
             border: 0;
-            background: rgba(0, 0, 0, 0.02);
+            background: var(--color-white-100);
+            box-shadow: var(--shadow-sm);
             color: var(--text-dark);
             cursor: pointer;
             display: flex;
@@ -70,10 +68,10 @@
             display: block;
             width: 100%;
             text-align: left;
-            background: #fff;
+            background: var(--color-white-100);
             border: 0;
             border-radius: 20px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+            box-shadow: var(--shadow-sm);
             padding: 20px;
             cursor: pointer;
             color: inherit;
@@ -98,7 +96,7 @@
 
         .divider {
             border: 0;
-            border-top: 1px solid #EEEEEE;
+            border-top: 1px solid var(--border);
             margin: 12px 0;
         }
 
@@ -116,7 +114,7 @@
 
         .route-tag {
             padding: 2px 6px;
-            border: 1px solid #EAEAEA;
+            border: 1px solid var(--border);
             border-radius: 4px;
             font-size: 10px;
             font-weight: 700;
@@ -156,8 +154,8 @@
         }
     </style>
 </head>
-<body>
-<main class="page customer-bottom-nav-content">
+<body class="mypage-body">
+<main class="page cancel-list-page customer-bottom-nav-content">
     <header class="top">
         <button class="back-button" type="button" aria-label="이전으로" onclick="location.href='/my-page'">
             <svg viewBox="0 0 24 24" fill="none" width="20" height="20"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
