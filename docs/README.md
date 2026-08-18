@@ -123,3 +123,9 @@ LangChain, LangGraph, GraphRAG 및 LLM 기반 소프트웨어 엔지니어링 �
 
 ### 9. 🏛️ [`docs/adr/`](./adr/) — 아키텍처 의사결정 기록 (3종)
 * 📖 [**ADR 기록 소식지**](./adr/README.md) (0001 무상태 JWT 인증 체계 등)
+
+---
+
+### 10. 🎤 [`docs/presentation/`](./presentation/) — 프로젝트 발표 자료 (PPT) 표준 가이드
+* 📖 [**개발자 발표 PPT 표준 템플릿 가이드**](./presentation/개발자-발표-PPT-표준-템플릿-가이드.md) — 6대 표준 슬라이드 덱 양식 및 발표 가이드
+
