@@ -8,6 +8,7 @@ import com.example.shinhandelivery.delivery.dto.response.AvailableDeliveryRespon
 import com.example.shinhandelivery.delivery.entity.DeliveryRequest;
 import com.example.shinhandelivery.delivery.entity.DeliveryStatus;
 import com.example.shinhandelivery.delivery.entity.Matching;
+import com.example.shinhandelivery.delivery.event.DeliveryStatusChangedEvent;
 import com.example.shinhandelivery.delivery.exception.AlreadyMatchedException;
 import com.example.shinhandelivery.delivery.helper.DeliveryFeeCalculator;
 import com.example.shinhandelivery.delivery.repository.DeliveryRequestRepository;
@@ -18,9 +19,11 @@ import com.example.shinhandelivery.member.service.MemberService;
 import com.example.shinhandelivery.vehicle.entity.Vehicle;
 import com.example.shinhandelivery.vehicle.entity.VehicleStatus;
 import com.example.shinhandelivery.vehicle.service.VehicleService;
+import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,6 +38,7 @@ public class DeliveryMatchingService {
   private final DeliveryRequestRepository deliveryRequestRepository;
   private final MatchingRepository matchingRepository;
   private final DeliveryFeeCalculator feeCalculator;
+  private final ApplicationEventPublisher eventPublisher;
 
   /** 배송원의 위치(GPS) 기준 반경 3km 이내의 대기 중인(REQUESTED) 주문 목록을 거리가 가까운 순으로 조회한다. */
   @Transactional(readOnly = true)
@@ -130,8 +134,13 @@ public class DeliveryMatchingService {
       deliveryRequestRepository.saveAndFlush(deliveryRequest);
 
       Matching matching = Matching.of(deliveryRequestId, vehicle.getId());
+      Matching saved = matchingRepository.saveAndFlush(matching);
 
-      return matchingRepository.saveAndFlush(matching);
+      eventPublisher.publishEvent(
+          new DeliveryStatusChangedEvent(
+              deliveryRequestId, DeliveryStatus.MATCHED, LocalDateTime.now()));
+
+      return saved;
 
     } catch (DataIntegrityViolationException e) {
       throw new AlreadyMatchedException(deliveryRequestId, DeliveryStatus.MATCHED);
