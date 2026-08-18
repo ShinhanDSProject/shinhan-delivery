@@ -286,8 +286,12 @@ public class DeliveryService {
   }
 
   /** 매칭이 있으면 그 차량 소유주(Member) id를, 매칭이 없으면(아직 아무도 안 맡았으면) null을 반환한다. */
+  /**
+   * 엔티티 전체가 아니라 소유주(memberId)만 프로젝션으로 조회한다 — completeDelivery처럼 뒤이어 같은 차량에 비관적 락을 거는 호출 경로가 있어서,
+   * Vehicle 엔티티를 먼저 캐시에 올리지 않기 위함이다({@link VehicleService#getOwnerMemberId} 참고).
+   */
   private Long courierIdOf(Matching matching) {
-    return matching == null ? null : vehicleService.getById(matching.getVehicleId()).getMemberId();
+    return matching == null ? null : vehicleService.getOwnerMemberId(matching.getVehicleId());
   }
 
   /**

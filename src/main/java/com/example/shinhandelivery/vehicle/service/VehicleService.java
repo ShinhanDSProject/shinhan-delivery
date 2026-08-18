@@ -49,6 +49,19 @@ public class VehicleService {
   }
 
   /**
+   * 차량 id로 소유주(memberId)만 조회한다(엔티티를 영속성 컨텍스트에 올리지 않는 프로젝션). 같은 트랜잭션에서 뒤이어 {@link
+   * #getVehicleForUpdate}로 비관적 락을 걸 계획이라면 {@link #getById} 대신 이 메서드를 써야 한다 — 그렇지 않으면 먼저 로드된 Vehicle
+   * 엔티티가 1차 캐시에 올라가 있어서, 이후 락을 거는 조회가 DB 행 잠금은 정상적으로 걸어도 자바 객체 필드값은 잠금 전 상태 그대로인 그 캐시된 인스턴스를 그대로
+   * 반환해버린다.
+   */
+  @Transactional(readOnly = true)
+  public Long getOwnerMemberId(Long vehicleId) {
+    return vehicleRepository
+        .findMemberIdById(vehicleId)
+        .orElseThrow(() -> new EntityNotFoundException(ErrorCode.VEHICLE_NOT_FOUND));
+  }
+
+  /**
    * 매칭(배정) 직전에 비관적 쓰기 락으로 Vehicle을 조회한다. 동시에 들어온 다른 매칭 요청이 같은 차량을 동시에 가져가지 못하도록, 호출한 트랜잭션이 끝날 때까지
    * 해당 차량 행을 잠근다.
    */

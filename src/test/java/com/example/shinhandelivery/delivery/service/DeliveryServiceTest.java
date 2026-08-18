@@ -473,14 +473,13 @@ class DeliveryServiceTest {
     assertThat(created.getFeePoint()).isEqualTo(estimate.totalFee().longValueExact());
   }
 
-  /** confirmPickup/completeDelivery의 배정된 배송원 판정에 쓰이는 매칭·차량을 courierId 소유로 스텁한다. */
+  /** confirmPickup/completeDelivery의 배정된 배송원 판정에 쓰이는 매칭·차량 소유주를 courierId로 스텁한다. */
   private void stubAssignedCourier(Long deliveryRequestId, Long vehicleId, Long courierId) {
     Matching matching = new Matching();
     matching.setVehicleId(vehicleId);
     when(matchingRepository.findByDeliveryRequestId(deliveryRequestId))
         .thenReturn(Optional.of(matching));
-    when(vehicleService.getById(vehicleId))
-        .thenReturn(Vehicle.builder().id(vehicleId).memberId(courierId).build());
+    when(vehicleService.getOwnerMemberId(vehicleId)).thenReturn(courierId);
   }
 
   @Test
@@ -630,9 +629,7 @@ class DeliveryServiceTest {
     Matching matching = new Matching();
     matching.setVehicleId(10L);
     when(matchingRepository.findByDeliveryRequestId(1L)).thenReturn(Optional.of(matching));
-
-    Vehicle vehicle = Vehicle.builder().id(10L).memberId(20L).build();
-    when(vehicleService.getById(10L)).thenReturn(vehicle);
+    when(vehicleService.getOwnerMemberId(10L)).thenReturn(20L);
 
     ProofPhotoResponse response = deliveryService.getProofPhoto(20L, 1L);
 
@@ -705,9 +702,7 @@ class DeliveryServiceTest {
     Matching matching = new Matching();
     matching.setVehicleId(10L);
     when(matchingRepository.findByDeliveryRequestId(1L)).thenReturn(Optional.of(matching));
-
-    Vehicle vehicle = Vehicle.builder().id(10L).memberId(20L).build();
-    when(vehicleService.getById(10L)).thenReturn(vehicle);
+    when(vehicleService.getOwnerMemberId(10L)).thenReturn(20L);
 
     PickupPhotoResponse response = deliveryService.getPickupPhoto(20L, 1L);
 

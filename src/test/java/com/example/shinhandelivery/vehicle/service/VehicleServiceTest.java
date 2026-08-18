@@ -128,6 +128,25 @@ class VehicleServiceTest {
   }
 
   @Test
+  @DisplayName("존재하지 않는 차량 id로 소유주를 조회하면 EntityNotFoundException을 던진다")
+  void getOwnerMemberIdNotFoundShouldThrowException() {
+    when(vehicleRepository.findMemberIdById(1L)).thenReturn(Optional.empty());
+
+    assertThatThrownBy(() -> vehicleService.getOwnerMemberId(1L))
+        .isInstanceOf(EntityNotFoundException.class);
+  }
+
+  @Test
+  @DisplayName("존재하는 차량 id로 조회하면 소유주(memberId)만 반환한다")
+  void getOwnerMemberIdSuccess() {
+    when(vehicleRepository.findMemberIdById(1L)).thenReturn(Optional.of(7L));
+
+    Long memberId = vehicleService.getOwnerMemberId(1L);
+
+    assertThat(memberId).isEqualTo(7L);
+  }
+
+  @Test
   @DisplayName("비관적 락으로 존재하지 않는 차량을 조회하면 EntityNotFoundException을 던진다")
   void getVehicleForUpdateNotFoundShouldThrowException() {
     when(vehicleRepository.findByIdForUpdate(1L)).thenReturn(Optional.empty());
