@@ -756,6 +756,13 @@
   <div id="toast" class="toast-popup">메시지 내용</div>
 
   <script>
+    // 로그인 없이 /courier-home에 직접 접근하면 화면이 그려지기 전에 로그인 화면으로 보낸다(다른 화면들과 동일한 가드).
+    (function requireAuth() {
+      if (!localStorage.getItem('accessToken')) {
+        location.replace('/login');
+      }
+    })();
+
     let kakaoMap = null;
     let currentMarker = null;
     let allDeliveries = [];
@@ -853,6 +860,10 @@
         const res = await fetch('/api/v1/members/me', {
           headers: { 'Authorization': `Bearer ${token}` }
         });
+        if (res.status === 401) {
+          location.replace('/login');
+          return;
+        }
         if (res.ok) {
           const me = await res.json();
           if (me.courierApprovalStatus === 'PENDING' || me.courierApprovalStatus === 'REJECTED') {
