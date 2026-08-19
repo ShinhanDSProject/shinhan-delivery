@@ -1,8 +1,54 @@
 document.addEventListener('DOMContentLoaded', () => {
     // 비밀번호 확인 일치 실시간 검사
+    const emailInput = document.getElementById('email');
     const pwInput = document.getElementById('password');
     const confirmPwInput = document.getElementById('confirmPassword');
+    const phoneInput = document.getElementById('phoneNumber');
+    const emailStatus = document.getElementById('emailStatus');
+    const pwStatus = document.getElementById('pwStatus');
     const pwMatchStatus = document.getElementById('pwMatchStatus');
+    const phoneStatus = document.getElementById('phoneStatus');
+
+    if (typeof attachPhoneNumberFormatter === 'function' && phoneInput) {
+        attachPhoneNumberFormatter(phoneInput);
+    }
+
+    function updateStatusElement(targetElement, result) {
+        if (!targetElement) return;
+        if (!result || !result.message) {
+            targetElement.textContent = '';
+            targetElement.className = 'status-badge';
+            return;
+        }
+        targetElement.className = `status-badge ${result.valid ? 'success' : 'error'}`;
+        targetElement.textContent = `${result.valid ? '✓' : '✕'} ${result.message.replace(/^[✓✕]\s*/, '')}`;
+    }
+
+    if (typeof debounce === 'function' && typeof validateFieldWithServer === 'function') {
+        if (emailInput) {
+            emailInput.addEventListener('input', debounce(async (e) => {
+                if (!e.target.value.trim()) return updateStatusElement(emailStatus, null);
+                const res = await validateFieldWithServer('email', e.target.value.trim());
+                updateStatusElement(emailStatus, res);
+            }, 300));
+        }
+
+        if (pwInput) {
+            pwInput.addEventListener('input', debounce(async (e) => {
+                if (!e.target.value) return updateStatusElement(pwStatus, null);
+                const res = await validateFieldWithServer('password', e.target.value);
+                updateStatusElement(pwStatus, res);
+            }, 300));
+        }
+
+        if (phoneInput) {
+            phoneInput.addEventListener('input', debounce(async (e) => {
+                if (!e.target.value.trim()) return updateStatusElement(phoneStatus, null);
+                const res = await validateFieldWithServer('phoneNumber', e.target.value.trim());
+                updateStatusElement(phoneStatus, res);
+            }, 300));
+        }
+    }
 
     function checkPasswordMatch() {
         if (!confirmPwInput || !pwMatchStatus) return;

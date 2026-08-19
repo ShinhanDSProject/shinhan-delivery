@@ -36,6 +36,7 @@ public class SecurityConfig {
                         "/api/v1/members/login",
                         "/api/v1/members/refresh",
                         "/api/v1/members/logout",
+                        "/api/v1/members/validate",
                         "/api/v1/auth/**")
                     .permitAll()
                     .requestMatchers(

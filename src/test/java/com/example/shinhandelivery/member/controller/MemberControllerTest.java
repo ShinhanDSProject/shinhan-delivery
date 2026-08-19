@@ -17,9 +17,11 @@ import com.example.shinhandelivery.common.exception.GlobalExceptionHandler;
 import com.example.shinhandelivery.common.security.CustomUserDetails;
 import com.example.shinhandelivery.member.dto.request.LoginRequest;
 import com.example.shinhandelivery.member.dto.request.MemberCreateRequest;
+import com.example.shinhandelivery.member.dto.request.MemberFieldValidateRequest;
 import com.example.shinhandelivery.member.dto.request.MemberPasswordUpdateRequest;
 import com.example.shinhandelivery.member.dto.request.MemberProfileUpdateRequest;
 import com.example.shinhandelivery.member.dto.request.RefreshTokenRequest;
+import com.example.shinhandelivery.member.dto.response.MemberFieldValidateResponse;
 import com.example.shinhandelivery.member.dto.response.TokenResponse;
 import com.example.shinhandelivery.member.entity.Member;
 import com.example.shinhandelivery.member.entity.MemberRole;
@@ -93,6 +95,25 @@ class MemberControllerTest {
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.email").value("user@example.com"))
         .andExpect(jsonPath("$.role").value("CUSTOMER"));
+  }
+
+  @Test
+  @DisplayName("회원 필드 유효성 검증 API 호출 시 200 OK와 검증 결과를 반환한다")
+  void validateFieldShouldReturnOk() throws Exception {
+    MemberFieldValidateRequest request =
+        new MemberFieldValidateRequest("email", "user@example.com");
+    MemberFieldValidateResponse response = MemberFieldValidateResponse.ok("✓ 사용 가능한 이메일입니다.");
+
+    when(memberService.validateField(any())).thenReturn(response);
+
+    mockMvc
+        .perform(
+            post("/api/v1/members/validate")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.valid").value(true))
+        .andExpect(jsonPath("$.message").value("✓ 사용 가능한 이메일입니다."));
   }
 
   @Test
