@@ -36,7 +36,7 @@ public class VehicleService {
   @Transactional
   public Vehicle create(VehicleCreateRequest request) {
     if (request.getMemberId() == null) {
-      throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE, "회원 ID 정보가 필수입니다.");
+      throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
     }
     memberService.getById(request.getMemberId());
     return vehicleRepository.save(Vehicle.from(request));
@@ -86,10 +86,7 @@ public class VehicleService {
   public Vehicle getActiveVehicle(Long memberId) {
     return vehicleRepository
         .findByMemberIdAndIsActiveTrue(memberId)
-        .orElseThrow(
-            () ->
-                new BusinessException(
-                    ErrorCode.VEHICLE_NOT_FOUND, "활성화된 운송수단이 없습니다. 장비 탭에서 차량을 활성화해주세요."));
+        .orElseThrow(() -> new BusinessException(ErrorCode.VEHICLE_NOT_FOUND));
   }
 
   /**
@@ -102,10 +99,7 @@ public class VehicleService {
   public Long getActiveVehicleId(Long memberId) {
     return vehicleRepository
         .findActiveVehicleIdByMemberId(memberId)
-        .orElseThrow(
-            () ->
-                new BusinessException(
-                    ErrorCode.VEHICLE_NOT_FOUND, "활성화된 운송수단이 없습니다. 장비 탭에서 차량을 활성화해주세요."));
+        .orElseThrow(() -> new BusinessException(ErrorCode.VEHICLE_NOT_FOUND));
   }
 
   /** 소유자(MemberId) 기준 차량과 Member 정보를 Fetch Join으로 한 번에 조회한다. */

@@ -86,7 +86,8 @@ class CourierStatusServiceTest {
     // when & then
     assertThatThrownBy(() -> courierStatusService.updateWorkStatus(memberId, request))
         .isInstanceOf(BusinessException.class)
-        .hasMessageContaining("배송원(COURIER) 권한만");
+        .extracting("errorCode")
+        .isEqualTo(ErrorCode.ACCESS_DENIED);
   }
 
   @Test
@@ -116,9 +117,8 @@ class CourierStatusServiceTest {
 
     assertThatThrownBy(() -> courierStatusService.updateWorkStatus(memberId, request))
         .isInstanceOf(BusinessException.class)
-        .hasMessageContaining("서류 심사가 진행 중입니다")
         .extracting("errorCode")
-        .isEqualTo(ErrorCode.ACCESS_DENIED);
+        .isEqualTo(ErrorCode.COURIER_APPROVAL_PENDING);
   }
 
   @Test
@@ -160,7 +160,8 @@ class CourierStatusServiceTest {
 
     assertThatThrownBy(() -> courierStatusService.updateWorkStatus(memberId, request))
         .isInstanceOf(BusinessException.class)
-        .hasMessageContaining("등록된 차량");
+        .extracting("errorCode")
+        .isEqualTo(ErrorCode.COURIER_VEHICLE_REQUIRED);
   }
 
   @Test

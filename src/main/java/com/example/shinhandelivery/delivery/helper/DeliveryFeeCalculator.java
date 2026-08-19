@@ -1,6 +1,8 @@
 package com.example.shinhandelivery.delivery.helper;
 
 import com.example.shinhandelivery.common.domain.Location;
+import com.example.shinhandelivery.common.exception.BusinessException;
+import com.example.shinhandelivery.common.exception.ErrorCode;
 import com.example.shinhandelivery.delivery.dto.response.DeliveryEstimateResponse;
 import com.example.shinhandelivery.delivery.entity.ItemSize;
 import java.math.BigDecimal;
@@ -23,7 +25,7 @@ public class DeliveryFeeCalculator {
   /** Location 값 객체를 받아 두 좌표 간의 대권 거리를 계산한다(단위: km). */
   public double calculateDistanceKm(Location start, Location destination) {
     if (start == null || destination == null) {
-      throw new IllegalArgumentException("출발지(start)와 목적지(destination) 위치는 null일 수 없습니다.");
+      throw new BusinessException(ErrorCode.INVALID_LOCATION_TARGET);
     }
     return start.distanceToKm(destination);
   }

@@ -27,19 +27,19 @@ public class CourierStatusService {
   public CourierStatusResponse updateWorkStatus(Long memberId, CourierStatusUpdateRequest request) {
     List<Vehicle> vehicles = vehicleService.getVehiclesWithMemberByMemberId(memberId);
     if (vehicles.isEmpty()) {
-      throw new BusinessException(ErrorCode.VEHICLE_NOT_FOUND, "등록된 차량(운송수단)이 없어 출근할 수 없습니다.");
+      throw new BusinessException(ErrorCode.COURIER_VEHICLE_REQUIRED);
     }
 
     Vehicle vehicle = vehicles.get(0);
     if (vehicle.getMember().getRole() != MemberRole.COURIER) {
-      throw new BusinessException(ErrorCode.ACCESS_DENIED, "배송원(COURIER) 권한만 영업 상태를 설정할 수 있습니다.");
+      throw new BusinessException(ErrorCode.ACCESS_DENIED);
     }
 
     WorkStatus workStatus = request.getStatus();
 
     if (workStatus == WorkStatus.ONLINE) {
       if (vehicle.getMember().getCourierApprovalStatus() != CourierApprovalStatus.APPROVED) {
-        throw new BusinessException(ErrorCode.ACCESS_DENIED, "서류 심사가 진행 중입니다. 관리자 승인 후 이용 가능합니다.");
+        throw new BusinessException(ErrorCode.COURIER_APPROVAL_PENDING);
       }
       vehicle.setStatus(VehicleStatus.AVAILABLE);
     } else {

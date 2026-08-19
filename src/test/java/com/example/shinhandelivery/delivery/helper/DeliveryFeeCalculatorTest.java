@@ -5,6 +5,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.data.Offset.offset;
 
 import com.example.shinhandelivery.common.domain.Location;
+import com.example.shinhandelivery.common.exception.BusinessException;
+import com.example.shinhandelivery.common.exception.ErrorCode;
 import com.example.shinhandelivery.delivery.dto.response.DeliveryEstimateResponse;
 import com.example.shinhandelivery.delivery.entity.ItemSize;
 import java.math.BigDecimal;
@@ -41,12 +43,14 @@ class DeliveryFeeCalculatorTest {
     Location loc = Location.of(37.5, 127.0);
 
     assertThatThrownBy(() -> calculator.calculateDistanceKm(null, loc))
-        .isInstanceOf(IllegalArgumentException.class)
-        .hasMessageContaining("출발지(start)와 목적지(destination) 위치는 null일 수 없습니다.");
+        .isInstanceOf(BusinessException.class)
+        .extracting("errorCode")
+        .isEqualTo(ErrorCode.INVALID_LOCATION_TARGET);
 
     assertThatThrownBy(() -> calculator.calculateDistanceKm(loc, null))
-        .isInstanceOf(IllegalArgumentException.class)
-        .hasMessageContaining("출발지(start)와 목적지(destination) 위치는 null일 수 없습니다.");
+        .isInstanceOf(BusinessException.class)
+        .extracting("errorCode")
+        .isEqualTo(ErrorCode.INVALID_LOCATION_TARGET);
   }
 
   @Test

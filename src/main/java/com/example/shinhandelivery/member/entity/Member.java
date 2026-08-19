@@ -75,7 +75,7 @@ public class Member {
   /** 회원의 역할(CUSTOMER/COURIER)을 변경한다. ADMIN 권한 승격은 직접 변경을 불허한다. */
   public Member changeRole(MemberRole newRole) {
     if (newRole == null) {
-      throw new IllegalArgumentException("변경할 역할은 필수 선택 항목입니다.");
+      throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
     }
     if (newRole == MemberRole.ADMIN) {
       throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
@@ -90,7 +90,7 @@ public class Member {
   /** 배송원의 자격 심사를 최종 승인한다. */
   public Member approveCourier() {
     if (this.proofDocumentUrl == null || this.proofDocumentUrl.isBlank()) {
-      throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE, "증빙 서류가 등록되지 않은 배송원은 승인할 수 없습니다.");
+      throw new BusinessException(ErrorCode.COURIER_PROOF_REQUIRED);
     }
     this.courierApprovalStatus = CourierApprovalStatus.APPROVED;
     return this;
@@ -115,7 +115,7 @@ public class Member {
   /** 암호화된 새 비밀번호로 회원 비밀번호를 변경한다. */
   public Member changePassword(String encodedPassword) {
     if (encodedPassword == null || encodedPassword.isBlank()) {
-      throw new IllegalArgumentException("암호화된 비밀번호는 필수입니다.");
+      throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
     }
     this.password = encodedPassword;
     return this;
@@ -153,7 +153,7 @@ public class Member {
   /** 결제 PIN을 저장하고 잠금/실패 횟수를 초기화한다. */
   public Member changePaymentPin(String encodedPin) {
     if (encodedPin == null || encodedPin.isBlank()) {
-      throw new IllegalArgumentException("인코딩된 결제 PIN은 필수입니다.");
+      throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
     }
     this.pinHash = encodedPin;
     this.pinFailCount = 0;

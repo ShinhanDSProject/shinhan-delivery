@@ -16,6 +16,8 @@ public enum ErrorCode {
   INVALID_FILE_TYPE(HttpStatus.BAD_REQUEST, "C005", "허용하지 않는 파일 형식입니다."),
   FILE_TOO_LARGE(HttpStatus.BAD_REQUEST, "C006", "파일 크기가 허용 범위를 초과했습니다."),
   ACCESS_DENIED(HttpStatus.FORBIDDEN, "C007", "접근 권한이 없습니다."),
+  INVALID_LOCATION_TARGET(HttpStatus.BAD_REQUEST, "C008", "목적지 위치 정보는 필수입니다."),
+  INVALID_LOCATION_COORDINATES(HttpStatus.BAD_REQUEST, "C009", "위도/경도 좌표 범위가 유효하지 않습니다."),
 
   // Member Domain Errors
   MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "M001", "존재하지 않는 회원입니다."),
@@ -24,7 +26,10 @@ public enum ErrorCode {
   CURRENT_PASSWORD_MISMATCH(HttpStatus.BAD_REQUEST, "M004", "현재 비밀번호가 일치하지 않습니다."),
   PASSWORD_CONFIRMATION_MISMATCH(HttpStatus.BAD_REQUEST, "M005", "새 비밀번호와 비밀번호 확인이 일치하지 않습니다."),
   PASSWORD_REUSE_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "M006", "현재 비밀번호와 다른 비밀번호를 입력해야 합니다."),
+  COURIER_APPROVAL_PENDING(HttpStatus.FORBIDDEN, "M007", "서류 심사가 진행 중입니다. 관리자 승인 후 이용 가능합니다."),
+  COURIER_PROOF_REQUIRED(HttpStatus.BAD_REQUEST, "M008", "증빙 서류가 등록되지 않은 배송원은 승인할 수 없습니다."),
   UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "A001", "인증 권한이 필요합니다."),
+  INVALID_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "A002", "유효하지 않거나 만료된 리프레시 토큰입니다."),
 
   // Vehicle Domain Errors
   VEHICLE_NOT_FOUND(HttpStatus.NOT_FOUND, "V001", "존재하지 않는 차량입니다."),
@@ -44,6 +49,7 @@ public enum ErrorCode {
   VEHICLE_CAPACITY_MISMATCH(HttpStatus.BAD_REQUEST, "V002", "차량이 배송 조건을 감당할 수 없습니다."),
   VEHICLE_NOT_AVAILABLE(HttpStatus.CONFLICT, "V003", "이미 배정되어 사용할 수 없는 차량입니다."),
   VEHICLE_NOT_APPROVED(HttpStatus.BAD_REQUEST, "V004", "승인 완료된 장비만 활성화할 수 있습니다."),
+  COURIER_VEHICLE_REQUIRED(HttpStatus.BAD_REQUEST, "V005", "등록된 차량(운송수단)이 없어 출근할 수 없습니다."),
 
   // Payment Domain Errors
   POINT_WALLET_NOT_FOUND(HttpStatus.NOT_FOUND, "P001", "포인트 지갑 정보를 찾을 수 없습니다."),
@@ -53,6 +59,7 @@ public enum ErrorCode {
   PIN_LOCKED(HttpStatus.CONFLICT, "P005", "결제 PIN을 3회 이상 실패하여 잠겼습니다."),
   CURRENT_PIN_MISMATCH(HttpStatus.BAD_REQUEST, "P006", "현재 결제 PIN이 일치하지 않습니다."),
   PIN_CONFIRMATION_MISMATCH(HttpStatus.BAD_REQUEST, "P007", "새 결제 PIN과 확인 PIN이 일치하지 않습니다."),
+  PIN_SETTING_REQUIRED(HttpStatus.FORBIDDEN, "P008", "결제 PIN 설정 후 이용할 수 있습니다."),
 
   // Notification Domain Errors
   NOTIFICATION_NOT_FOUND(HttpStatus.NOT_FOUND, "N001", "존재하지 않는 알림입니다."),

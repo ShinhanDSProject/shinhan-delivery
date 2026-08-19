@@ -1,5 +1,7 @@
 package com.example.shinhandelivery.common.domain;
 
+import com.example.shinhandelivery.common.exception.BusinessException;
+import com.example.shinhandelivery.common.exception.ErrorCode;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import lombok.AccessLevel;
@@ -46,7 +48,7 @@ public class Location {
    */
   public double distanceToKm(Location target) {
     if (target == null) {
-      throw new IllegalArgumentException("목적지 위치(target)는 null일 수 없습니다.");
+      throw new BusinessException(ErrorCode.INVALID_LOCATION_TARGET);
     }
     double dLat = Math.toRadians(target.latitude - this.latitude);
     double dLon = Math.toRadians(target.longitude - this.longitude);
@@ -62,16 +64,10 @@ public class Location {
 
   private static void validateCoordinates(double latitude, double longitude) {
     if (latitude < MIN_LATITUDE || latitude > MAX_LATITUDE) {
-      throw new IllegalArgumentException(
-          String.format(
-              "위도(latitude)는 %.1f~%.1f 범위 내여야 합니다. (입력값: %.6f)",
-              MIN_LATITUDE, MAX_LATITUDE, latitude));
+      throw new BusinessException(ErrorCode.INVALID_LOCATION_COORDINATES);
     }
     if (longitude < MIN_LONGITUDE || longitude > MAX_LONGITUDE) {
-      throw new IllegalArgumentException(
-          String.format(
-              "경도(longitude)는 %.1f~%.1f 범위 내여야 합니다. (입력값: %.6f)",
-              MIN_LONGITUDE, MAX_LONGITUDE, longitude));
+      throw new BusinessException(ErrorCode.INVALID_LOCATION_COORDINATES);
     }
   }
 }

@@ -283,6 +283,16 @@ public class DuplicateMemberException extends BusinessException {
 
 - 그 결과 해당 요청 처리 중 찍히는 모든 로그 라인(`logback-spring.xml` 패턴에 `[%X{traceId}]` 반영)과 `ErrorResponse.traceId`가 자동으로 같은 값을 갖는다.
 - 개발자는 로그를 남기거나 예외를 던질 때 traceId를 직접 다루는 코드를 작성할 필요가 없다 — 필터가 이미 MDC에 넣어둔 값을 로깅 프레임워크와 `ErrorResponse`가 알아서 읽는다.
+
+### 6.5 예외 메시지 하드코딩 금지 및 ErrorCode Enum 일관성 수칙 (Strict Rule)
+
+1. **표준 예외 및 하드코딩 메시지 사용 금지**:
+   - `throw new IllegalArgumentException("존재하지 않는 회원입니다.")` 처럼 Java 표준 예외(`IllegalArgumentException`, `RuntimeException`)를 직접 인스턴스화하거나 예외 메시지 문자열을 하드코딩하여 던지는 구문을 100% 금지한다.
+2. **`ErrorCode` Enum 필수 사용**:
+   - 모든 비즈니스 예외 발생 시 `common.exception.ErrorCode` Enum에 정의된 고유 코드를 주입하여 `throw new BusinessException(ErrorCode.MEMBER_NOT_FOUND)` 또는 `throw new EntityNotFoundException(ErrorCode.DELIVERY_NOT_FOUND)` 형태로 발화한다.
+3. **신규 에러 발생 상황 처리**:
+   - 신규 예외 상황 발생 시 임의의 String 파라미터를 하드코딩하지 말고, `ErrorCode` Enum에 도메인별 고유 에러 코드(`C008`, `M007`, `V005` 등) 및 명확한 한국어 안내 메시지를 추가한 후 사용한다.
+
 - 장애 문의 시 클라이언트가 알려준 `traceId`로 로그를 검색하면 해당 요청의 전체 처리 과정을 즉시 역추적할 수 있다.
 
 ---

@@ -42,7 +42,7 @@ public class VehicleController {
       request.setMemberId(userDetails.getId());
     }
     if (request.getMemberId() == null || request.getMemberId() <= 0) {
-      throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE, "회원 인증 정보가 유효하지 않습니다.");
+      throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
     }
     Vehicle created = vehicleService.create(request);
     return ResponseEntity.status(HttpStatus.CREATED).body(VehicleResponse.from(created));
@@ -53,7 +53,7 @@ public class VehicleController {
   public ResponseEntity<List<VehicleResponse>> getMyVehicles(
       @AuthenticationPrincipal CustomUserDetails userDetails) {
     if (userDetails == null) {
-      throw new BusinessException(ErrorCode.ACCESS_DENIED, "로그인이 필요합니다.");
+      throw new BusinessException(ErrorCode.UNAUTHORIZED);
     }
     Long memberId = userDetails.getId();
     List<VehicleResponse> responses =
