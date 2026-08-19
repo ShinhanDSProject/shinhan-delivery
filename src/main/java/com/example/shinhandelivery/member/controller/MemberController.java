@@ -6,6 +6,7 @@ import com.example.shinhandelivery.common.security.CookieUtils;
 import com.example.shinhandelivery.common.security.CustomUserDetails;
 import com.example.shinhandelivery.member.dto.request.LoginRequest;
 import com.example.shinhandelivery.member.dto.request.MemberCreateRequest;
+import com.example.shinhandelivery.member.dto.request.MemberFieldValidateRequest;
 import com.example.shinhandelivery.member.dto.request.MemberPasswordUpdateRequest;
 import com.example.shinhandelivery.member.dto.request.MemberPaymentPinUpdateRequest;
 import com.example.shinhandelivery.member.dto.request.MemberProfileUpdateRequest;
@@ -13,6 +14,7 @@ import com.example.shinhandelivery.member.dto.request.MemberRoleUpdateRequest;
 import com.example.shinhandelivery.member.dto.request.MemberUpdateRequest;
 import com.example.shinhandelivery.member.dto.request.ProofDocumentUpdateRequest;
 import com.example.shinhandelivery.member.dto.request.RefreshTokenRequest;
+import com.example.shinhandelivery.member.dto.response.MemberFieldValidateResponse;
 import com.example.shinhandelivery.member.dto.response.MemberProfileResponse;
 import com.example.shinhandelivery.member.dto.response.MemberResponse;
 import com.example.shinhandelivery.member.dto.response.TokenResponse;
@@ -47,6 +49,14 @@ import org.springframework.web.bind.annotation.RestController;
 public class MemberController {
 
   private final MemberService memberService;
+
+  /** 실시간 회원 필드(이메일, 비밀번호, 전화번호) 단건 유효성 검증 API. */
+  @PostMapping("/validate")
+  public ResponseEntity<MemberFieldValidateResponse> validateField(
+      @Valid @RequestBody MemberFieldValidateRequest request) {
+    MemberFieldValidateResponse response = memberService.validateField(request);
+    return ResponseEntity.ok(response);
+  }
 
   /** 회원을 생성(가입)한다. */
   @PostMapping

@@ -27,3 +27,33 @@ function formatRelativeTime(isoString) {
     const days = Math.floor(hours / 24);
     return `${days}일 전`;
 }
+
+function debounce(func, wait = 300) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+async function validateFieldWithServer(field, value) {
+    try {
+        const response = await fetch('/api/v1/members/validate', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ field, value })
+        });
+        if (!response.ok) {
+            return { valid: false, message: '서버 검증 요청 중 오류가 발생했습니다.' };
+        }
+        return await response.json();
+    } catch (error) {
+        return { valid: false, message: '네트워크 연결 상태를 확인해주세요.' };
+    }
+}

@@ -9,7 +9,9 @@ import static org.mockito.Mockito.when;
 import com.example.shinhandelivery.common.exception.BusinessException;
 import com.example.shinhandelivery.common.exception.EntityNotFoundException;
 import com.example.shinhandelivery.member.dto.request.MemberCreateRequest;
+import com.example.shinhandelivery.member.dto.request.MemberFieldValidateRequest;
 import com.example.shinhandelivery.member.dto.request.MemberProfileUpdateRequest;
+import com.example.shinhandelivery.member.dto.response.MemberFieldValidateResponse;
 import com.example.shinhandelivery.member.entity.CourierApprovalStatus;
 import com.example.shinhandelivery.member.entity.Member;
 import com.example.shinhandelivery.member.entity.MemberRole;
@@ -252,5 +254,31 @@ class MemberServiceTest {
 
     assertThat(result.getRole()).isEqualTo(MemberRole.COURIER);
     assertThat(result.getCourierApprovalStatus()).isEqualTo(CourierApprovalStatus.PENDING);
+  }
+
+  @Test
+  @DisplayName("이미 가입된 이메일인 경우 validateField는 fail 응답을 반환한다")
+  void validateFieldDuplicateEmail() {
+    MemberFieldValidateRequest request =
+        new MemberFieldValidateRequest("email", "user@example.com");
+    when(memberRepository.existsByEmail("user@example.com")).thenReturn(true);
+
+    MemberFieldValidateResponse response = memberService.validateField(request);
+
+    assertThat(response.isValid()).isFalse();
+    assertThat(response.getMessage()).isEqualTo("이미 가입된 이메일 주소입니다.");
+  }
+
+  @Test
+  @DisplayName("올바른 이메일인 경우 validateField는 ok 응답을 반환한다")
+  void validateFieldSuccess() {
+    MemberFieldValidateRequest request =
+        new MemberFieldValidateRequest("email", "newuser@example.com");
+    when(memberRepository.existsByEmail("newuser@example.com")).thenReturn(false);
+
+    MemberFieldValidateResponse response = memberService.validateField(request);
+
+    assertThat(response.isValid()).isTrue();
+    assertThat(response.getMessage()).isEqualTo("✓ 사용 가능한 이메일입니다.");
   }
 }

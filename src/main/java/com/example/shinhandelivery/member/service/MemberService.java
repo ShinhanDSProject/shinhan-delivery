@@ -6,10 +6,12 @@ import com.example.shinhandelivery.common.exception.ErrorCode;
 import com.example.shinhandelivery.common.security.JwtProvider;
 import com.example.shinhandelivery.member.dto.request.LoginRequest;
 import com.example.shinhandelivery.member.dto.request.MemberCreateRequest;
+import com.example.shinhandelivery.member.dto.request.MemberFieldValidateRequest;
 import com.example.shinhandelivery.member.dto.request.MemberPasswordUpdateRequest;
 import com.example.shinhandelivery.member.dto.request.MemberPaymentPinUpdateRequest;
 import com.example.shinhandelivery.member.dto.request.MemberProfileUpdateRequest;
 import com.example.shinhandelivery.member.dto.request.MemberUpdateRequest;
+import com.example.shinhandelivery.member.dto.response.MemberFieldValidateResponse;
 import com.example.shinhandelivery.member.dto.response.TokenResponse;
 import com.example.shinhandelivery.member.entity.CourierApprovalStatus;
 import com.example.shinhandelivery.member.entity.Member;
@@ -39,6 +41,55 @@ public class MemberService {
   private final JwtProvider jwtProvider;
   private final VehicleService vehicleService;
   private final PointWalletProvisioningService pointWalletProvisioningService;
+
+  /** 이메일, 전화번호, 비밀번호 등 필드 단건 유효성을 검증한다. */
+  @Transactional(readOnly = true)
+  public MemberFieldValidateResponse validateField(MemberFieldValidateRequest request) {
+    if (request == null || request.getField() == null) {
+      return MemberFieldValidateResponse.fail("검증 대상 필드 정보가 올바르지 않습니다.");
+    }
+
+    String field = request.getField().trim();
+    String value = request.getValue() != null ? request.getValue().trim() : "";
+
+    switch (field) {
+      case "email":
+        if (value.isBlank()) {
+          return MemberFieldValidateResponse.fail("이메일 주소를 입력해주세요.");
+        }
+        if (!value.matches("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
+          return MemberFieldValidateResponse.fail("올바른 이메일 형식이어야 합니다.");
+        }
+        if (memberRepository.existsByEmail(value)) {
+          return MemberFieldValidateResponse.fail("이미 가입된 이메일 주소입니다.");
+        }
+        return MemberFieldValidateResponse.ok("✓ 사용 가능한 이메일입니다.");
+
+      case "phoneNumber":
+        if (value.isBlank()) {
+          return MemberFieldValidateResponse.fail("휴대폰 번호를 입력해주세요.");
+        }
+        if (!value.matches("^\\d{2,3}-\\d{3,4}-\\d{4}$")) {
+          return MemberFieldValidateResponse.fail("올바른 전화번호 형식(예: 010-1234-5678)이어야 합니다.");
+        }
+        return MemberFieldValidateResponse.ok("✓ 올바른 전화번호 형식입니다.");
+
+      case "password":
+        if (value.isBlank()) {
+          return MemberFieldValidateResponse.fail("비밀번호를 입력해주세요.");
+        }
+        if (value.length() < 8 || value.length() > 100) {
+          return MemberFieldValidateResponse.fail("비밀번호는 8자 이상 100자 이하이어야 합니다.");
+        }
+        if (!value.matches("^(?=.*[A-Za-z])(?=.*\\d)(?=.*[^A-Za-z\\d\\s]).+$")) {
+          return MemberFieldValidateResponse.fail("비밀번호는 영문, 숫자, 특수문자를 모두 포함해야 합니다.");
+        }
+        return MemberFieldValidateResponse.ok("✓ 사용 가능한 비밀번호 조합입니다.");
+
+      default:
+        return MemberFieldValidateResponse.fail("지원하지 않는 검증 필드입니다.");
+    }
+  }
 
   /** 이메일 중복을 검증하고 비밀번호를 암호화해 회원을 생성한다 (Entity 리턴). */
   @Transactional
