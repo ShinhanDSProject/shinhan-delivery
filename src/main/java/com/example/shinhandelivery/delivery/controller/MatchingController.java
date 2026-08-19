@@ -12,6 +12,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,10 +23,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-/** Matching CRUD API를 제공하는 컨트롤러. */
+/**
+ * 관리자 전용 Matching CRUD API를 제공하는 컨트롤러. 배송원의 실제 콜 수락은 {@code DeliveryController#catchDelivery}(자기 소유
+ * 차량으로만 수락 가능)를 거치며, 이 컨트롤러는 임의의 배송 요청·차량을 직접 매칭시키거나 상태를 바꿀 수 있어 운영자 개입 용도로만 열어둔다.
+ */
 @RestController
 @RequestMapping("/api/v1/matchings")
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('ADMIN')")
 public class MatchingController {
 
   private final MatchingService matchingService;

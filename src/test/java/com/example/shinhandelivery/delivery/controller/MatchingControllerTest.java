@@ -21,14 +21,29 @@ import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.test.context.support.WithAnonymousUser;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.ObjectMapper;
 
+/**
+ * {@code @PreAuthorize}가 실제로 걸러내는지 검증하려면 {@code @EnableMethodSecurity}가 슬라이스 컨텍스트에 있어야 한다. 다만
+ * SecurityConfig 전체(JWT 필터·STATELESS 세션 정책이 있는 실제 SecurityFilterChain)를 그대로 가져오면
+ * {@code @WithMockUser}가 채워둔 인증 정보를 필터 체인이 덮어써버리므로, 메서드 보안 AOP만 활성화하는 최소 설정을 별도로 둔다.
+ */
 @WebMvcTest(MatchingController.class)
+@Import(MatchingControllerTest.MethodSecurityTestConfig.class)
 class MatchingControllerTest {
+
+  @TestConfiguration
+  @EnableMethodSecurity
+  static class MethodSecurityTestConfig {}
 
   @Autowired private MockMvc mockMvc;
   @Autowired private ObjectMapper objectMapper;
@@ -36,6 +51,23 @@ class MatchingControllerTest {
   @MockitoBean private MatchingService matchingService;
 
   @Test
+  @WithAnonymousUser
+  @DisplayName("ADMIN이 아니면 매칭 생성 요청이 거부된다")
+  void createMatchingWithoutAdminRoleShouldBeForbidden() throws Exception {
+    MatchingCreateRequest request = new MatchingCreateRequest();
+    request.setDeliveryRequestId(1L);
+    request.setVehicleId(2L);
+
+    mockMvc
+        .perform(
+            post("/api/v1/matchings")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isForbidden());
+  }
+
+  @Test
+  @WithMockUser(roles = "ADMIN")
   @DisplayName("매칭 생성 요청을 받으면 생성된 매칭을 반환한다")
   void createMatchingSuccess() throws Exception {
     MatchingCreateRequest request = new MatchingCreateRequest();
@@ -58,6 +90,7 @@ class MatchingControllerTest {
   }
 
   @Test
+  @WithMockUser(roles = "ADMIN")
   @DisplayName("차량의 열린 콜 목록을 조회한다")
   void getOpenCallsSuccess() throws Exception {
     DeliveryRequest deliveryRequest = new DeliveryRequest();
@@ -80,6 +113,7 @@ class MatchingControllerTest {
   }
 
   @Test
+  @WithMockUser(roles = "ADMIN")
   @DisplayName("존재하지 않는 매칭을 조회하면 404를 반환한다")
   void getMatchingNotFoundShouldReturn404() throws Exception {
     when(matchingService.getById(eq(999L)))
@@ -89,6 +123,7 @@ class MatchingControllerTest {
   }
 
   @Test
+  @WithMockUser(roles = "ADMIN")
   @DisplayName("매칭 생성시 deliveryRequestId가 없으면 400을 반환한다")
   void createMatchingMissingDeliveryRequestIdShouldReturn400() throws Exception {
     MatchingCreateRequest request = new MatchingCreateRequest();
@@ -103,6 +138,7 @@ class MatchingControllerTest {
   }
 
   @Test
+  @WithMockUser(roles = "ADMIN")
   @DisplayName("매칭 상태 변경시 status가 없으면 400을 반환한다")
   void updateMatchingMissingStatusShouldReturn400() throws Exception {
     MatchingUpdateRequest request = new MatchingUpdateRequest();
