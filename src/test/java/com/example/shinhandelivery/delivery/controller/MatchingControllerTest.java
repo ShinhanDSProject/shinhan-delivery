@@ -52,6 +52,26 @@ class MatchingControllerTest {
 
   @Test
   @WithAnonymousUser
+  @DisplayName("로그인하지 않으면 조회조차 거부된다")
+  void getMatchingsWithoutAuthenticationShouldBeForbidden() throws Exception {
+    mockMvc.perform(get("/api/v1/matchings")).andExpect(status().isForbidden());
+  }
+
+  @Test
+  @WithMockUser
+  @DisplayName("ADMIN이 아니어도 로그인한 회원이면 매칭 목록을 조회할 수 있다 (고객의 실시간 추적 화면이 이 API를 그대로 씀)")
+  void getMatchingsAsNonAdminMemberShouldSucceed() throws Exception {
+    Matching matching = Matching.builder().id(1L).deliveryRequestId(10L).vehicleId(20L).build();
+    when(matchingService.list()).thenReturn(List.of(matching));
+
+    mockMvc
+        .perform(get("/api/v1/matchings"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$[0].deliveryRequestId").value(10L));
+  }
+
+  @Test
+  @WithMockUser
   @DisplayName("ADMIN이 아니면 매칭 생성 요청이 거부된다")
   void createMatchingWithoutAdminRoleShouldBeForbidden() throws Exception {
     MatchingCreateRequest request = new MatchingCreateRequest();

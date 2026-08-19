@@ -24,19 +24,22 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * 관리자 전용 Matching CRUD API를 제공하는 컨트롤러. 배송원의 실제 콜 수락은 {@code DeliveryController#catchDelivery}(자기 소유
- * 차량으로만 수락 가능)를 거치며, 이 컨트롤러는 임의의 배송 요청·차량을 직접 매칭시키거나 상태를 바꿀 수 있어 운영자 개입 용도로만 열어둔다.
+ * Matching 조회 API를 제공하는 컨트롤러. 조회(GET)는 {@code realtime-tracking.html}처럼 고객이 본인 배송의 매칭 정보를 확인하는 실사용
+ * 경로가 있어 로그인한 회원이면 누구나 접근할 수 있다. 반면 생성·변경·삭제는 배송원의 실제 콜 수락({@code
+ * DeliveryController#catchDelivery}, 자기 소유 차량으로만 가능)을 우회해 임의의 배송 요청·차량을 직접 매칭시키거나 상태를 바꿀 수 있어 운영자
+ * 개입 용도로만 열어둔다.
  */
 @RestController
 @RequestMapping("/api/v1/matchings")
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('ADMIN')")
+@PreAuthorize("isAuthenticated()")
 public class MatchingController {
 
   private final MatchingService matchingService;
 
-  /** 매칭을 생성한다. */
+  /** 매칭을 생성한다. 임의의 배송 요청·차량을 직접 매칭시킬 수 있어 관리자만 호출할 수 있다. */
   @PostMapping
+  @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<MatchingResponse> createMatching(
       @RequestBody @Valid MatchingCreateRequest request) {
     Matching created = matchingService.create(request);
@@ -64,16 +67,18 @@ public class MatchingController {
     return ResponseEntity.ok(responses);
   }
 
-  /** 매칭 상태를 변경한다. */
+  /** 매칭 상태를 변경한다. 진행 중인 임의의 매칭을 강제로 전이시킬 수 있어 관리자만 호출할 수 있다. */
   @PutMapping("/{matchingId}")
+  @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<MatchingResponse> updateMatching(
       @PathVariable Long matchingId, @RequestBody @Valid MatchingUpdateRequest request) {
     Matching updated = matchingService.update(matchingId, request);
     return ResponseEntity.ok(MatchingResponse.from(updated));
   }
 
-  /** 매칭을 삭제한다. */
+  /** 매칭을 삭제한다. 관리자만 호출할 수 있다. */
   @DeleteMapping("/{matchingId}")
+  @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<Void> deleteMatching(@PathVariable Long matchingId) {
     matchingService.delete(matchingId);
     return ResponseEntity.noContent().build();
