@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.data.Offset.offset;
 
+import com.example.shinhandelivery.common.exception.BusinessException;
+import com.example.shinhandelivery.common.exception.ErrorCode;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -28,24 +30,28 @@ class LocationTest {
   @DisplayName("위도가 -90~90 범위를 벗어나면 예외가 발생한다.")
   void createLocationInvalidLatitude() {
     assertThatThrownBy(() -> Location.of(91.0, 127.0))
-        .isInstanceOf(IllegalArgumentException.class)
-        .hasMessageContaining("위도(latitude)는 -90.0~90.0 범위 내여야 합니다.");
+        .isInstanceOf(BusinessException.class)
+        .extracting("errorCode")
+        .isEqualTo(ErrorCode.INVALID_LOCATION_COORDINATES);
 
     assertThatThrownBy(() -> Location.of(-90.1, 127.0))
-        .isInstanceOf(IllegalArgumentException.class)
-        .hasMessageContaining("위도(latitude)는 -90.0~90.0 범위 내여야 합니다.");
+        .isInstanceOf(BusinessException.class)
+        .extracting("errorCode")
+        .isEqualTo(ErrorCode.INVALID_LOCATION_COORDINATES);
   }
 
   @Test
   @DisplayName("경도가 -180~180 범위를 벗어나면 예외가 발생한다.")
   void createLocationInvalidLongitude() {
     assertThatThrownBy(() -> Location.of(37.5, 181.0))
-        .isInstanceOf(IllegalArgumentException.class)
-        .hasMessageContaining("경도(longitude)는 -180.0~180.0 범위 내여야 합니다.");
+        .isInstanceOf(BusinessException.class)
+        .extracting("errorCode")
+        .isEqualTo(ErrorCode.INVALID_LOCATION_COORDINATES);
 
     assertThatThrownBy(() -> Location.of(37.5, -180.1))
-        .isInstanceOf(IllegalArgumentException.class)
-        .hasMessageContaining("경도(longitude)는 -180.0~180.0 범위 내여야 합니다.");
+        .isInstanceOf(BusinessException.class)
+        .extracting("errorCode")
+        .isEqualTo(ErrorCode.INVALID_LOCATION_COORDINATES);
   }
 
   @Test

@@ -79,14 +79,14 @@ public class MemberService {
   @Transactional(readOnly = true)
   public TokenResponse refresh(String refreshToken) {
     if (refreshToken == null || !jwtProvider.validateToken(refreshToken)) {
-      throw new BusinessException(ErrorCode.UNAUTHORIZED, "유효하지 않거나 만료된 리프레시 토큰입니다.");
+      throw new BusinessException(ErrorCode.INVALID_REFRESH_TOKEN);
     }
 
     Claims claims = jwtProvider.parseClaims(refreshToken);
     Object idObj = claims.get("id");
     Long memberId = idObj instanceof Number ? ((Number) idObj).longValue() : null;
     if (memberId == null) {
-      throw new BusinessException(ErrorCode.UNAUTHORIZED, "리프레시 토큰 정보가 유효하지 않습니다.");
+      throw new BusinessException(ErrorCode.INVALID_REFRESH_TOKEN);
     }
 
     Member member = findMemberOrThrow(memberId);
@@ -120,7 +120,7 @@ public class MemberService {
   public void requirePaymentPinConfigured(Long memberId) {
     Member member = findMemberOrThrow(memberId);
     if (member.getPinHash() == null || member.getPinHash().isBlank()) {
-      throw new BusinessException(ErrorCode.ACCESS_DENIED, "결제 PIN 설정 후 이용할 수 있습니다.");
+      throw new BusinessException(ErrorCode.PIN_SETTING_REQUIRED);
     }
   }
 
