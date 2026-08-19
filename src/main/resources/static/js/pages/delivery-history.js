@@ -136,6 +136,16 @@ function resetAndLoad(tab) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.history-card[data-detail-url]').forEach((card) => {
+        const detailUrl = card.dataset.detailUrl;
+        card.addEventListener('click', (event) => {
+            if (!event.target.closest('.reorder-button')) location.href = detailUrl;
+        });
+        card.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter' && event.target === card) location.href = detailUrl;
+        });
+    });
+
     const tabs = document.getElementById('tabs');
     if (tabs) {
         tabs.addEventListener('click', (event) => {

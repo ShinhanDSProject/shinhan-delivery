@@ -1,7 +1,7 @@
 package com.example.shinhandelivery.delivery.controller;
 
 import com.example.shinhandelivery.common.security.WebAuthHelper;
-import com.example.shinhandelivery.delivery.dto.response.DeliveryResponse;
+import com.example.shinhandelivery.delivery.dto.response.DeliveryListResponse;
 import com.example.shinhandelivery.delivery.entity.DeliveryStatus;
 import com.example.shinhandelivery.delivery.service.DeliveryService;
 import java.util.List;
@@ -25,12 +25,12 @@ public class DeliveryWebController {
         .getCurrentMemberId()
         .ifPresent(
             memberId -> {
-              List<DeliveryResponse> deliveries =
+              List<DeliveryListResponse> deliveries =
                   deliveryService
                       .getMyDeliveryRequests(memberId, null, PageRequest.of(0, 10))
                       .getContent()
                       .stream()
-                      .map(DeliveryResponse::from)
+                      .map(DeliveryListResponse::from)
                       .toList();
               model.addAttribute("deliveries", deliveries);
             });
@@ -43,13 +43,13 @@ public class DeliveryWebController {
         .getCurrentMemberId()
         .ifPresent(
             memberId -> {
-              List<DeliveryResponse> cancelledDeliveries =
+              List<DeliveryListResponse> cancelledDeliveries =
                   deliveryService
                       .getMyDeliveryRequests(
                           memberId, DeliveryStatus.CANCELLED, PageRequest.of(0, 10))
                       .getContent()
                       .stream()
-                      .map(DeliveryResponse::from)
+                      .map(DeliveryListResponse::from)
                       .toList();
               model.addAttribute("cancelledDeliveries", cancelledDeliveries);
             });
