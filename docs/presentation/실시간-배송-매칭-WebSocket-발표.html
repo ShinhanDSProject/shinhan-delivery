@@ -1,0 +1,517 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>실시간 배송 매칭</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F2F5FB; --surface:#FFFFFF; --surface-alt:#E8EEF9;
+    --ink:#0B1526; --ink-soft:#57647C; --line:#D7E0F0;
+    --accent:#2F5FE0; --accent-soft:#E4EBFC;
+    --pulse:#0EA99B; --pulse-soft:#DFF5F1;
+    --warn:#C97A1F; --warn-soft:#F8ECDA;
+    --bad:#D1414B; --bad-soft:#FBE6E7;
+    --font-display:'Black Han Sans','IBM Plex Sans KR',sans-serif;
+    --font-body:'IBM Plex Sans KR',-apple-system,'Malgun Gothic',sans-serif;
+    --font-mono:'JetBrains Mono',ui-monospace,'D2Coding',monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#060B16; --surface:#0E1728; --surface-alt:#12203A;
+      --ink:#EAF1FC; --ink-soft:#8CA0C4; --line:#213256;
+      --accent:#7C9CFF; --accent-soft:#182446;
+      --pulse:#33E7CE; --pulse-soft:#0F2E2A;
+      --warn:#F3AE63; --warn-soft:#3A2712;
+      --bad:#FF7373; --bad-soft:#3A1418;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#060B16; --surface:#0E1728; --surface-alt:#12203A;
+    --ink:#EAF1FC; --ink-soft:#8CA0C4; --line:#213256;
+    --accent:#7C9CFF; --accent-soft:#182446;
+    --pulse:#33E7CE; --pulse-soft:#0F2E2A;
+    --warn:#F3AE63; --warn-soft:#3A2712;
+    --bad:#FF7373; --bad-soft:#3A1418;
+  }
+  *{box-sizing:border-box;}
+  html{ -webkit-text-size-adjust:100%; }
+  @media (prefers-reduced-motion: no-preference){ html{ scroll-behavior:smooth; } }
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:var(--font-body); line-height:1.7;
+    font-size:15.5px;
+  }
+  a{ color:inherit; }
+  ::selection{ background:var(--pulse); color:#04211D; }
+
+  /* ---------- chrome ---------- */
+  .chrome{
+    position:fixed; top:0; left:0; right:0; height:52px; z-index:40;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:0 22px; backdrop-filter:blur(10px);
+    background:color-mix(in srgb, var(--bg) 78%, transparent);
+    border-bottom:1px solid var(--line);
+  }
+  .chrome .brand{ display:flex; align-items:center; gap:9px; font-family:var(--font-mono); font-size:11px; letter-spacing:.09em; color:var(--ink-soft); text-transform:uppercase; }
+  .dot-live{ width:7px; height:7px; border-radius:50%; background:var(--pulse); flex-shrink:0; box-shadow:0 0 0 0 color-mix(in srgb, var(--pulse) 60%, transparent); }
+  @media (prefers-reduced-motion: no-preference){
+    .dot-live{ animation:ping 2.1s ease-out infinite; }
+  }
+  @keyframes ping{
+    0%{ box-shadow:0 0 0 0 color-mix(in srgb, var(--pulse) 55%, transparent); }
+    70%{ box-shadow:0 0 0 9px color-mix(in srgb, var(--pulse) 0%, transparent); }
+    100%{ box-shadow:0 0 0 0 color-mix(in srgb, var(--pulse) 0%, transparent); }
+  }
+  .chrome .counter{ font-family:var(--font-mono); font-size:12px; color:var(--ink-soft); font-variant-numeric:tabular-nums; }
+  .chrome .counter strong{ color:var(--ink); }
+
+  /* ---------- rail nav ---------- */
+  .rail{
+    position:fixed; right:22px; top:50%; transform:translateY(-50%); z-index:40;
+    display:flex; flex-direction:column; gap:13px;
+  }
+  @media (max-width: 880px){ .rail{ display:none; } }
+  .rail a{
+    position:relative; display:flex; align-items:center; justify-content:flex-end; gap:9px;
+    text-decoration:none; height:14px;
+  }
+  .rail .lbl{
+    font-family:var(--font-mono); font-size:10.5px; color:var(--ink-soft);
+    opacity:0; transform:translateX(6px); white-space:nowrap;
+    transition:opacity .18s ease, transform .18s ease;
+  }
+  .rail a:hover .lbl{ opacity:1; transform:translateX(0); }
+  .rail .pip{ width:7px; height:7px; border-radius:50%; background:var(--line); border:1px solid var(--line); transition:background .2s, border-color .2s, transform .2s; }
+  .rail a[data-active="true"] .pip{ background:var(--pulse); border-color:var(--pulse); transform:scale(1.35); }
+  .rail a[data-active="true"] .lbl{ opacity:1; transform:translateX(0); color:var(--ink); }
+
+  /* ---------- layout ---------- */
+  main{ padding-top:52px; }
+  .slide{
+    position:relative; padding:96px 26px 88px;
+    border-bottom:1px solid var(--line);
+    overflow:hidden;
+  }
+  .slide.alt{ background:var(--surface); }
+  .wrap{ max-width:980px; margin:0 auto; position:relative; z-index:1; }
+  .ghost-index{
+    position:absolute; top:.2em; right:-.05em; font-family:var(--font-display);
+    font-size:clamp(90px,16vw,190px); color:var(--surface-alt); line-height:1;
+    z-index:0; user-select:none; pointer-events:none;
+  }
+  .slide.alt .ghost-index{ color:var(--bg); }
+  .eyebrow{
+    display:inline-flex; align-items:center; gap:8px;
+    font-family:var(--font-mono); font-size:11.5px; font-weight:600;
+    letter-spacing:.11em; text-transform:uppercase; color:var(--accent);
+    margin:0 0 16px;
+  }
+  .eyebrow::before{ content:''; width:16px; height:1.5px; background:var(--accent); }
+  h1{ font-family:var(--font-display); font-weight:400; font-size:clamp(30px,4.6vw,50px); margin:0 0 14px; text-wrap:balance; letter-spacing:.01em; }
+  h2.slide-title{ font-family:var(--font-display); font-weight:400; font-size:clamp(26px,3.6vw,38px); margin:0 0 18px; text-wrap:balance; }
+  .lede{ color:var(--ink-soft); font-size:16.5px; max-width:64ch; margin:0 0 8px; }
+  h3{ font-size:16px; font-weight:700; margin:0 0 8px; }
+  p{ margin:0; }
+  .stack{ display:flex; flex-direction:column; gap:14px; }
+
+  /* ---------- panels / cards ---------- */
+  .panel{
+    background:var(--surface); border:1px solid var(--line); border-radius:14px;
+    padding:22px 24px; display:flex; flex-direction:column; gap:10px;
+  }
+  .slide.alt .panel{ background:var(--bg); }
+  .panel p{ color:var(--ink-soft); font-size:14.5px; }
+  .panel ul{ margin:0; padding-left:18px; display:flex; flex-direction:column; gap:6px; }
+  .panel li{ color:var(--ink-soft); font-size:14px; }
+  .panel li strong{ color:var(--ink); }
+  .grid2{ display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+  @media (max-width:760px){ .grid2{ grid-template-columns:1fr; } }
+
+  /* diagrams */
+  figure{ margin:0; background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:22px 22px 18px; display:flex; flex-direction:column; gap:14px; }
+  .slide.alt figure{ background:var(--bg); }
+  .diagram-scroll{ overflow-x:auto; }
+  svg{ display:block; width:100%; height:auto; color:var(--ink-soft); }
+  svg text{ fill:var(--ink); font-family:var(--font-body); }
+  svg .soft{ fill:var(--ink-soft); }
+  svg .mono{ font-family:var(--font-mono); }
+  svg .lane{ font-weight:700; fill:var(--ink); font-size:12.5px; }
+  figcaption{ color:var(--ink-soft); font-size:13.5px; border-top:1px solid var(--line); padding-top:12px; }
+  figcaption strong{ color:var(--ink); }
+  figcaption code{ font-family:var(--font-mono); background:var(--surface-alt); padding:1px 6px; border-radius:5px; color:var(--ink); font-size:12.5px; }
+  .legend{ display:flex; flex-wrap:wrap; gap:16px; font-size:12px; color:var(--ink-soft); }
+  .legend .li{ display:flex; align-items:center; gap:6px; }
+  .legend .sw{ width:16px; height:2.5px; border-radius:2px; flex-shrink:0; }
+  .legend .sw.dashed{ background:repeating-linear-gradient(90deg,currentColor 0 4px,transparent 4px 7px); height:2px; }
+
+  /* topic table */
+  .ttable{ width:100%; border-collapse:collapse; font-size:13px; }
+  .ttable th{ text-align:left; font-family:var(--font-mono); font-size:10.5px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-soft); padding:0 12px 9px 0; border-bottom:1px solid var(--line); white-space:nowrap; }
+  .ttable td{ padding:11px 12px 11px 0; border-bottom:1px solid var(--line); color:var(--ink-soft); vertical-align:top; }
+  .ttable tr:last-child td{ border-bottom:none; }
+  .ttable td:first-child{ font-family:var(--font-mono); color:var(--ink); font-size:12.5px; }
+  .ttable .tscroll{ overflow-x:auto; }
+</style>
+</head>
+<body>
+
+<header class="chrome">
+  <div class="brand"><span class="dot-live"></span>SHINHAN DELIVERY · REALTIME MATCHING</div>
+  <div class="counter"><strong id="cur">01</strong> / 05</div>
+</header>
+
+<nav class="rail" id="rail">
+  <a href="#s1" data-target="s1"><span class="lbl">배송 흐름</span><span class="pip"></span></a>
+  <a href="#s2" data-target="s2"><span class="lbl">WebSocket</span><span class="pip"></span></a>
+  <a href="#s3" data-target="s3"><span class="lbl">매칭 시퀀스</span><span class="pip"></span></a>
+  <a href="#s4" data-target="s4"><span class="lbl">동시성 방어</span><span class="pip"></span></a>
+  <a href="#s5" data-target="s5"><span class="lbl">위치·알림</span><span class="pip"></span></a>
+</nav>
+
+<main>
+
+  <!-- 01 전체 배송 흐름 -->
+  <section class="slide alt" id="s1" data-index="01">
+    <span class="ghost-index" aria-hidden="true">01</span>
+    <div class="wrap">
+      <p class="eyebrow">전체 그림</p>
+      <h2 class="slide-title">배송 한 건이 지나가는 여섯 단계</h2>
+      <p class="lede" style="margin-bottom:26px;">견적부터 완료까지, 취소 가능 구간과 위치 push 구간은 서로 다릅니다. 위치 공유는 <strong>매칭되는 즉시</strong> 시작해 완료까지 이어집니다.</p>
+      <figure>
+        <div class="diagram-scroll">
+          <svg viewBox="0 0 920 210" role="img" aria-label="배송은 견적, 결제·등록, 매칭, 픽업, 배송 중, 완료 순서로 진행된다. 견적부터 매칭까지는 취소가 가능하고 픽업 이후에는 취소가 불가능하다. 배송원 위치 push는 매칭되는 즉시 시작되어 픽업 이동 구간과 배송 이동 구간을 모두 포함해 완료까지 계속된다.">
+            <defs>
+              <marker id="af1" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker>
+            </defs>
+
+            <path d="M323,44 L323,38 L895,38 L895,44" stroke="var(--pulse)" stroke-width="1.2" stroke-dasharray="4 3" fill="none"/>
+            <text x="609" y="26" text-anchor="middle" font-size="11" fill="var(--pulse)">위치 push · 3초 주기 — 매칭 즉시 시작, 완료까지 계속</text>
+
+            <g class="mono">
+              <rect x="25" y="50" width="125" height="58" rx="10" fill="var(--surface-alt)" stroke="var(--line)"/>
+              <text x="87" y="75" text-anchor="middle" font-size="12.5" font-weight="700" font-family="var(--font-body)">견적</text>
+              <text x="87" y="92" text-anchor="middle" font-size="9.5" class="soft">거리·무게·크기</text>
+
+              <rect x="174" y="50" width="125" height="58" rx="10" fill="var(--surface-alt)" stroke="var(--line)"/>
+              <text x="236" y="75" text-anchor="middle" font-size="12.5" font-weight="700" font-family="var(--font-body)">결제·등록</text>
+              <text x="236" y="92" text-anchor="middle" font-size="9.5" class="soft">포인트 차감</text>
+
+              <rect x="323" y="50" width="125" height="58" rx="10" fill="var(--pulse-soft)" stroke="var(--pulse)"/>
+              <text x="385" y="75" text-anchor="middle" font-size="12.5" font-weight="700" font-family="var(--font-body)">매칭</text>
+              <text x="385" y="92" text-anchor="middle" font-size="9.5" fill="var(--pulse)">오퍼 push</text>
+
+              <rect x="472" y="50" width="125" height="58" rx="10" fill="var(--pulse-soft)" stroke="var(--pulse)"/>
+              <text x="534" y="75" text-anchor="middle" font-size="12.5" font-weight="700" font-family="var(--font-body)">픽업</text>
+              <text x="534" y="92" text-anchor="middle" font-size="9.5" class="soft">사진 증빙</text>
+
+              <rect x="621" y="50" width="125" height="58" rx="10" fill="var(--pulse-soft)" stroke="var(--pulse)"/>
+              <text x="683" y="75" text-anchor="middle" font-size="12.5" font-weight="700" font-family="var(--font-body)">배송 중</text>
+              <text x="683" y="92" text-anchor="middle" font-size="9.5" class="soft">목적지로 이동</text>
+
+              <rect x="770" y="50" width="125" height="58" rx="10" fill="var(--surface-alt)" stroke="var(--line)"/>
+              <text x="832" y="75" text-anchor="middle" font-size="12.5" font-weight="700" font-family="var(--font-body)">완료</text>
+              <text x="832" y="92" text-anchor="middle" font-size="9.5" class="soft">증빙사진</text>
+            </g>
+
+            <path d="M150,79 L172,79" stroke="currentColor" stroke-width="1.6" marker-end="url(#af1)"/>
+            <path d="M299,79 L321,79" stroke="currentColor" stroke-width="1.6" marker-end="url(#af1)"/>
+            <path d="M448,79 L470,79" stroke="currentColor" stroke-width="1.6" marker-end="url(#af1)"/>
+            <path d="M597,79 L619,79" stroke="currentColor" stroke-width="1.6" marker-end="url(#af1)"/>
+            <path d="M746,79 L768,79" stroke="currentColor" stroke-width="1.6" marker-end="url(#af1)"/>
+
+            <path d="M174,124 L174,130 L448,130 L448,124" stroke="var(--bad)" stroke-width="1.2" fill="none"/>
+            <text x="311" y="144" text-anchor="middle" font-size="11" fill="var(--bad)">취소 가능 구간 · 전액~부분 환불</text>
+
+            <path d="M472,124 L472,130 L895,130 L895,124" stroke="currentColor" stroke-width="1.2" fill="none" opacity=".5"/>
+            <text x="683" y="144" text-anchor="middle" font-size="11" class="soft">취소 불가 구간</text>
+          </svg>
+        </div>
+        <div class="legend">
+          <div class="li"><span class="sw" style="background:var(--pulse)"></span>오퍼 push</div>
+          <div class="li"><span class="sw dashed" style="color:var(--pulse)"></span>위치 push 구간</div>
+          <div class="li"><span class="sw dashed" style="color:var(--bad)"></span>취소 가능 구간</div>
+        </div>
+        <figcaption>배송원이 픽업 장소로 이동하는 구간과 목적지로 이동하는 구간 모두 3초 주기로 위치가 push됩니다. 차량은 <code>COMPLETED</code>·<code>CANCELLED</code>로 전이될 때 서버가 자동으로 <code>AVAILABLE</code>로 되돌립니다.</figcaption>
+      </figure>
+
+      <figure style="margin-top:20px;">
+        <div class="diagram-scroll">
+          <svg viewBox="0 0 920 250" role="img" aria-label="배송 요청 상태는 REQUESTED에서 MATCHED, PICKED_UP을 거쳐 COMPLETED로 순서대로 전이한다. CANCELLED로는 REQUESTED 또는 MATCHED 상태에서만 전이할 수 있고, REQUESTED에서 취소되면 전액 환불되며 MATCHED에서 취소되면 최대 1000포인트가 차감된 뒤 나머지가 환불된다. PICKED_UP과 COMPLETED에서는 취소로 전이할 수 없다.">
+            <defs>
+              <marker id="af8" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker>
+              <marker id="af9" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--bad)"/></marker>
+            </defs>
+
+            <rect x="20" y="40" width="170" height="50" rx="9" fill="var(--surface-alt)" stroke="var(--line)"/>
+            <text x="105" y="70" text-anchor="middle" class="mono" font-size="12.5" font-weight="700">REQUESTED</text>
+
+            <rect x="240" y="40" width="170" height="50" rx="9" fill="var(--surface-alt)" stroke="var(--line)"/>
+            <text x="325" y="70" text-anchor="middle" class="mono" font-size="12.5" font-weight="700">MATCHED</text>
+
+            <rect x="460" y="40" width="170" height="50" rx="9" fill="var(--surface-alt)" stroke="var(--line)"/>
+            <text x="545" y="70" text-anchor="middle" class="mono" font-size="12.5" font-weight="700">PICKED_UP</text>
+            <text x="545" y="106" text-anchor="middle" font-size="10" class="soft">취소 불가</text>
+
+            <rect x="680" y="40" width="200" height="50" rx="9" fill="var(--pulse-soft)" stroke="var(--pulse)"/>
+            <text x="780" y="70" text-anchor="middle" class="mono" font-size="12.5" font-weight="700">COMPLETED</text>
+            <text x="780" y="106" text-anchor="middle" font-size="10" class="soft">취소 불가</text>
+
+            <path d="M190,65 L238,65" stroke="currentColor" stroke-width="1.6" marker-end="url(#af8)"/>
+            <text x="214" y="55" text-anchor="middle" font-size="10.5" class="soft">수락(매칭)</text>
+
+            <path d="M410,65 L458,65" stroke="currentColor" stroke-width="1.6" marker-end="url(#af8)"/>
+            <text x="434" y="55" text-anchor="middle" font-size="10.5" class="soft">픽업 확인</text>
+
+            <path d="M630,65 L678,65" stroke="currentColor" stroke-width="1.6" marker-end="url(#af8)"/>
+            <text x="654" y="55" text-anchor="middle" font-size="10.5" class="soft">배송 완료</text>
+
+            <rect x="140" y="176" width="300" height="50" rx="9" fill="var(--bad-soft)" stroke="var(--bad)"/>
+            <text x="290" y="206" text-anchor="middle" class="mono" font-size="12.5" font-weight="700" fill="var(--bad)">CANCELLED</text>
+
+            <path d="M90,90 L200,174" stroke="var(--bad)" stroke-width="1.4" stroke-dasharray="4 3" fill="none" marker-end="url(#af9)"/>
+            <text x="16" y="128" font-size="10" fill="var(--bad)">30분 미배정 자동취소</text>
+            <text x="16" y="141" font-size="10" fill="var(--bad)">· 고객 취소</text>
+            <text x="16" y="154" font-size="10" fill="var(--bad)" font-weight="700">→ 전액 환불</text>
+
+            <path d="M325,90 L325,174" stroke="var(--bad)" stroke-width="1.4" stroke-dasharray="4 3" fill="none" marker-end="url(#af9)"/>
+            <text x="470" y="128" font-size="10" fill="var(--bad)">고객 취소</text>
+            <text x="470" y="141" font-size="10" fill="var(--bad)">→ 최대 1,000P 차감 후 환불</text>
+            <text x="470" y="154" font-size="10" fill="var(--bad)" font-weight="700">(차감액은 배송원 보상으로 지급)</text>
+          </svg>
+        </div>
+        <figcaption>배송 요청 상태는 <code>REQUESTED → MATCHED → PICKED_UP → COMPLETED</code> 순으로만 전이합니다. <code>CANCELLED</code>로는 <code>REQUESTED</code>·<code>MATCHED</code>에서만 갈 수 있고, 취소 API 자체가 그 외 상태에서는 막혀 있습니다.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- 02 WebSocket 기술 기반 -->
+  <section class="slide" id="s2" data-index="02">
+    <span class="ghost-index" aria-hidden="true">02</span>
+    <div class="wrap">
+      <p class="eyebrow">기술 기반</p>
+      <h2 class="slide-title">WebSocket · STOMP, 그리고 토픽 설계</h2>
+
+      <div class="grid2" style="margin-bottom:22px;">
+        <div class="panel">
+          <h3>일반 HTTP라면</h3>
+          <p>요청 → 응답이 끝나면 연결이 닫혀서, 서버가 새 소식이 생겨도 클라이언트가 다시 물어보기 전엔 알릴 방법이 없습니다. 오퍼 경쟁·위치·상태처럼 지연이 결과를 바꾸는 곳에서는 폴링 주기만큼 그대로 지연이 체감됩니다.</p>
+        </div>
+        <div class="panel">
+          <h3>WebSocket이라면</h3>
+          <p>연결을 계속 열어둔 채로 양쪽이 아무 때나 메시지를 보낼 수 있어, 서버가 먼저 오퍼·위치·상태 변화를 밀어넣을(push) 수 있습니다.</p>
+        </div>
+      </div>
+
+      <p class="lede" style="margin-bottom:26px;">이 프로젝트는 WebSocket 위에 발행-구독 규칙을 표준화한 STOMP를 얹어, 토픽을 구독(SUBSCRIBE)하고 발행(SEND)하는 방식으로 씁니다.</p>
+
+      <figure style="margin-bottom:22px;">
+        <div class="diagram-scroll">
+          <svg viewBox="0 0 920 160" role="img" aria-label="CONNECT 단계에서 JWT로 신원을 확인하고, SUBSCRIBE 단계에서 자원별 접근 권한을 검사해 구독을 등록한다. 이 두 단계는 세션 시작 시 한 번 일어나고, 이후 클라이언트의 SEND 메시지를 서버가 검증해 topic 구독자 전체에게 BROADCAST하는 흐름이 메시지가 생길 때마다 반복된다.">
+            <defs>
+              <marker id="af2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker>
+            </defs>
+            <rect x="35" y="38" width="205" height="54" rx="10" fill="var(--surface-alt)" stroke="var(--line)"/>
+            <text x="137" y="62" text-anchor="middle" class="mono" font-size="12.5" font-weight="700">CONNECT</text>
+            <text x="137" y="79" text-anchor="middle" font-size="10" class="soft">JWT로 신원 확인</text>
+
+            <rect x="272" y="38" width="205" height="54" rx="10" fill="var(--surface-alt)" stroke="var(--line)"/>
+            <text x="374" y="62" text-anchor="middle" class="mono" font-size="12.5" font-weight="700">SUBSCRIBE</text>
+            <text x="374" y="79" text-anchor="middle" font-size="10" class="soft">자원별 인가 재검사</text>
+
+            <rect x="509" y="38" width="185" height="54" rx="10" fill="var(--surface-alt)" stroke="var(--line)"/>
+            <text x="601" y="62" text-anchor="middle" class="mono" font-size="12.5" font-weight="700">SEND · /app</text>
+            <text x="601" y="79" text-anchor="middle" font-size="10" class="soft">클라이언트 → 서버</text>
+
+            <rect x="726" y="38" width="165" height="54" rx="10" fill="var(--pulse-soft)" stroke="var(--pulse)"/>
+            <text x="808" y="62" text-anchor="middle" class="mono" font-size="12" font-weight="700" fill="var(--pulse)">BROADCAST</text>
+            <text x="808" y="79" text-anchor="middle" font-size="10" fill="var(--pulse)">/topic · 구독자 전체</text>
+
+            <path d="M240,64 L270,64" stroke="currentColor" stroke-width="1.6" marker-end="url(#af2)"/>
+            <path d="M477,64 L507,64" stroke="currentColor" stroke-width="1.6" marker-end="url(#af2)"/>
+            <path d="M694,64 L724,64" stroke="currentColor" stroke-width="1.6" marker-end="url(#af2)"/>
+
+            <path d="M35,106 L35,112 L477,112 L477,106" stroke="currentColor" stroke-width="1.2" fill="none" opacity=".5"/>
+            <text x="256" y="126" text-anchor="middle" font-size="11" class="soft">연결·구독 · 세션 시작 시 1회</text>
+
+            <path d="M509,106 L509,112 L891,112 L891,106" stroke="var(--pulse)" stroke-width="1.2" fill="none"/>
+            <text x="700" y="126" text-anchor="middle" font-size="11" fill="var(--pulse)">메시지가 생길 때마다 반복</text>
+          </svg>
+        </div>
+        <figcaption>CONNECT에서는 인증("이 사람이 누구인가", JWT)만 확인하고, SUBSCRIBE에서 인가("이 사람이 이 자원을 볼 자격이 있는가")를 자원 단위로 검사합니다.</figcaption>
+      </figure>
+
+      <figure>
+        <div class="tscroll">
+          <table class="ttable">
+            <thead><tr><th>토픽</th><th>발행 주체</th><th>용도</th></tr></thead>
+            <tbody>
+              <tr><td>/vehicles/{id}/offers</td><td>서버 (등록 시 자동)</td><td>새 콜 오퍼 알림</td></tr>
+              <tr><td>/delivery/{id}/status</td><td>서버 (상태 변경 시)</td><td>매칭·픽업·완료·취소</td></tr>
+              <tr><td>/delivery/{id}/location</td><td>배송원 (SEND)</td><td>실시간 위치 중계</td></tr>
+              <tr><td>/members/{id}/notifications</td><td>서버 (상태 변경 시)</td><td>개인 알림</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <figcaption>4개 토픽 모두 자원(차량·배송·회원) ID 단위로 쪼개, 구독 시점마다 자원별 인가를 검사합니다.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- 03 매칭 시퀀스 -->
+  <section class="slide alt" id="s3" data-index="03">
+    <span class="ghost-index" aria-hidden="true">03</span>
+    <div class="wrap">
+      <p class="eyebrow">핵심 흐름</p>
+      <h2 class="slide-title">오퍼는 동시에 도착한다, 매칭은 한 번만 확정된다</h2>
+      <p class="lede" style="margin-bottom:26px;">서버는 조건에 맞는 배송원 후보 전원에게 오퍼를 동시에 push합니다. 여러 명이 거의 동시에 수락해도, 락을 먼저 잡은 단 하나의 요청만 매칭으로 확정됩니다.</p>
+      <figure>
+        <div class="diagram-scroll">
+          <svg viewBox="0 0 920 470" role="img" aria-label="고객이 배송을 등록하면 서버가 조건에 맞는 배송원 후보 전원에게 WebSocket으로 오퍼를 동시에 push한다. 두 명이 거의 동시에 수락 요청을 보내면 서버는 락을 먼저 잡은 한 명만 차량 용량과 가용 상태를 재검증한 뒤 매칭을 확정하고, 나머지는 실패 응답을 받는다. 확정 결과는 다시 WebSocket push로 고객에게 지연 없이 전달된다.">
+            <defs>
+              <marker id="af3" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--accent)"/></marker>
+              <marker id="af4" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--pulse)"/></marker>
+              <marker id="af5" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--bad)"/></marker>
+            </defs>
+
+            <text x="95" y="24" text-anchor="middle" class="lane">고객</text>
+            <text x="460" y="24" text-anchor="middle" class="lane">서버</text>
+            <text x="825" y="24" text-anchor="middle" class="lane">배송원 후보</text>
+            <line x1="95" y1="38" x2="95" y2="448" stroke="currentColor" stroke-width="1" opacity=".25"/>
+            <line x1="460" y1="38" x2="460" y2="448" stroke="currentColor" stroke-width="1" opacity=".25"/>
+            <line x1="825" y1="38" x2="825" y2="448" stroke="currentColor" stroke-width="1" opacity=".25"/>
+
+            <circle cx="825" cy="150" r="5" fill="var(--surface)" stroke="currentColor" stroke-width="1.4"/>
+            <text x="838" y="154" class="mono soft" font-size="11">A</text>
+            <circle cx="825" cy="180" r="5" fill="var(--surface)" stroke="currentColor" stroke-width="1.4"/>
+            <text x="838" y="184" class="mono soft" font-size="11">B</text>
+
+            <text x="277" y="70" text-anchor="middle" font-size="12">배송 등록 · <tspan class="mono">REQUESTED</tspan> 저장</text>
+            <path d="M95,80 L452,80" stroke="var(--accent)" stroke-width="2" marker-end="url(#af3)"/>
+
+            <rect x="345" y="98" width="255" height="46" rx="8" fill="var(--surface)" stroke="var(--line)"/>
+            <text x="472" y="115" text-anchor="middle" font-size="11.5" font-weight="700">후보 탐색 · 2단계 필터</text>
+            <text x="472" y="130" text-anchor="middle" font-size="9.5" class="soft">AVAILABLE+거리(DB) → 3km 이내(Haversine)</text>
+
+            <text x="640" y="163" text-anchor="middle" font-size="12" fill="var(--pulse)">오퍼 push · 동시 도착</text>
+            <path d="M460,150 L818,150" class="mono" stroke="var(--pulse)" stroke-width="2" stroke-dasharray="4 4" marker-end="url(#af4)"/>
+            <path d="M460,150 L818,180" class="mono" stroke="var(--pulse)" stroke-width="2" stroke-dasharray="4 4" marker-end="url(#af4)"/>
+
+            <text x="650" y="225" text-anchor="middle" font-size="12">A, B가 거의 동시에 수락 요청</text>
+            <path d="M825,156 L468,238" stroke="var(--accent)" stroke-width="1.6" marker-end="url(#af3)"/>
+            <path d="M825,186 L468,252" stroke="var(--accent)" stroke-width="1.6" marker-end="url(#af3)"/>
+
+            <rect x="345" y="270" width="255" height="46" rx="8" fill="var(--surface)" stroke="var(--line)"/>
+            <text x="472" y="288" text-anchor="middle" font-size="11.5" font-weight="700">락 · 용량/상태 재검증</text>
+            <text x="472" y="303" text-anchor="middle" font-size="9.5" class="soft">먼저 도착한 1건만 매칭 확정</text>
+
+            <path d="M460,335 L790,325" stroke="var(--pulse)" stroke-width="2" marker-end="url(#af4)"/>
+            <text x="650" y="318" text-anchor="middle" font-size="12" fill="var(--pulse)">A: 매칭 확정</text>
+
+            <path d="M460,343 L790,368" stroke="var(--bad)" stroke-width="1.6" stroke-dasharray="4 4" marker-end="url(#af5)"/>
+            <text x="650" y="383" text-anchor="middle" font-size="12" fill="var(--bad)">B: 이미 배정됨 · 409</text>
+
+            <text x="277" y="418" text-anchor="middle" font-size="12" fill="var(--pulse)">상태 브로드캐스트 push</text>
+            <path d="M452,428 L100,428" class="mono" stroke="var(--pulse)" stroke-width="2" stroke-dasharray="4 4" marker-end="url(#af4)"/>
+          </svg>
+        </div>
+        <div class="legend">
+          <div class="li"><span class="sw" style="background:var(--accent)"></span>요청/응답</div>
+          <div class="li"><span class="sw" style="background:var(--pulse)"></span>WebSocket push</div>
+          <div class="li"><span class="sw dashed" style="color:var(--bad)"></span>실패 응답</div>
+        </div>
+      </figure>
+    </div>
+  </section>
+
+  <!-- 04 동시성 방어 -->
+  <section class="slide" id="s4" data-index="04">
+    <span class="ghost-index" aria-hidden="true">04</span>
+    <div class="wrap">
+      <p class="eyebrow">트러블슈팅</p>
+      <h2 class="slide-title">한 콜에 두 번 배정되지 않도록 — 2중 방어</h2>
+      <div class="grid2">
+        <div class="panel">
+          <h3>1차 · 비관적 락</h3>
+          <p>배송 요청 행과 차량 행에 락을 걸어, 같은 콜·같은 차량을 노리는 트랜잭션을 줄 세웁니다. 락을 먼저 잡은 요청만 용량·<span class="mono" style="font-family:var(--font-mono)">AVAILABLE</span> 상태를 재검증하고 매칭을 확정합니다. 차량 엔티티는 ID로만 먼저 조회하고, 락을 잡는 시점에 실제 엔티티를 로드합니다.</p>
+        </div>
+        <div class="panel">
+          <h3>2차 · DB 유니크 제약</h3>
+          <p>락을 거치지 않는 경로가 있더라도 배송 요청 ID에 걸린 DB 유니크 제약이 중복 저장 자체를 거부하는 최후 방어선입니다.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 05 위치추적 & 알림 -->
+  <section class="slide alt" id="s5" data-index="05">
+    <span class="ghost-index" aria-hidden="true">05</span>
+    <div class="wrap">
+      <p class="eyebrow">보조 흐름</p>
+      <h2 class="slide-title">위치는 저장하지 않고, 중계만 합니다</h2>
+      <p class="lede" style="margin-bottom:26px;">위치는 배송원 브라우저의 위치 API가 기기 GPS로 계속 추적합니다. "정확도 우선" 모드로 요청해 Wi-Fi·기지국으로 대충 추정하지 않고, 느리더라도 GPS로 정확한 좌표를 받습니다. 브라우저가 좌표를 바꿀 때마다 바로 알려주지만, 그걸 다 보내지 않고 3초에 한 번 그 시점의 최신 좌표만 골라 서버로 발행합니다.</p>
+        <figure>
+          <div class="diagram-scroll">
+            <svg viewBox="0 0 460 190" role="img" aria-label="배송원이 3초마다 위치를 발행하면 서버는 매칭된 차량 소유주인지 검증한 뒤 저장 없이 즉시 고객에게 중계하고, 고객 지도의 마커가 그 좌표로 이동한다. 이 과정은 매칭되는 즉시 시작되어 배송 완료까지 반복된다.">
+              <defs><marker id="af6" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--pulse)"/></marker></defs>
+              <text x="45" y="22" text-anchor="middle" class="lane" font-size="11.5">배송원</text>
+              <text x="230" y="22" text-anchor="middle" class="lane" font-size="11.5">서버</text>
+              <text x="415" y="22" text-anchor="middle" class="lane" font-size="11.5">고객</text>
+              <line x1="45" y1="34" x2="45" y2="172" stroke="currentColor" stroke-width="1" opacity=".25"/>
+              <line x1="230" y1="34" x2="230" y2="172" stroke="currentColor" stroke-width="1" opacity=".25"/>
+              <line x1="415" y1="34" x2="415" y2="172" stroke="currentColor" stroke-width="1" opacity=".25"/>
+
+              <text x="137" y="60" text-anchor="middle" font-size="11" fill="var(--pulse)">위치 SEND · 3초 주기</text>
+              <path d="M52,70 L222,70" stroke="var(--pulse)" stroke-width="1.8" marker-end="url(#af6)"/>
+
+              <rect x="180" y="82" width="100" height="34" rx="7" fill="var(--surface)" stroke="var(--line)"/>
+              <text x="230" y="95" text-anchor="middle" font-size="8.5" class="soft">소유주 검증</text>
+              <text x="230" y="107" text-anchor="middle" font-size="8.5" class="soft">저장 없이 중계</text>
+
+              <text x="325" y="132" text-anchor="middle" font-size="11" fill="var(--pulse)">위치 브로드캐스트</text>
+              <path d="M238,142 L408,142" stroke="var(--pulse)" stroke-width="1.8" marker-end="url(#af6)"/>
+
+              <rect x="368" y="152" width="80" height="28" rx="7" fill="var(--pulse-soft)" stroke="var(--pulse)"/>
+              <text x="408" y="170" text-anchor="middle" font-size="10.5" font-weight="700">마커 이동</text>
+            </svg>
+          </div>
+          <figcaption>위치 SEND가 올 때마다 경로·본문의 배송 ID가 일치하는지, 보낸 사람이 그 배송에 매칭된 차량의 소유주인지 재검증한 뒤 중계합니다. DB를 거치지 않는 순수 중계라 지연이 거의 없고, 새 좌표를 받는 즉시 지도 마커 위치를 갱신합니다.</figcaption>
+        </figure>
+    </div>
+  </section>
+
+</main>
+
+<script>
+  (function(){
+    var sections = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+    var railLinks = Array.prototype.slice.call(document.querySelectorAll('#rail a'));
+    var counter = document.getElementById('cur');
+    var total = sections.length;
+
+    function setActive(id, index){
+      railLinks.forEach(function(a){
+        a.setAttribute('data-active', a.getAttribute('data-target') === id ? 'true' : 'false');
+      });
+      if (counter) counter.textContent = index;
+    }
+
+    if ('IntersectionObserver' in window){
+      var io = new IntersectionObserver(function(entries){
+        entries.forEach(function(entry){
+          if (entry.isIntersecting){
+            var idx = entry.target.getAttribute('data-index');
+            setActive(entry.target.id, idx);
+          }
+        });
+      }, { rootMargin: '-45% 0px -45% 0px', threshold: 0 });
+      sections.forEach(function(s){ io.observe(s); });
+    }
+  })();
+</script>
+
+</body>
+</html>
