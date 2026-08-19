@@ -43,7 +43,7 @@
 
     <div class="cta">
         <button type="button" class="primary-btn" id="matchingWaitButton">매칭 대기 화면으로 이동</button>
-        <button type="button" class="secondary-btn" onclick="location.href='/home'">홈으로 돌아가기</button>
+        <button type="button" class="secondary-btn" id="homeButton">홈으로 돌아가기</button>
     </div>
 </main>
 
@@ -76,7 +76,12 @@
             return;
         }
         document.getElementById('matchingWaitButton').addEventListener('click', () => {
+            clearDraft();
             location.href = `/matching-wait?id=${encodeURIComponent(deliveryId)}`;
+        });
+        document.getElementById('homeButton').addEventListener('click', () => {
+            clearDraft();
+            location.href = '/home';
         });
     })();
 </script>
