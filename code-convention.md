@@ -725,3 +725,7 @@ void 도메인은_다른_도메인의_repository를_직접_참조하지_않는�
 12. **공통 JavaScript 유틸리티 모듈화 규격 (JS Utility Module Rule):**
    - 인증 토큰 추출(`authHeader()`), HTML XSS 방어(`escapeHtml()`), 날짜/상대시간 포맷팅(`formatDate()`, `formatRelativeTime()`), 토스트 UI(`showToast()`) 등 복수 스크립트에 중복 작성되던 함수는 개별 스크립트에 재정의하지 않고 `src/main/resources/static/js/utils/` (`auth.js`, `format.js`, `ui.js`) 공통 모듈로 통합해야 합니다.
    - 각 HTML 템플릿에서는 필요한 공통 유틸리티 모듈을 스크립트 상단에 `<script src="/js/utils/*.js"></script>` 형태로 로드하여 중복 코드를 제거하고 재사용성을 100% 사수해야 합니다.
+13. **비즈니스 유효성 검사 중앙집중화 및 백엔드 단일 원본(SSOT) 수칙 (BE-Driven Validation & Debounce Rule):**
+   - 이메일 중복 체크, 전화번호 포맷, 비밀번호 규칙, 요금 계산 등 모든 핵심 비즈니스 유효성 검증(Business Validation) 로직은 백엔드(BE)를 **단일 원본(SSOT: Single Source of Truth)**으로 삼아 중앙집중식으로 처리해야 합니다.
+   - 프론트엔드(FE)에 비즈니스 규칙 정규식이나 검증 로직을 중복 구현하는 행위를 엄격히 금지하며, FE는 숫자 입력 이외 제한/실시간 자동 하이픈 마스킹 등 UX 조작에만 집중합니다.
+   - 실시간 필드 검증이 필요한 폼은 백엔드 필드 검증 API(`POST /api/v1/members/validate`)와 300ms 디바운스(Debounce) 유틸리티(`format.js` 내 `debounce`)를 활용하여 비동기로 호출하고 백엔드가 응답한 메시지 및 결과를 화면에 렌더링해야 합니다.
