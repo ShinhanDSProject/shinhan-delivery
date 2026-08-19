@@ -39,8 +39,9 @@ out/
 # Environment Variables
 .env
 
-# Local file upload storage
+# Local file upload storage & H2 database storage
 /uploads/
+/data/
 
 # Local application logs
 /logs/
