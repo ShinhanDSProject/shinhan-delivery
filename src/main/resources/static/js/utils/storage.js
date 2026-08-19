@@ -32,3 +32,17 @@ function normalizeLegacyPickupGuide(draft) {
 function saveDraft(draft) {
     sessionStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
 }
+
+function clearDraft() {
+    sessionStorage.removeItem(DRAFT_KEY);
+}
+
+function resetPaymentState(draft) {
+    const currentDraft = draft || loadDraft();
+    delete currentDraft.paymentStatus;
+    delete currentDraft.paymentResult;
+    delete currentDraft.paymentEstimate;
+    saveDraft(currentDraft);
+    return currentDraft;
+}
+

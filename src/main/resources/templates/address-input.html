@@ -735,7 +735,10 @@
             location.replace('/login');
             return;
         }
-        const draft = loadDraft();
+        let draft = loadDraft();
+        if (draft.paymentStatus === 'COMPLETED') {
+            draft = resetPaymentState(draft);
+        }
         if (draft.reorderSourceId && new URLSearchParams(location.search).get('reorder') === 'success') {
             document.getElementById('reorderNotice').hidden = false;
         }

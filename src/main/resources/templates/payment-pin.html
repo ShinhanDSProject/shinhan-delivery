@@ -267,10 +267,16 @@
     }
 
     (function init() {
-        const draft = loadDraft();
+        let draft = loadDraft();
         if (draft.paymentStatus === 'COMPLETED') {
-            location.replace('/payment-complete');
-            return;
+            // Only redirect to payment-complete if the current draft has a completed result matching the current flow.
+            // If the user started a new order flow or modified the draft, reset stale payment status.
+            if (draft.paymentResult && draft.paymentResult.deliveryRequestId && draft.paymentEstimate) {
+                location.replace('/payment-complete');
+                return;
+            } else {
+                draft = resetPaymentState(draft);
+            }
         }
         if (!draft.paymentEstimate) {
             location.replace('/payment-confirmation');
