@@ -22,16 +22,11 @@ public class MemberFieldValidator {
 
     String value = request.getValue() != null ? request.getValue().trim() : "";
 
-    switch (request.getField()) {
-      case EMAIL:
-        return validateEmail(value);
-      case PHONE_NUMBER:
-        return validatePhoneNumber(value);
-      case PASSWORD:
-        return validatePassword(value);
-      default:
-        return MemberFieldValidateResponse.fail("지원하지 않는 검증 필드입니다.");
-    }
+    return switch (request.getField()) {
+      case EMAIL -> validateEmail(value);
+      case PHONE_NUMBER -> validatePhoneNumber(value);
+      case PASSWORD -> validatePassword(value);
+    };
   }
 
   private MemberFieldValidateResponse validateEmail(String value) {

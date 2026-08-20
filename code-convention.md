@@ -353,7 +353,34 @@ public class DuplicateMemberException extends BusinessException {
   public Notification markAsRead(Long notificationId, Long memberId)
   ```
 
-### 8.4 포맷팅 및 코드 스타일 규칙
+### 8.4 Enhanced Switch 문법 사용 의무화 수칙 (Java 14+ Modern Switch Rule)
+
+- **원칙:** `switch` 구문 작성 시 기존 `case A: ... break;` 스타일 대신 Java 14+부터 표준 도입된 **Enhanced Switch 문법 (`switch (x) { case A -> ...; }` 또는 Switch Expression)**을 100% 사용하여 개발해야 합니다.
+- **목적:**
+  1. `break;` 누락으로 인한 의도치 않은 **fall-through 버그 발생을 근본적으로 차단**합니다.
+  2. `return switch (x) { case A -> val; ... };` 형태의 표현식을 활용하여 가독성 및 표현력을 최상으로 유지합니다.
+  3. **Enum 타입의 Switch Expression 시 불필요한 `default` 문 작성 금지**: Enum의 모든 상수가 커버된 경우 `default` 구문을 생략함으로써, 향후 신규 Enum 상수가 추가되었을 때 컴파일러가 이를 자동 감지(Compile-time Exhaustiveness Check)하도록 안전성을 극대화합니다.
+- **적용 예시:**
+  ```java
+  // ⭕ 올바른 예시: Enhanced Switch Expression (Enum 전체 커버 시 default 생략)
+  public MemberFieldValidateResponse validate(MemberFieldValidateRequest request) {
+    return switch (request.getField()) {
+      case EMAIL -> validateEmail(value);
+      case PHONE_NUMBER -> validatePhoneNumber(value);
+      case PASSWORD -> validatePassword(value);
+    };
+  }
+
+  // ❌ 금지 예시: 전통적인 case A: ... break; 구문 및 불필요한 default 작성
+  switch (request.getField()) {
+    case EMAIL:
+      return validateEmail(value);
+      break;
+    ...
+  }
+  ```
+
+### 8.5 포맷팅 및 코드 스타일 규칙
 
 - 들여쓰기: 스페이스 2칸 (탭 금지)
 - 한 줄 최대 길이: 100자
