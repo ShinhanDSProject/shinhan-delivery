@@ -15,6 +15,7 @@ import com.example.shinhandelivery.member.dto.response.MemberFieldValidateRespon
 import com.example.shinhandelivery.member.entity.CourierApprovalStatus;
 import com.example.shinhandelivery.member.entity.Member;
 import com.example.shinhandelivery.member.entity.MemberRole;
+import com.example.shinhandelivery.member.entity.MemberValidationField;
 import com.example.shinhandelivery.member.exception.DuplicateMemberException;
 import com.example.shinhandelivery.member.repository.MemberRepository;
 import com.example.shinhandelivery.payment.entity.PointWallet;
@@ -39,6 +40,7 @@ class MemberServiceTest {
   @Mock private PasswordEncoder passwordEncoder;
   @Mock private VehicleService vehicleService;
   @Mock private PointWalletProvisioningService pointWalletProvisioningService;
+  @Mock private MemberFieldValidator memberFieldValidator;
   @InjectMocks private MemberService memberService;
 
   @Test
@@ -257,28 +259,18 @@ class MemberServiceTest {
   }
 
   @Test
-  @DisplayName("이미 가입된 이메일인 경우 validateField는 fail 응답을 반환한다")
-  void validateFieldDuplicateEmail() {
+  @DisplayName("validateField 호출 시 MemberFieldValidator에 검증 처리를 위임한다")
+  void validateFieldDelegatesToValidator() {
     MemberFieldValidateRequest request =
-        new MemberFieldValidateRequest("email", "user@example.com");
-    when(memberRepository.existsByEmail("user@example.com")).thenReturn(true);
+        new MemberFieldValidateRequest(MemberValidationField.EMAIL, "user@example.com");
+    MemberFieldValidateResponse expectedResponse =
+        MemberFieldValidateResponse.ok("✓ 사용 가능한 이메일입니다.");
+
+    when(memberFieldValidator.validate(request)).thenReturn(expectedResponse);
 
     MemberFieldValidateResponse response = memberService.validateField(request);
 
-    assertThat(response.isValid()).isFalse();
-    assertThat(response.getMessage()).isEqualTo("이미 가입된 이메일 주소입니다.");
-  }
-
-  @Test
-  @DisplayName("올바른 이메일인 경우 validateField는 ok 응답을 반환한다")
-  void validateFieldSuccess() {
-    MemberFieldValidateRequest request =
-        new MemberFieldValidateRequest("email", "newuser@example.com");
-    when(memberRepository.existsByEmail("newuser@example.com")).thenReturn(false);
-
-    MemberFieldValidateResponse response = memberService.validateField(request);
-
-    assertThat(response.isValid()).isTrue();
-    assertThat(response.getMessage()).isEqualTo("✓ 사용 가능한 이메일입니다.");
+    assertThat(response).isEqualTo(expectedResponse);
+    verify(memberFieldValidator).validate(request);
   }
 }

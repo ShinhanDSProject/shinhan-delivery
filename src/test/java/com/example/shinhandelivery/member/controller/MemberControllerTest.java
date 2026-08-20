@@ -25,6 +25,7 @@ import com.example.shinhandelivery.member.dto.response.MemberFieldValidateRespon
 import com.example.shinhandelivery.member.dto.response.TokenResponse;
 import com.example.shinhandelivery.member.entity.Member;
 import com.example.shinhandelivery.member.entity.MemberRole;
+import com.example.shinhandelivery.member.entity.MemberValidationField;
 import com.example.shinhandelivery.member.service.MemberService;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.AfterEach;
@@ -71,7 +72,7 @@ class MemberControllerTest {
   void createMemberSuccess() throws Exception {
     MemberCreateRequest request = new MemberCreateRequest();
     request.setEmail("user@example.com");
-    request.setPassword("password123");
+    request.setPassword("password123!");
     request.setName("홍길동");
     request.setPhoneNumber("010-1234-5678");
     request.setRole(MemberRole.CUSTOMER);
@@ -80,7 +81,7 @@ class MemberControllerTest {
         Member.builder()
             .id(1L)
             .email("user@example.com")
-            .password("password123")
+            .password("password123!")
             .name("홍길동")
             .phoneNumber("010-1234-5678")
             .role(MemberRole.CUSTOMER)
@@ -101,7 +102,7 @@ class MemberControllerTest {
   @DisplayName("회원 필드 유효성 검증 API 호출 시 200 OK와 검증 결과를 반환한다")
   void validateFieldShouldReturnOk() throws Exception {
     MemberFieldValidateRequest request =
-        new MemberFieldValidateRequest("email", "user@example.com");
+        new MemberFieldValidateRequest(MemberValidationField.EMAIL, "user@example.com");
     MemberFieldValidateResponse response = MemberFieldValidateResponse.ok("✓ 사용 가능한 이메일입니다.");
 
     when(memberService.validateField(any())).thenReturn(response);
@@ -130,7 +131,7 @@ class MemberControllerTest {
   void createMemberInvalidEmailShouldReturn400() throws Exception {
     MemberCreateRequest request = new MemberCreateRequest();
     request.setEmail("invalid-email-format");
-    request.setPassword("password123");
+    request.setPassword("password123!");
     request.setName("홍길동");
     request.setPhoneNumber("010-1234-5678");
 
