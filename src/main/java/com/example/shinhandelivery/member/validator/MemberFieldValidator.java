@@ -1,4 +1,4 @@
-package com.example.shinhandelivery.member.service;
+package com.example.shinhandelivery.member.validator;
 
 import com.example.shinhandelivery.member.constant.MemberValidationConstants;
 import com.example.shinhandelivery.member.dto.request.MemberFieldValidateRequest;

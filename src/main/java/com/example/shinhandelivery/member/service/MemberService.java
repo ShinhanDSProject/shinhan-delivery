@@ -18,6 +18,7 @@ import com.example.shinhandelivery.member.entity.Member;
 import com.example.shinhandelivery.member.entity.MemberRole;
 import com.example.shinhandelivery.member.exception.DuplicateMemberException;
 import com.example.shinhandelivery.member.repository.MemberRepository;
+import com.example.shinhandelivery.member.validator.MemberFieldValidator;
 import com.example.shinhandelivery.payment.service.PointWalletProvisioningService;
 import com.example.shinhandelivery.vehicle.entity.Vehicle;
 import com.example.shinhandelivery.vehicle.entity.VehicleType;

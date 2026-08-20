@@ -1,4 +1,4 @@
-package com.example.shinhandelivery.member.service;
+package com.example.shinhandelivery.member.validator;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -16,7 +16,6 @@ class MemberFieldValidatorTest {
     MemberFieldValidateRequest request =
         new MemberFieldValidateRequest(MemberValidationField.EMAIL, "user@example.com");
 
-    // Pure lambda for email duplicate check
     MemberFieldValidateResponse response =
         MemberFieldValidator.validate(request, email -> "user@example.com".equals(email));
 

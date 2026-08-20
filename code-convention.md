@@ -30,7 +30,12 @@ com.company.delivery
 ├── member
 │   ├── entity
 │   │   ├── Member.java
-│   │   └── Role.java
+│   │   ├── MemberRole.java
+│   │   └── MemberValidationField.java
+│   ├── constant
+│   │   └── MemberValidationConstants.java
+│   ├── validator
+│   │   └── MemberFieldValidator.java
 │   ├── repository
 │   │   └── MemberRepository.java
 │   ├── service
