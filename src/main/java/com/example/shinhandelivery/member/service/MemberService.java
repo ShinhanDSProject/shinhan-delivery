@@ -41,12 +41,11 @@ public class MemberService {
   private final JwtProvider jwtProvider;
   private final VehicleService vehicleService;
   private final PointWalletProvisioningService pointWalletProvisioningService;
-  private final MemberFieldValidator memberFieldValidator;
 
   /** 이메일, 전화번호, 비밀번호 등 필드 단건 유효성을 검증한다. */
   @Transactional(readOnly = true)
   public MemberFieldValidateResponse validateField(MemberFieldValidateRequest request) {
-    return memberFieldValidator.validate(request);
+    return MemberFieldValidator.validate(request, memberRepository::existsByEmail);
   }
 
   /** 이메일 중복을 검증하고 비밀번호를 암호화해 회원을 생성한다 (Entity 리턴). */

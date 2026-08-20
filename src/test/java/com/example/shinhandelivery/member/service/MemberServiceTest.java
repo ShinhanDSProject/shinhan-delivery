@@ -40,7 +40,6 @@ class MemberServiceTest {
   @Mock private PasswordEncoder passwordEncoder;
   @Mock private VehicleService vehicleService;
   @Mock private PointWalletProvisioningService pointWalletProvisioningService;
-  @Mock private MemberFieldValidator memberFieldValidator;
   @InjectMocks private MemberService memberService;
 
   @Test
@@ -259,18 +258,15 @@ class MemberServiceTest {
   }
 
   @Test
-  @DisplayName("validateField 호출 시 MemberFieldValidator에 검증 처리를 위임한다")
-  void validateFieldDelegatesToValidator() {
+  @DisplayName("validateField 호출 시 MemberFieldValidator를 수행하여 결과를 반환한다")
+  void validateFieldExecutesValidator() {
     MemberFieldValidateRequest request =
         new MemberFieldValidateRequest(MemberValidationField.EMAIL, "user@example.com");
-    MemberFieldValidateResponse expectedResponse =
-        MemberFieldValidateResponse.ok("✓ 사용 가능한 이메일입니다.");
-
-    when(memberFieldValidator.validate(request)).thenReturn(expectedResponse);
+    when(memberRepository.existsByEmail("user@example.com")).thenReturn(false);
 
     MemberFieldValidateResponse response = memberService.validateField(request);
 
-    assertThat(response).isEqualTo(expectedResponse);
-    verify(memberFieldValidator).validate(request);
+    assertThat(response.isValid()).isTrue();
+    assertThat(response.getMessage()).isEqualTo("✓ 사용 가능한 이메일입니다.");
   }
 }
