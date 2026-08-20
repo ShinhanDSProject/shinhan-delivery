@@ -18,9 +18,9 @@ public class MemberUpdateRequest {
   @Size(min = 2, max = 50, message = "이름은 2자 이상 50자 이하이어야 합니다.")
   private String name;
 
-  @NotBlank(message = "전화번호는 필수 입력 값입니다.")
+  @NotBlank(message = MemberValidationConstants.MSG_PHONE_EMPTY)
   @Pattern(
       regexp = MemberValidationConstants.PHONE_REGEX,
-      message = "올바른 전화번호 형식(예: 010-1234-5678)이어야 합니다.")
+      message = MemberValidationConstants.MSG_PHONE_INVALID_FORMAT)
   private String phoneNumber;
 }
