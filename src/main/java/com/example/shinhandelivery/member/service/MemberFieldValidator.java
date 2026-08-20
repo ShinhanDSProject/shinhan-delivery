@@ -24,40 +24,49 @@ public class MemberFieldValidator {
 
     switch (request.getField()) {
       case EMAIL:
-        if (value.isBlank()) {
-          return MemberFieldValidateResponse.fail("이메일 주소를 입력해주세요.");
-        }
-        if (!MemberValidationConstants.EMAIL_PATTERN.matcher(value).matches()) {
-          return MemberFieldValidateResponse.fail("올바른 이메일 형식이어야 합니다.");
-        }
-        if (memberRepository.existsByEmail(value)) {
-          return MemberFieldValidateResponse.fail("이미 가입된 이메일 주소입니다.");
-        }
-        return MemberFieldValidateResponse.ok("✓ 사용 가능한 이메일입니다.");
-
+        return validateEmail(value);
       case PHONE_NUMBER:
-        if (value.isBlank()) {
-          return MemberFieldValidateResponse.fail("휴대폰 번호를 입력해주세요.");
-        }
-        if (!MemberValidationConstants.PHONE_PATTERN.matcher(value).matches()) {
-          return MemberFieldValidateResponse.fail("올바른 전화번호 형식(예: 010-1234-5678)이어야 합니다.");
-        }
-        return MemberFieldValidateResponse.ok("✓ 올바른 전화번호 형식입니다.");
-
+        return validatePhoneNumber(value);
       case PASSWORD:
-        if (value.isBlank()) {
-          return MemberFieldValidateResponse.fail("비밀번호를 입력해주세요.");
-        }
-        if (value.length() < 8 || value.length() > 100) {
-          return MemberFieldValidateResponse.fail("비밀번호는 8자 이상 100자 이하이어야 합니다.");
-        }
-        if (!MemberValidationConstants.PASSWORD_PATTERN.matcher(value).matches()) {
-          return MemberFieldValidateResponse.fail("비밀번호는 영문, 숫자, 특수문자를 모두 포함해야 합니다.");
-        }
-        return MemberFieldValidateResponse.ok("✓ 사용 가능한 비밀번호 조합입니다.");
-
+        return validatePassword(value);
       default:
         return MemberFieldValidateResponse.fail("지원하지 않는 검증 필드입니다.");
     }
+  }
+
+  private MemberFieldValidateResponse validateEmail(String value) {
+    if (value.isBlank()) {
+      return MemberFieldValidateResponse.fail("이메일 주소를 입력해주세요.");
+    }
+    if (!MemberValidationConstants.EMAIL_PATTERN.matcher(value).matches()) {
+      return MemberFieldValidateResponse.fail("올바른 이메일 형식이어야 합니다.");
+    }
+    if (memberRepository.existsByEmail(value)) {
+      return MemberFieldValidateResponse.fail("이미 가입된 이메일 주소입니다.");
+    }
+    return MemberFieldValidateResponse.ok("✓ 사용 가능한 이메일입니다.");
+  }
+
+  private MemberFieldValidateResponse validatePhoneNumber(String value) {
+    if (value.isBlank()) {
+      return MemberFieldValidateResponse.fail("휴대폰 번호를 입력해주세요.");
+    }
+    if (!MemberValidationConstants.PHONE_PATTERN.matcher(value).matches()) {
+      return MemberFieldValidateResponse.fail("올바른 전화번호 형식(예: 010-1234-5678)이어야 합니다.");
+    }
+    return MemberFieldValidateResponse.ok("✓ 올바른 전화번호 형식입니다.");
+  }
+
+  private MemberFieldValidateResponse validatePassword(String value) {
+    if (value.isBlank()) {
+      return MemberFieldValidateResponse.fail("비밀번호를 입력해주세요.");
+    }
+    if (value.length() < 8 || value.length() > 100) {
+      return MemberFieldValidateResponse.fail("비밀번호는 8자 이상 100자 이하이어야 합니다.");
+    }
+    if (!MemberValidationConstants.PASSWORD_PATTERN.matcher(value).matches()) {
+      return MemberFieldValidateResponse.fail("비밀번호는 영문, 숫자, 특수문자를 모두 포함해야 합니다.");
+    }
+    return MemberFieldValidateResponse.ok("✓ 사용 가능한 비밀번호 조합입니다.");
   }
 }
