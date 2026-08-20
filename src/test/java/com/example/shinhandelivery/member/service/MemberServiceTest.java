@@ -8,11 +8,15 @@ import static org.mockito.Mockito.when;
 
 import com.example.shinhandelivery.common.exception.BusinessException;
 import com.example.shinhandelivery.common.exception.EntityNotFoundException;
+import com.example.shinhandelivery.member.constant.MemberValidationConstants;
 import com.example.shinhandelivery.member.dto.request.MemberCreateRequest;
+import com.example.shinhandelivery.member.dto.request.MemberFieldValidateRequest;
 import com.example.shinhandelivery.member.dto.request.MemberProfileUpdateRequest;
+import com.example.shinhandelivery.member.dto.response.MemberFieldValidateResponse;
 import com.example.shinhandelivery.member.entity.CourierApprovalStatus;
 import com.example.shinhandelivery.member.entity.Member;
 import com.example.shinhandelivery.member.entity.MemberRole;
+import com.example.shinhandelivery.member.entity.MemberValidationField;
 import com.example.shinhandelivery.member.exception.DuplicateMemberException;
 import com.example.shinhandelivery.member.repository.MemberRepository;
 import com.example.shinhandelivery.payment.entity.PointWallet;
@@ -252,5 +256,18 @@ class MemberServiceTest {
 
     assertThat(result.getRole()).isEqualTo(MemberRole.COURIER);
     assertThat(result.getCourierApprovalStatus()).isEqualTo(CourierApprovalStatus.PENDING);
+  }
+
+  @Test
+  @DisplayName("validateField 호출 시 MemberFieldValidator를 수행하여 결과를 반환한다")
+  void validateFieldExecutesValidator() {
+    MemberFieldValidateRequest request =
+        new MemberFieldValidateRequest(MemberValidationField.EMAIL, "user@example.com");
+    when(memberRepository.existsByEmail("user@example.com")).thenReturn(false);
+
+    MemberFieldValidateResponse response = memberService.validateField(request);
+
+    assertThat(response.isValid()).isTrue();
+    assertThat(response.getMessage()).isEqualTo(MemberValidationConstants.MSG_EMAIL_SUCCESS);
   }
 }

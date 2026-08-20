@@ -6,16 +6,19 @@ import com.example.shinhandelivery.common.exception.ErrorCode;
 import com.example.shinhandelivery.common.security.JwtProvider;
 import com.example.shinhandelivery.member.dto.request.LoginRequest;
 import com.example.shinhandelivery.member.dto.request.MemberCreateRequest;
+import com.example.shinhandelivery.member.dto.request.MemberFieldValidateRequest;
 import com.example.shinhandelivery.member.dto.request.MemberPasswordUpdateRequest;
 import com.example.shinhandelivery.member.dto.request.MemberPaymentPinUpdateRequest;
 import com.example.shinhandelivery.member.dto.request.MemberProfileUpdateRequest;
 import com.example.shinhandelivery.member.dto.request.MemberUpdateRequest;
+import com.example.shinhandelivery.member.dto.response.MemberFieldValidateResponse;
 import com.example.shinhandelivery.member.dto.response.TokenResponse;
 import com.example.shinhandelivery.member.entity.CourierApprovalStatus;
 import com.example.shinhandelivery.member.entity.Member;
 import com.example.shinhandelivery.member.entity.MemberRole;
 import com.example.shinhandelivery.member.exception.DuplicateMemberException;
 import com.example.shinhandelivery.member.repository.MemberRepository;
+import com.example.shinhandelivery.member.validator.MemberFieldValidator;
 import com.example.shinhandelivery.payment.service.PointWalletProvisioningService;
 import com.example.shinhandelivery.vehicle.entity.Vehicle;
 import com.example.shinhandelivery.vehicle.entity.VehicleType;
@@ -39,6 +42,12 @@ public class MemberService {
   private final JwtProvider jwtProvider;
   private final VehicleService vehicleService;
   private final PointWalletProvisioningService pointWalletProvisioningService;
+
+  /** 이메일, 전화번호, 비밀번호 등 필드 단건 유효성을 검증한다. */
+  @Transactional(readOnly = true)
+  public MemberFieldValidateResponse validateField(MemberFieldValidateRequest request) {
+    return MemberFieldValidator.validate(request, memberRepository::existsByEmail);
+  }
 
   /** 이메일 중복을 검증하고 비밀번호를 암호화해 회원을 생성한다 (Entity 리턴). */
   @Transactional

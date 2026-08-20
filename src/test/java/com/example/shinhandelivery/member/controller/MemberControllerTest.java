@@ -15,14 +15,18 @@ import com.example.shinhandelivery.common.exception.EntityNotFoundException;
 import com.example.shinhandelivery.common.exception.ErrorCode;
 import com.example.shinhandelivery.common.exception.GlobalExceptionHandler;
 import com.example.shinhandelivery.common.security.CustomUserDetails;
+import com.example.shinhandelivery.member.constant.MemberValidationConstants;
 import com.example.shinhandelivery.member.dto.request.LoginRequest;
 import com.example.shinhandelivery.member.dto.request.MemberCreateRequest;
+import com.example.shinhandelivery.member.dto.request.MemberFieldValidateRequest;
 import com.example.shinhandelivery.member.dto.request.MemberPasswordUpdateRequest;
 import com.example.shinhandelivery.member.dto.request.MemberProfileUpdateRequest;
 import com.example.shinhandelivery.member.dto.request.RefreshTokenRequest;
+import com.example.shinhandelivery.member.dto.response.MemberFieldValidateResponse;
 import com.example.shinhandelivery.member.dto.response.TokenResponse;
 import com.example.shinhandelivery.member.entity.Member;
 import com.example.shinhandelivery.member.entity.MemberRole;
+import com.example.shinhandelivery.member.entity.MemberValidationField;
 import com.example.shinhandelivery.member.service.MemberService;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.AfterEach;
@@ -69,7 +73,7 @@ class MemberControllerTest {
   void createMemberSuccess() throws Exception {
     MemberCreateRequest request = new MemberCreateRequest();
     request.setEmail("user@example.com");
-    request.setPassword("password123");
+    request.setPassword("password123!");
     request.setName("홍길동");
     request.setPhoneNumber("010-1234-5678");
     request.setRole(MemberRole.CUSTOMER);
@@ -78,7 +82,7 @@ class MemberControllerTest {
         Member.builder()
             .id(1L)
             .email("user@example.com")
-            .password("password123")
+            .password("password123!")
             .name("홍길동")
             .phoneNumber("010-1234-5678")
             .role(MemberRole.CUSTOMER)
@@ -96,6 +100,26 @@ class MemberControllerTest {
   }
 
   @Test
+  @DisplayName("회원 필드 유효성 검증 API 호출 시 200 OK와 검증 결과를 반환한다")
+  void validateFieldShouldReturnOk() throws Exception {
+    MemberFieldValidateRequest request =
+        new MemberFieldValidateRequest(MemberValidationField.EMAIL, "user@example.com");
+    MemberFieldValidateResponse response =
+        MemberFieldValidateResponse.ok(MemberValidationConstants.MSG_EMAIL_SUCCESS);
+
+    when(memberService.validateField(any())).thenReturn(response);
+
+    mockMvc
+        .perform(
+            post("/api/v1/members/validate")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.valid").value(true))
+        .andExpect(jsonPath("$.message").value(MemberValidationConstants.MSG_EMAIL_SUCCESS));
+  }
+
+  @Test
   @DisplayName("존재하지 않는 회원을 조회하면 404를 반환한다")
   void getMemberNotFoundShouldReturn404() throws Exception {
     when(memberService.getById(eq(999L)))
@@ -109,7 +133,7 @@ class MemberControllerTest {
   void createMemberInvalidEmailShouldReturn400() throws Exception {
     MemberCreateRequest request = new MemberCreateRequest();
     request.setEmail("invalid-email-format");
-    request.setPassword("password123");
+    request.setPassword("password123!");
     request.setName("홍길동");
     request.setPhoneNumber("010-1234-5678");
 

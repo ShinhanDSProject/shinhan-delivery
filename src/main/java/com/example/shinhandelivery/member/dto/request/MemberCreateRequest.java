@@ -1,11 +1,12 @@
 package com.example.shinhandelivery.member.dto.request;
 
+import com.example.shinhandelivery.member.constant.MemberValidationConstants;
 import com.example.shinhandelivery.member.entity.MemberRole;
 import com.example.shinhandelivery.vehicle.entity.VehicleType;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,18 +18,26 @@ import lombok.Setter;
 @NoArgsConstructor
 public class MemberCreateRequest {
 
-  @NotBlank(message = "이메일은 필수 입력값입니다.")
-  @Email(message = "올바른 이메일 형식이어야 합니다.")
+  @NotBlank(message = MemberValidationConstants.MSG_EMAIL_EMPTY)
+  @Pattern(
+      regexp = MemberValidationConstants.EMAIL_REGEX,
+      message = MemberValidationConstants.MSG_EMAIL_INVALID_FORMAT)
   private String email;
 
-  @NotBlank(message = "비밀번호는 필수 입력값입니다.")
-  @Size(min = 8, message = "비밀번호는 최소 8자 이상이어야 합니다.")
+  @NotBlank(message = MemberValidationConstants.MSG_PASSWORD_EMPTY)
+  @Size(min = 8, max = 100, message = MemberValidationConstants.MSG_PASSWORD_INVALID_LENGTH)
+  @Pattern(
+      regexp = MemberValidationConstants.PASSWORD_REGEX,
+      message = MemberValidationConstants.MSG_PASSWORD_INVALID_PATTERN)
   private String password;
 
   @NotBlank(message = "이름은 필수 입력값입니다.")
   private String name;
 
-  @NotBlank(message = "전화번호는 필수 입력값입니다.")
+  @NotBlank(message = MemberValidationConstants.MSG_PHONE_EMPTY)
+  @Pattern(
+      regexp = MemberValidationConstants.PHONE_REGEX,
+      message = MemberValidationConstants.MSG_PHONE_INVALID_FORMAT)
   private String phoneNumber;
 
   // 배송원에게만 필요한 정보들
