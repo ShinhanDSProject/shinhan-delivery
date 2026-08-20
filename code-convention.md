@@ -385,7 +385,15 @@ public class DuplicateMemberException extends BusinessException {
   }
   ```
 
-### 8.5 포맷팅 및 코드 스타일 규칙
+### 8.5 프로젝트 전역 한글 텍스트 및 메시지 상수 통합 관리 수칙 (Project-Wide Korean Constant Rule)
+
+- **원칙:** 백엔드(BE) 및 프론트엔드(FE) 연동부의 모든 한글 텍스트 문자열 리터럴(예외 메시지, DTO Validation 검증 메시지, 필드 실시간 유효성 피드백, 비즈니스 처리 성공 안내 등)은 소스 코드 내 하드코딩 작성을 100% 금지하며, 도메인별 Constant 클래스(예: `MemberValidationConstants`) 또는 `ErrorCode` Enum 상수로 통합 정의하여 단일 원본(SSOT: Single Source of Truth)으로 관리해야 합니다.
+- **목적:**
+  1. 문자열 오타 버그 방지 및 프로젝트 내 모든 사용자 메시지의 100% 통일성 사수
+  2. 향후 문구 일괄 변경 및 다국어(i18n) 지원 시 단일 상수 파일 수정만으로 일괄 대응
+  3. 컨트롤러, 서비스, DTO, 단위 테스트 간 메시지 문자열 이원화 및 파편화 근본 차단
+
+### 8.6 포맷팅 및 코드 스타일 규칙
 
 - 들여쓰기: 스페이스 2칸 (탭 금지)
 - 한 줄 최대 길이: 100자
