@@ -2,6 +2,7 @@ package com.example.shinhandelivery.member.validator;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.example.shinhandelivery.member.constant.MemberValidationConstants;
 import com.example.shinhandelivery.member.dto.request.MemberFieldValidateRequest;
 import com.example.shinhandelivery.member.dto.response.MemberFieldValidateResponse;
 import com.example.shinhandelivery.member.entity.MemberValidationField;
@@ -20,7 +21,7 @@ class MemberFieldValidatorTest {
         MemberFieldValidator.validate(request, email -> "user@example.com".equals(email));
 
     assertThat(response.isValid()).isFalse();
-    assertThat(response.getMessage()).isEqualTo("이미 가입된 이메일 주소입니다.");
+    assertThat(response.getMessage()).isEqualTo(MemberValidationConstants.MSG_EMAIL_DUPLICATED);
   }
 
   @Test
@@ -32,7 +33,7 @@ class MemberFieldValidatorTest {
     MemberFieldValidateResponse response = MemberFieldValidator.validate(request, email -> false);
 
     assertThat(response.isValid()).isTrue();
-    assertThat(response.getMessage()).isEqualTo("✓ 사용 가능한 이메일입니다.");
+    assertThat(response.getMessage()).isEqualTo(MemberValidationConstants.MSG_EMAIL_SUCCESS);
   }
 
   @Test
@@ -44,7 +45,7 @@ class MemberFieldValidatorTest {
     MemberFieldValidateResponse response = MemberFieldValidator.validate(request, null);
 
     assertThat(response.isValid()).isTrue();
-    assertThat(response.getMessage()).isEqualTo("✓ 올바른 전화번호 형식입니다.");
+    assertThat(response.getMessage()).isEqualTo(MemberValidationConstants.MSG_PHONE_SUCCESS);
   }
 
   @Test
@@ -56,6 +57,6 @@ class MemberFieldValidatorTest {
     MemberFieldValidateResponse response = MemberFieldValidator.validate(request, null);
 
     assertThat(response.isValid()).isTrue();
-    assertThat(response.getMessage()).isEqualTo("✓ 사용 가능한 비밀번호 조합입니다.");
+    assertThat(response.getMessage()).isEqualTo(MemberValidationConstants.MSG_PASSWORD_SUCCESS);
   }
 }

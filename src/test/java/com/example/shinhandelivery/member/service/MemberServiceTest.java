@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 
 import com.example.shinhandelivery.common.exception.BusinessException;
 import com.example.shinhandelivery.common.exception.EntityNotFoundException;
+import com.example.shinhandelivery.member.constant.MemberValidationConstants;
 import com.example.shinhandelivery.member.dto.request.MemberCreateRequest;
 import com.example.shinhandelivery.member.dto.request.MemberFieldValidateRequest;
 import com.example.shinhandelivery.member.dto.request.MemberProfileUpdateRequest;
@@ -267,6 +268,6 @@ class MemberServiceTest {
     MemberFieldValidateResponse response = memberService.validateField(request);
 
     assertThat(response.isValid()).isTrue();
-    assertThat(response.getMessage()).isEqualTo("✓ 사용 가능한 이메일입니다.");
+    assertThat(response.getMessage()).isEqualTo(MemberValidationConstants.MSG_EMAIL_SUCCESS);
   }
 }

@@ -15,6 +15,7 @@ import com.example.shinhandelivery.common.exception.EntityNotFoundException;
 import com.example.shinhandelivery.common.exception.ErrorCode;
 import com.example.shinhandelivery.common.exception.GlobalExceptionHandler;
 import com.example.shinhandelivery.common.security.CustomUserDetails;
+import com.example.shinhandelivery.member.constant.MemberValidationConstants;
 import com.example.shinhandelivery.member.dto.request.LoginRequest;
 import com.example.shinhandelivery.member.dto.request.MemberCreateRequest;
 import com.example.shinhandelivery.member.dto.request.MemberFieldValidateRequest;
@@ -103,7 +104,8 @@ class MemberControllerTest {
   void validateFieldShouldReturnOk() throws Exception {
     MemberFieldValidateRequest request =
         new MemberFieldValidateRequest(MemberValidationField.EMAIL, "user@example.com");
-    MemberFieldValidateResponse response = MemberFieldValidateResponse.ok("✓ 사용 가능한 이메일입니다.");
+    MemberFieldValidateResponse response =
+        MemberFieldValidateResponse.ok(MemberValidationConstants.MSG_EMAIL_SUCCESS);
 
     when(memberService.validateField(any())).thenReturn(response);
 
@@ -114,7 +116,7 @@ class MemberControllerTest {
                 .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.valid").value(true))
-        .andExpect(jsonPath("$.message").value("✓ 사용 가능한 이메일입니다."));
+        .andExpect(jsonPath("$.message").value(MemberValidationConstants.MSG_EMAIL_SUCCESS));
   }
 
   @Test
