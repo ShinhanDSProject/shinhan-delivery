@@ -15,6 +15,11 @@ spring:
     properties:
       hibernate:
         format_sql: true
+        boot:
+          # false로 두면 Hibernate가 기동 시점에 DB 메타데이터를 읽지 않아, DB 없이도 기동된다.
+          # DB 없이 기동해야 하는 배포에서만 false로 바꾸며, 이때는
+          # SPRING_JPA_DATABASE_PLATFORM 으로 dialect를 직접 지정해야 한다.
+          allow_jdbc_metadata_access: ${JPA_JDBC_METADATA_ACCESS:true}
 
   flyway:
     enabled: true
@@ -26,6 +31,12 @@ spring:
       max-request-size: 10MB
 
 app:
+  # DB 없이 먼저 기동해야 하는 배포에서 SPRING_FLYWAY_ENABLED=false 와 함께 켠다.
+  # 기동 이후 백그라운드에서 DB가 준비될 때까지 재시도하며 마이그레이션을 수행한다.
+  background-migration:
+    enabled: ${BACKGROUND_MIGRATION_ENABLED:false}
+    retry-interval-seconds: ${BACKGROUND_MIGRATION_RETRY_INTERVAL_SECONDS:10}
+    max-attempts: ${BACKGROUND_MIGRATION_MAX_ATTEMPTS:0}
   data-seed:
     enabled: ${DATA_SEED_ENABLED:false}
   delivery-timeout:
