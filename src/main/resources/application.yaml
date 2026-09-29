@@ -50,3 +50,9 @@ management:
   endpoint:
     health:
       show-details: never
+  health:
+    db:
+      # DB 장애가 /actuator/health 를 DOWN(503, 응답 30초)으로 만들지 않게 한다.
+      # 앱은 DB가 죽어도 살아있고 복구 시 자동 회복되는데, 이 지표 때문에 컨테이너
+      # 헬스체크/liveness probe가 앱을 죽은 것으로 판단해 컨테이너를 재시작시킨다.
+      enabled: false
