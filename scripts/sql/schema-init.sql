@@ -17,11 +17,12 @@
 -- [실행 방법]
 --   mysql -u root -p shinhan_delivery < scripts/sql/schema-init.sql
 --
--- [이 파일로 만든 DB에 애플리케이션을 붙이려면]
---   Flyway가 V1부터 다시 적용하려다 "테이블 이미 존재" 오류를 냅니다.
---   아래처럼 Flyway를 끄고 기동하세요.
---     SPRING_FLYWAY_ENABLED=false ./gradlew bootRun
---   (Flyway를 정상적으로 쓰려면 빈 DB에서 ./gradlew bootRun 으로 마이그레이션하세요.)
+-- [이 파일로 만든 DB에 애플리케이션을 붙일 때]
+--   이 스크립트는 맨 마지막(13번 섹션)에서 Flyway 이력 테이블을 만들고
+--   "V32까지 적용 완료"를 뜻하는 베이스라인 행을 심어 둡니다. 덕분에 별도 설정
+--   없이 ./gradlew bootRun 으로 바로 기동되고, 이후 추가되는 V33 이상의 신규
+--   마이그레이션도 정상적으로 이어서 적용됩니다.
+--   (SPRING_FLYWAY_ENABLED=false 같은 우회 설정이 필요 없습니다)
 -- ============================================================================
 
 SET NAMES utf8mb4;
@@ -43,6 +44,7 @@ SET NAMES utf8mb4;
 -- DROP TABLE IF EXISTS category;
 -- DROP TABLE IF EXISTS diary;
 -- DROP TABLE IF EXISTS member;
+-- DROP TABLE IF EXISTS flyway_schema_history;
 
 -- ============================================================================
 -- 1. member : 회원 (role로 CUSTOMER / COURIER / ADMIN 구분)
@@ -297,3 +299,45 @@ INSERT INTO notice (title, content, category, is_pinned, created_at, updated_at)
 ('[안내] 딜리버리 해피니스 서비스 정기 점검 안내', '안녕하세요. 딜리버리 해피니스 서비스의 안정적인 운영을 위한 정기 점검이 진행될 예정입니다.\n\n■ 점검 일시: 2026년 8월 1일 02:00 ~ 06:00 (4시간)\n■ 영향 범위: 서비스 전체 이용 및 배송 요청 일시 중단\n\n이용에 불편을 드려 죄송합니다.', 'SYSTEM', true, NOW(), NOW()),
 ('[이벤트] 신규 가입 회원 대상 배송 할인 쿠폰 지급', '신규 회원가입 고객님들을 위한 첫 배송 3,000원 할인 쿠폰이 일괄 발급되었습니다.\n마이페이지 > 쿠폰함에서 확인해 보세요!', 'EVENT', false, NOW(), NOW()),
 ('[안내] 실시간 위치 추적 기능 업데이트 안내', '배송 상태 및 이동 경로를 실시간 지도 화면에서 확인할 수 있는 위치 추적 기능이 업데이트되었습니다.', 'SERVICE', false, NOW(), NOW());
+
+
+-- ============================================================================
+-- 13. Flyway 이력 테이블 베이스라인 (Flyway Schema History Baseline)
+--     ----------------------------------------------------------------------
+--     이 스크립트는 V1~V32를 이미 반영한 결과물이므로, 그 사실을 Flyway에게
+--     알려 주지 않으면 애플리케이션 기동 시 Flyway가 V1부터 다시 적용하려다
+--     "Table 'member' already exists" 오류로 기동에 실패합니다.
+--
+--     아래에서 Flyway 이력 테이블을 직접 만들고 "V32까지 적용 완료"를 뜻하는
+--     BASELINE 행 한 개를 넣어, 이 DB가 정상적인 Flyway 관리 DB로 보이게 합니다.
+--     Flyway는 베이스라인 버전 이하의 마이그레이션을 건너뛰므로, 앞으로 추가될
+--     V33 이상만 이어서 적용됩니다. 체크섬 검증 대상도 아니라 안전합니다.
+--
+--     테이블 정의는 Flyway 12.4.0(flyway-mysql)이 MariaDB에 직접 생성한 DDL과
+--     동일합니다.
+--
+--     ⚠️ 신규 마이그레이션을 추가해 이 파일의 스키마를 갱신할 때는, 아래 INSERT의
+--        version 값도 반영한 마지막 마이그레이션 번호로 반드시 함께 올려야 합니다.
+--        (예: V33까지 반영했다면 '32' → '33')
+-- ============================================================================
+CREATE TABLE flyway_schema_history (
+    installed_rank INT           NOT NULL,
+    version        VARCHAR(50)   NULL,
+    description    VARCHAR(200)  NOT NULL,
+    type           VARCHAR(20)   NOT NULL,
+    script         VARCHAR(1000) NOT NULL,
+    checksum       INT           NULL,
+    installed_by   VARCHAR(100)  NOT NULL,
+    installed_on   TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    execution_time INT           NOT NULL,
+    success        BOOLEAN       NOT NULL,
+    PRIMARY KEY (installed_rank),
+    KEY flyway_schema_history_s_idx (success)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+INSERT INTO flyway_schema_history
+    (installed_rank, version, description, type, script, checksum,
+     installed_by, installed_on, execution_time, success)
+VALUES
+    (1, '32', '<< Flyway Baseline >>', 'BASELINE', '<< Flyway Baseline >>', NULL,
+     SUBSTRING_INDEX(CURRENT_USER(), '@', 1), NOW(), 0, TRUE);
