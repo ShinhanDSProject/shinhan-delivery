@@ -1,0 +1,162 @@
+---
+marp: true
+theme: uncover
+paginate: true
+header: '🎤 신한 딜리버리: AI 페어 프로그래밍 발표'
+footer: 'Shinhan DS Project — Team Retrospective & Tech Talk'
+style: |
+  section {
+    background-color: #0f172a;
+    color: #f8fafc;
+    font-family: 'Inter', 'Pretendard', sans-serif;
+    padding: 35px;
+    font-size: 1.0rem;
+  }
+  h1 {
+    color: #38bdf8;
+    font-size: 1.8rem;
+    margin-bottom: 10px;
+  }
+  h2 {
+    color: #818cf8;
+    font-size: 1.3rem;
+    margin-bottom: 15px;
+  }
+  blockquote {
+    background: #1e293b;
+    border-left: 5px solid #38bdf8;
+    color: #cbd5e1;
+    padding: 12px;
+    font-size: 0.95rem;
+    margin: 10px 0;
+  }
+  table {
+    font-size: 0.75rem;
+    border-collapse: collapse;
+    width: 100%;
+    margin-top: 10px;
+  }
+  th {
+    background-color: #1e293b;
+    color: #38bdf8;
+    padding: 6px;
+  }
+  td {
+    border-bottom: 1px solid #334155;
+    padding: 6px;
+  }
+  pre {
+    background-color: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 8px;
+    padding: 10px;
+    font-size: 0.75rem;
+    color: #38bdf8;
+    text-align: left;
+  }
+  ul {
+    text-align: left;
+    margin-left: 15px;
+  }
+  li {
+    margin-bottom: 6px;
+  }
+---
+
+<!-- _class: lead -->
+# 🎤 AI 페어 프로그래밍의 한계를 넘어서
+### 사전 기획부터 하네스 자가 치유 피드백 루프까지의 엔지니어링 여정
+
+**발표자:** 프로젝트 테크 리드 (수석 엔지니어)  
+**소속:** 신한 딜리버리(shinhan-delivery) 프로젝트 팀
+
+---
+
+# 📌 [Slide 1] 사전 기획 기반 AI 통합 개발 플로우
+## 💡 엔드투엔드 4단계 개발 파이프라인 (End-to-End Flow)
+
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│ 1. 사전기획/설계 │ ──> │ 2. GitHub Issue │ ──> │ 3. AI 이슈 분석 │ ──> │ 4. AI 연동 구현 │
+│ (MVP & 화면설계) │    │   발행 및 할당   │    │  & 승인 Check   │    │  & 자가치유 통제 │
+└─────────────────┘    └─────────────────┘    └─────────────────┘    └─────────────────┘
+```
+
+> *"기획부터 코드 구현, 자가 치유 피드백 루프까지 단일 연결 흐름으로 수행되는 개발 플로우를 설계하여 획기적인 개발 생산성을 달성했습니다."*
+
+- **[1단계] 사전 기획/설계**: **MVP 기획서 작성** (요구사항) ➔ **화면 설계서 작성** (UI/UX)
+- **[2단계] 이슈 발행/기획**: 기획/화면설계서 기반 **GitHub Issue 발행** ➔ `/plan` AI 자동 분석 ➔ **승인**
+- **[3단계] AI 연동 구현**: 백엔드 비즈니스 로직 및 프론트엔드 화면 연동 연속 구현
+- **[4단계] 자가 치유 피드백**: `./scripts/verify.sh` 자동 구동 ➔ AI Auto-Fix 피드백 루프 ➔ 마이크로 커밋(`commit`)
+
+---
+
+# 🔍 [Slide 2] Phase 1: 화려한 성공 뒤의 5대 현실 고충 & 결함
+## ⚡ 생산성의 덫: 팀원들이 겪은 4대 인적 고충과 5대 기술 결함
+
+| 구분 | 팀원들이 실제로 겪은 인적/기술적 고충 | 실제 부작용 및 위험 타격 |
+|---|---|---|
+| **1. 도구/학습 과부하** | **AI 숙련도 부족 & 방대한 컨벤션 피로도** | 기술 스택과 AI도구를 동시 학습하는 정보 과부하, 핵심 수칙 구분 벅참 |
+| **2. AI 맹목적 의존** | **'코딩 근육' 퇴화 & 메타인지(내가 뭘 모르는지) 상실** | 직접 고민 습관 사라짐, AI 없이는 코딩 힘들다는 무력감 & 메타인지 부재 |
+| **3. UX / Thymeleaf** | **Thymeleaf SSR 대신 CSR AJAX 남발** | Thymeleaf 사전 바인딩 외면하고 client AJAX만 호출해 **초기 화면 텅 빔/깜빡임 발생** |
+| **4. FE 파일 비분리** | **HTML/CSS/JS 분리 없이 인라인 결합** | HTML 내 대용량 CSS/JS 섞여 **캐싱 불가, 중복 스타일 파편화** |
+| **5. 계층 위반** | 계층을 건너뛰고 내부 데이터 직접 접근 | 계층별 역할 분리 및 아키텍처 규칙 위반 |
+
+---
+
+# 🛠️ [Slide 3] Phase 2: 아키텍처 재정립 & 자가 치유 피드백 루프
+## 🔄 코드 작성 후 '자가 치유 피드백 루프 (Self-Healing Loop)' 다이어그램
+
+```mermaid
+flowchart LR
+    Impl["1. AI 코드 구현"] --> Harness["2. ./scripts/verify.sh"]
+    Harness -- "성공 (0 Exit Code)" --> Commit["3. Git 마이크로 커밋"]
+    Harness -- "실패 (린트/테스트)" --> Log["4. 에러 로그 수집"]
+    Log --> AutoFix["5. AI 자가 치유 (Auto-Fix)"]
+    AutoFix --> Impl
+```
+
+- **1. Thymeleaf SSR 사전 바인딩 (`th:each`)**: CSR AJAX 남용 제거로 **초기 화면 텅 빔 및 깜빡이는 현상 완전 개선**
+- **2. HTML/CSS/JS 3-Tier 완전 분리 모듈화**: 독립 static 파일 분리로 **중복 코드 대량 제거 및 브라우저 캐싱 혜택 확보**
+- **3. 자가 치유 피드백 루프 구동**:
+  - `./scripts/verify.sh` 5대 품질 통제 게이트 구동 (Spotless + Checkstyle + ArchUnit + JaCoCo 60%+ + 400개 테스트)
+  - 실패 시 에러 로그 수집 ➔ AI Auto-Fix ➔ 100% 그린 빌드(0 Exit Code) 달성 시 마이크로 커밋
+
+---
+
+# 🎯 [Slide 4] Phase 3: 개발자가 사수해야 할 4대 핵심 수칙
+## 💡 사람(Human)과 AI(인공지능)의 명확한 역할 분담 다이어그램
+
+```
+┌───────────────────────────────────────┬───────────────────────────────────────┐
+│ 👤 Human (사람): What & Architecture │ 🤖 AI (인공지능): How & Execution     │
+├───────────────────────────────────────┼───────────────────────────────────────┤
+│ 1. MVP 기획서 & 화면 설계서 선제 정의  │ 1. 반복 보일러플레이트 자동 구현      │
+│ 2. 백엔드/프론트엔드 아키텍처 수칙 수립│ 2. 백엔드/프론트엔드 연동 연속 구현   │
+│ 3. SSR 사전 바인딩 렌더링 방향성 지시 │ 3. 테스트 실패 로그 수집 시 자가 치유 │
+└───────────────────────────────────────┴───────────────────────────────────────┘
+```
+
+1. **[수칙 1] 선(先) 기획 및 사람이 직접 기술적 의사결정 주도 (Planning-First)**
+2. **[수칙 2] 프론트엔드 HTML/CSS/JS 3-Tier 파일 분리 및 모듈화 (Modularization)**
+3. **[수칙 3] Thymeleaf SSR vs CSR AJAX 렌더링 역할 분담 (Zero Flicker)**
+4. **[수칙 4] 정적 분석 & 자동화된 하네스 통제망 구축 (Harness First)**
+
+---
+
+# 🚀 [Slide 5] Outro: KPT 회고 & 향후 극복 대책
+## 📊 KPT 선순환 회고 & AI 시대 개발자의 진짜 역할
+
+```
+[ Keep: 사전기획 & 자가치유 통제망 ] ──(성장통)──> [ Problem: 코딩근육 퇴화 & 메타인지 상실 ]
+                                                                   │
+[ Result: AI를 주도하는 수석 엔지니어 ] <──(실천대책)── [ Try: 30분 고민타임 & 스터디 정례화 ]
+```
+
+### 📑 KPT 회고 (Keep / Problem / Try)
+- **Keep**: MVP기획/화면설계 선제 정의 + 자가 치유 피드백 루프로 매끄러운 화면 진입 & 결함 0개 달성
+- **Problem**: AI 맹목적 의존으로 인한 '코딩 근육 퇴화', 메타인지 상실 및 컨벤션 과부하
+- **Try (향후 극복 대책 3가지)**:
+  1. **"Human-First Thinking (30분 고민 타임)"**: AI 사용 전 30분간 직접 고민하고 설계하기
+  2. **"팀 내 기초 CS & 아키텍처 스터디 정례화"**: '내가 뭘 모르는지' 인지하기 위한 자발적 스터디 병행
+  3. **"핵심 수칙 3대 숏컷 도식화"**: 벅찬 md 파일 대신 꼭 챙길 핵심 3대 수칙 위주로 시각화
