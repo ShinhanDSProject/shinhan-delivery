@@ -5,6 +5,7 @@
 | 파일 | 역할 | 포함 내용 |
 | :--- | :--- | :--- |
 | [`schema-init.sql`](./schema-init.sql) | 스키마 초기화 | 테이블 11개 + 인덱스/FK + 기준 데이터(카테고리 12종, 초기 공지 3건) |
+| [`flyway-baseline.sql`](./flyway-baseline.sql) | 기존 DB 구제 | 이력 테이블이 없는 DB에 V32 베이스라인만 심는 일회성 스크립트 |
 | [`dummy-data.sql`](./dummy-data.sql) | 더미 데이터 | 회원 7명, 장비 5대, 배송 요청 8건, 매칭 5건, 포인트 지갑 7건·원장 13건, 알림 8건, 주소 5건, 공지 2건 |
 
 ---
@@ -38,15 +39,26 @@ mysql -u root -p shinhan_delivery < scripts/sql/dummy-data.sql
 → [Flyway 마이그레이션 가이드](../../docs/architecture/Flyway-마이그레이션-가이드.md)
 
 마이그레이션이 추가되면 이 파일도 함께 갱신해 주세요.
+이때 파일 마지막 13번 섹션의 **베이스라인 `version` 값도 같이 올려야 합니다.**
+(예: V33까지 반영했다면 `'32'` → `'33'`)
 
-### 2. `schema-init.sql`로 만든 DB에 앱을 붙일 때는 Flyway를 끕니다
+### 2. `schema-init.sql`로 만든 DB는 그대로 기동됩니다
 
-이미 테이블이 있는 DB에 Flyway가 `V1`부터 다시 적용을 시도해 "테이블이 이미 존재한다"는 오류가 납니다.
+`schema-init.sql`은 마지막에 Flyway 이력 테이블을 만들고 "V32까지 적용 완료"를 뜻하는
+베이스라인 행을 심어 둡니다. 그래서 별도 설정 없이 바로 기동되고, 이후 추가되는
+V33 이상의 신규 마이그레이션도 정상적으로 이어서 적용됩니다.
 
 ```bash
-# schema-init.sql로 만든 DB에 붙이는 경우
-SPRING_FLYWAY_ENABLED=false ./gradlew bootRun
+./gradlew bootRun     # 추가 플래그 불필요
 ```
+
+> **이전 버전(2026-09-29 이전)의 `schema-init.sql`로 이미 DB를 만드셨다면**
+> 그 DB에는 이력 테이블이 없어 기동 시 `Table 'member' already exists` 오류가 납니다.
+> 아래를 **한 번만** 실행하면 됩니다. 재실행해도 안전하고, 이미 정상인 DB에 돌리면 아무 일도 하지 않습니다.
+>
+> ```bash
+> mariadb -u <계정> -p <DB명> < scripts/sql/flyway-baseline.sql
+> ```
 
 반대로 **빈 데이터베이스**에 `./gradlew bootRun`을 하면 Flyway가 `V1~V32`를 자동 적용하므로
 `schema-init.sql`을 실행할 필요가 없습니다. 이때는 더미 데이터만 넣으면 됩니다.

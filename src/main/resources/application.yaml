@@ -19,6 +19,10 @@ spring:
   flyway:
     enabled: true
     baseline-on-migrate: true
+    # DB가 아직 기동 중이어도 곧바로 죽지 않고 연결될 때까지 재시도한다.
+    # (Flyway가 DataSource를 가장 먼저 잡기 때문에, 이 재시도가 사실상 앱 전체의 DB 대기 역할을 한다)
+    connect-retries: ${FLYWAY_CONNECT_RETRIES:10}
+    connect-retries-interval: ${FLYWAY_CONNECT_RETRIES_INTERVAL:5}
 
   servlet:
     multipart:
